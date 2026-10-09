@@ -1,5 +1,6 @@
 import { Component, Input, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { parseUtcDate } from '../../utils/date-utils';
 
 @Component({
   selector: 'app-elapsed-timer',
@@ -104,7 +105,7 @@ export class ElapsedTimerComponent implements OnInit, OnDestroy {
   private updateElapsed() {
     if (!this.createdAt) return;
 
-    const createdTime = new Date(this.createdAt).getTime();
+    const createdTime = parseUtcDate(this.createdAt).getTime();
     if (isNaN(createdTime)) return;
 
     const diffMs = Math.max(0, Date.now() - createdTime);

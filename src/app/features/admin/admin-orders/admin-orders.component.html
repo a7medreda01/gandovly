@@ -85,7 +85,7 @@
 
             <div class="card-top-meta">
               <span class="time-chip">
-                <i class="bi bi-clock"></i> {{ ord.createdAt | date:'shortTime' }}
+                <i class="bi bi-clock"></i> {{ formatOrderTime(ord.createdAt) }}
               </span>
               <span class="live-timer-chip" [ngClass]="getTimerClass(ord.createdAt)" title="الوقت المنقضي على الطلب">
                 <i class="bi bi-stopwatch"></i> {{ getElapsedTime(ord.createdAt) }}
@@ -323,18 +323,45 @@
             </div>
           }
 
-          <!-- Order Price Summary -->
+          <!-- Order Price Summary Breakdown -->
           <div class="order-summary-box mb-3">
             <div class="summary-line flex-between">
-              <span class="text-muted">المجموع التقديري:</span>
+              <span class="text-muted">المجموع الفرعي للأصناف:</span>
+              <strong class="text-dark">{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} ج.م</strong>
+            </div>
+
+            @if (selectedOrder()!.orderType === 'Delivery') {
+              <div class="summary-line flex-between">
+                <span class="text-muted">
+                  <i class="bi bi-scooter text-primary me-1"></i>
+                  رسوم التوصيل ({{ selectedOrder()!.deliveryZoneName || 'دليفري' }}):
+                </span>
+                <strong class="text-dark">{{ selectedOrder()!.deliveryFee || 0 }} ج.م</strong>
+              </div>
+            }
+
+            @if (selectedOrder()!.discountAmount && selectedOrder()!.discountAmount > 0) {
+              <div class="summary-line flex-between text-success">
+                <span>
+                  <i class="bi bi-tag-fill me-1"></i>
+                  الخصم المطبق ({{ selectedOrder()!.discountDescription || 'خصم' }}):
+                </span>
+                <strong>-{{ selectedOrder()!.discountAmount }} ج.م</strong>
+              </div>
+            }
+
+            <div class="summary-line flex-between" style="border-top: 1px dashed #cbd5e1; padding-top: 0.4rem; margin-top: 0.2rem;">
+              <span class="text-muted">الإجمالي التقديري للطلب:</span>
               <strong>{{ selectedOrder()!.estimatedTotal }} ج.م</strong>
             </div>
+
             @if (hasWeightItems(selectedOrder()!)) {
               <div class="summary-line flex-between text-primary">
-                <span>الإجمالي بعد تعديل الوزن والعدد:</span>
+                <span>الإجمالي بعد تعديل الأوزان (شامل التوصيل):</span>
                 <strong>{{ getCalculatedOrderTotal(selectedOrder()!) }} ج.م</strong>
               </div>
             }
+
             @if (selectedOrder()!.finalTotal) {
               <div class="summary-line flex-between final-line">
                 <span class="final-lbl">الإجمالي النهائي المعتمد:</span>

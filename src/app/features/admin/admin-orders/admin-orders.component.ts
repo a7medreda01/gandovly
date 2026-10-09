@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Order, OrderLine, OrderStatus } from '../../../core/models/models';
-
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
+import { parseUtcDate, formatEgyptTime, formatEgyptDateTime } from '../../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-admin-orders',
@@ -58,7 +58,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   getElapsedTime(createdAt: string | Date | undefined): string {
     if (!createdAt) return '';
     const now = this.currentTime().getTime();
-    const created = new Date(createdAt).getTime();
+    const created = parseUtcDate(createdAt).getTime();
     const diffSec = Math.max(0, Math.floor((now - created) / 1000));
 
     const hours = Math.floor(diffSec / 3600);
@@ -76,7 +76,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   getElapsedMinutes(createdAt: string | Date | undefined): number {
     if (!createdAt) return 0;
     const now = this.currentTime().getTime();
-    const created = new Date(createdAt).getTime();
+    const created = parseUtcDate(createdAt).getTime();
     return Math.floor((now - created) / 60000);
   }
 
@@ -87,20 +87,12 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     return 'timer-normal';
   }
 
+  formatOrderTime(createdAt: string | Date | undefined): string {
+    return formatEgyptTime(createdAt);
+  }
+
   formatScheduledDate(scheduledFor: string | Date | undefined): string {
-    if (!scheduledFor) return '';
-    try {
-      const d = new Date(scheduledFor);
-      return d.toLocaleDateString('ar-EG', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    } catch {
-      return String(scheduledFor);
-    }
+    return formatEgyptDateTime(scheduledFor);
   }
 
   onSearchInput() {

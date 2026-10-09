@@ -204,8 +204,14 @@ export class CheckoutComponent implements OnInit {
     this.onAddressChange();
   }
 
-  onZoneSelected(zoneId: number) {
-    this.selectedZoneId = zoneId;
+  onZoneSelected(zoneId: any) {
+    this.selectedZoneId = Number(zoneId);
+    const matched = this.deliveryZones().find(z => z.id === this.selectedZoneId);
+    if (matched) {
+      this.resolvedZoneName.set(matched.name);
+      this.district = matched.name;
+      this.zoneResolutionMessage.set(`تم تحديد المنطقة: ${matched.name} (رسوم التوصيل: ${matched.deliveryFee} ج.م) 🛵`);
+    }
     this.fetchQuote();
   }
 

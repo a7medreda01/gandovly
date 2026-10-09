@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { parseUtcDate } from '../utils/date-utils';
 
 @Pipe({
   name: 'elapsedTime',
@@ -8,7 +9,7 @@ export class ElapsedTimePipe implements PipeTransform {
   transform(value: string | Date | null | undefined): string {
     if (!value) return '0د';
 
-    const createdTime = new Date(value).getTime();
+    const createdTime = parseUtcDate(value).getTime();
     if (isNaN(createdTime)) return '0د';
 
     const diffMs = Math.max(0, Date.now() - createdTime);

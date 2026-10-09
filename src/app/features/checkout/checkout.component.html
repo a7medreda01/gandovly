@@ -114,7 +114,7 @@
               >
                 @for (zone of deliveryZones(); track zone.id) {
                   <option [value]="zone.id">
-                    {{ zone.name }}
+                    {{ zone.name }} (رسوم التوصيل: {{ zone.deliveryFee }} ج.م)
                   </option>
                 }
               </select>
