@@ -1,0 +1,804 @@
+@use 'styles/variables' as *;
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+/* ============================================================ */
+/* 1. CSS Reset & Typography (RTL & Logical Properties)        */
+/* ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-family-base);
+  direction: rtl;
+  text-align: right;
+  scroll-behavior: smooth;
+  background-color: var(--page-bg);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  line-height: 1.55;
+  font-family: var(--font-family-base);
+  background-color: var(--page-bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+button, input, select, textarea {
+  font-family: var(--font-family-base);
+  font-size: 0.95rem;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: var(--transition-base);
+  touch-action: manipulation;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(18, 38, 63, 0.04);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: var(--radius-pill);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink);
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Display & Responsive Utilities */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+.d-flex { display: flex !important; }
+.d-inline-flex { display: inline-flex !important; }
+.d-grid { display: grid !important; }
+
+.w-100 { width: 100% !important; }
+.h-100 { height: 100% !important; }
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 576px) {
+  .d-sm-none { display: none !important; }
+  .d-sm-block { display: block !important; }
+  .d-sm-flex { display: flex !important; }
+}
+
+@media (min-width: 768px) {
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-flex { display: flex !important; }
+  .d-md-grid { display: grid !important; }
+}
+
+@media (max-width: 767.98px) {
+  .d-md-down-none { display: none !important; }
+}
+
+@media (min-width: 992px) {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-flex { display: flex !important; }
+  .d-lg-grid { display: grid !important; }
+}
+
+@media (max-width: 991.98px) {
+  .d-lg-down-none { display: none !important; }
+}
+
+/* ============================================================ */
+/* 2. Global Bootstrap Icons Spacing & RTL Alignment            */
+/* ============================================================ */
+.bi, [class^="bi-"], [class*=" bi-"] {
+  display: inline-block;
+  vertical-align: -0.125em;
+  line-height: 1;
+
+  // Natural spacing when placed before text or inline elements (RTL reading direction)
+  &:first-child:not(:only-child) {
+    margin-inline-end: 0.45rem;
+  }
+
+  // Natural spacing when placed after text (e.g. trailing arrows, chevrons)
+  &:last-child:not(:only-child) {
+    margin-inline-start: 0.45rem;
+  }
+
+  // Exact centered placement for icon-only buttons, close buttons, badges
+  &:only-child {
+    margin-inline: 0;
+  }
+}
+
+// In flex buttons and controls that already specify a gap, avoid doubled spacing
+.btn > .bi:not(.me-1):not(.me-2):not(.me-3):not(.ms-1):not(.ms-2):not(.ms-3),
+.btn > [class^="bi-"]:not(.me-1):not(.me-2):not(.me-3):not(.ms-1):not(.ms-2):not(.ms-3),
+.btn > [class*=" bi-"]:not(.me-1):not(.me-2):not(.me-3):not(.ms-1):not(.ms-2):not(.ms-3) {
+  margin-inline: 0;
+}
+
+/* ============================================================ */
+/* 3. RTL Spacing & Utility System (Bootstrap 5 Compatible)     */
+/* ============================================================ */
+// Margin End (Left in RTL - between item and subsequent text)
+.me-0 { margin-inline-end: 0 !important; }
+.me-1 { margin-inline-end: 0.45rem !important; }
+.me-2 { margin-inline-end: 0.75rem !important; }
+.me-3 { margin-inline-end: 1rem !important; }
+.me-4 { margin-inline-end: 1.5rem !important; }
+.me-5 { margin-inline-end: 3rem !important; }
+.me-auto { margin-inline-end: auto !important; }
+
+// Margin Start (Right in RTL - before item)
+.ms-0 { margin-inline-start: 0 !important; }
+.ms-1 { margin-inline-start: 0.45rem !important; }
+.ms-2 { margin-inline-start: 0.75rem !important; }
+.ms-3 { margin-inline-start: 1rem !important; }
+.ms-4 { margin-inline-start: 1.5rem !important; }
+.ms-5 { margin-inline-start: 3rem !important; }
+.ms-auto { margin-inline-start: auto !important; }
+
+// Margin Bottom
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 1rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.mb-5 { margin-bottom: 3rem !important; }
+
+// Margin Top
+.mt-0 { margin-top: 0 !important; }
+.mt-1 { margin-top: 0.25rem !important; }
+.mt-2 { margin-top: 0.5rem !important; }
+.mt-3 { margin-top: 1rem !important; }
+.mt-4 { margin-top: 1.5rem !important; }
+.mt-5 { margin-top: 3rem !important; }
+
+// Margin X & Y
+.mx-0 { margin-inline: 0 !important; }
+.mx-1 { margin-inline: 0.25rem !important; }
+.mx-2 { margin-inline: 0.5rem !important; }
+.mx-3 { margin-inline: 1rem !important; }
+.mx-auto { margin-inline: auto !important; }
+
+.my-0 { margin-block: 0 !important; }
+.my-1 { margin-block: 0.25rem !important; }
+.my-2 { margin-block: 0.5rem !important; }
+.my-3 { margin-block: 1rem !important; }
+.my-4 { margin-block: 1.5rem !important; }
+.m-0 { margin: 0 !important; }
+
+// Padding Utilities
+.p-0 { padding: 0 !important; }
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+.p-4 { padding: 1.5rem !important; }
+
+.py-0 { padding-block: 0 !important; }
+.py-1 { padding-block: 0.25rem !important; }
+.py-2 { padding-block: 0.5rem !important; }
+.py-3 { padding-block: 1rem !important; }
+
+.px-0 { padding-inline: 0 !important; }
+.px-1 { padding-inline: 0.25rem !important; }
+.px-2 { padding-inline: 0.5rem !important; }
+.px-3 { padding-inline: 1rem !important; }
+
+// Flex & Alignment Utilities
+.align-items-center { align-items: center !important; }
+.align-items-start { align-items: flex-start !important; }
+.align-items-end { align-items: flex-end !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-center { justify-content: center !important; }
+.justify-content-start { justify-content: flex-start !important; }
+.justify-content-end { justify-content: flex-end !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.flex-column { flex-direction: column !important; }
+.flex-grow-1 { flex-grow: 1 !important; }
+
+// Gap Utilities
+.gap-0 { gap: 0 !important; }
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 1rem !important; }
+.gap-4 { gap: 1.5rem !important; }
+
+// Text Color Helpers
+.text-primary { color: var(--primary-color, #0d2b45) !important; }
+.text-success { color: #16a34a !important; }
+.text-danger { color: #dc2626 !important; }
+.text-warning { color: #d97706 !important; }
+.text-info { color: #0284c7 !important; }
+.text-muted { color: #64748b !important; }
+.text-white { color: #ffffff !important; }
+.text-dark { color: #0f172a !important; }
+
+// Typography Size Utilities
+.fs-1 { font-size: 2.25rem !important; }
+.fs-2 { font-size: 1.75rem !important; }
+.fs-3 { font-size: 1.5rem !important; }
+.fs-4 { font-size: 1.25rem !important; }
+.fs-5 { font-size: 1.1rem !important; }
+.fs-6 { font-size: 0.95rem !important; }
+.fs-small { font-size: 0.85rem !important; }
+
+// Text Alignment Utilities
+.text-center { text-align: center !important; }
+.text-start { text-align: start !important; }
+.text-end { text-align: end !important; }
+
+/* ============================================================ */
+/* 4. Linear SVG Icons (Stroke 2px - Lucide Style)             */
+/* ============================================================ */
+.ui-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  stroke-width: 2px;
+  stroke: currentColor;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+  vertical-align: middle;
+
+  &.icon-sm { width: 16px; height: 16px; }
+  &.icon-md { width: 20px; height: 20px; }
+  &.icon-lg { width: 24px; height: 24px; }
+  &.icon-xl { width: 32px; height: 32px; }
+}
+
+/* ============================================================ */
+/* 3. Buttons (Min 44px Touch Targets, Contrast 4.5:1)         */
+/* ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--touch-min-size);
+  padding-block: 0.65rem;
+  padding-inline: 1.25rem;
+  border-radius: var(--radius-control);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  transition: var(--transition-base);
+  border: 1.5px solid transparent;
+  user-select: none;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+// 1. Primary Dark Button (--ink)
+.btn-primary, .btn-ink {
+  @extend .btn;
+  background-color: var(--ink);
+  color: #ffffff;
+
+  &:hover {
+    background-color: #1a3556;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(18, 38, 63, 0.25);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+input,
+textarea,
+select {
+  // الحجم الأساسي لسطح المكتب (يمكن تعديله حسب تصميمك)
+  font-size: 14px;
+
+  // شاشات الموبايل (أقل من 768px)
+  @media (max-width: 767px) {
+    font-size: 16px !important; // 16px يمنع المتصفح من عمل زووم نهائياً
+  }
+}
+// 2. Brand CTA Button (Orange - strictly for primary actions)
+.btn-cta, .btn-brand {
+  @extend .btn;
+  background-color: var(--brand-orange);
+  color: #ffffff;
+  box-shadow: var(--shadow-cta);
+
+  &:hover {
+    background-color: var(--brand-orange-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(231, 111, 81, 0.45);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// 3. Secondary & Surface Buttons
+.btn-secondary {
+  @extend .btn;
+  background-color: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+
+  &:hover {
+    background-color: var(--chip);
+    border-color: var(--muted);
+  }
+}
+
+// 4. Outline Button
+.btn-outline {
+  @extend .btn;
+  background-color: transparent;
+  border-color: var(--ink);
+  color: var(--ink);
+
+  &:hover {
+    background-color: var(--ink);
+    color: #ffffff;
+  }
+}
+
+// 5. WhatsApp Button
+.btn-whatsapp {
+  @extend .btn;
+  background-color: var(--status-whatsapp-bg);
+  border-color: var(--status-whatsapp-border);
+  color: var(--status-whatsapp-text);
+
+  &:hover {
+    background-color: #d7f0df;
+  }
+}
+
+// 6. Danger / Cancel Button
+.btn-danger, .btn-cancel {
+  @extend .btn;
+  background-color: var(--status-cancel-bg);
+  border-color: var(--status-cancel-border);
+  color: var(--status-cancel-text);
+
+  &:hover {
+    background-color: #ffe6e6;
+    border-color: #e59d9d;
+  }
+}
+
+// 7. Icon Only Button (Strictly 44x44px min target)
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--touch-min-size);
+  height: var(--touch-min-size);
+  min-width: var(--touch-min-size);
+  min-height: var(--touch-min-size);
+  border-radius: var(--radius-control);
+  background-color: var(--surface);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  padding: 0;
+  transition: var(--transition-base);
+
+  &:hover {
+    background-color: var(--chip);
+    border-color: var(--muted);
+    color: var(--ink);
+  }
+
+  &.btn-icon-dark {
+    background-color: var(--ink);
+    border-color: var(--ink);
+    color: #ffffff;
+
+    &:hover {
+      background-color: #1a3556;
+    }
+  }
+
+  &.btn-icon-circle {
+    border-radius: var(--radius-pill);
+  }
+}
+
+/* ============================================================ */
+/* 4. Badges & Status Pills (Unified Color Tokens)             */
+/* ============================================================ */
+.badge, .status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  user-select: none;
+}
+
+// Status 1: Confirmed (تم التأكيد)
+.status-confirmed, .badge-confirmed {
+  background-color: var(--status-confirmed-bg);
+  color: var(--status-confirmed-text);
+  border: 1px solid var(--status-confirmed-border);
+}
+
+// Status 2: Timer / Danger (التايمر / خطر)
+.status-danger, .status-timer, .badge-danger {
+  background-color: var(--status-danger-bg);
+  color: var(--status-danger-text);
+  border: 1px solid var(--status-danger-border);
+}
+
+// Status 3: Cancel (إلغاء الطلب)
+.status-cancel, .badge-cancel {
+  background-color: var(--status-cancel-bg);
+  color: var(--status-cancel-text);
+  border: 1px solid var(--status-cancel-border);
+}
+
+// Status 4: Delivery / Success (التوصيل / نجاح)
+.status-delivery, .status-success, .badge-success {
+  background-color: var(--status-success-bg);
+  color: var(--status-success-text);
+  border: 1px solid var(--status-success-border);
+}
+
+// Status 5: WhatsApp
+.status-whatsapp, .badge-whatsapp {
+  background-color: var(--status-whatsapp-bg);
+  color: var(--status-whatsapp-text);
+  border: 1px solid var(--status-whatsapp-border);
+}
+
+// Status 6: In Prep (قيد الطهي)
+.status-preparing, .badge-warning {
+  background-color: var(--status-preparing-bg);
+  color: var(--status-preparing-text);
+  border: 1px solid var(--status-preparing-border);
+}
+
+// Neutral chip badge
+.status-neutral, .badge-neutral {
+  background-color: var(--chip);
+  color: var(--text-2);
+  border: 1px solid var(--line);
+}
+
+/* ============================================================ */
+/* 5. Cards & Surface Containers                               */
+/* ============================================================ */
+.ui-card {
+  background: var(--surface-white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-section-gap);
+  transition: var(--transition-base);
+}
+
+.ui-surface-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-box);
+  padding: 0.85rem 1rem;
+}
+
+.ui-banner-teal {
+  background: var(--status-success-bg);
+  color: var(--status-success-text);
+  border: 1px solid var(--status-success-border);
+  border-radius: var(--radius-box);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+/* ============================================================ */
+/* 6. Form Controls & Inputs (Height 48px, Radius 12px)        */
+/* ============================================================ */
+.form-group {
+  margin-block-end: 1rem;
+  display: flex;
+  flex-direction: column;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    margin-block-end: 0.35rem;
+    color: var(--ink);
+  }
+
+  .form-control {
+    width: 100%;
+    height: var(--control-height);
+    min-height: var(--control-height);
+    padding-inline: 1rem;
+    padding-block: 0.5rem;
+    border-radius: var(--radius-control);
+    border: 1.5px solid var(--line);
+    background: var(--surface-white);
+    font-size: 0.92rem;
+    color: var(--ink);
+    transition: var(--transition-base);
+
+    &::placeholder {
+      color: var(--muted);
+      opacity: 0.75;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--ink);
+      box-shadow: var(--shadow-focus);
+    }
+  }
+
+  textarea.form-control {
+    height: auto;
+    min-height: 80px;
+    padding-block: 0.75rem;
+    resize: vertical;
+  }
+
+  .hint-text {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-block-start: 0.25rem;
+  }
+}
+
+/* ============================================================ */
+/* 7. Toggle Switch Component                                  */
+/* ============================================================ */
+.ui-toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  min-height: var(--touch-min-size);
+
+  input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .switch-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    background-color: var(--line);
+    border-radius: var(--radius-pill);
+    transition: var(--transition-base);
+    flex-shrink: 0;
+
+    &::before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      inset-inline-start: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(18, 38, 63, 0.2);
+      transition: var(--transition-base);
+    }
+  }
+
+  input:checked + .switch-slider {
+    background-color: var(--brand-orange);
+
+    &::before {
+      transform: translateX(-20px); // RTL move
+    }
+  }
+
+  .switch-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+/* ============================================================ */
+/* 8. Modern Underlined Tabs (Replacing Heavy Backgrounds)     */
+/* ============================================================ */
+.ui-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-block-end: 1px solid var(--line);
+  margin-block-end: 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  .ui-tab-item {
+    padding-block: 0.75rem;
+    padding-inline: 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-block-end: 3px solid transparent;
+    transition: var(--transition-base);
+    white-space: nowrap;
+    cursor: pointer;
+    background: none;
+    border-top: none;
+    border-inline: none;
+
+    &:hover {
+      color: var(--ink);
+    }
+
+    &.active {
+      color: var(--ink);
+      font-weight: 700;
+      border-block-end-color: var(--brand-orange);
+    }
+  }
+}
+
+/* ============================================================ */
+/* 9. Modals & Overlays                                        */
+/* ============================================================ */
+.ui-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 38, 63, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.ui-modal-card {
+  width: 100%;
+  max-width: 600px;
+  background: var(--surface-white);
+  border-radius: var(--radius-modal);
+  box-shadow: var(--shadow-modal);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--modal-section-gap);
+  padding: 1.75rem;
+}
+
+/* Global Body Scroll Lock when ANY Modal or Drawer is Open */
+body.modal-open,
+body:has(.modal-backdrop),
+body:has(.drawer-backdrop),
+body:has(.ui-modal-backdrop) {
+  overflow: hidden !important;
+}
+
+.modal-backdrop,
+.drawer-backdrop,
+.ui-modal-backdrop {
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-dialog,
+.modal-body,
+.drawer-panel,
+.drawer-body,
+.custom-modal-card,
+.product-modal-dialog,
+.address-modern-modal,
+.order-details-modal {
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================ */
+/* 10. Shimmer & Animation Utilities                           */
+/* ============================================================ */
+.skeleton {
+  background: linear-gradient(90deg, #eef1f6 25%, #e1e6ee 50%, #eef1f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-badge);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Legacy helper aliases */
+.glass-panel {
+  background: var(--surface-white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}

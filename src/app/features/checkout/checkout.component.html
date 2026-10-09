@@ -1,0 +1,722 @@
+<div class="checkout-page container">
+  <div class="checkout-header">
+    <h1 class="page-title"><i class="bi bi-bag-check-fill text-primary me-2"></i> إتمام الطلب والدفع</h1>
+    <p class="page-subtitle">أدخل بيانات التوصيل أو الاستلام لتأكيد تجهيز الأسماك والمأكولات البحرية الطازجة</p>
+  </div>
+
+  <div class="checkout-grid">
+    <!-- Left Column: Checkout Form -->
+    <div class="form-column">
+      <!-- 1. Customer Info -->
+      <div class="checkout-card glass-panel">
+        <div class="flex-between card-header-row">
+          <h3 class="card-title mb-0"><i class="bi bi-person-lines-fill text-primary me-2"></i> 1. بيانات العميل</h3>
+          @if (authService.currentCustomer()) {
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+              <i class="bi bi-shield-check me-1"></i> مسجل دخول ({{ authService.currentCustomer()?.fullName }})
+            </span>
+          } @else {
+            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">
+              <i class="bi bi-whatsapp me-1"></i> سيتم تأكيد الرقم بالواتساب
+            </span>
+          }
+        </div>
+
+        <div class="form-row mt-3">
+          <div class="form-group flex-1">
+            <label for="cName">الاسم بالكامل *</label>
+            <input
+              id="cName"
+              type="text"
+              class="form-control"
+              placeholder="مثال: أحمد محمد"
+              [(ngModel)]="customerName"
+            />
+          </div>
+          <div class="form-group flex-1">
+            <label for="cPhone">رقم الهاتف للتواصل وإشعارات واتساب *</label>
+            <input
+              id="cPhone"
+              type="tel"
+              class="form-control"
+              placeholder="مثال: 01012345678"
+              [(ngModel)]="customerPhone"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Order Type -->
+      <div class="checkout-card glass-panel">
+        <h3 class="card-title"><i class="bi bi-truck text-primary me-2"></i> 2. نوع استلام الطلب</h3>
+        <div class="order-type-tabs">
+          <button
+            type="button"
+            class="type-tab-btn"
+            [class.active]="orderType === 'Delivery'"
+            (click)="setOrderType('Delivery')"
+          >
+            <i class="bi bi-scooter tab-icon text-primary"></i>
+            <div class="tab-text">
+              <span class="title">توصيل</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="type-tab-btn"
+            [class.active]="orderType === 'Pickup'"
+            (click)="setOrderType('Pickup')"
+          >
+            <i class="bi bi-shop tab-icon text-warning"></i>
+            <div class="tab-text">
+              <span class="title">استلام من المطعم</span>
+            </div>
+          </button>
+        </div>
+
+        <!-- Address Fields if Delivery -->
+        @if (orderType === 'Delivery') {
+          <div class="address-box animate-fade-in">
+            <div class="form-group mb-2">
+              <label for="cStreet">العنوان بالتفصيل *</label>
+              <textarea
+                id="cStreet"
+                rows="2"
+                class="form-control"
+                placeholder="اكتب عنوانك بالتفصيل (اسم الشارع، رقم العمارة، الشقة، وأي علامة مميزة)..."
+                [(ngModel)]="streetAddress"
+                (input)="onAddressChange()"
+                (blur)="onAddressChange()"
+              ></textarea>
+            </div>
+
+            <!-- Auto Zone Resolution Status -->
+            @if (isResolvingZone()) {
+              <div class="zone-status-pill resolving">
+                <i class="bi bi-hourglass-split me-1"></i> جاري التعرف على منطقة التوصيل من العنوان...
+              </div>
+            } @else if (zoneResolutionMessage()) {
+              <div class="zone-status-pill" [class.success]="resolvedZoneName()" [class.warning]="!resolvedZoneName()">
+                <i class="bi" [class.bi-check-circle-fill]="resolvedZoneName()" [class.bi-exclamation-triangle-fill]="!resolvedZoneName()"></i>
+                <span>{{ zoneResolutionMessage() }}</span>
+              </div>
+            }
+
+            <!-- Delivery Zone Selector -->
+            <div class="form-group mb-0">
+              <label for="zonePicker">تأكيد منطقة التوصيل *</label>
+              <select
+                id="zonePicker"
+                class="form-control"
+                [ngModel]="selectedZoneId"
+                (ngModelChange)="onZoneSelected($event)"
+              >
+                @for (zone of deliveryZones(); track zone.id) {
+                  <option [value]="zone.id">
+                    {{ zone.name }}
+                  </option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- 3. Prep Timing (Instant vs Scheduled) -->
+      <div class="checkout-card glass-panel">
+        <h3 class="card-title"><i class="bi bi-clock-history text-primary me-2"></i> 3. موعد تجهيز الطلب</h3>
+        
+        <div class="order-type-tabs timing-tabs">
+          <button
+            type="button"
+            class="type-tab-btn"
+            [class.active]="prepTimingType() === 'Now'"
+            (click)="selectInstantPrep()"
+          >
+            <i class="bi bi-lightning-charge-fill tab-icon text-warning"></i>
+            <div class="tab-text">
+              <span class="title">الآن فوراً</span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="type-tab-btn"
+            [class.active]="prepTimingType() === 'Scheduled'"
+            (click)="openScheduleModal()"
+          >
+            <i class="bi bi-calendar-check-fill tab-icon text-primary"></i>
+            <div class="tab-text">
+              <span class="title">موعد محدد 🕒</span>
+            </div>
+          </button>
+        </div>
+
+        @if (prepTimingType() === 'Scheduled') {
+          <div class="scheduled-active-box mt-2 animate-fade-in">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="sched-info">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 mb-1">
+                  <i class="bi bi-alarm-fill me-1"></i> طلب مجدول لاحقاً
+                </span>
+                <div class="sched-time-text fw-bold text-dark small">
+                  <i class="bi bi-calendar3 me-1 text-primary"></i>
+                  {{ scheduledDisplaySummary() || 'لم يتم اختيار الوقت بعد' }}
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2" (click)="openScheduleModal()">
+                <i class="bi bi-pencil-square me-1"></i> تغيير الموعد
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- 4. Payment & Notes -->
+      <div class="checkout-card glass-panel">
+        <div class="flex-between card-header-row mb-2">
+          <h3 class="card-title mb-0"><i class="bi bi-wallet2 text-primary me-2"></i> 4. طريقة الدفع والملاحظات</h3>
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-bold">
+            <i class="bi bi-cash-stack me-1"></i> الدفع عند الاستلام (كاش)
+          </span>
+        </div>
+
+        <div class="form-group mb-0 mt-2">
+          <label for="ordNotes"><i class="bi bi-chat-dots me-1"></i> ملاحظات إضافية للطلب (اختياري)</label>
+          <input
+            id="ordNotes"
+            type="text"
+            class="form-control"
+            placeholder="أي تعليمات إضافية بخصوص الطهي أو التوصيل..."
+            [(ngModel)]="notes"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Order Summary & Quote -->
+    <div class="summary-column">
+      <div class="summary-card glass-panel">
+        <h3 class="card-title">
+          <i class="bi bi-receipt-cutoff text-primary me-2"></i>
+          @if (cartService.hasWeightedItems()) {
+            ملخص الفاتورة التقديرية
+          } @else {
+            ملخص الفاتورة
+          }
+        </h3>
+
+        <!-- Items Mini List -->
+        <div class="summary-items-list">
+          @for (item of cartService.items(); track item.id) {
+            <div class="summary-item-row flex-between">
+              <div class="item-name-box">
+                <span class="name">{{ item.product.nameAr }} (×{{ item.quantityUnits }})</span>
+                @if (item.selectedPrepOption) {
+                  <small class="prep"><i class="bi bi-fire me-1"></i> {{ item.selectedPrepOption.nameAr }}</small>
+                }
+              </div>
+              <div class="item-meta-box">
+                @if (item.product.pricingType === 'ByWeight' && item.estimatedWeightGrams) {
+                  <span class="weight-approx">≈ {{ item.estimatedWeightGrams }} جرام</span>
+                }
+                <span class="price">{{ item.estimatedLineTotal }} ج.م</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <hr class="divider" />
+
+        <!-- Totals Breakdown -->
+        @if (serverQuote()) {
+          <div class="totals-box">
+            <div class="t-row flex-between">
+              <span>
+                @if (cartService.hasWeightedItems()) {
+                  الإجمالي التقديري للأصناف:
+                } @else {
+                  إجمالي الأصناف:
+                }
+              </span>
+              <span class="val">{{ serverQuote()!.estimatedSubtotal }} ج.م</span>
+            </div>
+
+            @if (orderType === 'Delivery') {
+              <div class="t-row flex-between">
+                <span>رسوم التوصيل:</span>
+                @if (serverQuote()!.isFreeDelivery || serverQuote()!.deliveryFee === 0) {
+                  <span class="val text-success font-bold"><i class="bi bi-gift-fill me-1"></i> مجاناً</span>
+                } @else {
+                  <span class="val">{{ serverQuote()!.deliveryFee }} ج.م</span>
+                }
+              </div>
+            }
+
+            @if (serverQuote()!.discountAmount > 0) {
+              <div class="t-row flex-between text-success">
+                <span>
+                  <i class="bi bi-tag-fill me-1"></i>
+                  <span>الخصم المطبق:</span>
+                  @if (serverQuote()!.discountDescription) {
+                    <small class="d-block text-muted">{{ serverQuote()!.discountDescription }}</small>
+                  }
+                </span>
+                <span class="val font-bold">- {{ serverQuote()!.discountAmount }} ج.م</span>
+              </div>
+            }
+
+            <hr class="divider" />
+
+            <div class="t-row flex-between grand-total">
+              <span>
+                @if (cartService.hasWeightedItems()) {
+                  الإجمالي التقديري النهائي:
+                } @else {
+                  الإجمالي النهائي:
+                }
+              </span>
+              <span class="total-val">{{ serverQuote()!.estimatedTotal }} ج.م</span>
+            </div>
+          </div>
+        }
+
+        <!-- Minimum Order Warning -->
+        @if (serverQuote() && !serverQuote()!.meetsMinimumOrder) {
+          <div class="min-order-alert">
+            <i class="bi bi-exclamation-octagon-fill me-1"></i>
+            <span>الحد الأدنى للطلب هو {{ serverQuote()!.minimumOrderRequired }} ج.م. يرجى إضافة أصناف أخرى.</span>
+          </div>
+        }
+
+        <!-- Disclaimer -->
+        @if (cartService.hasWeightedItems()) {
+          <div class="disclaimer-note">
+            <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ settingsService.settings().estimatedWeightDisclaimer }}</small>
+          </div>
+        }
+
+        <!-- Checkout Action Button -->
+        <button
+          type="button"
+          class="btn-primary btn-submit-order w-100"
+          (click)="handleCheckoutClick()"
+          [disabled]="isSubmitting() || (serverQuote() && !serverQuote()!.meetsMinimumOrder)"
+        >
+          @if (isSubmitting()) {
+            <span><i class="bi bi-hourglass-split me-1"></i> جاري تجهيز الطلب...</span>
+          } @else {
+            <span>متابعة تأكيد الطلب</span>
+            <i class="bi bi-arrow-left ms-2"></i>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- MODAL 1: Guest Phone / Password / WhatsApp OTP Modal       -->
+<!-- ========================================================= -->
+@if (showAuthModal()) {
+  <div class="modal-backdrop animate-fade-in" (click)="closeAuthModal()">
+    <div class="custom-modal-card glass-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="brand-badge mb-2">
+          <i class="bi bi-whatsapp text-success me-1"></i>
+          <span>التحقق السريع عبر واتساب</span>
+        </div>
+        @if (authStep() === 'info') {
+          <h3 class="modal-title">تسجيل الدخول / تأكيد رقم الهاتف</h3>
+          <p class="modal-sub">أدخل بياناتك لتأكيد الطلب واستلام إشعارات التتبع وحالة الطهي والتوصيل على الواتساب</p>
+        } @else {
+          <h3 class="modal-title">أدخل رمز التحقق (OTP)</h3>
+          <p class="modal-sub">أرسلنا كود التحقق المكون من 6 أرقام إلى رقم واتساب الخاص بك: <strong>{{ authPhone }}</strong></p>
+        }
+        <button type="button" class="btn-close-modal" (click)="closeAuthModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        @if (authStep() === 'info') {
+          <div class="form-group mb-3">
+            <label for="mFullName"><i class="bi bi-person me-1"></i> الاسم بالكامل *</label>
+            <input
+              id="mFullName"
+              type="text"
+              class="form-control modal-input"
+              placeholder="مثال: أحمد عبد الله"
+              [(ngModel)]="authFullName"
+            />
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="mPhone"><i class="bi bi-telephone me-1"></i> رقم الهاتف / الواتساب *</label>
+            <input
+              id="mPhone"
+              type="tel"
+              dir="ltr"
+              class="form-control modal-input text-start"
+              placeholder="010XXXXXXXX"
+              [(ngModel)]="authPhone"
+            />
+            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> سنرسل رمز التحقق مباشرة على هذا الرقم عبر واتساب</small>
+          </div>
+
+          <div class="form-group mb-4">
+            <label for="mPass"><i class="bi bi-shield-lock me-1"></i> كلمة السر للحساب (اختياري)</label>
+            <input
+              id="mPass"
+              type="password"
+              class="form-control modal-input"
+              placeholder="اختر كلمة سر لتسجيل الدخول مستقبلاً"
+              [(ngModel)]="authPassword"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="btn-primary w-100 btn-modal-action"
+            (click)="requestAuthOtp()"
+            [disabled]="isRequestingOtp() || !authPhone.trim()"
+          >
+            @if (isRequestingOtp()) {
+              <i class="bi bi-hourglass-split me-2"></i> جاري إرسال رمز التحقق...
+            } @else {
+              <i class="bi bi-whatsapp me-2 fs-5"></i> إرسال رمز التحقق عبر واتساب
+            }
+          </button>
+        } @else {
+          <!-- OTP Verification Stage -->
+          <div class="otp-stage text-center py-2">
+            <div class="otp-icon-wrap mb-3">
+              <i class="bi bi-chat-left-dots-fill text-success fs-1"></i>
+            </div>
+
+            <div class="form-group mb-4">
+              <label for="mOtp" class="mb-2 fw-bold">رمز التحقق المكون من 6 أرقام</label>
+              <input
+                id="mOtp"
+                type="text"
+                maxlength="6"
+                dir="ltr"
+                class="form-control modal-input otp-code-input text-center"
+                placeholder="------"
+                [(ngModel)]="authOtpCode"
+                (keyup.enter)="verifyAuthOtp()"
+                autofocus
+              />
+            </div>
+
+            <button
+              type="button"
+              class="btn-primary w-100 btn-modal-action mb-3"
+              (click)="verifyAuthOtp()"
+              [disabled]="isVerifyingOtp() || !authOtpCode.trim()"
+            >
+              @if (isVerifyingOtp()) {
+                <i class="bi bi-hourglass-split me-2"></i> جاري التحقق...
+              } @else {
+                <i class="bi bi-check-circle-fill me-2"></i> تأكيد ودخول ومتابعة الطلب
+              }
+            </button>
+
+            <div class="otp-actions flex-between text-muted small">
+              <button type="button" class="btn-link-action" (click)="authStep.set('info')">
+                <i class="bi bi-pencil me-1"></i> تعديل رقم الهاتف
+              </button>
+
+              @if (otpResendCountdown() > 0) {
+                <span>إعادة الإرسال بعد ({{ otpResendCountdown() }} ثانية)</span>
+              } @else {
+                <button type="button" class="btn-link-action text-primary fw-bold" (click)="requestAuthOtp()">
+                  <i class="bi bi-arrow-repeat me-1"></i> إعادة إرسال الكود
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ========================================================= -->
+<!-- MODAL 2: Order Confirmation & Summary Modal               -->
+<!-- ========================================================= -->
+@if (showConfirmModal()) {
+  <div class="modal-backdrop animate-fade-in" (click)="closeConfirmModal()">
+    <div class="custom-modal-card glass-modal confirm-order-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="brand-badge mb-2">
+          <i class="bi bi-shield-check me-1"></i>
+          <span>مراجعة وتأكيد الطلب النهائي</span>
+        </div>
+        <h3 class="modal-title">هل تريد تأكيد إرسال الطلب؟</h3>
+        <p class="modal-sub">يرجى مراجعة تفاصيل أصنافك وعنوان التوصيل قبل إرسال الطلب للمطبخ</p>
+        <button type="button" class="btn-close-modal" (click)="closeConfirmModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body confirm-modal-body">
+        <!-- Customer & Delivery Summary Box -->
+        <div class="info-highlight-box mb-3">
+          <div class="info-pill-row">
+            @if (customerName || authService.currentCustomer()?.fullName) {
+              <div class="info-item">
+                <span class="lbl"><i class="bi bi-person me-1 text-primary"></i> العميل:</span>
+                <span class="val fw-bold">{{ customerName || authService.currentCustomer()?.fullName }}</span>
+              </div>
+            }
+            <div class="info-item">
+              <span class="lbl"><i class="bi bi-telephone me-1 text-success"></i> الموبايل:</span>
+              <span class="val fw-bold" dir="ltr">{{ customerPhone || authService.currentCustomer()?.usernameOrPhone }}</span>
+            </div>
+          </div>
+
+          <div class="info-pill-row mt-2">
+            <div class="info-item">
+              <span class="lbl"><i class="bi bi-truck me-1 text-primary"></i> طريقة الاستلام:</span>
+              <span class="val badge" [class.bg-primary]="orderType === 'Delivery'" [class.bg-warning]="orderType === 'Pickup'">
+                {{ orderType === 'Delivery' ? 'توصيل للعنوان' : 'استلام من الفرع' }}
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="lbl"><i class="bi bi-cash-stack me-1 text-success"></i> الدفع:</span>
+              <span class="val fw-bold">كاش عند الاستلام</span>
+            </div>
+          </div>
+
+          @if (orderType === 'Delivery') {
+            <div class="address-summary-line mt-2">
+              <div class="address-line-top">
+                <span class="lbl"><i class="bi bi-geo-alt-fill text-danger me-1"></i> عنوان التوصيل بالتفصيل:</span>
+                @if (selectedZone?.name || resolvedZoneName()) {
+                  <span class="zone-pill"><i class="bi bi-pin-map me-1"></i> {{ selectedZone?.name || resolvedZoneName() }}</span>
+                }
+              </div>
+              <div class="address-line-detail">{{ streetAddress || fullFormattedAddress }}</div>
+            </div>
+          }
+
+          @if (prepTimingType() === 'Scheduled' && scheduledDisplaySummary()) {
+            <div class="scheduled-summary-line mt-2 text-primary fw-bold">
+              <i class="bi bi-alarm-fill me-1"></i>
+              <span class="lbl">موعد التجهيز المطلوب:</span>
+              <span class="val ms-1 badge bg-primary text-white">{{ scheduledDisplaySummary() }}</span>
+            </div>
+          }
+
+          @if (notes.trim()) {
+            <div class="notes-summary-line mt-2 text-muted small">
+              <i class="bi bi-chat-left-text me-1"></i>
+              <span>ملاحظات: {{ notes }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Items Summary List -->
+        <div class="confirm-items-box mb-3">
+          <div class="section-header-row flex-between mb-2">
+            <h5 class="section-sub-title m-0"><i class="bi bi-basket3-fill text-primary me-2"></i> تفاصيل الأصناف</h5>
+            <span class="items-count-pill">{{ cartService.items().length }} أصناف</span>
+          </div>
+          <div class="confirm-items-scroll">
+            @for (item of cartService.items(); track item.id) {
+              <div class="confirm-item-row">
+                <div class="item-desc">
+                  <div class="item-title">
+                    <strong class="item-name">{{ item.product.nameAr }}</strong>
+                    <span class="badge qty-badge">×{{ item.quantityUnits }}</span>
+                    @if (item.product.pricingType === 'ByWeight' && (item.customWeightGrams || item.estimatedWeightGrams)) {
+                      <span class="approx-weight-pill">≈ {{ item.customWeightGrams || item.estimatedWeightGrams }} جرام</span>
+                    }
+                  </div>
+                  @if (item.selectedPrepOption) {
+                    <div class="prep-line"><i class="bi bi-fire text-danger me-1"></i> {{ item.selectedPrepOption.nameAr }}</div>
+                  }
+                  @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
+                    <div class="mods-line">إضافات: {{ getModifiersSummary(item) }}</div>
+                  }
+                </div>
+                <div class="item-total-price">
+                  {{ item.estimatedLineTotal }} ج.م
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Pricing Summary -->
+        @if (serverQuote()) {
+          <div class="confirm-price-box mb-3">
+            <div class="price-row flex-between">
+              <span class="text-muted">المجموع الفرعي:</span>
+              <span class="val">{{ serverQuote()!.estimatedSubtotal }} ج.م</span>
+            </div>
+            @if (orderType === 'Delivery') {
+              <div class="price-row flex-between">
+                <span class="text-muted">رسوم التوصيل:</span>
+                <span class="val">{{ serverQuote()!.deliveryFee }} ج.م</span>
+              </div>
+            }
+            <div class="total-row flex-between">
+              <span>
+                @if (cartService.hasWeightedItems()) {
+                  الإجمالي التقديري المطلوب:
+                } @else {
+                  الإجمالي المطلوب:
+                }
+              </span>
+              <span class="total-val">{{ serverQuote()!.estimatedTotal }} <small class="curr">ج.م</small></span>
+            </div>
+          </div>
+        }
+
+        <!-- Fresh Weight Notice (Only if weighted items in cart) -->
+        @if (cartService.hasWeightedItems()) {
+          <div class="weight-disclaimer-alert p-2 rounded mb-3">
+            <small class="d-flex align-items-center">
+              <i class="bi bi-info-circle-fill text-warning fs-5 me-2 flex-shrink-0"></i>
+              <span>نظراً لطبيعة الأسماك الطازجة بالوزن، سيقوم المطبخ بوزن طلبك بدقة وتحديث الفاتورة وإشعارك فوراً عبر الواتساب.</span>
+            </small>
+          </div>
+        }
+      </div>
+
+      <div class="modal-footer confirm-modal-footer">
+        <button
+          type="button"
+          class="btn-primary w-100 btn-confirm-order-action mb-2"
+          (click)="confirmAndSubmitOrder()"
+          [disabled]="isSubmitting()"
+        >
+          @if (isSubmitting()) {
+            <i class="bi bi-hourglass-split me-2"></i> جاري تأكيد وإرسال الطلب للمطبخ...
+          } @else {
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i> نعم، تأكيد وإرسال الطلب الآن
+          }
+        </button>
+
+        <button
+          type="button"
+          class="btn-modify-order w-100"
+          (click)="closeConfirmModal()"
+          [disabled]="isSubmitting()"
+        >
+          <i class="bi bi-pencil-square me-1"></i> تعديل بيانات الطلب
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Schedule Modal -->
+@if (showScheduleModal()) {
+  <div class="modal-backdrop animate-fade-in" (click)="closeScheduleModal()">
+    <div class="custom-modal-card glass-modal schedule-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="brand-badge mb-2 bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill">
+          <i class="bi bi-clock-history me-1"></i>
+          <span>جدولة الطلب</span>
+        </div>
+        <h3 class="modal-title">تحديد موعد تجهيز الطلب 🕒</h3>
+        <p class="modal-sub">اختر اليوم والوقت المناسب لتجهيز وتوصيل طلبك طازجاً وساخناً</p>
+        <button type="button" class="btn-close-modal" (click)="closeScheduleModal()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="modal-body p-3">
+        <!-- Day Selection -->
+        <label class="form-label fw-bold mb-2">1. اختر اليوم:</label>
+        <div class="date-options-grid mb-3">
+          <button
+            type="button"
+            class="date-option-btn"
+            [class.active]="scheduleDateOption() === 'today'"
+            (click)="scheduleDateOption.set('today')"
+          >
+            <i class="bi bi-calendar-day mb-1 fs-5"></i>
+            <span>اليوم</span>
+          </button>
+
+          <button
+            type="button"
+            class="date-option-btn"
+            [class.active]="scheduleDateOption() === 'tomorrow'"
+            (click)="scheduleDateOption.set('tomorrow')"
+          >
+            <i class="bi bi-calendar-plus mb-1 fs-5"></i>
+            <span>غداً</span>
+          </button>
+
+          <button
+            type="button"
+            class="date-option-btn"
+            [class.active]="scheduleDateOption() === 'custom'"
+            (click)="scheduleDateOption.set('custom')"
+          >
+            <i class="bi bi-calendar3 mb-1 fs-5"></i>
+            <span>تاريخ محدد</span>
+          </button>
+        </div>
+
+        @if (scheduleDateOption() === 'custom') {
+          <div class="form-group mb-3 animate-fade-in">
+            <label for="customDateInput" class="small text-muted mb-1">حدد التاريخ:</label>
+            <input
+              id="customDateInput"
+              type="date"
+              class="form-control"
+              [(ngModel)]="customScheduleDate"
+              [min]="customScheduleDate"
+            />
+          </div>
+        }
+
+        <!-- Time Selection -->
+        <label for="scheduleTimeInput" class="form-label fw-bold mb-2">2. اختر وقت التجهيز:</label>
+        <div class="time-picker-box mb-3">
+          <input
+            id="scheduleTimeInput"
+            type="time"
+            class="form-control form-control-lg text-center fw-bold fs-4"
+            [(ngModel)]="scheduleTime"
+          />
+        </div>
+
+        <!-- Quick Time Presets -->
+        <div class="quick-times-row mb-3">
+          <span class="small text-muted d-block mb-1">أوقات شائعة سريعة:</span>
+          <div class="preset-chips">
+            <button type="button" class="btn-chip" (click)="scheduleTime = '13:00'">01:00 م</button>
+            <button type="button" class="btn-chip" (click)="scheduleTime = '14:30'">02:30 م</button>
+            <button type="button" class="btn-chip" (click)="scheduleTime = '16:00'">04:00 م</button>
+            <button type="button" class="btn-chip" (click)="scheduleTime = '18:00'">06:00 م</button>
+            <button type="button" class="btn-chip" (click)="scheduleTime = '20:00'">08:00 م</button>
+            <button type="button" class="btn-chip" (click)="scheduleTime = '21:30'">09:30 م</button>
+          </div>
+        </div>
+
+        <div class="alert alert-info py-2 px-3 small d-flex align-items-center mb-0">
+          <i class="bi bi-info-circle-fill me-2 fs-5 flex-shrink-0"></i>
+          <span>سيتم تحضير الأسماك والمأكولات طازجة قبل موعدك المحدد مباشرة لضمان وصولها ساخنة وشهية.</span>
+        </div>
+      </div>
+
+      <div class="modal-footer p-3 d-flex flex-column gap-2">
+        <button type="button" class="btn-primary w-100 py-2 fw-bold" (click)="confirmSchedule()">
+          <i class="bi bi-check-lg me-1"></i> اعتماد هذا الموعد للطلب
+        </button>
+        <button type="button" class="btn btn-outline-secondary w-100 py-2" (click)="closeScheduleModal()">
+          إلغاء
+        </button>
+      </div>
+    </div>
+  </div>
+}
+

@@ -1,0 +1,328 @@
+<div
+  class="modal-backdrop"
+  [class.is-closing]="isClosing"
+  [style.opacity]="backdropOpacity"
+  (click)="dismissModal()"
+>
+  <div
+    class="modal-dialog luxury-modal"
+    (click)="$event.stopPropagation()"
+    [class.is-closing]="isClosing"
+    [style.transform]="modalTransform"
+    [style.transition]="modalTransition"
+  >
+    <!-- Product Photo Showcase (Hero Gallery with Swipe Down to Dismiss) -->
+    <div
+      class="product-gallery-hero"
+      (touchstart)="onTouchStart($event)"
+      (touchmove)="onTouchMove($event)"
+      (touchend)="onTouchEnd()"
+      (touchcancel)="onTouchEnd()"
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="onPointerUp($event)"
+    >
+      <div class="hero-image-container">
+        <!-- Mobile Floating Drag Handle -->
+        <div class="mobile-drag-bar" (click)="dismissModal()" title="مرر لأسفل للإغلاق">
+          <span class="drag-pill"></span>
+        </div>
+
+        <img
+          [src]="currentImageUrl | imageUrl:'product'"
+          [alt]="product.nameAr"
+          class="hero-food-img"
+        />
+
+        <!-- Image Overlay Gradient -->
+        <div class="hero-overlay"></div>
+
+        <!-- Top Actions Bar -->
+        <div class="hero-top-bar">
+          <span class="category-badge">
+            <i class="bi bi-tag-fill me-1"></i>
+            {{ product.categoryNameAr || 'أسماك جندوفلي' }}
+          </span>
+
+          <button class="btn-close-circle" (click)="dismissModal()" aria-label="إغلاق">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <!-- Gallery Arrows (if multiple images) -->
+        @if (galleryImages.length > 1) {
+          <button type="button" class="gallery-nav-btn prev-btn" (click)="prevImage($event)" title="الصورة السابقة">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+          <button type="button" class="gallery-nav-btn next-btn" (click)="nextImage($event)" title="الصورة التالية">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+
+          <!-- Dots / Counter Indicator -->
+          <div class="gallery-pagination">
+            @for (img of galleryImages; track $index) {
+              <span
+                class="dot-indicator"
+                [class.active]="activeImageIndex === $index"
+                (click)="activeImageIndex = $index"
+              ></span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Thumbnails Switcher Row -->
+      @if (galleryImages.length > 1) {
+        <div class="gallery-thumbs-strip">
+          @for (img of galleryImages; track $index) {
+            <button
+              type="button"
+              class="thumb-item"
+              [class.active]="activeImageIndex === $index"
+              (click)="activeImageIndex = $index"
+              [title]="product.nameAr"
+            >
+              <img [src]="img | imageUrl:'product'" [alt]="product.nameAr" />
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Modal Scrollable Body -->
+    <div class="modal-body">
+      <!-- Title & Price Banner -->
+      <div class="product-intro-box">
+        <div class="title-wrap">
+          <h2 class="product-title">{{ product.nameAr }}</h2>
+          @if (product.nameEn) {
+            <span class="product-subtitle">{{ product.nameEn }}</span>
+          }
+        </div>
+
+        <div class="product-price-badge">
+          <div class="price-amount-row">
+            <span class="price-val">{{ isWeighedProduct ? (product.pricePerKg || product.pricePerUnit) : product.pricePerUnit }}</span>
+            <span class="price-curr">ج.م</span>
+          </div>
+          @if (isWeighedProduct) {
+            <span class="price-unit-tag">لكل كجم</span>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      @if (product.description) {
+        <p class="product-description-text">{{ product.description }}</p>
+      }
+
+      <!-- Weighed Fish Configuration (Pieces vs Grams) -->
+      <!-- Weighed Fish Configuration (Pieces vs Grams) -->
+      @if (isWeighedProduct) {
+        <div class="config-card weight-card">
+          <div class="config-card-header flex-between">
+            <span class="card-title"><i class="bi bi-speedometer2 text-accent me-1"></i> طريقة تحديد الوزن والكمية</span>
+            @if (product.allowOrderByPieces && product.averageUnitWeightGrams) {
+              <span class="weight-hint-badge">الواحدة ≈ {{ product.averageUnitWeightGrams }} جرام</span>
+            }
+          </div>
+
+          @if (product.allowOrderByPieces && product.allowOrderByWeight) {
+            <div class="mode-toggle-group">
+              <button
+                type="button"
+                class="mode-btn"
+                [class.active]="orderMode === 'pieces'"
+                (click)="setOrderMode('pieces')"
+              >
+                <i class="bi bi-123 me-1"></i> بالعدد ({{ product.nameAr.includes('سمك') ? 'سمكات' : 'قطع' }})
+              </button>
+              <button
+                type="button"
+                class="mode-btn"
+                [class.active]="orderMode === 'weight'"
+                (click)="setOrderMode('weight')"
+              >
+                <i class="bi bi-sliders me-1"></i> بالوزن المباشر (جرام)
+              </button>
+            </div>
+          } @else if (product.allowOrderByWeight) {
+            <div class="single-mode-banner mb-2">
+              <span class="mode-tag"><i class="bi bi-sliders me-1"></i> يتم تحديد الكمية بالوزن المطلوب مباشرة</span>
+            </div>
+          } @else if (product.allowOrderByPieces) {
+            <div class="single-mode-banner mb-2">
+              <span class="mode-tag"><i class="bi bi-123 me-1"></i> يتم تحديد الكمية بعدد {{ product.nameAr.includes('سمك') ? 'السمكات' : 'القطع' }}</span>
+            </div>
+          }
+
+          <!-- Pieces Mode -->
+          @if (orderMode === 'pieces') {
+            <div class="stepper-row flex-between">
+              <span class="stepper-label">العدد المطلوب:</span>
+              <div class="stepper-box">
+                <button type="button" class="btn-step" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
+                  <i class="bi bi-dash-lg"></i>
+                </button>
+                <span class="step-value">{{ piecesCount }} {{ product.nameAr.includes('سمك') ? 'سمكة' : 'قطعة' }}</span>
+                <button type="button" class="btn-step" (click)="changePieces(1)">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
+            </div>
+            <div class="est-weight-pill">
+              <i class="bi bi-info-circle me-1"></i>
+              الوزن التقريبي: <strong>{{ calculatedEstimatedWeightGrams }} جرام</strong> ({{ calculatedEstimatedWeightGrams / 1000 }} كجم)
+            </div>
+          }
+
+          <!-- Weight Mode -->
+          @if (orderMode === 'weight') {
+            <div class="stepper-row flex-between">
+              <span class="stepper-label">الوزن المطلوب:</span>
+              <div class="stepper-box">
+                <button type="button" class="btn-step" (click)="changeWeight(-250)" [disabled]="customWeightGrams <= 250">
+                  <i class="bi bi-dash-lg"></i>
+                </button>
+                <span class="step-value">{{ customWeightGrams }} جرام</span>
+                <button type="button" class="btn-step" (click)="changeWeight(250)">
+                  <i class="bi bi-plus-lg"></i>
+                </button>
+              </div>
+            </div>
+            <div class="quick-weight-presets">
+              <button type="button" class="preset-pill" [class.active]="customWeightGrams === 500" (click)="customWeightGrams = 500">نصف كجم (500 جرام)</button>
+              <button type="button" class="preset-pill" [class.active]="customWeightGrams === 1000" (click)="customWeightGrams = 1000">1 كجم (1000 جرام)</button>
+              <button type="button" class="preset-pill" [class.active]="customWeightGrams === 1500" (click)="customWeightGrams = 1500">1.5 كجم (1500 جرام)</button>
+              <button type="button" class="preset-pill" [class.active]="customWeightGrams === 2000" (click)="customWeightGrams = 2000">2 كجم (2000 جرام)</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Fixed Meal Quantity Counter -->
+        <div class="config-card">
+          <div class="stepper-row flex-between">
+            <div class="stepper-title-wrap">
+              <span class="stepper-main-title">عدد الوجبات / الكمية المطلوبة</span>
+              <span class="stepper-sub-title">اختر الكمية المراد إضافتها</span>
+            </div>
+            <div class="stepper-box">
+              <button type="button" class="btn-step" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
+                <i class="bi bi-dash-lg"></i>
+              </button>
+              <span class="step-value">{{ piecesCount }}</span>
+              <button type="button" class="btn-step" (click)="changePieces(1)">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Preparation Options (Cooking Style) -->
+      @if (product.preparationGroups && product.preparationGroups.length > 0) {
+        @for (prepGroup of product.preparationGroups; track prepGroup.id) {
+          <div class="config-card">
+            <div class="config-card-header">
+              <span class="card-title"><i class="bi bi-fire text-danger me-1"></i> {{ prepGroup.nameAr }} (إلزامي):</span>
+            </div>
+            <div class="options-selectable-grid">
+              @for (opt of prepGroup.options; track opt.id) {
+                <div
+                  class="option-tile"
+                  [class.is-selected]="selectedPrepOption?.id === opt.id"
+                  (click)="selectPrep(opt)"
+                >
+                  <div class="tile-check-icon">
+                    <i class="bi" [class.bi-check-circle-fill]="selectedPrepOption?.id === opt.id" [class.bi-circle]="selectedPrepOption?.id !== opt.id"></i>
+                  </div>
+                  <div class="tile-details">
+                    <span class="tile-name">{{ opt.nameAr }}</span>
+                    @if (opt.price > 0) {
+                      <span class="tile-extra-price">+{{ opt.price }} ج.م</span>
+                    } @else {
+                      <span class="tile-free-badge">بدون تكلفة</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Modifiers / Add-ons -->
+      @if (product.modifierGroups && product.modifierGroups.length > 0) {
+        @for (modGroup of product.modifierGroups; track modGroup.id) {
+          <div class="config-card">
+            <div class="config-card-header">
+              <span class="card-title"><i class="bi bi-plus-circle-fill text-success me-1"></i> {{ modGroup.nameAr }} (إضافات اختيارية):</span>
+            </div>
+            <div class="modifiers-vertical-list">
+              @for (mod of modGroup.options; track mod.id) {
+                <label class="modifier-row" [class.is-checked]="isModifierSelected(mod.id)">
+                  <div class="mod-right flex-center">
+                    <input
+                      type="checkbox"
+                      class="custom-check"
+                      [checked]="isModifierSelected(mod.id)"
+                      (change)="toggleModifier(mod)"
+                    />
+                    <span class="mod-title">{{ mod.nameAr }}</span>
+                  </div>
+                  <span class="mod-addon-price">+{{ mod.price }} ج.م</span>
+                </label>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Special Cooking Notes -->
+      <div class="config-card">
+        <label class="card-title mb-2 d-block" for="modalNotes">
+          <i class="bi bi-chat-heart text-primary me-1"></i> ملاحظات الشيف والتتبيل:
+        </label>
+        <textarea
+          id="modalNotes"
+          class="notes-textarea"
+          rows="2"
+          placeholder="مثال: تسوية مقرمشة، شطة زيادة، ليمون إضافي..."
+          [(ngModel)]="specialInstructions"
+        ></textarea>
+      </div>
+
+      <!-- Disclaimer Alert (ONLY FOR WEIGHED PRODUCTS LIKE FISH) -->
+      @if (isWeighedProduct) {
+        <div class="weighed-disclaimer-card">
+          <div class="disclaimer-icon-wrap">
+            <i class="bi bi-info-circle-fill"></i>
+          </div>
+          <div class="disclaimer-body">
+            <h4 class="disclaimer-head">تنبيه اختلاف الوزن الطازج:</h4>
+            <p class="disclaimer-msg">
+              الوزن والسعر تقديريان، ويتم اعتمادهما نهائياً بعد الوزن الفعلي في المطبخ وقد يختلفان بنسبة بسيطة حسب حجم السمك الطازج المستلم يومياً.
+            </p>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Sticky Luxury Modal Footer -->
+    <div class="modal-footer-lux">
+      <div class="footer-price-summary">
+        <span class="summary-caption">الإجمالي التقديري:</span>
+        <div class="summary-amount">
+          <span class="amount-val">{{ calculatedEstimatedTotal }}</span>
+          <span class="amount-curr">ج.م</span>
+        </div>
+      </div>
+
+      <button class="btn-add-to-basket" (click)="onAddToCart()">
+        <span class="basket-txt">إضافة للطلب</span>
+        <i class="bi bi-bag-check-fill me-2"></i>
+      </button>
+    </div>
+  </div>
+</div>

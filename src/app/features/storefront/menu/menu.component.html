@@ -1,0 +1,103 @@
+<div class="menu-page">
+  <div class="menu-inner container">
+    <!-- 1. Search Bar Capsule -->
+    <div class="menu-search-wrap">
+      <div class="search-capsule">
+        <i class="bi bi-search search-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="ابحث عن وجبة، صينية، بلطي، بوري، جمبري، طاجن..."
+          [(ngModel)]="searchTerm"
+        />
+        @if (searchTerm) {
+          <button type="button" class="btn-clear-search" (click)="searchTerm = ''" aria-label="مسح">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- 2. Horizontal Categories Row (Matching Home Exactly) -->
+    <section class="menu-categories-section">
+      <div class="categories-scroll">
+        <!-- "الكل" Card -->
+        <div
+          class="category-item"
+          [class.active]="selectedCatId === null"
+          (click)="selectCategory(null)"
+        >
+          <div class="category-icon-box box-all">
+            <i class="bi bi-grid-fill"></i>
+          </div>
+          <span class="category-label">الكل</span>
+        </div>
+
+        <!-- Categories from Backend API -->
+        @for (cat of catalogService.categories(); track cat.id) {
+          <div
+            class="category-item"
+            [class.active]="selectedCatId === cat.id"
+            (click)="selectCategory(cat.id)"
+          >
+            <div class="category-icon-box">
+              @if (cat.imageUrl) {
+                <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="cat.nameAr" class="category-img" />
+              } @else {
+                <i class="bi bi-water text-primary"></i>
+              }
+            </div>
+            <span class="category-label">{{ cat.nameAr }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- 3. Section Title & Results Header -->
+    <div class="menu-results-header">
+      <h2 class="menu-active-title">
+        @if (selectedCatId === null) {
+          <span>جميع الأصناف والمأكولات</span>
+        } @else {
+          <span>قائمة {{ selectedCategoryName }}</span>
+        }
+      </h2>
+      <span class="results-count">{{ filteredProducts.length }} صنف متاح</span>
+    </div>
+
+    <!-- 4. Products Grid / Loading / Empty State -->
+    @if (catalogService.isLoading()) {
+      <div class="products-grid">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <app-product-card-skeleton></app-product-card-skeleton>
+        }
+      </div>
+    } @else if (filteredProducts.length === 0) {
+      <div class="empty-results flex-center glass-panel">
+        <i class="bi bi-search fs-1 text-muted mb-2"></i>
+        <h3>لم نجد أصنافاً مطابقة لبحثك</h3>
+        <p>جرّب البحث باسم صنف آخر أو اختر قسماً من القائمة أعلاه.</p>
+        <button class="btn btn-sm btn-outline-primary mt-2" (click)="searchTerm = ''; selectedCatId = null">
+          <i class="bi bi-arrow-clockwise me-1"></i> عرض جميع الأصناف
+        </button>
+      </div>
+    } @else {
+      <div class="products-grid">
+        @for (prod of filteredProducts; track prod.id) {
+          <app-product-card
+            [product]="prod"
+            (selectProduct)="openProductModal($event)"
+          ></app-product-card>
+        }
+      </div>
+    }
+
+    <!-- Interactive Modal -->
+    @if (selectedProductForModal()) {
+      <app-product-detail-modal
+        [product]="selectedProductForModal()!"
+        (closeModal)="closeProductModal()"
+      ></app-product-detail-modal>
+    }
+  </div>
+</div>

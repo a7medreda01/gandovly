@@ -1,0 +1,212 @@
+@if (cartService.isDrawerOpen()) {
+  <div class="drawer-backdrop" (click)="cartService.closeDrawer()">
+    <div class="drawer-panel" (click)="$event.stopPropagation()">
+      <!-- Mobile Drag Handle -->
+      <div class="sheet-drag-handle d-md-none"></div>
+
+      <!-- Header -->
+      <div class="drawer-header flex-between">
+        <div class="header-title d-flex align-items-center gap-2">
+          <div class="cart-title-icon">
+            <i class="bi bi-bag-check-fill"></i>
+          </div>
+          <div>
+            <h2 class="title-text mb-0">سلة طلباتك</h2>
+            <span class="items-count">{{ cartService.totalItemsCount() }} صنف مضاف</span>
+          </div>
+        </div>
+        <button class="btn-close" (click)="cartService.closeDrawer()" aria-label="إغلاق">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Body / Items List -->
+      <div class="drawer-body">
+        @if (cartService.items().length === 0) {
+          <div class="empty-cart flex-center">
+            <div class="empty-cart-icon-ring">
+              <i class="bi bi-cart-x"></i>
+            </div>
+            <h3>السلة فارغة حالياً</h3>
+            <p>تصفح أشهى الأسماك والمأكولات البحرية وأضفها إلى سلتك!</p>
+            <button class="btn-browse-menu" (click)="goToMenu()" type="button">
+              <span>تصفح المنيو الآن</span>
+            </button>
+          </div>
+        } @else {
+          <div class="cart-items-list">
+            @for (item of cartService.items(); track item.id) {
+              <div class="cart-item-card">
+                <div class="item-card-grid">
+                  <!-- Product Image Thumbnail -->
+                  <div class="item-thumb-box">
+                    <img
+                      [src]="item.product.imageUrl | imageUrl:'product'"
+                      [alt]="item.product.nameAr"
+                      class="cart-item-thumb"
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <!-- Product Info & Actions -->
+                  <div class="item-details-box">
+                    <div class="item-title-row flex-between">
+                      <h4 class="item-name" [title]="item.product.nameAr">{{ item.product.nameAr }}</h4>
+                      <button class="btn-remove-item" (click)="cartService.removeItem(item.id)" title="حذف الصنف" aria-label="حذف">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    </div>
+
+                    <!-- Prep Option & Sub-Badges -->
+                    <div class="item-badges-row">
+                      @if (item.selectedPrepOption) {
+                        <span class="item-prep-badge">
+                          <i class="bi bi-fire"></i> {{ item.selectedPrepOption.nameAr }}
+                        </span>
+                      }
+
+                      <!-- If ordered by pieces: show estimated weight badge -->
+                      @if (item.orderMode === 'pieces' && item.product.pricingType === 'ByWeight') {
+                        <span class="item-weight-badge">
+                          <i class="bi bi-speedometer2"></i> ≈ {{ formatWeight(item.estimatedWeightGrams) }}
+                        </span>
+                      }
+
+                      <!-- If ordered by weight and allows pieces: show estimated pieces badge -->
+                      @if (item.orderMode === 'weight' && item.product.allowOrderByPieces) {
+                        <span class="item-weight-badge">
+                          <i class="bi bi-fish"></i> ≈ {{ item.quantityUnits }} سمكة
+                        </span>
+                      }
+                    </div>
+
+                    <!-- Modifiers List -->
+                    @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
+                      <div class="item-modifiers">
+                        @for (mod of item.selectedModifiers; track mod.id) {
+                          <span class="mod-pill">+ {{ mod.nameAr }}</span>
+                        }
+                      </div>
+                    }
+
+                    <!-- Special instructions -->
+                    @if (item.specialInstructions) {
+                      <p class="item-note"><i class="bi bi-chat-left-dots me-1"></i> {{ item.specialInstructions }}</p>
+                    }
+
+                    <!-- Unified Bottom Row: Single Stepper based on customer's initial choice -->
+                    <div class="item-bottom-row flex-between">
+                      <!-- Case 1: Customer chose By Weight -->
+                      @if (item.orderMode === 'weight') {
+                        <div class="qty-control flex-center weight-stepper">
+                          <button
+                            type="button"
+                            class="btn-qty"
+                            (click)="cartService.adjustWeight(item.id, -1)"
+                            [disabled]="(item.estimatedWeightGrams || 500) <= (item.product.averageUnitWeightGrams || 250)"
+                            aria-label="تقليل الوزن"
+                          >
+                            <i class="bi bi-dash"></i>
+                          </button>
+                          <span class="qty-val">{{ formatWeight(item.estimatedWeightGrams) }}</span>
+                          <button
+                            type="button"
+                            class="btn-qty"
+                            (click)="cartService.adjustWeight(item.id, 1)"
+                            aria-label="زيادة الوزن"
+                          >
+                            <i class="bi bi-plus"></i>
+                          </button>
+                        </div>
+                      }
+                      <!-- Case 2: Customer chose By Pieces (for fish) -->
+                      @else if (item.orderMode === 'pieces' && item.product.pricingType === 'ByWeight') {
+                        <div class="qty-control flex-center">
+                          <button
+                            type="button"
+                            class="btn-qty"
+                            (click)="cartService.updateQuantity(item.id, item.quantityUnits - 1)"
+                            [disabled]="item.quantityUnits <= 1"
+                            aria-label="تقليل عدد السمك"
+                          >
+                            <i class="bi bi-dash"></i>
+                          </button>
+                          <span class="qty-val">{{ item.quantityUnits }} <small class="unit-sub">سمكة</small></span>
+                          <button
+                            type="button"
+                            class="btn-qty"
+                            (click)="cartService.updateQuantity(item.id, item.quantityUnits + 1)"
+                            aria-label="زيادة عدد السمك"
+                          >
+                            <i class="bi bi-plus"></i>
+                          </button>
+                        </div>
+                      }
+                      <!-- Case 3: Standard Fixed Per Unit item (meals, sandwiches, side orders) -->
+                      @else {
+                        <div class="qty-control flex-center">
+                          <button
+                            type="button"
+                            class="btn-qty"
+                            (click)="cartService.updateQuantity(item.id, item.quantityUnits - 1)"
+                            aria-label="تقليل"
+                          >
+                            <i class="bi bi-dash"></i>
+                          </button>
+                          <span class="qty-val">{{ item.quantityUnits }}</span>
+                          <button
+                            type="button"
+                            class="btn-qty"
+                            (click)="cartService.updateQuantity(item.id, item.quantityUnits + 1)"
+                            aria-label="زيادة"
+                          >
+                            <i class="bi bi-plus"></i>
+                          </button>
+                        </div>
+                      }
+
+                      <!-- Item Total Price -->
+                      <div class="item-price">
+                        <span class="amount">{{ item.estimatedLineTotal }}</span>
+                        <span class="currency">ج.م</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Footer / Totals & Checkout -->
+      @if (cartService.items().length > 0) {
+        <div class="drawer-footer">
+          <div class="totals-breakdown">
+            <div class="total-row flex-between">
+              <span class="label">
+                @if (cartService.hasWeightedItems()) {
+                  الإجمالي التقديري للأصناف:
+                } @else {
+                  إجمالي الأصناف:
+                }
+              </span>
+              <span class="val">{{ cartService.estimatedSubtotal() }} ج.م</span>
+            </div>
+          </div>
+
+          @if (cartService.hasWeightedItems()) {
+            <div class="disclaimer-mini">
+              <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ settingsService.settings().estimatedWeightDisclaimer || 'السعر تقريبي ويعتمد على الوزن الفعلي للأسماك بعد الوزن' }}</small>
+            </div>
+          }
+
+          <button class="btn-checkout w-100" (click)="onCheckout()">
+            <span>المتابعة لإتمام الطلب</span>
+            <i class="bi bi-arrow-left"></i>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

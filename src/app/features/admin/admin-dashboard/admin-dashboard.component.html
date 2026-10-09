@@ -1,0 +1,103 @@
+<div class="dashboard-page">
+  <div class="page-title-row flex-between">
+    <div>
+      <h1 class="page-heading">لوحة المؤشرات والإحصائيات</h1>
+      <p class="page-sub">نظرة عامة على المبيعات، الطلبات النشطة، والمنتجات الأكثر طلباً اليوم</p>
+    </div>
+    <button class="btn-primary" (click)="loadStats()">🔄 تحديث البيانات</button>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading-state
+      mode="spinner"
+      title="جاري تجهيز لوحة المؤشرات والإحصائيات..."
+      subtitle="يتم الآن حساب إجمالي المبيعات، الطلبات النشطة، والأصناف الأكثر مبيعاً"
+      icon="bi-graph-up-arrow"
+      minHeight="300px"
+    ></app-loading-state>
+  } @else if (stats()) {
+    <!-- Stat Cards -->
+    <div class="stats-grid">
+      <div class="stat-card glass-panel">
+        <div class="card-icon blue">🛍️</div>
+        <div class="card-info">
+          <span class="label">طلبات اليوم</span>
+          <span class="num">{{ stats()!.todayOrdersCount }} طلب</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel">
+        <div class="card-icon green">💰</div>
+        <div class="card-info">
+          <span class="label">إجمالي مبيعات اليوم</span>
+          <span class="num">{{ stats()!.todayTotalRevenue }} ج.م</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel">
+        <div class="card-icon amber">⏳</div>
+        <div class="card-info">
+          <span class="label">طلبات قيد الطهي والتحضير</span>
+          <span class="num">{{ stats()!.kitchenPendingOrdersCount }} طلب</span>
+        </div>
+      </div>
+
+      <div class="stat-card glass-panel">
+        <div class="card-icon purple">📊</div>
+        <div class="card-info">
+          <span class="label">متوسط قيمة الطلب</span>
+          <span class="num">{{ stats()!.averageOrderValue }} ج.م</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Shortcuts & Top Products -->
+    <div class="dashboard-split-grid">
+      <!-- Top Selling Products -->
+      <div class="box-card glass-panel">
+        <h3 class="box-title">الأسماك والوجبات الأكثر مبيعاً اليوم 🔥</h3>
+        @if (stats()!.topProductsToday.length > 0) {
+          <div class="top-list">
+            @for (prod of stats()!.topProductsToday; track prod.productId; let idx = $index) {
+              <div class="top-item flex-between">
+                <div class="item-rank flex-center">
+                  <span class="rank-num">#{{ idx + 1 }}</span>
+                  <span class="name">{{ prod.productNameAr }}</span>
+                </div>
+                <div class="item-stats">
+                  <span class="qty">{{ prod.quantitySold }} مبيعة</span>
+                  <span class="rev">{{ prod.totalRevenue }} ج.م</span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="text-muted">لا توجد مبيعات مسجلة حتى الآن اليوم.</p>
+        }
+      </div>
+
+      <!-- Quick Action Cards -->
+      <div class="box-card glass-panel">
+        <h3 class="box-title">روابط وإجراءات سريعة ⚡</h3>
+        <div class="shortcuts-grid">
+          <a routerLink="/kitchen" class="shortcut-card flex-center">
+            <span class="sc-icon">👨‍🍳</span>
+            <span class="sc-title">شاشة المطبخ والأوزان</span>
+          </a>
+          <a routerLink="/admin/orders" class="shortcut-card flex-center">
+            <span class="sc-icon">📋</span>
+            <span class="sc-title">إدارة جميع الطلبات</span>
+          </a>
+          <a routerLink="/admin/catalog" class="shortcut-card flex-center">
+            <span class="sc-icon">🐟</span>
+            <span class="sc-title">إضافة / تعديل صنف</span>
+          </a>
+          <a routerLink="/admin/settings" class="shortcut-card flex-center">
+            <span class="sc-icon">🎨</span>
+            <span class="sc-title">تعديل ألوان وشعار المطعم</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  }
+</div>

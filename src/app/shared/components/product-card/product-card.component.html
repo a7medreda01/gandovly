@@ -1,0 +1,70 @@
+<div class="product-card" [class.is-out-of-stock]="!product.isAvailable" (click)="onSelect()" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
+  <!-- Image Box with Badges -->
+  <div class="card-media">
+    <div class="product-img-wrapper">
+      <img
+        [src]="(isHovered && secondaryImage ? secondaryImage : product.imageUrl) | imageUrl:'product'"
+        [alt]="product.nameAr"
+        class="product-real-img"
+        loading="lazy"
+      />
+    </div>
+
+    <!-- Badges (Top Right) -->
+    <div class="card-badges">
+      <span class="badge badge-fire"><i class="bi bi-fire"></i> عرض خاص</span>
+    </div>
+
+    <!-- Favorite Circle Button (Top Left) -->
+    <button
+      type="button"
+      class="favorite-circle-btn"
+      [class.active]="isFavorite"
+      (click)="toggleFavorite($event)"
+      title="إضافة للمفضلة"
+      aria-label="إضافة للمفضلة"
+    >
+      <i class="bi" [class.bi-heart-fill]="isFavorite" [class.bi-heart]="!isFavorite"></i>
+    </button>
+
+    <!-- Quick plus action badge (Bottom Left) -->
+    <button
+      type="button"
+      class="quick-plus-btn"
+      (click)="$event.stopPropagation(); onSelect()"
+      title="تفاصيل واختيار"
+      aria-label="اختيار"
+    >
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </div>
+
+  <!-- Content Box -->
+  <div class="card-body">
+    <div class="title-row">
+      <h3 class="product-name" [title]="product.nameAr">{{ product.nameAr }}</h3>
+    </div>
+
+    <!-- Pricing Row (Price on right, dark navy cart button on left in RTL) -->
+    <div class="pricing-row">
+      <div class="price-box">
+        <span class="amount">{{ displayPrice }}</span>
+        <span class="currency">ج.م</span>
+        @if (isWeightBased) {
+          <span class="unit-label">/ كجم</span>
+        }
+      </div>
+
+      <button
+        type="button"
+        class="btn-cart-square"
+        (click)="$event.stopPropagation(); onSelect()"
+        [disabled]="!product.isAvailable"
+        title="إضافة للسلة"
+        aria-label="إضافة للسلة"
+      >
+        <i class="bi bi-cart3"></i>
+      </button>
+    </div>
+  </div>
+</div>

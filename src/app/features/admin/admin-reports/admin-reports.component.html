@@ -1,0 +1,101 @@
+<div class="reports-page">
+  <div class="page-title-row flex-between">
+    <div>
+      <h1 class="page-heading">التقارير والمبيعات وتحليل الأوزان 📈</h1>
+      <p class="page-sub">تحليل إجمالي الإيرادات، مبيعات الأصناف، وفروقات الأوزان التقديرية والفعلية للأسماك</p>
+    </div>
+    <div class="tab-selectors flex-center">
+      <button class="btn-outline" [class.active]="activeTab === 'sales'" (click)="activeTab = 'sales'">تقرير المبيعات</button>
+      <button class="btn-outline" [class.active]="activeTab === 'variance'" (click)="activeTab = 'variance'">تقرير فروق الأوزان ⚖️</button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading-state
+      mode="table"
+      title="جاري تجهيز التقارير وتحليل الأوزان والمبيعات..."
+      subtitle="يتم الآن حساب الإيرادات الفعلية، رسوم التوصيل، وفروقات الأوزان"
+      [count]="5"
+    ></app-loading-state>
+  } @else if (activeTab === 'sales' && salesReport()) {
+    <!-- Sales Summary Cards -->
+    <div class="report-cards-grid">
+      <div class="r-card glass-panel">
+        <span class="label">إجمالي الطلبات الناجحة</span>
+        <span class="num">{{ salesReport()!.totalOrders - salesReport()!.cancelledOrdersCount }}</span>
+      </div>
+      <div class="r-card glass-panel">
+        <span class="label">إجمالي الإيرادات الفعلية</span>
+        <span class="num green">{{ salesReport()!.totalFinalRevenue }} ج.م</span>
+      </div>
+      <div class="r-card glass-panel">
+        <span class="label">إجمالي رسوم التوصيل</span>
+        <span class="num">{{ salesReport()!.totalDeliveryFees }} ج.م</span>
+      </div>
+      <div class="r-card glass-panel">
+        <span class="label">طلبات ملغية</span>
+        <span class="num red">{{ salesReport()!.cancelledOrdersCount }}</span>
+      </div>
+    </div>
+
+    <!-- Top Products Table -->
+    <div class="report-table-card glass-panel">
+      <h3 class="card-title">الأصناف الأكثر طلباً ومبيعاً</h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>الصنف</th>
+            <th>الكمية المباعة</th>
+            <th>إجمالي الإيرادات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (prod of salesReport()!.topSellingProducts; track prod.productId) {
+            <tr>
+              <td><strong>{{ prod.productNameAr }}</strong></td>
+              <td>{{ prod.quantitySold }}</td>
+              <td><strong>{{ prod.totalRevenue }} ج.م</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else if (activeTab === 'variance') {
+    <!-- Weight Variance Table -->
+    <div class="report-table-card glass-panel">
+      <h3 class="card-title">سجل فروق الأوزان التقديرية والفعلية للأسماك ⚖️</h3>
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>رقم الطلب</th>
+            <th>نوع السمك</th>
+            <th>الوزن التقديري</th>
+            <th>الوزن الفعلي</th>
+            <th>فرق الوزن</th>
+            <th>السعر التقديري</th>
+            <th>السعر النهائي</th>
+            <th>التاريخ</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (v of varianceReport(); track v.orderId) {
+            <tr>
+              <td><strong>#{{ v.orderNumber }}</strong></td>
+              <td>{{ v.productNameAr }}</td>
+              <td>{{ v.estimatedWeightGrams }} جم</td>
+              <td><strong>{{ v.actualWeightGrams }} جم</strong></td>
+              <td>
+                <span class="badge" [class.badge-fresh]="v.varianceGrams >= 0" [class.badge-weight]="v.varianceGrams < 0">
+                  {{ v.varianceGrams > 0 ? '+' : '' }}{{ v.varianceGrams }} جم
+                </span>
+              </td>
+              <td>{{ v.estimatedPrice }} ج.م</td>
+              <td><strong class="green">{{ v.finalPrice }} ج.م</strong></td>
+              <td>{{ v.orderDate | date:'MM/dd' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,0 +1,27 @@
+<div class="admin-login-page flex-center">
+  <div class="login-card glass-panel text-center">
+    <span class="icon">🐟</span>
+    <h2>بوابة إدارة أسماك جندوفلي</h2>
+    <p>سجل الدخول للمتابعة وإدارة الطلبات والأسعار والمطبخ</p>
+
+    <div class="form-box text-right">
+      <div class="form-group">
+        <label for="admUser">اسم المستخدم:</label>
+        <input id="admUser" type="text" class="form-control" [(ngModel)]="username" />
+      </div>
+
+      <div class="form-group">
+        <label for="admPass">كلمة المرور:</label>
+        <input id="admPass" type="password" class="form-control" [(ngModel)]="password" (keyup.enter)="login()" />
+      </div>
+
+      <button class="btn-primary btn-block" (click)="login()" [disabled]="isLoading()">
+        @if (isLoading()) { <span>جاري تسجيل الدخول... ⏳</span> } @else { <span>دخول للوحة التحكم 🔐</span> }
+      </button>
+
+      <div class="hint-credentials text-center">
+        <small>بيانات الدخول الافتراضية: <strong>admin / Admin@123</strong> أو <strong>kitchen / Kitchen@123</strong></small>
+      </div>
+    </div>
+  </div>
+</div>

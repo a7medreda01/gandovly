@@ -1,0 +1,257 @@
+<div class="zones-page">
+  <div class="page-title-row flex-between">
+    <div>
+      <h1 class="page-heading">
+        <i class="bi bi-geo-alt-fill text-primary me-2"></i>
+        <span>إدارة مناطق ورسوم التوصيل</span>
+      </h1>
+      <p class="page-sub">تحديد رسوم التوصيل، الحد الأدنى للطلب، والكلمات المفتاحية لمطابقة أحياء العملاء آلياً</p>
+    </div>
+    <button class="btn-primary" (click)="openNewZoneModal()">
+      <i class="bi bi-plus-lg me-1"></i>
+      <span>إضافة منطقة تغطية جديدة</span>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading-state
+      mode="table"
+      title="جاري تحميل مناطق ورسوم التوصيل..."
+      subtitle="لحظات ويتم جلب كافة الأحياء والحد الأدنى للطلبات"
+      [count]="6"
+    ></app-loading-state>
+  } @else {
+    <div class="zones-card glass-panel">
+    <!-- Desktop Table View (>= 992px) -->
+    <div class="table-responsive desktop-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>المنطقة والمستوى</th>
+            <th>المنطقة التابعة لها</th>
+            <th>رسوم التوصيل</th>
+            <th>الحد الأدنى للطلب</th>
+            <th>الوقت المتوقع</th>
+            <th>الأحياء والكلمات المفتاحية للمطابقة</th>
+            <th>الحالة</th>
+            <th class="text-center">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (zone of zones(); track zone.id) {
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  @if (zone.level === 'Macro') {
+                    <span class="level-pill macro"><i class="bi bi-buildings me-1"></i> منطقة كبرى</span>
+                  } @else if (zone.level === 'Sub') {
+                    <span class="level-pill sub"><i class="bi bi-geo me-1"></i> منطقة فرعية</span>
+                  } @else {
+                    <span class="level-pill micro"><i class="bi bi-bullseye me-1"></i> أصغر حلقة</span>
+                  }
+                  <strong class="zone-title-main">{{ zone.name }}</strong>
+                </div>
+                <div class="text-muted small mt-1">{{ zone.city }}</div>
+              </td>
+              <td>
+                @if (zone.parentZoneName) {
+                  <span class="parent-badge">{{ zone.parentZoneName }}</span>
+                } @else {
+                  <span class="text-muted small">- رئيسية -</span>
+                }
+              </td>
+              <td><strong class="fee-text">{{ zone.deliveryFee }} ج.م</strong></td>
+              <td>{{ zone.minimumOrder }} ج.م</td>
+              <td>{{ zone.estimatedDeliveryTimeMinutes }} دقيقة</td>
+              <td class="keywords-cell">
+                <span class="kw-text" [title]="zone.neighborhoodKeywords">{{ zone.neighborhoodKeywords }}</span>
+              </td>
+              <td>
+                <span class="status-pill" [class.active]="zone.isActive" [class.inactive]="!zone.isActive">
+                  {{ zone.isActive ? 'مفعلة' : 'معطلة' }}
+                </span>
+              </td>
+              <td>
+                <div class="action-btn-row flex-center">
+                  <button class="btn-icon edit" (click)="openEditZoneModal(zone)" title="تعديل">
+                    <i class="bi bi-pencil-square"></i>
+                  </button>
+                  <button class="btn-icon del" (click)="deleteZone(zone)" title="حذف">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Cards View (< 992px) -->
+    <div class="mobile-zones-cards">
+      @for (zone of zones(); track zone.id) {
+        <div class="zone-mobile-card">
+          <div class="zone-card-top flex-between">
+            <div class="zone-info">
+              <div class="level-tag-wrap mb-1">
+                @if (zone.level === 'Macro') {
+                  <span class="level-pill macro"><i class="bi bi-buildings me-1"></i> منطقة كبرى</span>
+                } @else if (zone.level === 'Sub') {
+                  <span class="level-pill sub"><i class="bi bi-geo me-1"></i> منطقة فرعية</span>
+                } @else {
+                  <span class="level-pill micro"><i class="bi bi-bullseye me-1"></i> أصغر حلقة</span>
+                }
+              </div>
+              <strong class="zone-name">{{ zone.name }}</strong>
+              <span class="city-name">{{ zone.city }}</span>
+            </div>
+            <span class="status-pill" [class.active]="zone.isActive" [class.inactive]="!zone.isActive">
+              {{ zone.isActive ? 'مفعلة' : 'معطلة' }}
+            </span>
+          </div>
+
+          <div class="zone-metrics-grid">
+            <div class="metric-item">
+              <span class="m-label">التوصيل</span>
+              <span class="m-val highlight">{{ zone.deliveryFee }} ج.م</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">الحد الأدنى</span>
+              <span class="m-val">{{ zone.minimumOrder }} ج.م</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">الوقت التقديري</span>
+              <span class="m-val">{{ zone.estimatedDeliveryTimeMinutes }} دقيقة</span>
+            </div>
+          </div>
+
+          @if (zone.parentZoneName) {
+            <div class="parent-zone-row">
+              <span class="text-muted small">المنطقة الأم:</span>
+              <span class="parent-badge ms-1">{{ zone.parentZoneName }}</span>
+            </div>
+          }
+
+          <div class="zone-card-actions">
+            <button class="btn-outline flex-1" (click)="openEditZoneModal(zone)">
+              <i class="bi bi-pencil-square me-1"></i>
+              <span>تعديل</span>
+            </button>
+            <button class="btn-icon del" (click)="deleteZone(zone)" title="حذف">
+              <i class="bi bi-trash3-fill"></i>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+  <!-- Zone Modal -->
+  @if (showZoneModal()) {
+    <div class="modal-backdrop" (click)="showZoneModal.set(false)">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header flex-between">
+          <h3 class="title">{{ isEditing() ? 'تعديل منطقة التوصيل' : 'إضافة منطقة توصيل جديدة' }}</h3>
+          <button class="btn-close" (click)="showZoneModal.set(false)"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Section 1: Geographical Info -->
+          <div class="modal-section-box">
+            <span class="section-legend"><i class="bi bi-geo-alt-fill me-1 text-primary"></i> بيانات المنطقة الجغرافية</span>
+            <div class="form-grid-2">
+              <div class="form-group flex-2">
+                <label>اسم المنطقة *</label>
+                <input type="text" class="form-control" placeholder="مثال: كعابيش، الطوابق، فيصل..." [(ngModel)]="zoneForm.name" />
+              </div>
+              <div class="form-group flex-1">
+                <label>المدينة / المحافظة *</label>
+                <input type="text" class="form-control" [(ngModel)]="zoneForm.city" />
+              </div>
+            </div>
+
+            <div class="form-grid-2 mt-2">
+              <div class="form-group flex-1">
+                <label>المستوى الهرمي *</label>
+                <select class="form-control" [(ngModel)]="zoneForm.level">
+                  <option value="Macro">منطقة كبرى (فيصل، الهرم)</option>
+                  <option value="Sub">منطقة فرعية (الطوابق، العشرين)</option>
+                  <option value="Micro">أصغر حلقة / شارع (كعابيش، المنشية)</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label>المنطقة التابعة لها</label>
+                <select class="form-control" [(ngModel)]="zoneForm.parentZoneId">
+                  <option [ngValue]="null">-- رئيسية --</option>
+                  @for (z of zones(); track z.id) {
+                    @if (z.id !== zoneForm.id && z.level !== 'Micro') {
+                      <option [value]="z.id">{{ z.name }} ({{ z.level }})</option>
+                    }
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Delivery Pricing & Time (Compact 3-Columns) -->
+          <div class="modal-section-box mt-3">
+            <span class="section-legend"><i class="bi bi-cash-stack me-1 text-success"></i> أسعار ومدة التوصيل</span>
+            <div class="form-grid-3">
+              <div class="form-group">
+                <label>رسوم التوصيل *</label>
+                <div class="input-with-suffix">
+                  <input type="number" class="form-control text-center" [(ngModel)]="zoneForm.deliveryFee" />
+                  <span class="suffix-text">ج.م</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>الحد الأدنى للطلب *</label>
+                <div class="input-with-suffix">
+                  <input type="number" class="form-control text-center" [(ngModel)]="zoneForm.minimumOrder" />
+                  <span class="suffix-text">ج.م</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>الوقت المتوقع</label>
+                <div class="input-with-suffix">
+                  <input type="number" class="form-control text-center" [(ngModel)]="zoneForm.estimatedDeliveryTimeMinutes" />
+                  <span class="suffix-text">دقيقة</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Smart Keywords -->
+          <div class="modal-section-box mt-3">
+            <span class="section-legend"><i class="bi bi-tags-fill me-1 text-warning"></i> كلمات المطابقة الذكية للعنوان</span>
+            <div class="form-group mb-0">
+              <textarea
+                class="form-control compact-textarea"
+                rows="2"
+                placeholder="مثال: كعابيش، شارع كعابيش، مدرسة فضل، طوابق كعابيش..."
+                [(ngModel)]="zoneForm.neighborhoodKeywords"
+              ></textarea>
+              <span class="helper-text">افصل بين الكلمات بفواصل لتطابق عنوان العميل تلقائياً.</span>
+            </div>
+          </div>
+
+          <div class="status-toggle-bar mt-3">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="zoneForm.isActive" />
+              <span class="fw-bold">المنطقة مفعلة وتستقبل الطلبات حالياً</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-between">
+          <button class="btn-outline" (click)="showZoneModal.set(false)">إلغاء</button>
+          <button class="btn-primary" (click)="saveZone()">
+            <i class="bi bi-check2-circle me-1"></i>
+            <span>حفظ التعديلات</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,506 @@
+<div class="admin-wa-page">
+  <!-- Top Header Banner -->
+  <div class="page-top-header">
+    <div class="header-text">
+      <h1 class="page-title">
+        <i class="bi bi-whatsapp text-success me-2"></i> بوابة واتساب الذاتية (Local Gateway)
+      </h1>
+      <p class="page-subtitle">
+        ربط مباشر مع رقم هاتف المطعم عبر مسح QR Code لإرسال تأكيدات الطلبات، إشعارات التوصيل، وأكواد OTP التشغيلية
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
+        <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
+        <span>تحديث الحالة</span>
+      </button>
+      <button class="btn-restart" (click)="restartGateway()" [disabled]="isLoading() || connectionStatus() === 'offline'">
+        <i class="bi bi-arrow-repeat"></i>
+        <span>إعادة تشغيل الخادم</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Grid: 2 Columns on desktop, 1 on mobile -->
+  <div class="admin-wa-grid">
+    <!-- Column 1: Connection & QR Management -->
+    <div class="wa-card glass-panel">
+      <div class="card-header-row">
+        <h3 class="card-title">
+          <i class="bi bi-broadcast text-primary me-2"></i> حالة اتصال البوابة
+        </h3>
+
+        @switch (connectionStatus()) {
+          @case ('connected') {
+            <span class="status-pill status-connected">
+              <span class="pulse-dot green"></span>
+              <span>متصل ونشط ✅</span>
+            </span>
+          }
+          @case ('qr_ready') {
+            <span class="status-pill status-waiting">
+              <span class="pulse-dot yellow"></span>
+              <span>بانتظار مسح الـ QR</span>
+            </span>
+          }
+          @case ('connecting') {
+            <span class="status-pill status-connecting">
+              <i class="bi bi-hourglass-split spin"></i>
+              <span>جاري الاتصال...</span>
+            </span>
+          }
+          @case ('offline') {
+            <span class="status-pill status-offline">
+              <span>خادم الواتساب متوقف ❌</span>
+            </span>
+          }
+          @default {
+            <span class="status-pill status-disconnected">
+              <span>غير متصل</span>
+            </span>
+          }
+        }
+      </div>
+
+      <!-- Content based on state -->
+      <div class="wa-card-body">
+        @if (connectionStatus() === 'connected') {
+          <div class="connected-state-box text-center">
+            <div class="phone-icon-bubble">
+              <i class="bi bi-phone-vibrate-fill"></i>
+            </div>
+            <h4 class="connected-title">رقم هاتف المطعم متصل بنجاح</h4>
+            <div class="connected-phone-badge" dir="ltr">
+              +{{ connectedPhone() }}
+            </div>
+            <p class="connected-note">
+              يتم إرسال إشعارات الطلبات المعتمدة وأكواد الـ OTP التشغيلية للعملاء الموافقين مباشرة من هذا الرقم.
+            </p>
+
+            <div class="protection-box">
+              <div class="p-header">
+                <i class="bi bi-cpu text-primary fs-5"></i>
+                <span class="fw-bold">التحكم التشغيلي في تدفق الرسائل (Rate Limit)</span>
+              </div>
+              <p class="p-desc">
+                طابور إرسال تشغيلي لحماية موارد الخادم ومنع الإغراق اللحظي مع إمكانية المراقبة المستمرة.
+              </p>
+            </div>
+
+            <button class="btn-danger-outline" (click)="logoutSession()" [disabled]="isLoading()">
+              <i class="bi bi-box-arrow-right me-1"></i> قطع الارتباط وتسجيل الخروج
+            </button>
+          </div>
+        } @else if (connectionStatus() === 'qr_ready' && qrDataUrl()) {
+          <div class="qr-scan-box text-center">
+            <p class="qr-instructions">
+              افتح <strong>واتساب</strong> على الهاتف ➔ <strong>الأجهزة المرتبطة (Linked Devices)</strong> ➔ اضغط <strong>ربط جهاز</strong> ووجّه الكاميرا إلى الكود التالي:
+            </p>
+
+            <div class="qr-frame">
+              <img [src]="qrDataUrl()" alt="WhatsApp QR Code" class="qr-code-img" />
+            </div>
+
+            <div class="qr-actions">
+              <button class="btn-secondary-sm" (click)="refreshQrOnly()">
+                <i class="bi bi-arrow-clockwise me-1"></i> تحديث كود المسح
+              </button>
+            </div>
+          </div>
+        } @else if (connectionStatus() === 'offline') {
+          <div class="offline-state-box text-center">
+            <div class="offline-icon-bubble">
+              <i class="bi bi-wifi-off"></i>
+            </div>
+            <h4 class="offline-title">خادم بوابة الواتساب غير متاح حالياً</h4>
+            <p class="offline-desc">
+              تعذر الاتصال بمحرك الواتساب على العنوان المضبوط:
+            </p>
+            <div class="offline-url-pill" dir="ltr">
+              {{ gatewaySettings().baseUrl }}
+            </div>
+
+            @if (lastErrorMessage()) {
+              <div class="offline-error-alert" dir="ltr">
+                <small>{{ lastErrorMessage() }}</small>
+              </div>
+            }
+
+            <!-- Instructions -->
+            <div class="gateway-setup-guide">
+              <div class="guide-item">
+                <i class="bi bi-laptop text-primary fs-5"></i>
+                <div>
+                  <strong>إذا كنت تشغّل البوابة على جهازك:</strong>
+                  <p class="mb-0 small text-muted">
+                    تأكد من فتح المجلد <code>whatsapp-service</code> وتشغيل الأمر: <code>npm start</code>، ثم اضغط "إعادة فحص الاتصال".
+                  </p>
+                </div>
+              </div>
+
+              <div class="guide-item">
+                <i class="bi bi-cloud-arrow-up text-success fs-5"></i>
+                <div>
+                  <strong>لربط الموقع السحابي أونلاين:</strong>
+                  <p class="mb-0 small text-muted">
+                    يمكنك تشغيل البوابة وربطها بنفق عام (مثل Cloudflare Tunnel أو ngrok) أو استضافتها على خادم خارجي، ثم حفظ الرابط بالأسفل:
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gateway URL Direct Input -->
+            <div class="gateway-url-box mt-3 text-start">
+              <label class="form-label fw-bold small">
+                <i class="bi bi-link-45deg me-1"></i> رابط خادم الواتساب (Gateway URL):
+              </label>
+              <div class="input-group">
+                <input
+                  type="url"
+                  dir="ltr"
+                  class="form-control text-start font-monospace"
+                  placeholder="http://127.0.0.1:3001 أو https://your-tunnel.ngrok-free.app"
+                  [(ngModel)]="gatewaySettings().baseUrl"
+                />
+                <button class="btn-save-url" (click)="saveGatewayUrl()" [disabled]="isSavingSettings()">
+                  @if (isSavingSettings()) {
+                    <i class="bi bi-hourglass-split spin"></i>
+                  } @else {
+                    <i class="bi bi-floppy2-fill me-1"></i>
+                    <span>حفظ وتجربة</span>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="offline-actions mt-3">
+              <button class="btn-retry-check" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
+                <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
+                <span>إعادة فحص الاتصال الآن</span>
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="loading-state-box text-center">
+            <div class="spinner-bubble">
+              <i class="bi bi-arrow-repeat spin"></i>
+            </div>
+            <h4 class="loading-title">جاري فحص محرك الواتساب وتجهيز الـ QR Code...</h4>
+            <p class="loading-desc">يرجى الانتظار ثوانٍ معدودة...</p>
+          </div>
+        }
+
+        <!-- Alternative: Pairing Code -->
+        @if (connectionStatus() !== 'connected') {
+          <div class="pairing-code-section">
+            <div class="section-title-sm">
+              <i class="bi bi-key-fill text-warning me-1"></i> أو اربط بواسطة كود الاقتران (بدون كاميرا)
+            </div>
+            <div class="pairing-input-row">
+              <input
+                type="tel"
+                class="form-control text-start"
+                dir="ltr"
+                placeholder="010XXXXXXXX"
+                [(ngModel)]="pairPhone"
+                [disabled]="connectionStatus() === 'offline'"
+              />
+              <button
+                class="btn-pair"
+                (click)="requestPairingCode()"
+                [disabled]="isRequestingPairCode() || !pairPhone.trim() || connectionStatus() === 'offline'"
+              >
+                @if (isRequestingPairCode()) {
+                  <i class="bi bi-hourglass-split spin"></i>
+                } @else {
+                  <span>طلب الكود</span>
+                }
+              </button>
+            </div>
+
+            @if (connectionStatus() === 'offline') {
+              <small class="text-muted d-block mt-2">
+                <i class="bi bi-info-circle me-1 text-warning"></i>
+                يتطلب طلب كود الاقتران تشغيل خادم بوابة الواتساب بنجاح.
+              </small>
+            }
+
+            @if (pairingCode()) {
+              <div class="pairing-result-box">
+                <span class="sub">أدخل هذا الكود في إشعار الواتساب بهاتفك:</span>
+                <span class="code-digits font-monospace">{{ pairingCode() }}</span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Column 2: Notification Event Triggers & Test Sender -->
+    <div class="wa-side-column">
+      <!-- Notification Triggers Control Card -->
+      <div class="wa-card glass-panel mb-4 highlight-trigger-card">
+        <div class="card-header-row mb-2">
+          <h3 class="card-title m-0">
+            <i class="bi bi-bell-fill text-warning me-2"></i> التحكم في إرسال إشعارات العملاء
+          </h3>
+          <span class="badge bg-primary">تحكم فوري</span>
+        </div>
+        <p class="card-subtitle mb-3">حدد الحالات والمراحل التي يتم فيها إرسال رسالة واتساب تلقائية للعميل:</p>
+
+        <div class="triggers-list">
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">عند تسجيل الطلب المبدئي للعميل</span>
+              <small class="trig-desc">إشعار فوري للعميل بوصول طلبه بنجاح وبدء المراجعة</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderPlaced" class="form-check-input" />
+          </label>
+
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">عند تأكيد الطلب للعميل</span>
+              <small class="trig-desc">إرسال تفاصيل الفاتورة، الأصناف، ورابط تتبع الطلب المباشر</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderConfirmed" class="form-check-input" />
+          </label>
+
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">عند قيام المطبخ بوزن الأسماك وتثبيت الحساب</span>
+              <small class="trig-desc">إشعار العميل بالأوزان الحقيقية والإجمالي النهائي للطلب</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnKitchenWeighed" class="form-check-input" />
+          </label>
+
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">عند خروج الطلب للتوصيل (مع الدليفري)</span>
+              <small class="trig-desc">إعلام العميل بأن طلبه في الطريق إليه للتجهيز والاستلام</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOutForDelivery" class="form-check-input" />
+          </label>
+
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">عند اكتمال واستلام الطلب بنجاح</span>
+              <small class="trig-desc">رسالة شكر للعميل وتأكيد انتهاء الطلب</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCompleted" class="form-check-input" />
+          </label>
+
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">عند إلغاء الطلب</span>
+              <small class="trig-desc">إشعار العميل بإلغاء الطلب مع سبب الإلغاء</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCancelled" class="form-check-input" />
+          </label>
+        </div>
+
+        <button class="btn-save-triggers mt-3" (click)="saveNotificationTriggers()" [disabled]="isSavingSettings()">
+          @if (isSavingSettings()) {
+            <i class="bi bi-hourglass-split spin me-1"></i>
+            <span>جاري الحفظ...</span>
+          } @else {
+            <i class="bi bi-floppy2-fill me-1"></i>
+            <span>حفظ إعدادات إرسال الإشعارات</span>
+          }
+        </button>
+      </div>
+
+      <!-- Cashier WhatsApp Notification Card -->
+      <div class="wa-card glass-panel mb-4 highlight-cashier-card">
+        <div class="card-header-row mb-2">
+          <h3 class="card-title m-0">
+            <i class="bi bi-person-badge-fill text-success me-2"></i> إشعار الكاشير والإدارة عند كل طلب
+          </h3>
+          <span class="badge bg-success">إشعار فوري</span>
+        </div>
+        <p class="card-subtitle mb-3">
+          إرسال تذكرة تفاصيل الطلب بالكامل إلى واتساب الكاشير فور قيام العميل بالطلب، مع تأخير زمني محسوب:
+        </p>
+
+        <div class="triggers-list mb-3">
+          <label class="trigger-item">
+            <div class="trig-info">
+              <span class="trig-title">تفعيل إرسال إشعار للكاشير عند كل طلب جديد</span>
+              <small class="trig-desc">إرسال بيانات العميل، الأصناف، الإجمالي، والعنوان في رسالة واتساب منظمة</small>
+            </div>
+            <input type="checkbox" [(ngModel)]="gatewaySettings().notifyCashierOnNewOrder" class="form-check-input" />
+          </label>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-sm-7">
+            <label class="form-label fw-bold small">رقم واتساب الكاشير / الإدارة *</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-whatsapp text-success"></i></span>
+              <input
+                type="tel"
+                dir="ltr"
+                class="form-control text-start"
+                placeholder="010XXXXXXXX"
+                [(ngModel)]="gatewaySettings().cashierWhatsAppNumber"
+              />
+            </div>
+            <small class="text-muted d-block mt-1">يصل عليه إشعار الطلب الجديد مباشرة.</small>
+          </div>
+
+          <div class="col-12 col-sm-5">
+            <label class="form-label fw-bold small">فارق التأخير (ثواني) *</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-clock-history text-warning"></i></span>
+              <input
+                type="number"
+                min="1"
+                max="30"
+                class="form-control text-center"
+                [(ngModel)]="gatewaySettings().cashierNotificationDelaySeconds"
+              />
+              <span class="input-group-text">ثانية</span>
+            </div>
+            <small class="text-muted d-block mt-1">تأخير بسيط لتفادي الإرسال المزدوج.</small>
+          </div>
+        </div>
+
+        <button class="btn-save-triggers" (click)="saveNotificationTriggers()" [disabled]="isSavingSettings()">
+          @if (isSavingSettings()) {
+            <i class="bi bi-hourglass-split spin me-1"></i>
+            <span>جاري الحفظ...</span>
+          } @else {
+            <i class="bi bi-floppy2-fill me-1"></i>
+            <span>حفظ إعدادات إشعار الكاشير</span>
+          }
+        </button>
+      </div>
+
+      <!-- Gateway URL Permanent Setting Card -->
+      <div class="wa-card glass-panel mb-4">
+        <div class="card-header-row mb-2">
+          <h3 class="card-title m-0">
+            <i class="bi bi-hdd-network-fill text-info me-2"></i> عنوان ورابط خادم الواتساب
+          </h3>
+          <span class="badge bg-secondary">إعداد الخادم</span>
+        </div>
+        <p class="card-subtitle mb-3">
+          يمكنك ضبط وتغيير عنوان خادم الواتساب الذي يتصل به النظام (محلي 3001 أو رابط سحابي):
+        </p>
+
+        <div class="mb-3">
+          <label class="form-label fw-bold small">رابط خادم الواتساب (Gateway Base URL):</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-globe2 text-primary"></i></span>
+            <input
+              type="url"
+              dir="ltr"
+              class="form-control text-start font-monospace"
+              placeholder="http://127.0.0.1:3001 أو https://your-tunnel.ngrok-free.app"
+              [(ngModel)]="gatewaySettings().baseUrl"
+            />
+          </div>
+          <small class="text-muted d-block mt-1">
+            القيمة الافتراضية محلياً: <code>http://127.0.0.1:3001</code>
+          </small>
+        </div>
+
+        <button class="btn-save-triggers" (click)="saveGatewayUrl()" [disabled]="isSavingSettings()">
+          @if (isSavingSettings()) {
+            <i class="bi bi-hourglass-split spin me-1"></i>
+            <span>جاري الحفظ...</span>
+          } @else {
+            <i class="bi bi-floppy2-fill me-1"></i>
+            <span>حفظ وتحديث رابط الخادم</span>
+          }
+        </button>
+      </div>
+
+      <!-- Test Sender Card -->
+      <div class="wa-card glass-panel mb-4">
+        <div class="card-header-row mb-2">
+          <h3 class="card-title m-0">
+            <i class="bi bi-send-check-fill text-primary me-2"></i> اختبار إرسال رسالة تجريبية
+          </h3>
+        </div>
+        <p class="card-subtitle mb-3">تأكد من عمل البوابة وتجربة وصول الإشعارات إلى هاتفك مباشرة.</p>
+
+        <div class="form-group mb-3">
+          <label class="form-label fw-bold small">رقم الهاتف المستلم (مع كود الدولة) *</label>
+          <input
+            type="tel"
+            dir="ltr"
+            class="form-control text-start"
+            placeholder="010XXXXXXXX أو 2010XXXXXXXX"
+            [(ngModel)]="testPhone"
+          />
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="form-label fw-bold small">نص الرسالة *</label>
+          <textarea
+            class="form-control"
+            rows="3"
+            [(ngModel)]="testMessage"
+          ></textarea>
+        </div>
+
+        <button
+          class="btn-send-test"
+          (click)="sendTest()"
+          [disabled]="isSendingTest() || connectionStatus() !== 'connected' || !testPhone.trim()"
+        >
+          @if (isSendingTest()) {
+            <i class="bi bi-hourglass-split spin me-2"></i>
+            <span>جاري الإرسال عبر البوابة...</span>
+          } @else {
+            <i class="bi bi-whatsapp me-2 fs-5"></i>
+            <span>إرسال الرسالة التجريبية الآن</span>
+          }
+        </button>
+
+        @if (connectionStatus() !== 'connected') {
+          <div class="notice-alert">
+            <i class="bi bi-exclamation-circle me-1"></i>
+            <span>يجب ربط رقم الواتساب أولاً لتتمكن من إرسال الرسائل التجريبية.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Operational Policies Card -->
+      <div class="wa-card glass-panel">
+        <div class="card-header-row mb-2">
+          <h3 class="card-title m-0">
+            <i class="bi bi-shield-check text-success me-2"></i> السياسات والضوابط التشغيلية
+          </h3>
+        </div>
+
+        <div class="features-list">
+          <div class="feature-item">
+            <div class="f-icon"><i class="bi bi-check2-circle"></i></div>
+            <div class="f-content">
+              <strong>رسائل معاملات موثقة فقط</strong>
+              <small>قصر الرسائل على تأكيد الطلب، خروج التوصيل، اكتمال الطلب، ورمز OTP بموافقة العميل.</small>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="f-icon"><i class="bi bi-check2-circle"></i></div>
+            <div class="f-content">
+              <strong>عدم تعطيل الطلبات عند فشل الإرسال</strong>
+              <small>في حال انقطاع الواتساب يظل الطلب محفوظاً وتتابع مهام المطبخ بصورة طبيعية دون توقف.</small>
+            </div>
+          </div>
+
+          <div class="feature-item">
+            <div class="f-icon"><i class="bi bi-check2-circle"></i></div>
+            <div class="f-content">
+              <strong>طابور إرسال Outbox دائم</strong>
+              <small>إعادة محاولات محدودة ومحسوبة مع حفظ سجل الإخفاق المنقح لتدقيق المشرف.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

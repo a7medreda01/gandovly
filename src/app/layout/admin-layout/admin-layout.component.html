@@ -1,0 +1,105 @@
+<div class="admin-wrapper">
+  <!-- Mobile Backdrop Overlay -->
+  @if (isSidebarOpen) {
+  <div class="admin-sidebar-backdrop" (click)="closeSidebar()"></div>
+  }
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar" [class.open]="isSidebarOpen">
+    <div class="sidebar-header flex-between">
+      <div class="flex-center gap-2">
+        <i class="bi bi-water text-primary fs-2"></i>
+        <div class="header-titles">
+          <h2>{{ settingsService.settings().restaurantName }}</h2>
+          <span class="portal-tag">لوحة تحكم الإدارة</span>
+        </div>
+      </div>
+      <!-- Close button on mobile -->
+      <button class="btn-sidebar-close d-md-none" (click)="closeSidebar()" aria-label="إغلاق">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-speedometer2 icon"></i>
+        <span>لوحة المؤشرات</span>
+      </a>
+
+      <a routerLink="/admin/orders" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-receipt icon"></i>
+        <span>إدارة الطلبات</span>
+      </a>
+
+      <a routerLink="/admin/kitchen" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-fire icon text-danger"></i>
+        <span>شاشة المطبخ والأوزان</span>
+      </a>
+
+      <a routerLink="/admin/catalog" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-grid icon"></i>
+        <span>الأصناف وأقسام المنيو</span>
+      </a>
+
+      <a routerLink="/admin/delivery-zones" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-geo-alt icon"></i>
+        <span>مناطق ورسوم التوصيل</span>
+      </a>
+
+      <a routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-palette icon"></i>
+        <span>الهوية والإعدادات العامة</span>
+      </a>
+
+      <a routerLink="/admin/reports" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-graph-up-arrow icon"></i>
+        <span>التقارير والمبيعات</span>
+      </a>
+
+      <a routerLink="/admin/whatsapp" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <i class="bi bi-whatsapp icon text-success"></i>
+        <span>بوابة وإشعارات الواتساب</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <a routerLink="/" class="btn-storefront flex-center gap-2">
+        <i class="bi bi-shop"></i>
+        <span>زيارة المتجر</span>
+      </a>
+      <button class="btn-logout flex-center gap-2" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>تسجيل الخروج</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main View Area -->
+  <main class="admin-main">
+    <div class="admin-topbar flex-between glass-panel">
+      <div class="topbar-right flex-center gap-2">
+        <button class="btn-mobile-nav-toggle d-md-none" (click)="toggleSidebar()" aria-label="فتح القائمة">
+          <i class="bi bi-list fs-3"></i>
+        </button>
+        <span class="topbar-portal-name">لوحة الإدارة</span>
+        <span class="topbar-date d-none d-lg-inline text-muted ms-2">
+          <i class="bi bi-calendar3 me-1"></i> {{ todayDate | date:'d MMMM yyyy' }}
+        </span>
+      </div>
+
+      <div class="topbar-user flex-center gap-2">
+        <div class="user-pill flex-center gap-1">
+          <i class="bi bi-person-circle text-primary"></i>
+          <span class="user-name">{{ authService.currentAdmin()?.fullName || 'المدير' }}</span>
+        </div>
+        <a routerLink="/" class="btn-store-link" title="معاينة المتجر">
+          <i class="bi bi-box-arrow-up-right"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="admin-content">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

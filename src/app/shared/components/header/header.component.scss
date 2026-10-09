@@ -1,0 +1,490 @@
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(13, 43, 69, 0.07);
+  box-shadow: 0 2px 15px rgba(13, 43, 69, 0.04);
+}
+
+.top-promo-banner {
+  background: linear-gradient(135deg, #0d2b45, #1b4965);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  padding: 0.35rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 0.5rem;
+
+  .btn-banner-link {
+    background: #f4a261;
+    color: #0d2b45;
+    font-size: 0.75rem;
+    font-weight: 800;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.header-wrapper {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  @media (max-width: 768px) {
+    height: 50px;
+  }
+}
+
+.brand-logo {
+  gap: 0.55rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+
+  .restaurant-logo-img {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 2px 8px rgba(13, 43, 69, 0.15);
+    flex-shrink: 0;
+  }
+
+  .logo-icon {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #0d2b45 0%, #00875a 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(13, 43, 69, 0.18);
+    flex-shrink: 0;
+  }
+
+  .brand-texts {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .restaurant-name {
+    font-size: 1.12rem;
+    font-weight: 900;
+    color: #0d2b45;
+    line-height: 1.15;
+    letter-spacing: -0.3px;
+
+    @media (max-width: 768px) {
+      font-size: 1.05rem;
+    }
+  }
+
+  .restaurant-tagline {
+    font-size: 0.68rem;
+    color: #64748b;
+    font-weight: 600;
+    line-height: 1;
+    margin-top: 1px;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+}
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+
+  .nav-link {
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: #334155;
+    padding: 0.35rem 0.15rem;
+    position: relative;
+    text-decoration: none;
+    transition: all 0.2s ease;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      right: 0;
+      width: 0;
+      height: 2px;
+      background: #00875a;
+      transition: all 0.2s ease;
+      border-radius: 4px;
+    }
+
+    &:hover, &.active {
+      color: #00875a;
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+
+  .nav-badge-link {
+    text-decoration: none;
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 8px;
+    }
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-whatsapp {
+  background: #25d366;
+  color: #ffffff;
+  padding: 0.35rem 0.65rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  gap: 0.3rem;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.25);
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #20bd5a;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 900px) {
+    display: none !important;
+  }
+}
+
+.cart-trigger-btn {
+  background: linear-gradient(135deg, #00875a 0%, #00a896 100%);
+  color: #ffffff;
+  padding: 0.4rem 0.85rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 800;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 135, 90, 0.25);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(0, 135, 90, 0.35);
+  }
+
+  .cart-icon {
+    font-size: 0.95rem;
+  }
+
+  .cart-badge {
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    background: #e63946;
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+  }
+
+  @media (max-width: 900px) {
+    display: none !important;
+  }
+}
+
+.account-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(13, 43, 69, 0.05);
+  color: #0d2b45;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #0d2b45;
+    color: #ffffff;
+  }
+}
+
+.mobile-toggle-btn {
+  display: none;
+  font-size: 1.35rem;
+  padding: 0.2rem 0.35rem;
+  color: #0d2b45;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+/* Mobile Drawer Menu (Opens from Right matching Arabic RTL) */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 25, 41, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 9999;
+  animation: overlayFadeIn 0.25s ease forwards;
+}
+
+.mobile-menu-content {
+  position: fixed;
+  top: 0;
+  right: 0; /* Slide from the right side for RTL */
+  bottom: 0;
+  width: min(320px, 86vw);
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.3); /* Shadow on the left */
+  animation: slideDrawerRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  z-index: 10000;
+  direction: rtl;
+}
+
+.mobile-menu-header {
+  padding: 1.25rem 1rem 1rem;
+  background: linear-gradient(135deg, #0d2b45 0%, #174266 100%);
+  color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  .drawer-brand {
+    gap: 0.65rem;
+
+    .drawer-logo-img {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .drawer-logo-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00875a, #00a896);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: #ffffff;
+    }
+
+    .drawer-titles {
+      display: flex;
+      flex-direction: column;
+
+      .drawer-restaurant-name {
+        font-weight: 900;
+        font-size: 1.05rem;
+        color: #ffffff;
+        line-height: 1.2;
+      }
+
+      .drawer-tagline {
+        font-size: 0.72rem;
+        color: #f4a261;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+    }
+  }
+
+  .drawer-close-btn {
+    font-size: 1.15rem;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+.mobile-links-container {
+  padding: 1rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex: 1;
+  overflow-y: auto;
+
+  .mobile-link-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0.85rem;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 700;
+    font-size: 0.92rem;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    transition: all 0.2s ease;
+
+    .link-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+
+      .link-icon-box {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+        flex-shrink: 0;
+
+        &.icon-home { background: #e0f2fe; color: #0284c7; }
+        &.icon-menu { background: #e8f5e9; color: #16a34a; }
+        &.icon-track { background: #fef3c7; color: #d97706; }
+        &.icon-account { background: #f3e8ff; color: #9333ea; }
+        &.icon-kitchen { background: #fee2e2; color: #dc2626; }
+        &.icon-admin { background: #f1f5f9; color: #475569; }
+      }
+
+      .link-title {
+        font-size: 0.9rem;
+      }
+    }
+
+    .link-arrow {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover {
+      background: #f1f5f9;
+      transform: translateX(-2px);
+      .link-arrow {
+        color: #0d2b45;
+      }
+    }
+
+    &.active {
+      background: #e6f4ea;
+      border-color: #bbf7d0;
+      color: #00875a;
+      font-weight: 800;
+
+      .link-arrow {
+        color: #00875a;
+      }
+    }
+  }
+
+  .drawer-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 0.5rem 0.25rem;
+  }
+}
+
+.drawer-footer {
+  padding: 0.85rem;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  .btn-drawer-action {
+    padding: 0.65rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+
+    &.btn-phone {
+      background: #0d2b45;
+      color: #ffffff;
+      &:hover { background: #174266; }
+    }
+
+    &.btn-wa {
+      background: #25d366;
+      color: #ffffff;
+      &:hover { background: #20bd5a; }
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideDrawerRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}

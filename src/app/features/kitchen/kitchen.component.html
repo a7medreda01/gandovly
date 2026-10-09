@@ -1,0 +1,344 @@
+<div class="kitchen-page">
+  <!-- Kitchen Header -->
+  <div class="kitchen-header glass-panel">
+    <div class="header-info">
+      <div class="header-icon-box">
+        <i class="bi bi-fire text-danger fs-2"></i>
+      </div>
+      <div class="header-text">
+        <h1 class="page-title">شاشة المطبخ وإعداد الوجبات 👨‍🍳</h1>
+        <p class="page-subtitle">متابعة تحضير الطلبات، تحديث الأوزان الفعلية للأسماك، ونقل المراحل</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="active-badge">
+        <i class="bi bi-bell-fill me-1 text-warning"></i>
+        <span>{{ orders().length }} طلبات نشطة</span>
+      </span>
+      <button class="btn-refresh" (click)="loadOrders()" [disabled]="isLoading()">
+        <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
+        <span>تحديث</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading & Empty States -->
+  @if (isLoading()) {
+    <app-loading-state
+      mode="kitchen"
+      title="جاري تحديث شاشة المطبخ والطلبات النشطة..."
+      subtitle="يتم الآن جلب تفاصيل التجهيز، الأوزان، والملاحظات الخاصة"
+      [count]="4"
+    ></app-loading-state>
+  } @else if (orders().length === 0) {
+    <div class="empty-kitchen-card glass-panel">
+      <div class="empty-icon-ring">
+        <i class="bi bi-check2-all"></i>
+      </div>
+      <h3 class="empty-title">المطبخ جاهز بالكامل! 👨‍🍳</h3>
+      <p class="empty-desc">لا توجد طلبات معلقة أو قيد التحضير حالياً. جميع الطلبات تم تجهيزها بنجاح أو بانتظار طلبات واردة جديدة.</p>
+      <button class="btn-check-new" (click)="loadOrders()" [disabled]="isLoading()" type="button">
+        <i class="bi bi-arrow-clockwise me-1" [class.spin]="isLoading()"></i>
+        <span>التحقق من طلبات جديدة</span>
+      </button>
+    </div>
+  } @else {
+    <!-- Row-based Orders List (1 order per row) -->
+    <div class="kitchen-orders-list">
+      @for (ord of orders(); track ord.id) {
+        <div class="kitchen-order-row-card" (click)="openOrderModal(ord)">
+
+          <!-- TOP BAR: سطر 1 رقم الطلب والحالة | سطر 2 التوقيتات والمجدول -->
+          <div class="card-top">
+            <div class="card-top-main">
+              <span class="order-num-badge" dir="ltr">#{{ ord.orderNumber }}</span>
+              <span class="status-badge" [ngClass]="'status-' + ord.status.toLowerCase()">
+                {{ getStatusLabel(ord.status) }}
+              </span>
+            </div>
+
+            <div class="card-top-meta">
+              <span class="time-chip">
+                <i class="bi bi-clock"></i> {{ ord.createdAt | date:'shortTime' }}
+              </span>
+              <span class="live-timer-chip" [ngClass]="getTimerClass(ord.createdAt)" title="الوقت المنقضي منذ إنشاء الطلب">
+                <i class="bi bi-stopwatch"></i> {{ getElapsedTime(ord.createdAt) }}
+              </span>
+              @if (ord.scheduledFor) {
+                <span class="scheduled-banner-chip" title="طلب مجدول لموعد لاحق">
+                  <i class="bi bi-alarm-fill text-warning"></i>
+                  <span>مجدول: {{ formatScheduledDate(ord.scheduledFor) }}</span>
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- CUSTOMER ROW -->
+          <div class="card-customer-row">
+            <div class="cust-main">
+              <i class="bi bi-person text-primary"></i>
+              <strong class="cust-name">{{ ord.customerName }}</strong>
+            </div>
+            <div class="cust-tags">
+              <span class="order-type-badge" [class.delivery]="ord.orderType === 'Delivery'" [class.pickup]="ord.orderType === 'Pickup'">
+                <i class="bi" [class.bi-scooter]="ord.orderType === 'Delivery'" [class.bi-shop]="ord.orderType === 'Pickup'"></i>
+                {{ ord.orderType === 'Delivery' ? (ord.deliveryZoneName || 'دليفري') : 'استلام' }}
+              </span>
+              @if (hasWeightItems(ord)) {
+                @if (ord.totalActualWeightGrams) {
+                  <span class="weight-badge recorded"><i class="bi bi-check2-all"></i> وُزِن</span>
+                } @else {
+                  <span class="weight-badge pending">⚖️ يحتاج وزن</span>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- FOOTER ROW -->
+          <div class="card-footer-row">
+            <div class="footer-items">
+              <span class="items-count">{{ ord.orderLines.length }} صنف</span>
+              <span class="items-preview">
+                @for (l of ord.orderLines; track l.id; let isFirst = $first) {
+                  @if (isFirst) {
+                    {{ l.productNameAr }}
+                    @if (l.preparationOptionNameAr) { ({{ l.preparationOptionNameAr }}) }
+                    @if (ord.orderLines.length > 1) { <span class="more-badge">+{{ ord.orderLines.length - 1 }}</span> }
+                  }
+                }
+              </span>
+            </div>
+            <div class="footer-actions">
+              <span class="price-val">{{ ord.finalTotal || ord.estimatedTotal }}<small> ج.م</small></span>
+              <button class="btn-open-modal" (click)="$event.stopPropagation(); openOrderModal(ord)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Kitchen Order Modal -->
+  @if (selectedOrder()) {
+    <div class="modal-backdrop" (click)="closeOrderModal()">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <div class="modal-header-top flex-between">
+            <div class="d-flex align-items-center gap-2">
+              <span class="order-num-badge large" dir="ltr">#{{ selectedOrder()!.orderNumber }}</span>
+              <span class="modal-live-timer" [ngClass]="getTimerClass(selectedOrder()!.createdAt)">
+                <i class="bi bi-stopwatch-fill"></i> منذ {{ getElapsedTime(selectedOrder()!.createdAt) }}
+              </span>
+            </div>
+            <button class="btn-close-modal" (click)="closeOrderModal()" aria-label="إغلاق"><i class="bi bi-x-lg"></i></button>
+          </div>
+          <div class="modal-header-badges">
+            <span class="status-badge" [ngClass]="'status-' + selectedOrder()!.status.toLowerCase()">
+              {{ getStatusLabel(selectedOrder()!.status) }}
+            </span>
+            <span class="order-type-badge" [class.delivery]="selectedOrder()!.orderType === 'Delivery'" [class.pickup]="selectedOrder()!.orderType === 'Pickup'">
+              <i class="bi" [class.bi-scooter]="selectedOrder()!.orderType === 'Delivery'" [class.bi-shop]="selectedOrder()!.orderType === 'Pickup'"></i>
+              {{ selectedOrder()!.orderType === 'Delivery' ? 'توصيل: ' + (selectedOrder()!.deliveryZoneName || 'دليفري') : 'استلام من الفرع' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body">
+          @if (selectedOrder()!.scheduledFor) {
+            <div class="modal-scheduled-alert alert alert-warning d-flex align-items-center gap-2 mb-3">
+              <i class="bi bi-alarm-fill fs-3 text-warning flex-shrink-0"></i>
+              <div>
+                <strong class="d-block text-dark">طلب مجدول لتوقيت لاحق 🕒</strong>
+                <div class="sched-sub text-muted small">
+                  موعد التجهيز المطلوب:
+                  <strong class="text-primary">{{ formatScheduledDate(selectedOrder()!.scheduledFor) }}</strong>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Customer & Notes Box -->
+          <div class="cust-details-box mb-3">
+            <div class="detail-item">
+              <span class="lbl"><i class="bi bi-person text-primary me-1"></i> العميل:</span>
+              <strong class="val">{{ selectedOrder()!.customerName }}</strong>
+            </div>
+            <div class="detail-item">
+              <span class="lbl"><i class="bi bi-telephone text-success me-1"></i> الهاتف:</span>
+              <strong class="val" dir="ltr">{{ selectedOrder()!.customerPhone }}</strong>
+            </div>
+            @if (selectedOrder()!.deliveryAddress) {
+              <div class="detail-item full-width">
+                <span class="lbl"><i class="bi bi-geo-alt text-danger me-1"></i> العنوان:</span>
+                <span class="val">{{ selectedOrder()!.deliveryAddress }}</span>
+              </div>
+            }
+            @if (selectedOrder()!.notes) {
+              <div class="detail-item full-width notes-highlight">
+                <span class="lbl"><i class="bi bi-chat-quote me-1 text-warning"></i> ملاحظات العميل:</span>
+                <span class="val">{{ selectedOrder()!.notes }}</span>
+              </div>
+            }
+          </div>
+
+          <!-- Items Preparation & Weighing List -->
+          <div class="prep-items-section mb-3">
+            <h4 class="section-title"><i class="bi bi-basket2-fill me-1 text-primary"></i> أصناف الطلب والتحضير ({{ selectedOrder()!.orderLines.length }})</h4>
+
+            <div class="prep-items-list">
+              @for (line of selectedOrder()!.orderLines; track line.id) {
+                <div class="prep-item-card" [class.is-weight-item]="isLineByWeight(line)">
+                  <!-- Item Info Top -->
+                  <div class="item-header flex-between flex-wrap gap-2">
+                    <div class="item-title-block d-flex align-items-center gap-2 flex-wrap">
+                      <span class="qty-badge-prominent">×{{ (isLineByWeight(line) ? qtyInputs[line.id] : null) || line.quantityUnits }}</span>
+                      <strong class="item-name-prominent">{{ line.productNameAr }}</strong>
+                      @if (line.preparationOptionNameAr) {
+                        <span class="prep-pill"><i class="bi bi-fire me-1"></i> {{ line.preparationOptionNameAr }}</span>
+                      }
+                      @if (isLineByWeight(line)) {
+                        @if (line.actualWeightGrams) {
+                          <span class="weight-tag-badge recorded"><i class="bi bi-check2-circle me-1"></i> وُزِن: {{ line.actualWeightGrams }} جم</span>
+                        } @else {
+                          <span class="weight-tag-badge pending"><i class="bi bi-speedometer2 me-1"></i> مطلوب تحديد الوزن</span>
+                        }
+                      }
+                    </div>
+
+                    <div class="line-price-box">
+                      <strong class="item-price-prominent">{{ (isLineByWeight(line) ? priceInputs[line.id] : null) || line.finalLineTotal || line.estimatedLineTotal }} <small>ج.م</small></strong>
+                    </div>
+                  </div>
+
+                  @if (line.specialInstructions) {
+                    <div class="instructions-box mt-2">
+                      <i class="bi bi-pencil-square me-1 text-warning"></i>
+                      <span><strong>تعليمات التحضير:</strong> {{ line.specialInstructions }}</span>
+                    </div>
+                  }
+
+                  <!-- Bi-directional Weight & Price Input (ONLY for ByWeight items) -->
+                  @if (isLineByWeight(line)) {
+                    <div class="dual-input-container mt-2">
+                      <div class="input-card qty-card">
+                        <label class="input-lbl"><i class="bi bi-123 me-1"></i> العدد (سمكات/قطع):</label>
+                        <div class="input-group-custom">
+                          <input
+                            type="number"
+                            class="form-control"
+                            step="1"
+                            min="1"
+                            placeholder="العدد"
+                            [ngModel]="qtyInputs[line.id]"
+                            (ngModelChange)="onQtyChanged(line, $event)"
+                          />
+                          <span class="addon">سمكة</span>
+                        </div>
+                      </div>
+
+                      <div class="input-card weight-card">
+                        <label class="input-lbl"><i class="bi bi-speedometer2 me-1"></i> الوزن الفعلي (جرام):</label>
+                        <div class="input-group-custom">
+                          <input
+                            type="number"
+                            class="form-control"
+                            step="20"
+                            min="50"
+                            placeholder="الوزن بالجرام"
+                            [ngModel]="weightInputs[line.id]"
+                            (ngModelChange)="onWeightChanged(line, $event)"
+                          />
+                          <span class="addon">جرام</span>
+                        </div>
+                      </div>
+
+                      <div class="sync-icon-block">
+                        <i class="bi bi-arrow-left-right text-primary fs-5"></i>
+                      </div>
+
+                      <div class="input-card price-card">
+                        <label class="input-lbl"><i class="bi bi-cash-coin me-1"></i> إجمالي سعر الصنف (ج.م):</label>
+                        <div class="input-group-custom">
+                          <input
+                            type="number"
+                            class="form-control"
+                            step="1"
+                            min="0"
+                            placeholder="السعر بالجنيه"
+                            [ngModel]="priceInputs[line.id]"
+                            (ngModelChange)="onPriceChanged(line, $event)"
+                          />
+                          <span class="addon">ج.م</span>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Total & Save Weight Button (ONLY IF WEIGHT ITEMS EXIST) -->
+          @if (hasWeightItems(selectedOrder()!)) {
+            <div class="weight-save-box flex-between flex-wrap gap-2 p-3 mb-3">
+              <div>
+                <span class="subtotal-lbl">المجموع المحتسب للأصناف:</span>
+                <strong class="subtotal-val ms-2">{{ getCalculatedOrderSubtotal(selectedOrder()!) }} ج.م</strong>
+                <small class="text-muted d-block">(يتم تحديث الفاتورة وإرسال الإشعار للعميل بالوزن والعدد الفعلي)</small>
+              </div>
+
+              <button class="btn-save-weights" (click)="saveActualWeights(selectedOrder()!)">
+                <i class="bi bi-floppy2-fill me-1"></i>
+                <span>حفظ وتثبيت الأوزان والعدد</span>
+              </button>
+            </div>
+          }
+
+          <!-- Quick Stage Actions -->
+          <div class="stage-actions-box">
+            <span class="actions-title"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> تغيير مرحلة التحضير بالمطبخ:</span>
+            <div class="stage-btns-row">
+              @if (selectedOrder()!.status === 'Placed' || selectedOrder()!.status === 'AwaitingConfirmation') {
+                <button class="btn-stage btn-confirm" (click)="updateStatus(selectedOrder()!, 'Confirmed')">
+                  <i class="bi bi-check2-circle me-1"></i> تأكيد الطلب
+                </button>
+              }
+
+              @if (selectedOrder()!.status === 'Confirmed') {
+                <button class="btn-stage btn-prep" (click)="updateStatus(selectedOrder()!, 'Preparing')">
+                  <i class="bi bi-fire me-1"></i> بدء الطهي والتجهيز
+                </button>
+              }
+
+              @if (selectedOrder()!.status === 'Preparing') {
+                @if (selectedOrder()!.orderType === 'Delivery') {
+                  <button class="btn-stage btn-delivery" (click)="updateStatus(selectedOrder()!, 'OutForDelivery')">
+                    <i class="bi bi-scooter me-1"></i> خرج للتوصيل مع الدليفري
+                  </button>
+                } @else {
+                  <button class="btn-stage btn-pickup" (click)="updateStatus(selectedOrder()!, 'ReadyForPickup')">
+                    <i class="bi bi-bag-check-fill me-1"></i> جاهز لاستلام العميل
+                  </button>
+                }
+              }
+
+              @if (selectedOrder()!.status === 'OutForDelivery' || selectedOrder()!.status === 'ReadyForPickup') {
+                <button class="btn-stage btn-complete" (click)="updateStatus(selectedOrder()!, 'Completed')">
+                  <i class="bi bi-check-all me-1"></i> تم التسليم بنجاح
+                </button>
+              }
+
+              <button class="btn-stage btn-print" (click)="printOrderTicket(selectedOrder()!)">
+                <i class="bi bi-printer me-1"></i> طباعة البون
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

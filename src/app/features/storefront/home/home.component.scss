@@ -1,0 +1,646 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 85px;
+}
+
+/* 1. Hero Promo Seafood Banner (Full Width on Mobile) */
+.hero-banner-section {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+
+  @media (min-width: 769px) {
+    padding: 0 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+.luxury-hero-card {
+  position: relative;
+  width: 100%;
+  height: 215px;
+  border-radius: 0 0 24px 24px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(13, 43, 69, 0.12);
+  background: #0d2b45;
+
+  @media (min-width: 769px) {
+    height: 330px;
+    border-radius: 28px;
+  }
+
+  @media (min-width: 1200px) {
+    height: 360px;
+  }
+
+  .hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center left;
+  }
+
+  .hero-content-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 16px 20px;
+    direction: rtl;
+    background: linear-gradient(270deg, rgba(13, 43, 69, 0.85) 0%, rgba(13, 43, 69, 0.4) 50%, transparent 100%);
+
+    @media (min-width: 769px) {
+      padding: 30px 45px;
+      background: linear-gradient(270deg, rgba(13, 43, 69, 0.88) 0%, rgba(13, 43, 69, 0.45) 45%, transparent 80%);
+    }
+  }
+
+  .hero-texts {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    max-width: 62%;
+    z-index: 2;
+
+    @media (max-width: 380px) {
+      max-width: 70%;
+    }
+
+    @media (min-width: 769px) {
+      max-width: 480px;
+      gap: 10px;
+    }
+  }
+
+  .hero-title {
+    display: flex;
+    flex-direction: column;
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1.25;
+    margin: 0;
+
+    @media (min-width: 576px) {
+      font-size: 1.65rem;
+    }
+
+    @media (min-width: 769px) {
+      font-size: 2.25rem;
+      line-height: 1.2;
+    }
+
+    .white-text {
+      color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .gold-text {
+      color: #f7b731;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  .hero-subtitle {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #e2e8f0;
+    margin: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+
+    @media (min-width: 769px) {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+  }
+
+  .btn-hero-cta {
+    background: linear-gradient(135deg, #ff7b00 0%, #ff4500 100%);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 800;
+    padding: 0.42rem 1.15rem;
+    border-radius: 25px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 4px 14px rgba(255, 69, 0, 0.45);
+    margin-top: 4px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    @media (min-width: 769px) {
+      font-size: 0.95rem;
+      padding: 0.6rem 1.6rem;
+      margin-top: 8px;
+    }
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(255, 69, 0, 0.55);
+    }
+
+    i {
+      font-size: 0.9rem;
+      transition: transform 0.2s ease;
+    }
+
+    &:hover i {
+      transform: translateX(-3px);
+    }
+  }
+}
+
+/* 2. Search & Filter Bar (Overlapping Bottom of Banner) */
+.search-filter-section {
+  margin-top: -22px;
+  position: relative;
+  z-index: 20;
+
+  @media (min-width: 769px) {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: -24px;
+  }
+
+  .search-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-filter-dark {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: #0d2b45;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(13, 43, 69, 0.25);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #17426b;
+      transform: scale(1.05);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .search-capsule {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1.5px solid rgba(0, 0, 0, 0.08);
+    border-radius: 30px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    padding: 0.15rem 0.4rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus-within {
+      border-color: #00875a;
+      box-shadow: 0 4px 14px rgba(0, 135, 90, 0.18);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 14px;
+      color: #64748b;
+      font-size: 1.05rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 0.65rem 2.3rem 0.65rem 1.2rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #0d2b45;
+
+      &::placeholder {
+        color: #94a3b8;
+      }
+    }
+
+    .btn-clear-search {
+      position: absolute;
+      left: 12px;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: #0d2b45;
+      }
+    }
+  }
+}
+
+/* 3. Horizontal Categories Row */
+.categories-row-section {
+  margin-top: 12px;
+
+  .categories-scroll {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    padding-top: 2px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .category-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    flex-shrink: 0;
+    min-width: 66px;
+    transition: transform 0.2s ease;
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    .category-icon-box {
+      width: 66px;
+      height: 66px;
+      border-radius: 18px;
+      background: #ffffff;
+      border: 1.5px solid rgba(0, 0, 0, 0.07);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      overflow: hidden;
+
+      .category-img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+      }
+
+      &.box-all {
+        background: #eef9f2;
+        border-color: #00875a;
+        color: #00875a;
+        font-size: 1.6rem;
+      }
+    }
+
+    .category-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #1e293b;
+      text-align: center;
+      white-space: nowrap;
+      transition: color 0.2s ease;
+    }
+
+    &.active {
+      .category-icon-box {
+        background: #eef9f2;
+        border-color: #00875a;
+        box-shadow: 0 4px 12px rgba(0, 135, 90, 0.18);
+      }
+
+      .category-label {
+        color: #00875a;
+        font-weight: 800;
+      }
+    }
+  }
+}
+
+/* 4. "الأكثر طلباً" Section */
+.popular-section {
+  margin-top: 14px;
+
+  .section-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: #0d2b45;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .see-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #00875a;
+    font-weight: 800;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateX(-3px);
+    }
+
+    i {
+      font-size: 0.82rem;
+    }
+  }
+
+  .products-grid-2col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+
+    @media (min-width: 576px) {
+      gap: 14px;
+    }
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    app-product-card,
+    app-product-card-skeleton {
+      min-width: 0;
+      width: 100%;
+      display: block;
+    }
+  }
+}
+
+/* 5. "أقسام المنيو" Visual Categories Grid */
+.categories-visual-section {
+  margin-top: 24px;
+
+  .section-heading-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .header-titles {
+    display: flex;
+    flex-direction: column;
+
+    .sub-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: #0d2b45;
+      margin: 0;
+    }
+  }
+
+  .see-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #00875a;
+    font-weight: 800;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: translateX(-3px);
+    }
+
+    i {
+      font-size: 0.82rem;
+    }
+  }
+
+  .categories-compact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+
+    @media (min-width: 576px) {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    @media (min-width: 992px) {
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .cat-compact-card {
+    background: #ffffff;
+    border-radius: 18px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 8px rgba(10, 37, 64, 0.04);
+    padding: 12px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(10, 37, 64, 0.08);
+      border-color: rgba(0, 135, 90, 0.25);
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
+
+    .cat-icon-round {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      overflow: hidden;
+
+      .cat-grid-thumb {
+        width: 40px;
+        height: 40px;
+        object-fit: contain;
+      }
+    }
+
+    .cat-card-title {
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #0d2b45;
+      text-align: center;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .cat-card-count {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-align: center;
+    }
+  }
+}
+
+/* 6. Hotline Sticky Call Banner */
+.hotline-card-section {
+  margin-top: 20px;
+
+  .hotline-card {
+    background: linear-gradient(135deg, #0d2b45 0%, #153e63 100%);
+    border-radius: 20px;
+    padding: 18px 24px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px rgba(13, 43, 69, 0.2);
+    gap: 16px;
+
+    .hotline-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      .hotline-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .hotline-icon {
+          color: #f7b731;
+          font-size: 1.35rem;
+          line-height: 1;
+        }
+
+        .hotline-title {
+          font-size: 1.05rem;
+          font-weight: 800;
+          color: #ffffff;
+          margin: 0;
+        }
+      }
+
+      .numbers-str {
+        font-size: 0.88rem;
+        color: #e2e8f0;
+        direction: ltr;
+        text-align: right;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin: 0;
+      }
+    }
+
+    .btn-call-action {
+      background: linear-gradient(135deg, #f4a261 0%, #e76f51 100%);
+      color: #0d2b45;
+      font-weight: 800;
+      font-size: 0.92rem;
+      padding: 0.6rem 1.4rem;
+      border-radius: 30px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(244, 162, 97, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(244, 162, 97, 0.5);
+      }
+
+      &:active {
+        transform: scale(0.97);
+      }
+    }
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 16px 16px;
+      gap: 12px;
+
+      .hotline-texts {
+        align-items: center;
+
+        .hotline-title-row {
+          justify-content: center;
+
+          .hotline-title {
+            font-size: 0.98rem;
+          }
+        }
+
+        .numbers-str {
+          text-align: center;
+          font-size: 0.82rem;
+        }
+      }
+
+      .btn-call-action {
+        width: 100%;
+        justify-content: center;
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  }
+}

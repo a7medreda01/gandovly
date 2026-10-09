@@ -1,0 +1,104 @@
+<div class="notifications-page">
+  <div class="page-header">
+    <div class="header-info">
+      <h1>إعدادات بوابة الإشعارات والواتساب</h1>
+      <p class="subtitle">إدارة البوابة الذاتية المحلية (Local WhatsApp Gateway) وأحداث إشعارات الطلبات التشغيلية</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="saveConfig()" [disabled]="saving()">
+        <span *ngIf="saving()">جاري الحفظ...</span>
+        <span *ngIf="!saving()">💾 حفظ الإعدادات</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="content-grid" *ngIf="!loading()">
+    <!-- WhatsApp Gateway Settings Box -->
+    <div class="card config-card">
+      <div class="card-header">
+        <div class="header-title">
+          <span class="icon">💬</span>
+          <h3>إعدادات خادم بوابة الواتساب الذاتية</h3>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" [(ngModel)]="config.isEnabled">
+          <span class="slider"></span>
+          <span class="toggle-label">{{ config.isEnabled ? 'مفعل' : 'معطل' }}</span>
+        </label>
+      </div>
+
+      <div class="card-body form-body">
+        <div class="alert alert-info">
+          <span>ℹ️</span>
+          <p>ترسل الإشعارات فقط للطلبات التشغيلية (تأكيد الطلب، خروج الطلب للتوصيل، واكتمال التسليم) وللعملاء الذين وافقوا على استلام التحديثات.</p>
+        </div>
+
+        <div class="form-group">
+          <label>عنوان خادم البوابة المحلي (Gateway Base URL)</label>
+          <input type="url" [(ngModel)]="config.baseUrl" class="form-control" placeholder="http://127.0.0.1:3001">
+          <small class="form-text text-muted">يعمل خادم الواتساب محلياً على المنفذ 3001 بصورة آمنة ومغلقة عن الشبكة العامة.</small>
+        </div>
+
+        <div class="triggers-section">
+          <h4>أحداث إرسال إشعارات الطلبات المسموح بها:</h4>
+          <div class="triggers-grid">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="config.sendOnOrderConfirmed">
+              <span>تأكيد الطلب للعميل</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="config.sendOnKitchenWeighed">
+              <span>وزن المطبخ وتثبيت الحساب</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="config.sendOnOutForDelivery">
+              <span>خروج الطلب للتوصيل مع المندوب</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="config.sendOnOrderCompleted">
+              <span>اكتمال تسليم الطلب للعميل</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="config.sendOnOrderCancelled">
+              <span>إلغاء الطلب</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test Notification Box -->
+    <div class="card test-card">
+      <div class="card-header">
+        <div class="header-title">
+          <span class="icon">🚀</span>
+          <h3>إرسال رسالة اختبارية</h3>
+        </div>
+      </div>
+
+      <div class="card-body form-body">
+        <p class="section-desc">اختبر عمل البوابة المباشرة بإرسال رسالة تجريبية إلى رقم هاتف محدد.</p>
+
+        <div class="form-group">
+          <label>رقم هاتف المستلم</label>
+          <input type="tel" [(ngModel)]="testPhone" class="form-control" placeholder="مثال: 01012345678 أو 201012345678">
+        </div>
+
+        <div class="form-group">
+          <label>نص الرسالة الاختبارية</label>
+          <textarea [(ngModel)]="testMessage" class="form-control" rows="4"></textarea>
+        </div>
+
+        <button class="btn btn-secondary w-full" (click)="sendTest()" [disabled]="testing() || !testPhone">
+          <span *ngIf="testing()">جاري الإرسال التجريبي...</span>
+          <span *ngIf="!testing()">📤 إرسال رسالة اختبار عبر الواتساب</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading()">
+    <div class="spinner"></div>
+    <p>جاري تحميل الإعدادات...</p>
+  </div>
+</div>

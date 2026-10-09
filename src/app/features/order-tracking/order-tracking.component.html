@@ -1,0 +1,249 @@
+<div class="tracking-page container">
+  <!-- Page Header -->
+  <div class="tracking-hero text-center">
+    <div class="hero-badge">
+      <i class="bi bi-geo-alt-fill text-accent me-1"></i>
+      <span>المتابعة اللحظية للطلب</span>
+    </div>
+    <h1 class="page-title">تتبع حالة طلبك</h1>
+    <p class="page-subtitle">أدخل رمز التتبع أو راجع تقدم إعداد وطهي وتوصيل وجبتك البحرية</p>
+  </div>
+
+  <!-- Search Card -->
+  <div class="search-capsule-card">
+    <div class="search-form-wrap">
+      <i class="bi bi-search search-lens"></i>
+      <input
+        type="text"
+        class="tracking-input-field"
+        placeholder="أدخل رمز تتبع الطلب (مثال: 9f41acaf...)"
+        [(ngModel)]="searchTokenInput"
+        (keyup.enter)="lookupOrder()"
+      />
+      <button class="btn-track-submit" (click)="lookupOrder()" [disabled]="isLoading() || !searchTokenInput.trim()">
+        @if (isLoading()) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+          <span>جاري البحث...</span>
+        } @else {
+          <i class="bi bi-arrow-left-circle-fill me-1"></i>
+          <span>تتبع الطلب</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="loading-state-card">
+      <div class="skeleton-box" style="height: 320px;"></div>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-feedback-card text-center">
+      <div class="error-icon-box">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <h3 class="error-title">{{ errorMessage() }}</h3>
+      <p class="error-desc">يرجى التأكد من كتابة رمز التتبع المرفق في رسالة الواتساب أو الفاتورة.</p>
+    </div>
+  } @else if (order()) {
+    <!-- Main Order Details Card -->
+    <div class="order-main-card">
+      <!-- Order Header Bar -->
+      <div class="order-header-bar">
+        <div class="order-header-main">
+          <div class="order-badges-wrap">
+            <span class="badge-order-num">
+              <i class="bi bi-receipt me-1"></i> طلب رقم: #{{ order()!.orderNumber }}
+            </span>
+            <span class="badge-order-type">
+              <i class="bi" [class.bi-bicycle]="order()!.orderType === 'Delivery'" [class.bi-shop]="order()!.orderType === 'Pickup'"></i>
+              {{ order()!.orderType === 'Delivery' ? 'توصيل للعنوان' : 'استلام من المطعم' }}
+            </span>
+          </div>
+          <div class="order-timestamp">
+            <i class="bi bi-calendar3 me-1"></i>
+            <span>تاريخ ووقت الطلب: {{ order()!.createdAt | date:'yyyy-MM-dd hh:mm a' }}</span>
+          </div>
+        </div>
+
+        <button class="btn-refresh-status" (click)="lookupOrder()" title="تحديث الحالة اللحظية">
+          <i class="bi bi-arrow-repeat me-1"></i>
+          <span>تحديث الحالة</span>
+        </button>
+      </div>
+
+      <!-- Timeline Component with Pure Bootstrap Icons -->
+      <app-status-timeline
+        [currentStatus]="order()!.status"
+        [orderType]="order()!.orderType"
+      ></app-status-timeline>
+
+      <!-- Customer & Delivery Snapshot Grid -->
+      <div class="info-snapshot-grid">
+        <div class="snapshot-card">
+          <div class="snap-icon-wrap"><i class="bi bi-person-fill"></i></div>
+          <div class="snap-content">
+            <span class="snap-lbl">اسم العميل:</span>
+            <span class="snap-val">{{ order()!.customerName }}</span>
+          </div>
+        </div>
+
+        <div class="snapshot-card">
+          <div class="snap-icon-wrap"><i class="bi bi-telephone-fill"></i></div>
+          <div class="snap-content">
+            <span class="snap-lbl">رقم الهاتف:</span>
+            <span class="snap-val dir-ltr">{{ order()!.customerPhone }}</span>
+          </div>
+        </div>
+
+        @if (order()!.orderType === 'Delivery') {
+          <div class="snapshot-card span-full">
+            <div class="snap-icon-wrap"><i class="bi bi-geo-alt-fill"></i></div>
+            <div class="snap-content">
+              <span class="snap-lbl">عنوان التوصيل والمنطقة:</span>
+              <span class="snap-val">{{ order()!.deliveryAddress || order()!.deliveryZoneName }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Order Items Breakdown -->
+      <div class="items-breakdown-section">
+        <div class="items-header-title">
+          <i class="bi bi-list-stars text-primary me-2"></i>
+          <h3>الأصناف المطلوبة وطرق الطهي</h3>
+        </div>
+
+        <!-- Desktop Table / Mobile Cards -->
+        <div class="table-responsive d-none d-md-block">
+          <table class="lux-items-table">
+            <thead>
+              <tr>
+                <th>الصنف</th>
+                <th>طريقة الطهي / التجهيز</th>
+                <th>الكمية</th>
+                <th>الوزن التقديري</th>
+                <th>الوزن الفعلي</th>
+                <th>السعر</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of order()!.orderLines; track line.id) {
+                <tr>
+                  <td>
+                    <strong class="item-name-txt">{{ line.productNameAr }}</strong>
+                    @if (line.modifiers && line.modifiers.length > 0) {
+                      <div class="item-addons-tags">
+                        @for (m of line.modifiers; track m.id) {
+                          <span class="addon-chip">+ {{ m.modifierOptionNameAr }}</span>
+                        }
+                      </div>
+                    }
+                  </td>
+                  <td><span class="prep-pill">{{ line.preparationOptionNameAr || 'عادي' }}</span></td>
+                  <td><strong class="qty-txt">{{ line.quantityUnits }}</strong></td>
+                  <td>
+                    @if (line.estimatedWeightGrams) {
+                      <span>{{ line.estimatedWeightGrams }} جرام</span>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td>
+                    @if (line.actualWeightGrams) {
+                      <span class="actual-weight-pill">
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ line.actualWeightGrams }} جرام
+                      </span>
+                    } @else {
+                      <span class="pending-weight-pill">
+                        <i class="bi bi-hourglass-split me-1"></i> قيد الوزن
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <strong class="price-txt">{{ (line.finalLineTotal || line.estimatedLineTotal) }} ج.م</strong>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile Items Card List -->
+        <div class="mobile-items-list d-md-none">
+          @for (line of order()!.orderLines; track line.id) {
+            <div class="mobile-item-card">
+              <div class="m-item-head flex-between">
+                <span class="m-item-title">{{ line.productNameAr }}</span>
+                <span class="m-item-price">{{ (line.finalLineTotal || line.estimatedLineTotal) }} ج.م</span>
+              </div>
+
+              <div class="m-item-meta">
+                <span class="m-meta-pill"><i class="bi bi-fire text-danger me-1"></i> {{ line.preparationOptionNameAr || 'عادي' }}</span>
+                <span class="m-meta-pill"><i class="bi bi-123 me-1"></i> الكمية: {{ line.quantityUnits }}</span>
+              </div>
+
+              @if (line.modifiers && line.modifiers.length > 0) {
+                <div class="item-addons-tags mt-1">
+                  @for (m of line.modifiers; track m.id) {
+                    <span class="addon-chip">+ {{ m.modifierOptionNameAr }}</span>
+                  }
+                </div>
+              }
+
+              @if (line.estimatedWeightGrams || line.actualWeightGrams) {
+                <div class="m-weight-row flex-between mt-2">
+                  <span class="text-muted fs-small">تقديري: {{ line.estimatedWeightGrams || '-' }} جرام</span>
+                  @if (line.actualWeightGrams) {
+                    <span class="actual-weight-pill">
+                      <i class="bi bi-check-circle-fill me-1"></i> فعلي: {{ line.actualWeightGrams }} جرام
+                    </span>
+                  } @else {
+                    <span class="pending-weight-pill">
+                      <i class="bi bi-hourglass-split me-1"></i> قيد الوزن بالمطبخ
+                    </span>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Financial Totals Box -->
+      <div class="financial-summary-card">
+        <div class="payment-method-box">
+          <div class="pay-icon-circle"><i class="bi bi-wallet2"></i></div>
+          <div class="pay-info">
+            <span class="pay-lbl">طريقة السداد:</span>
+            <span class="pay-val">الدفع عند الاستلام (كاش / بطاقة)</span>
+          </div>
+        </div>
+
+        <div class="amounts-column">
+          @if (hasWeightedItems()) {
+            <div class="amt-row flex-between">
+              <span class="amt-lbl">الإجمالي التقديري:</span>
+              <span class="amt-val">{{ order()!.estimatedTotal }} ج.م</span>
+            </div>
+            @if (order()!.finalTotal) {
+              <div class="amt-row flex-between final-row">
+                <span class="amt-lbl-main">الإجمالي النهائي الفعلي:</span>
+                <span class="amt-val-main">{{ order()!.finalTotal }} ج.م</span>
+              </div>
+            } @else {
+              <div class="amt-row flex-between pending-row">
+                <span class="amt-lbl">الإجمالي النهائي:</span>
+                <span class="pending-note"><i class="bi bi-info-circle me-1"></i> يُعتمد بعد الوزن الفعلي في المطبخ</span>
+              </div>
+            }
+          } @else {
+            <div class="amt-row flex-between final-row">
+              <span class="amt-lbl-main">إجمالي الطلب:</span>
+              <span class="amt-val-main">{{ order()!.finalTotal || order()!.estimatedTotal }} ج.م</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

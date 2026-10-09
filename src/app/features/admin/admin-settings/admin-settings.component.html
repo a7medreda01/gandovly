@@ -1,0 +1,514 @@
+<div class="settings-page">
+  <div class="page-title-row flex-between">
+    <div>
+      <h1 class="page-heading">إعدادات المتجر والهوية ⚙️</h1>
+      <p class="page-sub">إدارة العروض الترويجية، الخصومات، الهوية البصرية، سياسات العمل وبيانات التواصل</p>
+    </div>
+  </div>
+
+  <!-- Settings Navigation Tabs -->
+  <div class="settings-tabs-bar">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'discounts'"
+      (click)="activeTab.set('discounts')"
+    >
+      <i class="bi bi-tag-fill me-2"></i>
+      <span>العروض والخصومات والتوصيل 🎁</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'branding'"
+      (click)="activeTab.set('branding')"
+    >
+      <i class="bi bi-palette-fill me-2"></i>
+      <span>الهوية البصرية والميديا 🎨</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'policies'"
+      (click)="activeTab.set('policies')"
+    >
+      <i class="bi bi-shield-check me-2"></i>
+      <span>سياسات العمل والطلب ⚖️</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'info'"
+      (click)="activeTab.set('info')"
+    >
+      <i class="bi bi-telephone-fill me-2"></i>
+      <span>بيانات المطعم والاتصال 📞</span>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading-state
+      mode="spinner"
+      title="جاري جلب إعدادات المتجر والهوية..."
+      subtitle="لحظات ويتم تحميل الخصومات، سياسات العمل، وبيانات التواصل"
+      icon="bi-gear-wide-connected"
+      minHeight="350px"
+    ></app-loading-state>
+  } @else if (settings()) {
+
+    <!-- TAB 1: Discounts & Promotions -->
+    @if (activeTab() === 'discounts') {
+      <div class="tab-content animate-fade-in">
+        <div class="settings-card glass-panel highlight-border">
+          <div class="flex-between align-center mb-3">
+            <div>
+              <h3 class="card-title text-accent m-0">
+                <i class="bi bi-gift-fill me-2"></i> إدارة العروض والخصومات والتوصيل المجاني
+              </h3>
+              <p class="card-subtitle text-muted small mt-1">تُطبق الخصومات والعروض تلقائياً للعملاء أثناء إتمام الطلب وتظهر في ملخص الفاتورة التقديرية</p>
+            </div>
+            <span class="badge bg-primary px-3 py-2">تحكم فوري</span>
+          </div>
+
+          <!-- Free Delivery Rule -->
+          <div class="discount-rule-box p-3 mb-3">
+            <div class="flex-between align-center mb-2">
+              <label class="checkbox-label font-bold text-success d-flex align-items-center cursor-pointer m-0">
+                <input type="checkbox" [(ngModel)]="settings()!.isFreeDeliveryEnabled" />
+                <span class="ms-2">تفعيل ميزة التوصيل المجاني 🛵</span>
+              </label>
+              @if (settings()!.isFreeDeliveryEnabled) {
+                <span class="badge bg-success">نشط الآن</span>
+              } @else {
+                <span class="badge bg-secondary">معطل</span>
+              }
+            </div>
+            @if (settings()!.isFreeDeliveryEnabled) {
+              <div class="form-group mb-0 mt-3 animate-fade-in">
+                <label class="small text-muted font-bold">الحد الأدنى لقيمة الطلب للحصول على توصيل مجاني (ج.م) - اتركها 0 للتوصيل مجاناً لأي طلب:</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" placeholder="مثال: 300" [(ngModel)]="settings()!.freeDeliveryMinOrderAmount" />
+                  <span class="unit-text">ج.م</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Tiered Threshold Discount Rule -->
+          <div class="discount-rule-box p-3 mb-3">
+            <div class="flex-between align-center mb-2">
+              <label class="checkbox-label font-bold text-primary d-flex align-items-center cursor-pointer m-0">
+                <input type="checkbox" [(ngModel)]="settings()!.isTieredDiscountEnabled" />
+                <span class="ms-2">خصم نسبة مئوية عند وصول الطلب لمبلغ معين 💰</span>
+              </label>
+              @if (settings()!.isTieredDiscountEnabled) {
+                <span class="badge bg-primary">نشط الآن</span>
+              } @else {
+                <span class="badge bg-secondary">معطل</span>
+              }
+            </div>
+            @if (settings()!.isTieredDiscountEnabled) {
+              <div class="form-row mt-3 animate-fade-in">
+                <div class="form-group flex-1 mb-0">
+                  <label class="small text-muted font-bold">الحد الأدنى لقيمة الطلب لتفعيل الخصم (ج.م):</label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" placeholder="مثال: 500" [(ngModel)]="settings()!.tieredDiscountThresholdAmount" />
+                    <span class="unit-text">ج.م</span>
+                  </div>
+                </div>
+                <div class="form-group flex-1 mb-0">
+                  <label class="small text-muted font-bold">نسبة الخصم المئوية (%):</label>
+                  <div class="input-with-unit">
+                    <input type="number" class="form-control" min="1" max="100" placeholder="مثال: 10" [(ngModel)]="settings()!.tieredDiscountPercentage" />
+                    <span class="unit-text">%</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Flat Discount on All Orders -->
+          <div class="discount-rule-box p-3 mb-3">
+            <div class="flex-between align-center mb-2">
+              <label class="checkbox-label font-bold text-warning d-flex align-items-center cursor-pointer m-0">
+                <input type="checkbox" [(ngModel)]="settings()!.isFlatDiscountEnabled" />
+                <span class="ms-2">خصم نسبة مئوية عامة على أي طلب 🏷️</span>
+              </label>
+              @if (settings()!.isFlatDiscountEnabled) {
+                <span class="badge bg-warning text-dark">نشط الآن</span>
+              } @else {
+                <span class="badge bg-secondary">معطل</span>
+              }
+            </div>
+            @if (settings()!.isFlatDiscountEnabled) {
+              <div class="form-group mb-0 mt-3 animate-fade-in">
+                <label class="small text-muted font-bold">نسبة الخصم العام المئوية (%):</label>
+                <div class="input-with-unit">
+                  <input type="number" class="form-control" min="1" max="100" placeholder="مثال: 5" [(ngModel)]="settings()!.flatDiscountPercentage" />
+                  <span class="unit-text">%</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Active Promotion Banner Text -->
+          <div class="form-group mb-0">
+            <label class="font-bold mb-1">
+              <i class="bi bi-megaphone-fill text-danger me-1"></i> شريط الإعلان الترويجي العلوي (Active Promotion Banner):
+            </label>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="مثال: خصم 10% على كل الأوردرات فوق 500 ج.م لفترة محدودة! 🔥"
+              [(ngModel)]="settings()!.activePromotionBanner"
+            />
+            <small class="text-muted mt-1 d-block">يظهر هذا النص كشريط متحرك أو بارز في أعلى المتجر للعملاء لجذب الانتباه للعروض.</small>
+          </div>
+        </div>
+
+        <!-- Separate Save Button for Discounts -->
+        <div class="tab-save-footer mt-4 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-check-circle-fill text-success me-1"></i>
+            يتم تطبيق العروض والخصومات فوراً في حسابات السلة والدفع للعملاء.
+          </div>
+          <button class="btn-primary" (click)="saveSettings('discounts')" [disabled]="isSaving()">
+            @if (isSaving()) {
+              <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
+            } @else {
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ إعدادات العروض والخصومات
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 2: Branding & Media & Colors -->
+    @if (activeTab() === 'branding') {
+      <div class="tab-content animate-fade-in">
+        <div class="row g-4">
+          <!-- Logo & Banners -->
+          <div class="col-12 col-lg-7">
+            <div class="settings-card glass-panel h-100">
+              <h3 class="card-title"><i class="bi bi-images text-primary me-2"></i> لوجو المطعم والبانرات الرئيسية</h3>
+
+              <!-- Restaurant Logo Section -->
+              <div class="media-upload-section">
+                <label class="form-label font-bold">لوجو المطعم (Logo):</label>
+                <div class="logo-preview-row flex-center">
+                  <div class="logo-box-preview">
+                    @if (settings()!.logoUrl) {
+                      <img [src]="settings()!.logoUrl | imageUrl:'category'" alt="Restaurant Logo" class="preview-logo-img" />
+                    } @else {
+                      <div class="empty-logo-box">
+                        <i class="bi bi-water text-primary fs-2"></i>
+                        <span>لا يوجد شعار مخصص</span>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="upload-controls-col">
+                    <input
+                      #logoFileInput
+                      type="file"
+                      accept="image/*"
+                      (change)="onLogoUpload($event)"
+                      style="display: none;"
+                    />
+                    <button type="button" class="btn-outline-upload" (click)="logoFileInput.click()" [disabled]="isUploading()">
+                      <i class="bi bi-cloud-arrow-up-fill me-1"></i> رفع لوجو جديد
+                    </button>
+                    @if (settings()!.logoUrl) {
+                      <button type="button" class="btn-remove-link text-danger" (click)="removeLogo()">
+                        <i class="bi bi-trash me-1"></i> حذف اللوجو واستخدام الأيقونة
+                      </button>
+                    }
+                    <div class="input-url-wrap mt-2">
+                      <span class="url-label">أو أدخل رابط اللوجو مباشرة:</span>
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        placeholder="/uploads/logo.png أو رابط خارجي"
+                        [(ngModel)]="settings()!.logoUrl"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="section-divider" />
+
+              <!-- Main Desktop Hero Banner Section -->
+              <div class="media-upload-section">
+                <label class="form-label font-bold">بانر الصفحة الرئيسية (Desktop Hero Banner):</label>
+                <div class="banner-preview-box">
+                  <img
+                    [src]="(settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
+                    alt="Main Hero Banner"
+                    class="preview-banner-img"
+                  />
+                  <div class="banner-overlay-tag">معاينة البانر النشط</div>
+                </div>
+
+                <div class="upload-controls-row flex-between mt-2">
+                  <input
+                    #bannerFileInput
+                    type="file"
+                    accept="image/*"
+                    (change)="onBannerDesktopUpload($event)"
+                    style="display: none;"
+                  />
+                  <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
+                    <i class="bi bi-image-fill me-1"></i> تغيير صورة البانر
+                  </button>
+                  @if (settings()!.heroBannerDesktopUrl) {
+                    <button type="button" class="btn-remove-link text-danger" (click)="removeBannerDesktop()">
+                      <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة البانر الافتراضي
+                    </button>
+                  }
+                </div>
+                <div class="input-url-wrap mt-2">
+                  <span class="url-label">رابط صورة البانر:</span>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="/uploads/banners/hero-desktop.jpg"
+                    [(ngModel)]="settings()!.heroBannerDesktopUrl"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Color Palette -->
+          <div class="col-12 col-lg-5">
+            <div class="settings-card glass-panel h-100">
+              <h3 class="card-title"><i class="bi bi-palette-fill text-primary me-2"></i> الألوان والهوية البصرية</h3>
+              <p class="text-muted small mb-3">تُطبق الألوان فوريًا على أزرار وشاشات الموقع بالكامل فور الحفظ</p>
+
+              <div class="colors-grid">
+                <div class="color-item">
+                  <label for="colPrimary">اللون الأساسي (Primary)</label>
+                  <div class="color-picker-row flex-center">
+                    <input id="colPrimary" type="color" [(ngModel)]="settings()!.primaryColor" class="color-input" />
+                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.primaryColor" />
+                  </div>
+                </div>
+
+                <div class="color-item">
+                  <label for="colSecondary">اللون الثانوي (Secondary)</label>
+                  <div class="color-picker-row flex-center">
+                    <input id="colSecondary" type="color" [(ngModel)]="settings()!.secondaryColor" class="color-input" />
+                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.secondaryColor" />
+                  </div>
+                </div>
+
+                <div class="color-item">
+                  <label for="colAccent">لون التمييز والأزرار (Accent)</label>
+                  <div class="color-picker-row flex-center">
+                    <input id="colAccent" type="color" [(ngModel)]="settings()!.accentColor" class="color-input" />
+                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.accentColor" />
+                  </div>
+                </div>
+
+                <div class="color-item">
+                  <label for="colSurface">لون الخلفية (Surface)</label>
+                  <div class="color-picker-row flex-center">
+                    <input id="colSurface" type="color" [(ngModel)]="settings()!.surfaceColor" class="color-input" />
+                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.surfaceColor" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separate Save Button for Branding -->
+        <div class="tab-save-footer mt-4 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-info-circle me-1"></i> يتم تطبيق الشعار والألوان فوريًا على كافة صفحات المتجر.
+          </div>
+          <button class="btn-primary" (click)="saveSettings('branding')" [disabled]="isSaving() || isUploading()">
+            @if (isSaving()) {
+              <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
+            } @else {
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ الهوية البصرية والميديا
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 3: Operating Policies & Weights -->
+    @if (activeTab() === 'policies') {
+      <div class="tab-content animate-fade-in">
+        <div class="settings-card glass-panel">
+          <h3 class="card-title"><i class="bi bi-shield-check text-primary me-2"></i> سياسات العمل والطلب والوزن التقديري</h3>
+
+          <div class="form-group mb-4">
+            <div class="store-status-toggle-box p-3 rounded d-flex align-items-center justify-content-between">
+              <div>
+                <strong class="d-block mb-1">حالة استقبال الطلبات أونلاين:</strong>
+                <small class="text-muted">عند الإيقاف، لن يتمكن العملاء من إرسال طلبات جديدة وسيظهر لهم رسالة التوقف المؤقت.</small>
+              </div>
+              <button
+                type="button"
+                class="badge-toggle"
+                [class.available]="settings()!.isOrdersOpen"
+                [class.unavailable]="!settings()!.isOrdersOpen"
+                (click)="settings()!.isOrdersOpen = !settings()!.isOrdersOpen"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="settings()!.isOrdersOpen" [class.bi-x-circle-fill]="!settings()!.isOrdersOpen"></i>
+                <span>{{ settings()!.isOrdersOpen ? 'المتجر مفتوح لاستقبال الطلبات' : 'المتجر مغلق حالياً' }}</span>
+              </button>
+            </div>
+          </div>
+
+          @if (!settings()!.isOrdersOpen) {
+            <div class="form-group animate-fade-in">
+              <label for="setPauseMsg">رسالة التوقف المؤقت للعملاء:</label>
+              <input
+                id="setPauseMsg"
+                type="text"
+                class="form-control"
+                placeholder="مثال: نعتذر، نستقبل الطلبات يومياً من 11 صباحاً حتى 11 مساءً."
+                [(ngModel)]="settings()!.pauseMessage"
+              />
+            </div>
+          }
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setMinOrd">الحد الأدنى لقيمة الطلب (ج.م) *</label>
+              <div class="input-with-unit">
+                <input id="setMinOrd" type="number" class="form-control" [(ngModel)]="settings()!.minimumOrderAmount" />
+                <span class="unit-text">ج.م</span>
+              </div>
+              <small class="text-muted">أقل قيمة طلب يُسمح للعميل بإرسالها للمطعم.</small>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="setDefFee">رسوم التوصيل الافتراضية (ج.م) *</label>
+              <div class="input-with-unit">
+                <input id="setDefFee" type="number" class="form-control" [(ngModel)]="settings()!.defaultDeliveryFee" />
+                <span class="unit-text">ج.م</span>
+              </div>
+              <small class="text-muted">تُطبق للمناطق التي لم يُحدد لها رسوم خاصة.</small>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="setDiscl">نص إخلاء مسؤولية الوزن التقديري للأسماك الطازجة:</label>
+            <textarea
+              id="setDiscl"
+              class="form-control"
+              rows="3"
+              placeholder="نظراً لطبيعة الأسماك الطازجة، يعتبر الوزن والسعر تقديريين..."
+              [(ngModel)]="settings()!.estimatedWeightDisclaimer"
+            ></textarea>
+            <small class="text-muted">يظهر هذا النص التوضيحي للعملاء في السلة وصفحة الدفع لتفادي أي خلاف بالوزن.</small>
+          </div>
+        </div>
+
+        <!-- Separate Save Button for Policies -->
+        <div class="tab-save-footer mt-4 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-info-circle me-1"></i> سيتم تطبيق سياسات الحد الأدنى وحالة المتجر فورياً.
+          </div>
+          <button class="btn-primary" (click)="saveSettings('policies')" [disabled]="isSaving()">
+            @if (isSaving()) {
+              <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
+            } @else {
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ سياسات العمل والطلب
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- TAB 4: Restaurant Info & Contacts -->
+    @if (activeTab() === 'info') {
+      <div class="tab-content animate-fade-in">
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="settings-card glass-panel h-100">
+              <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المطعم الأساسية</h3>
+
+              <div class="form-group">
+                <label for="setRestName">اسم المطعم *</label>
+                <input id="setRestName" type="text" class="form-control" [(ngModel)]="settings()!.restaurantName" />
+              </div>
+
+              <div class="form-group">
+                <label for="setTagline">الشعار اللفظي (Tagline)</label>
+                <input id="setTagline" type="text" class="form-control" placeholder="مثال: طازة من البحر لسفرتك 🐟" [(ngModel)]="settings()!.tagline" />
+              </div>
+
+              <div class="form-group mb-0">
+                <label for="setDesc">وصف تعريفي للمطعم</label>
+                <textarea id="setDesc" class="form-control" rows="4" placeholder="أشهى المأكولات البحرية والأسماك الطازجة يومياً..." [(ngModel)]="settings()!.description"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="settings-card glass-panel h-100">
+              <h3 class="card-title"><i class="bi bi-telephone-fill text-primary me-2"></i> وسائل الاتصال والعنوان</h3>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="setPhone">رقم الهاتف للاتصال *</label>
+                  <input id="setPhone" type="tel" class="form-control" [(ngModel)]="settings()!.phone" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="setWa">رقم واتساب للطلبات *</label>
+                  <input id="setWa" type="tel" class="form-control" [(ngModel)]="settings()!.whatsapp" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="setCity">المدينة / المحافظة *</label>
+                  <input id="setCity" type="text" class="form-control" [(ngModel)]="settings()!.city" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="setAddr">العنوان بالتفصيل *</label>
+                  <input id="setAddr" type="text" class="form-control" [(ngModel)]="settings()!.address" />
+                </div>
+              </div>
+
+              <div class="form-row mb-0">
+                <div class="form-group flex-1 mb-0">
+                  <label for="setFb">رابط صفحة فيسبوك (اختياري)</label>
+                  <input id="setFb" type="url" class="form-control" placeholder="https://facebook.com/..." [(ngModel)]="settings()!.facebookUrl" />
+                </div>
+                <div class="form-group flex-1 mb-0">
+                  <label for="setInsta">رابط إنستغرام (اختياري)</label>
+                  <input id="setInsta" type="url" class="form-control" placeholder="https://instagram.com/..." [(ngModel)]="settings()!.instagramUrl" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Separate Save Button for Info -->
+        <div class="tab-save-footer mt-4 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-info-circle me-1"></i> تظهر بيانات الاتصال في تذييل الموقع وفي إشعارات واتساب للعملاء.
+          </div>
+          <button class="btn-primary" (click)="saveSettings('info')" [disabled]="isSaving()">
+            @if (isSaving()) {
+              <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
+            } @else {
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ بيانات المطعم والاتصال
+            }
+          </button>
+        </div>
+      </div>
+    }
+
+  }
+</div>

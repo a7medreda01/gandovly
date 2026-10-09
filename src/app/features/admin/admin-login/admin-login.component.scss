@@ -1,0 +1,46 @@
+.admin-login-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #184e77 0%, var(--primary-dark) 100%);
+  padding: 1.5rem;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 3rem 2rem;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+
+  .icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--primary-color);
+  }
+
+  p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 1.75rem;
+  }
+}
+
+.btn-block {
+  width: 100%;
+  padding: 0.85rem;
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.hint-credentials {
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  background: #f8fafd;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+}

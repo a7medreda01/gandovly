@@ -1,0 +1,145 @@
+.product-card-skeleton {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(10, 37, 64, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Base Shimmer Effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 0%,
+    #e2e8f0 40%,
+    #ffffff 55%,
+    #e2e8f0 70%,
+    #f1f5f9 100%
+  );
+  background-size: 300% 100%;
+  animation: cardSkeletonShimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes cardSkeletonShimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Media Area matching ProductCard exactly */
+.skeleton-media {
+  position: relative;
+  height: 145px;
+  width: 100%;
+  overflow: hidden;
+
+  @media (max-width: 576px) {
+    height: 120px;
+  }
+}
+
+.skeleton-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 54px;
+  height: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.skeleton-circle-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.skeleton-plus-btn {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* Body Area */
+.skeleton-body {
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  background: #ffffff;
+  min-width: 0;
+  box-sizing: border-box;
+
+  @media (max-width: 576px) {
+    padding: 0.5rem 0.55rem;
+  }
+}
+
+.skeleton-title {
+  height: 14px;
+  width: 78%;
+  border-radius: 6px;
+
+  @media (max-width: 576px) {
+    height: 12px;
+  }
+}
+
+.skeleton-subtitle {
+  height: 9px;
+  width: 48%;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+}
+
+/* Pricing Row */
+.skeleton-pricing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 0.2rem;
+}
+
+.skeleton-price {
+  height: 18px;
+  width: 64px;
+  border-radius: 6px;
+
+  @media (max-width: 576px) {
+    height: 15px;
+    width: 52px;
+  }
+}
+
+.skeleton-cart-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  flex-shrink: 0;
+
+  @media (max-width: 576px) {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+  }
+}

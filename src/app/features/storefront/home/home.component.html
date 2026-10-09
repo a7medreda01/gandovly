@@ -1,0 +1,158 @@
+<div class="home-container">
+  <!-- 1. Hero Promo Seafood Banner (Full Width on Mobile) -->
+  <section class="hero-banner-section">
+    <div class="luxury-hero-card">
+      <img
+        [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl || '/uploads/banners/hero-desktop.jpg') | imageUrl:'banner'"
+        alt="أشهى المأكولات البحرية الطازجة - أسماك جندوفلي" class="hero-bg-img" />
+      <div class="hero-content-overlay">
+        <div class="hero-texts">
+          <h1 class="hero-title">
+            <span class="white-text">أشهى المأكولات</span>
+            <span class="gold-text">البحرية الطازجة</span>
+          </h1>
+          <p class="hero-subtitle">من البحر لطبقك مباشرة</p>
+          <a routerLink="/menu" class="btn-hero-cta">
+            <span>اطلب الآن</span>
+            <i class="bi bi-arrow-left"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Search & Filter Bar (Overlapping Bottom of Banner) -->
+  <section class="search-filter-section container">
+    <div class="search-filter-row">
+      <!-- Dark Filter Button on Right (1st child in RTL) -->
+      <a routerLink="/menu" class="btn-filter-dark" title="تصفية المنيو">
+        <i class="bi bi-sliders"></i>
+      </a>
+
+      <!-- Search Capsule on Left (2nd child in RTL) -->
+      <div class="search-capsule">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text" class="search-input" placeholder="ابحث عن وجبة أو صنف..." [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)" />
+        @if (searchQuery()) {
+        <button type="button" class="btn-clear-search" (click)="searchQuery.set('')">
+          <i class="bi bi-x-circle-fill"></i>
+        </button>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Horizontal Categories Row -->
+  <section class="categories-row-section container">
+    <div class="categories-scroll">
+      <!-- "الكل" Card (Selected by default) -->
+      <div class="category-item" [class.active]="selectedCategoryId() === null" (click)="selectCategory(null)">
+        <div class="category-icon-box box-all">
+          <i class="bi bi-grid-fill"></i>
+        </div>
+        <span class="category-label">الكل</span>
+      </div>
+
+      <!-- Categories from Backend API -->
+      @for (cat of catalogService.categories(); track cat.id) {
+      <div class="category-item" [class.active]="selectedCategoryId() === cat.id" (click)="selectCategory(cat.id)">
+        <div class="category-icon-box">
+          @if (cat.imageUrl) {
+          <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="cat.nameAr" class="category-img" />
+          } @else {
+          <i class="bi bi-water text-primary"></i>
+          }
+        </div>
+        <span class="category-label">{{ cat.nameAr }}</span>
+      </div>
+      }
+    </div>
+  </section>
+
+  <!-- 4. "الأكثر طلباً" Section (2-Column Grid Matching Screenshot) -->
+  <section class="popular-section container">
+    <div class="section-heading-row">
+      <h2 class="section-title">الأكثر طلباً</h2>
+      <a routerLink="/menu" class="see-all-btn">
+        <span>عرض الكل</span>
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </div>
+
+    @if (catalogService.isLoading()) {
+    <div class="products-grid-2col">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+      <app-product-card-skeleton></app-product-card-skeleton>
+      }
+    </div>
+    } @else if (filteredProducts().length > 0) {
+    <div class="products-grid-2col">
+      @for (prod of featuredProducts; track prod.id) {
+      <app-product-card [product]="prod" (selectProduct)="openProductModal($event)"></app-product-card>
+      }
+    </div>
+    } @else {
+    <div class="empty-state text-center py-5">
+      <i class="bi bi-search fs-1 text-muted mb-2"></i>
+      <p class="fw-bold">لم نجد أصناف تطابق بحثك</p>
+      <button class="btn btn-sm btn-outline-primary mt-2" (click)="searchQuery.set(''); selectCategory(null)">
+        عرض كل المنيو
+      </button>
+    </div>
+    }
+  </section>
+
+  <!-- 5. "أقسام المنيو" Visual Categories Grid (Restored as requested) -->
+  <section class="categories-visual-section container">
+    <div class="section-heading-row">
+      <div class="header-titles">
+        <span class="sub-label">تصفح القائمة</span>
+        <h2 class="section-title">أقسام المنيو</h2>
+      </div>
+      <a routerLink="/menu" class="see-all-btn">
+        <span>كل الأقسام</span>
+        <i class="bi bi-chevron-left"></i>
+      </a>
+    </div>
+
+    <div class="categories-compact-grid">
+      @for (cat of catalogService.categories(); track cat.id) {
+      <a [routerLink]="['/menu']" [queryParams]="{category: cat.id}" class="cat-compact-card">
+        <div class="cat-icon-round">
+          @if (cat.imageUrl) {
+          <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="cat.nameAr" class="cat-grid-thumb" />
+          } @else {
+          <i class="bi bi-grid-fill text-secondary"></i>
+          }
+        </div>
+        <span class="cat-card-title">{{ cat.nameAr }}</span>
+        <span class="cat-card-count">{{ cat.products.length }} صنف</span>
+      </a>
+      }
+    </div>
+  </section>
+
+  <!-- 6. Hotline Sticky Call Banner -->
+  <section class="hotline-card-section container mb-4">
+    <div class="hotline-card">
+      <div class="hotline-texts">
+        <div class="hotline-title-row">
+          <i class="bi bi-headset hotline-icon"></i>
+          <h4 class="hotline-title">الخط الساخن والدليفري السريع</h4>
+        </div>
+        <p class="numbers-str">{{ settingsService.settings().phone || '01034264003' }} - 01010415774 - 01151161690</p>
+      </div>
+      <a [href]="'tel:' + (settingsService.settings().phone || '01034264003')" class="btn-call-action">
+        <i class="bi bi-telephone-outbound-fill"></i>
+        <span>اتصل الآن</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Product Detail Modal -->
+  @if (selectedProductForModal()) {
+  <app-product-detail-modal [product]="selectedProductForModal()!"
+    (closeModal)="closeProductModal()"></app-product-detail-modal>
+  }
+</div>

@@ -1,0 +1,809 @@
+<div class="catalog-page">
+  <div class="page-title-row flex-between">
+    <div>
+      <h1 class="page-heading"><i class="bi bi-grid-fill text-primary me-2"></i> إدارة قائمة الطعام والأسماك</h1>
+      <p class="page-sub">إدارة أسعار الكيلو، متوسط أوزان الأسماك، التوفر الفوري، وطرق الطهي والإضافات</p>
+    </div>
+    <div class="header-actions">
+      @if (activeTab === 'products') {
+        <button class="btn-primary" (click)="openNewProductModal()">
+          <i class="bi bi-plus-circle-fill me-1"></i>
+          <span>إضافة صنف جديد</span>
+        </button>
+      } @else if (activeTab === 'categories') {
+        <button class="btn-primary" (click)="openNewCategoryModal()">
+          <i class="bi bi-folder-plus me-1"></i>
+          <span>إضافة قسم جديد</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="catalog-tabs-bar">
+    <button class="tab-nav-btn" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
+      <i class="bi bi-grid-3x3-gap-fill me-1"></i>
+      <span>الأصناف والوجبات</span>
+      <span class="count-pill">{{ products().length }}</span>
+    </button>
+    <button class="tab-nav-btn" [class.active]="activeTab === 'categories'" (click)="activeTab = 'categories'">
+      <i class="bi bi-folder-fill me-1"></i>
+      <span>أقسام المنيو</span>
+      <span class="count-pill">{{ categories().length }}</span>
+    </button>
+    <button class="tab-nav-btn" [class.active]="activeTab === 'cooking-methods'" (click)="activeTab = 'cooking-methods'">
+      <i class="bi bi-fire me-1 text-danger"></i>
+      <span>طرق الطهي والتحضير</span>
+      <span class="count-pill">{{ prepGroups().length }}</span>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <app-loading-state
+      mode="cards"
+      title="جاري تحميل قائمة الأسماك والوجبات..."
+      subtitle="لحظات ويتم جلب كافة الأصناف والأسعار المحدثة"
+      [count]="6"
+    ></app-loading-state>
+  } @else {
+    <!-- Tab 1: Products List Table & Mobile Cards -->
+    @if (activeTab === 'products') {
+    <div class="catalog-card glass-panel">
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">الصنف</th>
+              <th style="width: 15%;">القسم</th>
+              <th style="width: 14%;">نوع التسعير</th>
+              <th style="width: 14%;">سعر الكيلو / الوحدة</th>
+              <th style="width: 12%;">متوسط وزن السمكة</th>
+              <th style="width: 10%;">حالة التوفر</th>
+              <th style="width: 10%; text-align: center;">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (prod of products(); track prod.id) {
+              <tr>
+                <td>
+                  <div class="prod-cell-with-img">
+                    @if (prod.imageUrl) {
+                      <img [src]="prod.imageUrl | imageUrl:'product'" [alt]="prod.nameAr" class="prod-table-thumb" />
+                    } @else {
+                      <div class="prod-table-thumb-placeholder"><i class="bi bi-image"></i></div>
+                    }
+                    <div class="prod-cell">
+                      <span class="prod-name-ar">{{ prod.nameAr }}</span>
+                      @if (prod.nameEn) { <small class="text-muted">{{ prod.nameEn }}</small> }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="cat-pill">{{ prod.categoryNameAr || 'عام' }}</span>
+                </td>
+                <td>
+                  @if (prod.pricingType === 'ByWeight') {
+                    <span class="pricing-pill weight"><i class="bi bi-speedometer2 me-1"></i> بالوزن</span>
+                  } @else {
+                    <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> طبق ثابت</span>
+                  }
+                </td>
+                <td>
+                  @if (prod.pricingType === 'ByWeight') {
+                    <strong class="price-text">{{ prod.pricePerKg || prod.pricePerUnit }} ج.م <span class="unit-text">/ كجم</span></strong>
+                  } @else {
+                    <strong class="price-text">{{ prod.pricePerUnit }} ج.م</strong>
+                  }
+                </td>
+                <td>
+                  @if (prod.averageUnitWeightGrams) {
+                    <span class="weight-text">{{ prod.averageUnitWeightGrams }} جم</span>
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="badge-toggle"
+                    [class.available]="prod.isAvailable"
+                    [class.unavailable]="!prod.isAvailable"
+                    (click)="toggleAvailability(prod)"
+                  >
+                    <i class="bi" [class.bi-check-circle-fill]="prod.isAvailable" [class.bi-x-circle-fill]="!prod.isAvailable"></i>
+                    <span>{{ prod.isAvailable ? 'متوفر' : 'غير متوفر' }}</span>
+                  </button>
+                </td>
+                <td style="text-align: center;">
+                  <div class="action-btn-row">
+                    <button class="btn-icon edit" (click)="openEditProductModal(prod)" title="تعديل">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn-icon del" (click)="deleteProduct(prod)" title="حذف">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Cards List (shown instead of table on small screens) -->
+      <div class="mobile-catalog-list">
+        @for (prod of products(); track prod.id) {
+          <div class="mobile-product-card">
+            <div class="mobile-card-top">
+              <div class="prod-cell-with-img">
+                @if (prod.imageUrl) {
+                  <img [src]="prod.imageUrl | imageUrl:'product'" [alt]="prod.nameAr" class="prod-card-thumb" />
+                } @else {
+                  <div class="prod-card-thumb-placeholder"><i class="bi bi-image"></i></div>
+                }
+                <div class="mobile-card-name">
+                  <span class="prod-name-ar">{{ prod.nameAr }}</span>
+                  @if (prod.nameEn) { <small class="prod-name-en">{{ prod.nameEn }}</small> }
+                </div>
+              </div>
+              <div class="mobile-card-actions">
+                <button class="btn-icon edit" (click)="openEditProductModal(prod)" title="تعديل">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn-icon del" (click)="deleteProduct(prod)" title="حذف">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="mobile-card-meta">
+              <span class="cat-pill">{{ prod.categoryNameAr || 'عام' }}</span>
+              @if (prod.pricingType === 'ByWeight') {
+                <span class="pricing-pill weight"><i class="bi bi-speedometer2 me-1"></i> بالوزن</span>
+              } @else {
+                <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> طبق ثابت</span>
+              }
+            </div>
+
+            <div class="mobile-card-footer">
+              <div class="price-info">
+                <span class="price-label">{{ prod.pricingType === 'ByWeight' ? 'سعر الكيلو' : 'سعر الوحدة' }}</span>
+                @if (prod.pricingType === 'ByWeight') {
+                  <strong class="price-text">{{ prod.pricePerKg || prod.pricePerUnit }} ج.م <span class="unit-text">/ كجم</span></strong>
+                } @else {
+                  <strong class="price-text">{{ prod.pricePerUnit }} ج.م</strong>
+                }
+                @if (prod.averageUnitWeightGrams) {
+                  <small class="text-muted">متوسط الوزن: {{ prod.averageUnitWeightGrams }} جم</small>
+                }
+              </div>
+              <button
+                type="button"
+                class="badge-toggle"
+                [class.available]="prod.isAvailable"
+                [class.unavailable]="!prod.isAvailable"
+                (click)="toggleAvailability(prod)"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="prod.isAvailable" [class.bi-x-circle-fill]="!prod.isAvailable"></i>
+                <span>{{ prod.isAvailable ? 'متوفر' : 'غير متوفر' }}</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (activeTab === 'categories') {
+    <!-- Tab 2: Categories List Table & Mobile Cards -->
+    <div class="catalog-card glass-panel">
+      <!-- Desktop Table -->
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th style="width: 32%;">القسم والصورة</th>
+              <th style="width: 25%;">الوصف</th>
+              <th style="width: 15%; text-align: center;">الأصناف المرتبطة</th>
+              <th style="width: 8%; text-align: center;">الترتيب</th>
+              <th style="width: 10%; text-align: center;">الحالة</th>
+              <th style="width: 10%; text-align: center;">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cat of categories(); track cat.id) {
+              <tr>
+                <td>
+                  <div class="cat-cell-with-img">
+                    @if (cat.imageUrl) {
+                      <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="cat.nameAr" class="cat-table-thumb" />
+                    } @else {
+                      <div class="cat-table-thumb-placeholder"><i class="bi bi-folder-fill"></i></div>
+                    }
+                    <div class="prod-cell">
+                      <span class="cat-badge-name">{{ cat.nameAr }}</span>
+                      @if (cat.nameEn) { <small class="text-muted">{{ cat.nameEn }}</small> }
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-muted small">{{ cat.description || 'لا يوجد وصف' }}</span>
+                </td>
+                <td style="text-align: center;">
+                  <span class="count-badge-pill">
+                    <i class="bi bi-box-seam me-1 text-primary"></i>
+                    {{ getCategoryProductCount(cat.id) }} صنف
+                  </span>
+                </td>
+                <td style="text-align: center;">
+                  <span class="order-num-text">{{ cat.displayOrder }}</span>
+                </td>
+                <td style="text-align: center;">
+                  <button
+                    type="button"
+                    class="badge-toggle"
+                    [class.available]="cat.isActive"
+                    [class.unavailable]="!cat.isActive"
+                    (click)="toggleCategoryStatus(cat)"
+                  >
+                    <i class="bi" [class.bi-check-circle-fill]="cat.isActive" [class.bi-x-circle-fill]="!cat.isActive"></i>
+                    <span>{{ cat.isActive ? 'مفعل' : 'معطل' }}</span>
+                  </button>
+                </td>
+                <td style="text-align: center;">
+                  <div class="action-btn-row">
+                    <button class="btn-icon edit" (click)="openEditCategoryModal(cat)" title="تعديل القسم">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn-icon del" (click)="deleteCategory(cat)" title="حذف القسم">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Categories Cards List -->
+      <div class="mobile-catalog-list">
+        @for (cat of categories(); track cat.id) {
+          <div class="mobile-product-card">
+            <div class="mobile-card-top">
+              <div class="cat-cell-with-img">
+                @if (cat.imageUrl) {
+                  <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="cat.nameAr" class="cat-card-thumb" />
+                } @else {
+                  <div class="cat-card-thumb-placeholder"><i class="bi bi-folder-fill"></i></div>
+                }
+                <div class="mobile-card-name">
+                  <span class="cat-badge-name">{{ cat.nameAr }}</span>
+                  @if (cat.nameEn) { <small class="prod-name-en">{{ cat.nameEn }}</small> }
+                </div>
+              </div>
+              <div class="mobile-card-actions">
+                <button class="btn-icon edit" (click)="openEditCategoryModal(cat)" title="تعديل">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn-icon del" (click)="deleteCategory(cat)" title="حذف">
+                  <i class="bi bi-trash3-fill"></i>
+                </button>
+              </div>
+            </div>
+
+            @if (cat.description) {
+              <p class="text-muted small mb-1">{{ cat.description }}</p>
+            }
+
+            <div class="mobile-card-footer">
+              <span class="count-badge-pill">
+                <i class="bi bi-box-seam me-1 text-primary"></i>
+                {{ getCategoryProductCount(cat.id) }} صنف
+              </span>
+
+              <button
+                type="button"
+                class="badge-toggle"
+                [class.available]="cat.isActive"
+                [class.unavailable]="!cat.isActive"
+                (click)="toggleCategoryStatus(cat)"
+              >
+                <i class="bi" [class.bi-check-circle-fill]="cat.isActive" [class.bi-x-circle-fill]="!cat.isActive"></i>
+                <span>{{ cat.isActive ? 'مفعل' : 'معطل' }}</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (activeTab === 'cooking-methods') {
+    <!-- Tab 3: Cooking Methods Management -->
+    <div class="cooking-methods-section">
+      <div class="row g-4">
+        @for (grp of prepGroups(); track grp.id) {
+          <div class="col-12 col-xl-6">
+            <div class="catalog-card glass-panel h-100">
+              <div class="card-header-flex flex-between mb-3 pb-2 border-bottom">
+                <div>
+                  <h3 class="group-title mb-1">
+                    <i class="bi bi-fire text-danger me-2"></i>
+                    {{ grp.nameAr }}
+                  </h3>
+                  <small class="text-muted d-block">
+                    {{ grp.description || 'طرق الطهي والتحضير المتاحة للعملاء' }} ({{ grp.options.length }} طرق)
+                  </small>
+                </div>
+                <button class="btn-primary btn-sm" (click)="openNewPrepOptionModal(grp)">
+                  <i class="bi bi-plus-lg me-1"></i>
+                  <span>إضافة طريقة طهي</span>
+                </button>
+              </div>
+
+              <!-- Options List Table -->
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 40%;">طريقة الطهي</th>
+                      <th style="width: 25%;">التكلفة الإضافية</th>
+                      <th style="width: 15%; text-align: center;">الحالة</th>
+                      <th style="width: 20%; text-align: center;">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (opt of grp.options; track opt.id) {
+                      <tr>
+                        <td>
+                          <strong class="opt-name-ar">{{ opt.nameAr }}</strong>
+                          @if (opt.nameEn) { <small class="text-muted d-block">{{ opt.nameEn }}</small> }
+                        </td>
+                        <td>
+                          <span class="cost-badge" [class.free]="opt.price === 0">
+                            {{ opt.price === 0 ? 'مجاناً (0 ج.م)' : '+' + opt.price + ' ج.م' }}
+                          </span>
+                        </td>
+                        <td style="text-align: center;">
+                          <span class="status-pill" [class.active]="opt.isAvailable" [class.inactive]="!opt.isAvailable">
+                            {{ opt.isAvailable ? 'متاح' : 'معطل' }}
+                          </span>
+                        </td>
+                        <td style="text-align: center;">
+                          <div class="action-btn-row">
+                            <button class="btn-icon edit" (click)="openEditPrepOptionModal(opt)" title="تعديل">
+                              <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn-icon del" (click)="deletePrepOption(opt)" title="حذف">
+                              <i class="bi bi-trash3-fill"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Options Mobile Cards -->
+              <div class="mobile-catalog-list">
+                @for (opt of grp.options; track opt.id) {
+                  <div class="mobile-product-card">
+                    <div class="mobile-card-top">
+                      <div class="mobile-card-name">
+                        <strong class="prod-name-ar">{{ opt.nameAr }}</strong>
+                        @if (opt.nameEn) { <small class="prod-name-en">{{ opt.nameEn }}</small> }
+                      </div>
+                      <div class="mobile-card-actions">
+                        <button class="btn-icon edit" (click)="openEditPrepOptionModal(opt)" title="تعديل">
+                          <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn-icon del" (click)="deletePrepOption(opt)" title="حذف">
+                          <i class="bi bi-trash3-fill"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="mobile-card-footer">
+                      <span class="cost-badge" [class.free]="opt.price === 0">
+                        {{ opt.price === 0 ? 'مجاناً (0 ج.م)' : '+' + opt.price + ' ج.م' }}
+                      </span>
+
+                      <span class="status-pill" [class.active]="opt.isAvailable" [class.inactive]="!opt.isAvailable">
+                        {{ opt.isAvailable ? 'متاح' : 'معطل' }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+}
+
+  <!-- Product Modal -->
+  @if (showProductModal()) {
+    <div class="modal-backdrop animate-fade-in" (click)="showProductModal.set(false)">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header flex-between">
+          <h3 class="title">{{ isEditingProduct() ? 'تعديل الصنف' : 'إضافة صنف جديد للمنيو' }}</h3>
+          <button class="btn-close-modal" (click)="showProductModal.set(false)"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Product Multi-Image Gallery Section -->
+          <div class="product-gallery-section mb-4">
+            <div class="gallery-header-row mb-2">
+              <div class="gallery-header-info">
+                <label class="gallery-main-label">
+                  <i class="bi bi-images text-primary me-1"></i> معرض وصور الصنف
+                  <span class="badge bg-secondary ms-1">{{ productImages.length }} صور</span>
+                </label>
+                <p class="gallery-sub-text mb-0">
+                  الصورة الأولى بالوسام الذهبي <span class="badge-cover-mini"><i class="bi bi-star-fill text-warning"></i> الغلاف</span> هي التي تظهر للزبائن في المنيو. يمكنك إضافة عدة صور وترتيبهم بسهولة.
+                </p>
+              </div>
+              <div class="gallery-header-btn">
+                <input
+                  type="file"
+                  #prodMultiFileInput
+                  multiple
+                  accept="image/*"
+                  (change)="onProductImagesSelected($event)"
+                  class="d-none"
+                />
+                <button
+                  type="button"
+                  class="btn-upload-more"
+                  [disabled]="isUploadingProductImage()"
+                  (click)="prodMultiFileInput.click()"
+                >
+                  <i class="bi bi-cloud-arrow-up-fill me-1"></i>
+                  رفع صور إضافية
+                </button>
+              </div>
+            </div>
+
+            <!-- Uploading Spinner/Progress Bar -->
+            @if (isUploadingProductImage()) {
+              <div class="gallery-uploading-box mb-3">
+                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                <span class="fw-semibold">{{ uploadProgressText() || 'جاري رفع ومعالجة الصور...' }}</span>
+              </div>
+            }
+
+            <!-- Gallery Grid -->
+            <div class="gallery-cards-grid">
+              @for (img of productImages; track $index) {
+                <div class="gallery-img-card" [class.is-cover]="$index === 0">
+                  <div class="img-aspect-box">
+                    <img [src]="img.imageUrl | imageUrl:'product'" alt="صورة الصنف" loading="lazy" />
+
+                    <!-- Cover or Index Badge -->
+                    @if ($index === 0) {
+                      <span class="badge-cover" title="صورة الغلاف الرئيسية في المنيو">
+                        <i class="bi bi-star-fill me-1"></i> الغلاف الرئيسي
+                      </span>
+                    } @else {
+                      <span class="badge-img-number">
+                        #{{ $index + 1 }}
+                      </span>
+                    }
+
+                    <!-- Card Actions Overlay -->
+                    <div class="card-overlay-actions">
+                      <div class="actions-top-row">
+                        @if ($index > 0) {
+                          <button
+                            type="button"
+                            class="btn-action-pill make-cover-btn"
+                            (click)="setAsPrimaryProductImage($index)"
+                            title="تعيين هذه الصورة كغلاف رئيسي للصنف"
+                          >
+                            <i class="bi bi-star-fill me-1"></i>
+                            اجعلها الغلاف
+                          </button>
+                        }
+                        <button
+                          type="button"
+                          class="btn-action-icon delete-icon-btn ms-auto"
+                          (click)="removeProductImage($index)"
+                          title="حذف الصورة من الصنف"
+                        >
+                          <i class="bi bi-trash3-fill"></i>
+                        </button>
+                      </div>
+
+                      @if (productImages.length > 1) {
+                        <div class="actions-reorder-row">
+                          <button
+                            type="button"
+                            class="btn-reorder-arrow"
+                            [disabled]="$index === 0"
+                            (click)="moveProductImage($index, 'prev')"
+                            title="تقديم لليمين"
+                          >
+                            <i class="bi bi-chevron-right"></i>
+                          </button>
+                          <span class="reorder-label">ترتيب</span>
+                          <button
+                            type="button"
+                            class="btn-reorder-arrow"
+                            [disabled]="$index === productImages.length - 1"
+                            (click)="moveProductImage($index, 'next')"
+                            title="تأخير لليسار"
+                          >
+                            <i class="bi bi-chevron-left"></i>
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Add New Image Dropzone Card -->
+              <div class="gallery-add-card" (click)="prodMultiFileInput.click()" title="انقر لرفع صور جديدة">
+                <div class="add-card-inner">
+                  <div class="plus-icon-wrapper">
+                    <i class="bi bi-plus-lg"></i>
+                  </div>
+                  <span class="add-text-title">إضافة صور</span>
+                  <small class="add-text-sub">اختر صورة أو أكثر</small>
+                </div>
+              </div>
+            </div>
+
+            @if (productImages.length === 0 && !isUploadingProductImage()) {
+              <div class="empty-gallery-prompt mt-2">
+                <i class="bi bi-image text-muted fs-4 d-block mb-1"></i>
+                <span class="text-muted small">لم يتم إضافة أي صور لهذا الصنف حتى الآن. انقر على "إضافة صور" أعلاه لرفع صور الصنف.</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>القسم التابع له *</label>
+              <select class="form-control" [(ngModel)]="productForm.categoryId">
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.nameAr }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label>نوع التسعير *</label>
+              <select class="form-control" [(ngModel)]="productForm.pricingType">
+                <option value="ByWeight">بيع بالوزن وسعر الكيلو (مثل الأسماك والجمبري)</option>
+                <option value="FixedPerUnit">سعر ثابت للطبق / الصينية / الشوربة</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>اسم الصنف بالعربي *</label>
+              <input type="text" class="form-control" placeholder="مثال: سمك بلطي نيلي" [(ngModel)]="productForm.nameAr" />
+            </div>
+            <div class="form-group flex-1">
+              <label>الاسم بالإنجليزي (اختياري)</label>
+              <input type="text" class="form-control" placeholder="Fresh Tilapia" [(ngModel)]="productForm.nameEn" />
+            </div>
+          </div>
+
+          <!-- Pricing & Weight Inputs -->
+          @if (productForm.pricingType === 'ByWeight') {
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>سعر الكيلو (ج.م) *</label>
+                <input type="number" class="form-control" [(ngModel)]="productForm.pricePerKg" />
+              </div>
+              <div class="form-group flex-1">
+                <label>متوسط وزن السمكة بالجرام (للحساب التقديري) *</label>
+                <input type="number" step="50" class="form-control" [(ngModel)]="productForm.averageUnitWeightGrams" />
+                <span class="hint-text">مثلاً: 500 جم للبلطي، 400 جم للبوري</span>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label class="checkbox-label flex-center flex-1">
+                <input type="checkbox" [(ngModel)]="productForm.allowOrderByPieces" />
+                <span>السماح للعميل بالطلب بعدد السمكات</span>
+              </label>
+              <label class="checkbox-label flex-center flex-1">
+                <input type="checkbox" [(ngModel)]="productForm.allowOrderByWeight" />
+                <span>السماح للعميل بالطلب بالوزن المباشر بالجرام</span>
+              </label>
+            </div>
+          } @else {
+            <div class="form-group">
+              <label>سعر الطبق / الوحدة (ج.م) *</label>
+              <input type="number" class="form-control" [(ngModel)]="productForm.pricePerUnit" />
+            </div>
+          }
+
+          <div class="form-group">
+            <label>وصف الصنف ومكوناته</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="productForm.description"></textarea>
+          </div>
+
+          <!-- Groups Assignment -->
+          <div class="form-group">
+            <label>طرق الطهي والتحضير المتاحة لهذا الصنف:</label>
+            <div class="tags-group">
+              @for (grp of prepGroups(); track grp.id) {
+                <button
+                  type="button"
+                  class="tag-select-btn"
+                  [class.selected]="productForm.preparationOptionGroupIds.includes(grp.id)"
+                  (click)="togglePrepGroup(grp.id)"
+                >
+                  {{ grp.nameAr }} ({{ grp.options.length }} طرق)
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>مجموعات الإضافات والمقبلات:</label>
+            <div class="tags-group">
+              @for (mgrp of modifierGroups(); track mgrp.id) {
+                <button
+                  type="button"
+                  class="tag-select-btn"
+                  [class.selected]="productForm.modifierGroupIds.includes(mgrp.id)"
+                  (click)="toggleModifierGroup(mgrp.id)"
+                >
+                  {{ mgrp.nameAr }} ({{ mgrp.options.length }} إضافات)
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-between">
+          <button class="btn-outline" (click)="showProductModal.set(false)">إلغاء</button>
+          <button class="btn-primary" (click)="saveProduct()"><i class="bi bi-floppy me-1"></i> حفظ الصنف</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Category Form Modal -->
+  @if (showCategoryModal()) {
+    <div class="modal-backdrop animate-fade-in" (click)="showCategoryModal.set(false)">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header flex-between">
+          <h3 class="title">{{ isEditingCategory() ? 'تعديل بيانات القسم' : 'إضافة قسم جديد للمنيو' }}</h3>
+          <button class="btn-close-modal" (click)="showCategoryModal.set(false)"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Category Image Upload / Preview Section -->
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold"><i class="bi bi-image text-primary me-1"></i> صورة القسم (تظهر في الواجهة الرئيسية والمتجر)</label>
+            <div class="image-uploader-card">
+              @if (categoryForm.imageUrl) {
+                <div class="image-preview-box">
+                  <img [src]="categoryForm.imageUrl | imageUrl:'category'" alt="معاينة صورة القسم" class="current-img-preview" />
+                  <div class="img-preview-details">
+                    <span class="img-status-text"><i class="bi bi-check-circle-fill text-success me-1"></i> صورة القسم المعتمدة</span>
+                    <div class="img-actions-row">
+                      <input type="file" #catFileReplaceInput accept="image/*" (change)="onCategoryImageSelected($event)" class="d-none" />
+                      <button type="button" class="btn-change-img" (click)="catFileReplaceInput.click()">
+                        <i class="bi bi-arrow-repeat me-1"></i> تغيير الصورة
+                      </button>
+                      <button type="button" class="btn-remove-img" (click)="removeCategoryImage()">
+                        <i class="bi bi-trash3-fill me-1"></i> حذف الصورة
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="empty-upload-zone" (click)="catFileInput.click()">
+                  <input type="file" #catFileInput accept="image/*" (change)="onCategoryImageSelected($event)" class="d-none" />
+                  <i class="bi bi-cloud-arrow-up-fill upload-icon"></i>
+                  <div class="upload-text">
+                    <strong>انقر لاختيار أو رفع صورة جديدة للقسم</strong>
+                    <small class="text-muted d-block mt-1">تظهر في الشاشة الرئيسية وأقسام المنيو</small>
+                  </div>
+                </div>
+              }
+
+              @if (isUploadingCategoryImage()) {
+                <div class="uploading-progress mt-2">
+                  <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                  <span>جاري رفع ومعالجة صورة القسم...</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>اسم القسم بالعربي *</label>
+              <input type="text" class="form-control" placeholder="مثال: عروض الوجبات" [(ngModel)]="categoryForm.nameAr" />
+            </div>
+            <div class="form-group flex-1">
+              <label>الاسم بالإنجليزي (اختياري)</label>
+              <input type="text" class="form-control" placeholder="e.g. Special Offers" [(ngModel)]="categoryForm.nameEn" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>وصف تعريفي للقسم (اختياري)</label>
+            <textarea class="form-control" rows="2" placeholder="وصف يظهر تحت عنوان القسم في المتجر..." [(ngModel)]="categoryForm.description"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>ترتيب الظهور في المنيو</label>
+              <input type="number" class="form-control" [(ngModel)]="categoryForm.displayOrder" />
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">حالة التفعيل</label>
+              <label class="checkbox-label flex-center mt-2">
+                <input type="checkbox" [(ngModel)]="categoryForm.isActive" />
+                <span>مفعل ويظهر للعملاء في المتجر</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-between">
+          <button class="btn-outline" (click)="showCategoryModal.set(false)">إلغاء</button>
+          <button class="btn-primary" (click)="saveCategory()"><i class="bi bi-floppy me-1"></i> حفظ القسم</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Preparation Option Modal -->
+  @if (showPrepOptionModal()) {
+    <div class="modal-backdrop animate-fade-in" (click)="showPrepOptionModal.set(false)">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header flex-between">
+          <h3 class="title">{{ isEditingPrepOption() ? 'تعديل طريقة الطهي' : 'إضافة طريقة طهي جديدة' }}</h3>
+          <button class="btn-close-modal" (click)="showPrepOptionModal.set(false)"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>اسم طريقة الطهي بالعربي *</label>
+              <input type="text" class="form-control" placeholder="مثال: مقلي زيت وليمون، مشوي ردة..." [(ngModel)]="prepOptionForm.nameAr" />
+            </div>
+            <div class="form-group flex-1">
+              <label>الاسم بالإنجليزي (اختياري)</label>
+              <input type="text" class="form-control" placeholder="e.g. Fried Oil & Lemon" [(ngModel)]="prepOptionForm.nameEn" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>سعر التجهيز الإضافي (ج.م) *</label>
+              <input type="number" class="form-control" placeholder="0 إذا كانت مجانية" [(ngModel)]="prepOptionForm.price" />
+              <span class="hint-text">اكتب 0 إذا كانت الخدمة مجانية أو مشمولة بسعر الصنف</span>
+            </div>
+            <div class="form-group flex-1">
+              <label>ترتيب الظهور</label>
+              <input type="number" class="form-control" [(ngModel)]="prepOptionForm.displayOrder" />
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label class="checkbox-label flex-center">
+              <input type="checkbox" [(ngModel)]="prepOptionForm.isAvailable" />
+              <span>متاحة للطلب حالياً (غير معطلة)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-between">
+          <button class="btn-outline" (click)="showPrepOptionModal.set(false)">إلغاء</button>
+          <button class="btn-primary" (click)="savePrepOption()"><i class="bi bi-check2-circle me-1"></i> حفظ طريقة الطهي</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

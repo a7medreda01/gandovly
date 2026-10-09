@@ -1,0 +1,45 @@
+<div class="timeline-container">
+  @if (currentStatus === 'Cancelled' || currentStatus === 'Rejected') {
+    <div class="cancelled-status-card flex-center">
+      <i class="bi bi-x-circle-fill fs-2 text-danger me-2"></i>
+      <div>
+        <h4 class="mb-0">تم إلغاء هذا الطلب</h4>
+        <p class="mb-0 text-muted fs-small">يرجى التواصل مع خدمة العملاء أو إنشاء طلب جديد</p>
+      </div>
+    </div>
+  } @else {
+    <!-- Stepper Bar -->
+    <div class="stepper-horizontal">
+      @for (step of steps; track step.key; let idx = $index) {
+        <div
+          class="stepper-node"
+          [class.is-done]="isStepCompleted(step.key)"
+          [class.is-active]="isStepCurrent(step.key)"
+        >
+          <div class="node-icon-circle">
+            <i class="bi" [class]="step.icon"></i>
+          </div>
+          <span class="node-text">{{ step.label }}</span>
+        </div>
+
+        @if (idx < steps.length - 1) {
+          <div
+            class="stepper-track-line"
+            [class.is-filled]="isStepCompleted(steps[idx + 1].key)"
+          ></div>
+        }
+      }
+    </div>
+
+    <!-- Active Stage Banner -->
+    <div class="active-stage-banner">
+      <div class="stage-icon-box">
+        <i class="bi" [class]="currentStepInfo.icon"></i>
+      </div>
+      <div class="stage-text-box">
+        <span class="stage-pill">المرحلة الحالية: {{ currentStepInfo.label }}</span>
+        <p class="stage-desc">{{ currentStepInfo.desc }}</p>
+      </div>
+    </div>
+  }
+</div>

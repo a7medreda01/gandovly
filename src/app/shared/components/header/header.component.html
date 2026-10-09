@@ -1,0 +1,147 @@
+<header class="main-header">
+  @if (settingsService.settings().activePromotionBanner) {
+  <div class="top-promo-banner flex-center">
+    <i class="bi bi-stars me-1 text-warning"></i>
+    <span>{{ settingsService.settings().activePromotionBanner }}</span>
+    <a routerLink="/menu" class="btn-banner-link ms-2">اطلب الآن 🔥</a>
+  </div>
+  }
+
+  <div class="container flex-between header-wrapper">
+    <!-- Brand Info -->
+    <a routerLink="/" class="brand-logo flex-center" (click)="closeMobileMenu()">
+      @if (settingsService.settings().logoUrl) {
+      <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+        [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img" />
+      } @else {
+      <div class="logo-icon">
+        <i class="bi bi-water"></i>
+      </div>
+      }
+      <div class="brand-texts">
+        <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+        <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="desktop-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+        <i class="bi bi-house-door me-1"></i> الرئيسية
+      </a>
+      <a routerLink="/menu" routerLinkActive="active" class="nav-link">
+        <i class="bi bi-grid me-1"></i> قائمة الطعام
+      </a>
+
+      @if (isKitchenAllowed) {
+      <a routerLink="/kitchen" class="nav-badge-link">
+        <span class="badge badge-weight"><i class="bi bi-fire me-1"></i> المطبخ</span>
+      </a>
+      }
+      @if (isAdminAllowed) {
+      <a routerLink="/admin" class="nav-badge-link">
+        <span class="badge badge-prep"><i class="bi bi-shield-lock me-1"></i> الإدارة</span>
+      </a>
+      }
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions flex-center">
+      <!-- WhatsApp CTA -->
+      @if (settingsService.settings().whatsapp) {
+      <a [href]="'https://wa.me/' + settingsService.settings().whatsapp" target="_blank"
+        class="btn-whatsapp flex-center" title="تواصل عبر واتساب">
+        <i class="bi bi-whatsapp"></i>
+        <span class="btn-text">واتساب</span>
+      </a>
+      }
+
+      <!-- Cart Button -->
+      <button class="cart-trigger-btn flex-center" (click)="cartService.toggleDrawer()">
+        <i class="bi bi-bag-check cart-icon"></i>
+        <span class="cart-text">السلة</span>
+        @if (cartService.totalItemsCount() > 0) {
+        <span class="cart-badge">{{ cartService.totalItemsCount() }}</span>
+        }
+      </button>
+
+      <!-- Account Button -->
+      <a routerLink="/account" class="account-btn flex-center" title="حسابي">
+        <i class="bi bi-person-circle"></i>
+      </a>
+
+      <!-- Mobile Hamburger -->
+      <button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="القائمة">
+        <i class="bi bi-list"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  @if (isMobileMenuOpen) {
+  <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
+    <div class="mobile-menu-content" (click)="$event.stopPropagation()">
+      <div class="mobile-menu-header flex-between">
+        <div class="drawer-brand flex-center gap-2">
+          <i class="bi bi-water text-primary fs-4"></i>
+          <span class="drawer-restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+        </div>
+        <button class="drawer-close-btn" (click)="closeMobileMenu()">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="mobile-links-container">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
+          (click)="closeMobileMenu()" class="mobile-link-item">
+          <div class="link-left">
+            <div class="link-icon-box icon-home"><i class="bi bi-house-door"></i></div>
+            <span class="link-title">الرئيسية</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+
+        <a routerLink="/menu" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
+          <div class="link-left">
+            <div class="link-icon-box icon-menu"><i class="bi bi-grid"></i></div>
+            <span class="link-title">قائمة الطعام والعروض</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+
+        <div class="drawer-divider"></div>
+
+        <a routerLink="/account" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
+          <div class="link-left">
+            <div class="link-icon-box icon-account"><i class="bi bi-person"></i></div>
+            <span class="link-title">حسابي وطلباتي</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+
+        @if (isKitchenAllowed) {
+        <div class="drawer-divider"></div>
+
+        <a routerLink="/kitchen" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
+          <div class="link-left">
+            <div class="link-icon-box icon-kitchen"><i class="bi bi-fire"></i></div>
+            <span class="link-title">شاشة المطبخ والأوزان</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+        }
+
+        @if (isAdminAllowed) {
+        <a routerLink="/admin" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
+          <div class="link-left">
+            <div class="link-icon-box icon-admin"><i class="bi bi-gear"></i></div>
+            <span class="link-title">لوحة الإدارة</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</header>

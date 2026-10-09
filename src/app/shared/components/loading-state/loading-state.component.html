@@ -1,0 +1,128 @@
+<div class="loading-state-wrapper" [style.min-height]="minHeight">
+  @if (mode === 'spinner') {
+    <!-- 1. Ultra-clean Luxury Radial Spinner -->
+    <div class="spinner-container">
+      <div class="ring-spinner-box">
+        <div class="orbit-glow"></div>
+        <div class="orbit-ring"></div>
+        <div class="orbit-ring inner"></div>
+        <div class="center-icon">
+          <i class="bi" [ngClass]="icon"></i>
+        </div>
+      </div>
+      <h4 class="loading-title">{{ title }}</h4>
+      <p class="loading-subtitle">{{ subtitle }}</p>
+      <div class="loading-progress-bar">
+        <div class="progress-bar-shimmer"></div>
+      </div>
+    </div>
+  } @else if (mode === 'cards') {
+    <!-- 2. Catalog / Products Cards Skeleton -->
+    <div class="skeleton-header mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="mini-spinner"></div>
+        <span class="loading-label-sub">{{ title }}</span>
+      </div>
+    </div>
+    <div class="skeleton-cards-grid">
+      @for (i of repeatArray; track i) {
+        <div class="sk-card">
+          <div class="sk-img skeleton"></div>
+          <div class="sk-content">
+            <div class="sk-line sk-title skeleton"></div>
+            <div class="sk-line sk-meta skeleton"></div>
+            <div class="sk-row flex-between mt-3">
+              <div class="sk-pill skeleton"></div>
+              <div class="sk-btn skeleton"></div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (mode === 'kitchen') {
+    <!-- 3. Kitchen KDS Orders Skeleton -->
+    <div class="skeleton-header mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="mini-spinner kitchen-spin"></div>
+        <span class="loading-label-sub">{{ title }}</span>
+      </div>
+    </div>
+    <div class="skeleton-kitchen-grid">
+      @for (i of repeatArray; track i) {
+        <div class="sk-ticket">
+          <div class="sk-ticket-head flex-between">
+            <div class="sk-pill w-40 skeleton"></div>
+            <div class="sk-pill w-25 skeleton"></div>
+          </div>
+          <div class="sk-ticket-body">
+            <div class="sk-item-row flex-between">
+              <div class="sk-line w-60 skeleton"></div>
+              <div class="sk-pill w-20 skeleton"></div>
+            </div>
+            <div class="sk-item-row flex-between">
+              <div class="sk-line w-75 skeleton"></div>
+              <div class="sk-pill w-20 skeleton"></div>
+            </div>
+            <div class="sk-item-row flex-between">
+              <div class="sk-line w-50 skeleton"></div>
+              <div class="sk-pill w-20 skeleton"></div>
+            </div>
+          </div>
+          <div class="sk-ticket-foot flex-between mt-3">
+            <div class="sk-btn w-50 skeleton"></div>
+            <div class="sk-btn w-40 skeleton"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (mode === 'orders') {
+    <!-- 4. Customer / Admin Orders Stack Skeleton -->
+    <div class="skeleton-header mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="mini-spinner"></div>
+        <span class="loading-label-sub">{{ title }}</span>
+      </div>
+    </div>
+    <div class="skeleton-orders-stack">
+      @for (i of repeatArray; track i) {
+        <div class="sk-order-row">
+          <div class="sk-row-top flex-between mb-2">
+            <div class="sk-pill w-25 skeleton"></div>
+            <div class="sk-pill w-20 skeleton"></div>
+          </div>
+          <div class="sk-line w-75 mb-2 skeleton"></div>
+          <div class="sk-row-bottom flex-between">
+            <div class="sk-line w-30 skeleton"></div>
+            <div class="sk-btn w-25 skeleton"></div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else if (mode === 'table') {
+    <!-- 5. Table Rows Skeleton -->
+    <div class="skeleton-header mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="mini-spinner"></div>
+        <span class="loading-label-sub">{{ title }}</span>
+      </div>
+    </div>
+    <div class="sk-table-container">
+      <div class="sk-table-head">
+        <div class="sk-line w-20 skeleton"></div>
+        <div class="sk-line w-25 skeleton"></div>
+        <div class="sk-line w-15 skeleton"></div>
+        <div class="sk-line w-15 skeleton"></div>
+        <div class="sk-line w-15 skeleton"></div>
+      </div>
+      @for (i of repeatArray; track i) {
+        <div class="sk-table-row">
+          <div class="sk-line w-20 skeleton"></div>
+          <div class="sk-line w-25 skeleton"></div>
+          <div class="sk-line w-15 skeleton"></div>
+          <div class="sk-line w-15 skeleton"></div>
+          <div class="sk-line w-15 skeleton"></div>
+        </div>
+      }
+    </div>
+  }
+</div>

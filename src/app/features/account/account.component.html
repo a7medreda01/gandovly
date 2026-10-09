@@ -1,0 +1,499 @@
+<div class="account-page container">
+  @if (!authService.currentCustomer()) {
+    <!-- Guest Must Authenticate with Mobile Phone -->
+    <div class="guest-auth-card glass-panel animate-fade-in">
+      <div class="auth-header text-center">
+        <div class="auth-icon-badge">
+          @if (!isOtpSent()) {
+            <i class="bi bi-shield-lock-fill"></i>
+          } @else {
+            <i class="bi bi-chat-square-dots-fill"></i>
+          }
+        </div>
+        @if (!isOtpSent()) {
+          <h1 class="page-title">تسجيل الدخول إلى حسابك</h1>
+          <p class="page-subtitle">سجل برقم هاتفك لمتابعة طلباتك الحالية، تكرار طلباتك المفضلة، وحفظ عناوينك الدائمة</p>
+        } @else {
+          <h1 class="page-title">رمز التحقق السريع</h1>
+          <p class="page-subtitle">أدخل الرمز المكون من 6 أرقام لتأكيد رقم هاتفك والبدء فوراً</p>
+        }
+      </div>
+
+      <div class="auth-box-body">
+        @if (!isOtpSent()) {
+          <div class="auth-form">
+            <div class="form-group mb-3">
+              <label for="pPhone" class="auth-input-label text-end d-block">
+                <i class="bi bi-phone me-1 text-primary"></i> رقم الهاتف المحمول:
+              </label>
+              <div class="phone-input-wrapper" dir="ltr">
+                <span class="country-prefix">+20</span>
+                <input
+                  id="pPhone"
+                  type="tel"
+                  class="form-control phone-input"
+                  placeholder="01012345678"
+                  [(ngModel)]="phoneNumber"
+                  (keyup.enter)="sendOtp()"
+                  autofocus
+                />
+              </div>
+              <small class="auth-input-hint d-block mt-2 text-end">
+                <i class="bi bi-shield-check text-success me-1"></i>سيصلك كود التحقق عبر واتساب 
+              </small>
+            </div>
+
+            <button class="btn-auth-submit" (click)="sendOtp()" [disabled]="isLoading() || !phoneNumber.trim()">
+              @if (isLoading()) { 
+                <span class="d-flex align-items-center justify-content-center gap-2">
+                  <span class="spinner-border spinner-border-sm" role="status"></span>
+                  جاري إرسال الرمز...
+                </span> 
+              } @else { 
+                <span>إرسال كود التحقق</span> 
+              }
+            </button>
+          </div>
+        } @else {
+          <div class="auth-form animate-fade-in">
+            <!-- Modern Phone Notice Card -->
+            <div class="phone-info-card mb-3">
+              <div class="phone-info-text">
+                <span class="phone-info-label">تم إرسال الرمز إلى الرقم:</span>
+                <strong class="phone-info-number" dir="ltr">{{ phoneNumber }}</strong>
+              </div>
+              <button class="btn-change-phone" (click)="changePhone()" type="button" title="تعديل رقم الهاتف">
+                <i class="bi bi-pencil-square me-1"></i>تغيير
+              </button>
+            </div>
+
+            <!-- Optional Name Input for New Customers -->
+            <div class="form-group mb-3">
+              <label for="uName" class="auth-input-label text-end d-block">
+                <i class="bi bi-person me-1 text-primary"></i> الاسم بالكامل
+                <span class="optional-tag">(اختياري للعملاء الجدد)</span>
+              </label>
+              <input
+                id="uName"
+                type="text"
+                class="form-control auth-text-input text-center"
+                placeholder="اسمك الكريم..."
+                [(ngModel)]="fullName"
+              />
+            </div>
+
+            <!-- 6-Digit OTP Box Grid -->
+            <div class="otp-section mb-3">
+              <label class="auth-input-label text-center d-block mb-2">
+                <i class="bi bi-key-fill text-primary me-1"></i> أدخل رمز التحقق (6 أرقام):
+              </label>
+
+              <div class="otp-boxes-grid" dir="ltr" (paste)="onOtpPaste($event)">
+                @for (digit of otpDigits; track $index) {
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="1"
+                    pattern="[0-9]*"
+                    autocomplete="one-time-code"
+                    class="otp-digit-box"
+                    [id]="'digit_' + $index"
+                    [value]="otpDigits[$index]"
+                    (input)="onDigitInput($event, $index)"
+                    (keydown)="onDigitKeyDown($event, $index)"
+                    placeholder="-"
+                  />
+                }
+              </div>
+
+              <!-- 30s Countdown & Resend Button -->
+              <div class="resend-countdown-row text-center mt-3">
+                @if (resendCountdown() > 0) {
+                  <button type="button" class="btn-resend-countdown" disabled>
+                    <i class="bi bi-clock-history me-1 text-warning"></i>
+                    <span>إعادة إرسال الرمز خلال <strong>{{ resendCountdown() }} ثانية</strong></span>
+                  </button>
+                } @else {
+                  <button type="button" class="btn-resend-active" (click)="resendOtp()" [disabled]="isLoading()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>
+                    <span>إعادة إرسال الرمز الآن 📲</span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="auth-action-buttons-row mt-4">
+              <button class="btn-auth-back" (click)="changePhone()" type="button">
+                رجوع
+              </button>
+              <button class="btn-auth-submit" (click)="verifyOtp()" [disabled]="isLoading() || otpCode.length < 6">
+                @if (isLoading()) { 
+                  <span class="d-flex align-items-center justify-content-center gap-2">
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    جاري التحقق...
+                  </span> 
+                } @else { 
+                  <span>تأكيد وتسجيل الدخول</span> 
+                }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <!-- Logged in Customer Portal -->
+    <div class="profile-layout animate-fade-in">
+      <!-- Profile Header -->
+      <div class="profile-header glass-panel flex-between flex-wrap gap-3">
+        <div class="user-info d-flex align-items-center gap-3">
+          <div class="user-avatar-circle"></div>
+          <div>
+            <h2 class="user-name mb-1">{{ authService.currentCustomer()!.fullName || 'عميل جندوفلي' }}</h2>
+            <span class="phone-badge" dir="ltr"> {{ authService.currentCustomer()!.usernameOrPhone }}</span>
+          </div>
+        </div>
+        <button class="btn-logout" (click)="logout()" title="تسجيل الخروج">
+          <i class="bi bi-box-arrow-right me-1"></i> تسجيل الخروج
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="account-nav-tabs flex-center">
+        <button class="tab-btn" [class.active]="activeTab() === 'orders'" (click)="activeTab.set('orders')">
+          <i class="bi bi-bag-check-fill me-1"></i> طلباتي ({{ customerOrders().length }})
+        </button>
+        <button class="tab-btn" [class.active]="activeTab() === 'addresses'" (click)="activeTab.set('addresses')">
+          <i class="bi bi-geo-alt-fill me-1"></i> عناويني المحفوظة ({{ profile()?.addresses?.length || 0 }})
+        </button>
+      </div>
+
+      <!-- Orders Tab Content -->
+      @if (activeTab() === 'orders') {
+        <div class="customer-orders-section">
+          <div class="section-top flex-between mb-3">
+            <h3 class="section-title mb-0"><i class="bi bi-clock-history me-2 text-primary"></i> سجل طلباتي ومراحل التجهيز</h3>
+            <button class="btn-refresh-orders" (click)="loadUserOrders()" [disabled]="isLoadingOrders()">
+              <i class="bi bi-arrow-clockwise me-1" [class.spin]="isLoadingOrders()"></i> تحديث
+            </button>
+          </div>
+
+          @if (isLoadingOrders()) {
+            <app-loading-state
+              mode="orders"
+              title="جاري جلب وتحديث قائمة طلباتك..."
+              subtitle="لحظات وسيتم عرض تفاصيل الطلبات ومراحل التجهيز الحالية"
+              [count]="3"
+            ></app-loading-state>
+          } @else if (customerOrders().length > 0) {
+            <div class="orders-list">
+              @for (ord of customerOrders(); track ord.id) {
+                <div class="order-compact-card" (click)="openOrderDetails(ord)">
+                  <!-- Top Row: Order # and Status -->
+                  <div class="card-top-row">
+                    <span class="ord-num-tag" dir="ltr">#{{ ord.orderNumber }}</span>
+                    <span class="badge-status" [ngClass]="'status-' + ord.status.toLowerCase()">
+                      <i class="bi" [ngClass]="{
+                        'bi-clock-history': ord.status === 'Placed',
+                        'bi-check-circle': ord.status === 'Confirmed',
+                        'bi-fire': ord.status === 'Preparing',
+                        'bi-box-seam': ord.status === 'ReadyForPickup',
+                        'bi-scooter': ord.status === 'OutForDelivery',
+                        'bi-check2-all': ord.status === 'Completed',
+                        'bi-x-circle': ord.status === 'Cancelled'
+                      }"></i>
+                      {{ getStatusLabel(ord.status) }}
+                    </span>
+                  </div>
+
+                  <!-- Mid Row: Summary & Date -->
+                  <div class="card-mid-row">
+                    <div class="items-summary text-truncate">
+                      <i class="bi bi-basket2 text-primary me-1"></i>
+                      <span>{{ getOrderItemsSummary(ord) }}</span>
+                    </div>
+                    <div class="ord-date text-muted">
+                      <i class="bi bi-calendar3 me-1"></i>
+                      <span>{{ ord.createdAt | date:'short' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Bottom Row: Total & Actions -->
+                  <div class="card-bottom-row">
+                    <div class="price-box">
+                      <span class="price-label">الإجمالي:</span>
+                      <strong class="total-amount">{{ ord.finalTotal || ord.estimatedTotal }} ج.م</strong>
+                    </div>
+
+                    <div class="card-actions-group">
+                      <button class="btn-view-details" type="button" (click)="$event.stopPropagation(); openOrderDetails(ord)">
+                        <i class="bi bi-eye"></i>
+                        <span>التفاصيل والتتبع</span>
+                      </button>
+                      <button class="btn-reorder-icon" type="button" (click)="$event.stopPropagation(); reorder(ord)" title="تكرار الطلب">
+                        <i class="bi bi-arrow-repeat"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-orders-card glass-panel">
+              <div class="empty-icon-ring">
+                <i class="bi bi-bag-x"></i>
+              </div>
+              <h4 class="empty-title">لا توجد طلبات سابقة حتى الآن</h4>
+              <p class="empty-desc">استكشف منيو أسماك جندوفلي الطازجة واطلب وجبتك البحرية المفضلة الآن!</p>
+              <a routerLink="/menu" class="btn-menu-cta">
+                <span>تصفح المنيو واطلب الآن</span>
+                <i class="bi bi-arrow-left"></i>
+              </a>
+            </div>
+          }
+        </div>
+      } @else {
+        <!-- Saved Addresses Tab -->
+        <div class="addresses-section glass-panel">
+          <div class="section-top flex-between mb-3">
+            <h3 class="section-title mb-0"><i class="bi bi-geo-alt-fill me-2 text-primary"></i> العناوين</h3>
+            <button class="btn-primary btn-sm" (click)="showAddressModal.set(true)">
+              <i class="bi bi-plus-lg me-1"></i> إضافة جديد
+            </button>
+          </div>
+
+          @if (profile() && profile()!.addresses.length > 0) {
+            <div class="addresses-grid">
+              @for (addr of profile()!.addresses; track addr.id) {
+                <div class="address-card">
+                  <div class="addr-header flex-between mb-2">
+                    <span class="addr-label"><i class="bi bi-house-door me-1"></i> {{ addr.label }}</span>
+                    <button class="btn-del" (click)="deleteAddress(addr.id)" title="حذف العنوان">
+                      <i class="bi bi-trash text-danger"></i>
+                    </button>
+                  </div>
+                  <p class="addr-text mb-1">{{ addr.city }} - {{ addr.district }} - {{ addr.streetAddress }}</p>
+                  @if (addr.buildingNumber || addr.floor || addr.apartment) {
+                    <small class="addr-sub text-muted">عمارة {{ addr.buildingNumber }} - دور {{ addr.floor }} - شقة {{ addr.apartment }}</small>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="empty-addr-card">
+              <div class="empty-icon-ring">
+                <i class="bi bi-pin-map"></i>
+              </div>
+              <h4 class="empty-title">لم تقم بحفظ أي عناوين بعد</h4>
+              <p class="empty-desc">أضف عنوان منزلك أو عملك الآن لتسريع إتمام طلباتك البحرية مستقبلاً.</p>
+              <button class="btn-add-first-addr" (click)="showAddressModal.set(true)" type="button">
+                <i class="bi bi-plus-lg me-1"></i>
+                <span>إضافة عنوانك الأول</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Add Address Modal (Streamlined & Clean) -->
+  @if (showAddressModal()) {
+    <div class="modal-backdrop" (click)="showAddressModal.set(false)">
+      <div class="modal-dialog address-modern-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="d-flex align-items-center gap-2">
+            <div class="modal-icon-badge">
+              <i class="bi bi-geo-alt-fill text-primary"></i>
+            </div>
+            <div>
+              <h3 class="modal-title mb-0">إضافة عنوان جديد</h3>
+              <p class="modal-subtitle mb-0">لحفظ العنوان وسرعة إتمام الطلبات القادمة</p>
+            </div>
+          </div>
+          <button class="btn-close-modal" (click)="showAddressModal.set(false)" type="button" aria-label="إغلاق">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <!-- Full Street Details (All-in-one convenient field) -->
+          <div class="form-field-group mb-3">
+            <label class="field-label">تفاصيل العنوان بالكامل *:</label>
+            <div class="input-with-icon">
+              <i class="bi bi-signpost-2-fill input-icon"></i>
+              <textarea
+                rows="2"
+                class="modern-input modern-textarea"
+                placeholder="اسم الشارع، رقم العمارة، الدور، الشقة، وأي علامة مميزة..."
+                [(ngModel)]="newAddress.streetAddress"
+                (input)="onAddressChange()"
+                (blur)="onAddressChange()"
+                autofocus
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- 3. Auto Zone Resolution Status -->
+          @if (isResolvingZone()) {
+            <div class="zone-status-pill resolving mb-3">
+              <i class="bi bi-hourglass-split me-1"></i> جاري التعرف على منطقة التوصيل من العنوان...
+            </div>
+          } @else if (zoneResolutionMessage()) {
+            <div class="zone-status-pill mb-3" [class.success]="resolvedZoneName()" [class.warning]="!resolvedZoneName()">
+              <i class="bi" [class.bi-check-circle-fill]="resolvedZoneName()" [class.bi-exclamation-triangle-fill]="!resolvedZoneName()"></i>
+              <span>{{ zoneResolutionMessage() }}</span>
+            </div>
+          }
+
+          <!-- 4. Delivery Zone Selector Dropdown -->
+          <div class="form-field-group mb-3">
+            <label class="field-label">تأكيد منطقة التوصيل *:</label>
+            <div class="input-with-icon">
+              <i class="bi bi-pin-map-fill input-icon"></i>
+              <select
+                class="modern-input form-select"
+                [ngModel]="selectedZoneId()"
+                (ngModelChange)="onZoneSelected($event)"
+              >
+                @for (zone of deliveryZones(); track zone.id) {
+                  <option [value]="zone.id">{{ zone.name }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button class="btn-cancel-modal" (click)="showAddressModal.set(false)" type="button">
+            إلغاء
+          </button>
+          <button class="btn-save-address" (click)="saveAddress()" type="button" [disabled]="!newAddress.streetAddress.trim() || isSavingAddress()">
+            @if (isSavingAddress()) {
+              <i class="bi bi-hourglass-split spin me-1"></i>
+              <span>جاري الحفظ...</span>
+            } @else {
+              <i class="bi bi-check-lg me-1"></i>
+              <span>حفظ العنوان</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Order Details & Tracking Modal -->
+  @if (selectedOrder()) {
+    <div class="modal-backdrop" (click)="closeOrderDetails()">
+      <div class="order-details-modal glass-panel animate-scale-up" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="modal-header flex-between">
+          <div>
+            <span class="modal-subtitle text-muted small d-block">تفاصيل ومراحل الطلب</span>
+            <h3 class="modal-title mb-0" dir="ltr">#{{ selectedOrder()!.orderNumber }}</h3>
+          </div>
+          <button class="btn-close-modal" (click)="closeOrderDetails()" type="button">✕</button>
+        </div>
+
+        <div class="modal-body py-3">
+          <!-- Status Banner -->
+          <div class="status-banner mb-3" [ngClass]="'status-banner-' + selectedOrder()!.status.toLowerCase()">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="status-title fw-bold">
+                <i class="bi bi-info-circle me-1"></i> {{ getStatusLabel(selectedOrder()!.status) }}
+              </span>
+              <span class="status-time text-muted small">
+                {{ selectedOrder()!.createdAt | date:'short' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- 4-Step Visual Tracker / Stepper -->
+          <div class="modal-stepper-box mb-3">
+            <h5 class="stepper-title mb-2"><i class="bi bi-geo-alt me-1 text-primary"></i> تتبع مراحل التجهيز:</h5>
+            <div class="order-stepper">
+              <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 1">
+                <div class="node-circle"><i class="bi bi-receipt"></i></div>
+                <span class="node-label">تم الاستلام</span>
+              </div>
+              <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 2"></div>
+              <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 2">
+                <div class="node-circle"><i class="bi bi-fire"></i></div>
+                <span class="node-label">المطبخ والوزن</span>
+              </div>
+              <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 3"></div>
+              <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 3">
+                <div class="node-circle"><i class="bi bi-scooter"></i></div>
+                <span class="node-label">خرج للتوصيل</span>
+              </div>
+              <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 4"></div>
+              <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 4">
+                <div class="node-circle"><i class="bi bi-check2-all"></i></div>
+                <span class="node-label">تم التسليم</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Address -->
+          <div class="modal-info-tile mb-3">
+            <i class="bi bi-geo-alt-fill text-danger fs-5 me-2"></i>
+            <div>
+              <span class="tile-label d-block text-muted small">عنوان التوصيل</span>
+              <strong class="tile-val">{{ selectedOrder()!.deliveryAddress || selectedOrder()!.deliveryZoneName || 'استلام من المطعم' }}</strong>
+            </div>
+          </div>
+
+          <!-- Order Items List -->
+          <div class="modal-items-section mb-3">
+            <h5 class="items-title mb-2"><i class="bi bi-basket2 me-1 text-primary"></i> الأصناف المطلوبة ({{ selectedOrder()!.orderLines.length }}):</h5>
+            <div class="items-list-box">
+              @for (line of selectedOrder()!.orderLines; track line.id) {
+                <div class="item-detail-row">
+                  <div class="item-main">
+                    <strong class="item-name">{{ line.productNameAr }}</strong>
+                    <div class="item-meta">
+                      @if (line.preparationOptionNameAr) {
+                        <span class="prep-pill">{{ line.preparationOptionNameAr }}</span>
+                      }
+                      <span class="qty-pill">الكمية: ×{{ line.quantityUnits }}</span>
+                      @if (line.actualWeightGrams) {
+                        <span class="weight-pill">{{ line.actualWeightGrams / 1000 }} كجم (وزن فعلي)</span>
+                      }
+                    </div>
+                  </div>
+                  <strong class="item-price">{{ line.finalLineTotal || line.estimatedLineTotal }} ج.م</strong>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Price Summary -->
+          <div class="price-summary-box mb-2">
+            <div class="summary-line">
+              <span>إجمالي الأصناف:</span>
+              <span>{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} ج.م</span>
+            </div>
+            @if (selectedOrder()!.deliveryFee > 0) {
+              <div class="summary-line">
+                <span>رسوم التوصيل:</span>
+                <span>{{ selectedOrder()!.deliveryFee }} ج.م</span>
+              </div>
+            }
+            <div class="summary-line total-line">
+              <strong>المبلغ الإجمالي:</strong>
+              <strong class="total-number">{{ selectedOrder()!.finalTotal || selectedOrder()!.estimatedTotal }} ج.م</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer flex-between">
+          <button class="btn-modal-close" (click)="closeOrderDetails()" type="button">
+            إغلاق
+          </button>
+          <button class="btn-modal-reorder" (click)="reorder(selectedOrder()!); closeOrderDetails()" type="button">
+            <i class="bi bi-arrow-repeat me-1"></i> تكرار هذا الطلب بالسلة 🔄
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

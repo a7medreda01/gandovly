@@ -1,0 +1,253 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.page-title-row {
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  > div:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-heading {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--primary-color);
+    line-height: 1.2;
+  }
+  .page-sub {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+  }
+
+  button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.stat-card {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  border-radius: var(--radius-lg);
+
+  .card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+
+    &.blue { background: rgba(59, 130, 246, 0.12); }
+    &.green { background: rgba(16, 185, 129, 0.12); }
+    &.amber { background: rgba(245, 158, 11, 0.12); }
+    &.purple { background: rgba(139, 92, 246, 0.12); }
+  }
+
+  .card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+
+    .label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .num {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--primary-color);
+      white-space: nowrap;
+    }
+  }
+}
+
+.dashboard-split-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.5rem;
+}
+
+.box-card {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+
+  .box-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-color);
+  }
+}
+
+.top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .top-item {
+    padding: 0.75rem 1rem;
+    background: #f8fafd;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+
+    .item-rank {
+      gap: 0.75rem;
+      min-width: 0;
+      .rank-num {
+        font-weight: 900;
+        color: var(--accent-hover);
+        font-size: 1.1rem;
+        flex-shrink: 0;
+      }
+      .name {
+        font-weight: 800;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .item-stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.88rem;
+      flex-shrink: 0;
+
+      .qty { color: var(--text-muted); font-weight: 600; }
+      .rev { color: var(--primary-color); font-weight: 800; }
+    }
+  }
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  .shortcut-card {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    background: #f8fafd;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    text-align: center;
+    transition: var(--transition-smooth);
+
+    .sc-icon { font-size: 2rem; }
+    .sc-title { font-size: 0.9rem; font-weight: 800; color: var(--primary-color); }
+
+    &:hover {
+      border-color: var(--accent-color);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+}
+
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .dashboard-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-page {
+    gap: 1.25rem;
+  }
+
+  .page-title-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+
+    .page-heading {
+      font-size: 1.4rem;
+    }
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-card {
+    padding: 1rem;
+    gap: 0.85rem;
+    flex-direction: row;
+    align-items: center;
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      font-size: 1.4rem;
+    }
+
+    .card-info {
+      .label {
+        font-size: 0.78rem;
+        white-space: normal;
+        line-height: 1.3;
+      }
+      .num {
+        font-size: 1.2rem;
+      }
+    }
+  }
+
+  .box-card {
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .shortcuts-grid {
+    gap: 0.75rem;
+
+    .shortcut-card {
+      padding: 1rem 0.75rem;
+
+      .sc-icon { font-size: 1.6rem; }
+      .sc-title { font-size: 0.82rem; }
+    }
+  }
+}
+
+@media (max-width: 420px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    flex-direction: row;
+  }
+}
