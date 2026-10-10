@@ -50,39 +50,44 @@
     @if (activeTab === 'products') {
     <div class="catalog-card glass-panel">
       <!-- Search & Category Filter Bar -->
-      <div class="search-filter-bar mb-3 p-3 rounded-3 bg-light d-flex align-items-center justify-content-between gap-3 flex-wrap">
-        <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 520px;">
-          <div class="position-relative flex-grow-1">
-            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+      <div class="admin-search-wrapper">
+        <div class="search-inputs-group">
+          <!-- Search Input Pill -->
+          <div class="search-box-pill">
+            <i class="bi bi-search search-icon"></i>
             <input
               type="text"
-              class="form-control ps-5"
+              class="search-input-field"
               placeholder="ابحث باسم الصنف، الكود، أو التفاصيل..."
               [ngModel]="productSearch()"
               (ngModelChange)="productSearch.set($event)"
-              style="padding-right: 2.2rem;"
             />
             @if (productSearch()) {
-              <button type="button" class="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2 text-muted p-0" (click)="productSearch.set('')">
+              <button type="button" class="btn-clear-search" (click)="productSearch.set('')" title="مسح">
                 <i class="bi bi-x-circle-fill"></i>
               </button>
             }
           </div>
-          <select
-            class="form-select"
-            style="max-width: 180px;"
-            [ngModel]="categoryFilter()"
-            (ngModelChange)="categoryFilter.set($event)"
-          >
-            <option [ngValue]="null">كل الأقسام</option>
-            @for (c of categories(); track c.id) {
-              <option [ngValue]="c.id">{{ c.nameAr }}</option>
-            }
-          </select>
+
+          <!-- Category Select Filter -->
+          <div class="category-select-wrap">
+            <select
+              class="category-select-field"
+              [ngModel]="categoryFilter()"
+              (ngModelChange)="categoryFilter.set($event)"
+            >
+              <option [ngValue]="null">كل الأقسام</option>
+              @for (c of categories(); track c.id) {
+                <option [ngValue]="c.id">{{ c.nameAr }}</option>
+              }
+            </select>
+          </div>
         </div>
-        <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill">
+
+        <!-- Count Badge -->
+        <div class="search-count-badge">
           {{ filteredProducts().length }} من أصل {{ products().length }} صنف
-        </span>
+        </div>
       </div>
 
       <div class="table-responsive">
