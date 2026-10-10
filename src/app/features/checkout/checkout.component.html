@@ -79,7 +79,10 @@
         @if (orderType === 'Delivery') {
           <div class="address-box animate-fade-in">
             <div class="form-group mb-2">
-              <label for="cStreet">العنوان بالتفصيل *</label>
+              <label for="cStreet">
+                العنوان بالتفصيل *
+                <small class="text-muted fw-normal me-1" style="font-size: 0.8rem;">(داخل الجيزة)</small>
+              </label>
               <textarea
                 id="cStreet"
                 rows="2"
@@ -170,6 +173,33 @@
               </button>
             </div>
           </div>
+        } @else {
+          <div class="delivery-time-estimate-box mt-3 p-3 rounded-3 border bg-light animate-fade-in">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <div class="time-icon-circle bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; min-width: 38px;">
+                  <i class="bi bi-stopwatch-fill fs-5"></i>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark small">
+                    المدة المتوقعة لتجهيز وتوصيل الطلب: <span class="text-primary fw-bold">{{ totalEstimatedMinutes }} دقيقة</span>
+                  </div>
+                  <div class="text-muted" style="font-size: 0.76rem;">
+                    @if (orderType === 'Delivery') {
+                      <span>تجهيز ({{ longestItemPrepTime.minutes }} دقيقة) + توصيل ({{ deliveryDurationMinutes }} دقيقة)</span>
+                    } @else {
+                      <span>مدة التجهيز بالمطبخ: {{ longestItemPrepTime.minutes }} دقيقة</span>
+                    }
+                  </div>
+                </div>
+              </div>
+              <div>
+                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fw-bold" style="font-size: 0.78rem;">
+                  <i class="bi bi-clock-fill me-1"></i> موعد الوصول المتوقع: {{ estimatedArrivalFormatted }}
+                </span>
+              </div>
+            </div>
+          </div>
         }
       </div>
 
@@ -225,6 +255,36 @@
               </div>
             </div>
           }
+        </div>
+
+        <!-- Estimated Delivery Duration Box in Summary -->
+        <div class="summary-delivery-time-box d-flex align-items-center justify-content-between p-2.5 rounded-3 bg-light border mb-2 mt-2">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-clock-history text-primary fs-5"></i>
+            <div>
+              <div class="fw-bold text-dark" style="font-size: 0.82rem;">
+                @if (prepTimingType() === 'Scheduled' && scheduledDisplaySummary()) {
+                  موعد الاستلام المحدد:
+                } @else {
+                  مدة {{ orderType === 'Delivery' ? 'التوصيل' : 'الاستلام' }} المتوقعة:
+                }
+              </div>
+              <div class="text-muted" style="font-size: 0.74rem;">
+                @if (prepTimingType() === 'Scheduled' && scheduledDisplaySummary()) {
+                  {{ scheduledDisplaySummary() }}
+                } @else {
+                  {{ totalEstimatedMinutes }} دقيقة ({{ estimatedArrivalFormatted }})
+                }
+              </div>
+            </div>
+          </div>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold" style="font-size: 0.78rem;">
+            @if (prepTimingType() === 'Scheduled') {
+              مجدول 🕒
+            } @else {
+              {{ totalEstimatedMinutes }} دقيقة
+            }
+          </span>
         </div>
 
         <hr class="divider" />
@@ -465,167 +525,226 @@
 <!-- ========================================================= -->
 @if (showConfirmModal()) {
   <div class="modal-backdrop animate-fade-in" (click)="closeConfirmModal()">
-    <div class="custom-modal-card glass-modal confirm-order-modal" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <div class="brand-badge mb-2">
-          <i class="bi bi-shield-check me-1"></i>
+    <div class="confirm-order-modal" (click)="$event.stopPropagation()">
+      <button type="button" class="btn-close-modal" (click)="closeConfirmModal()" aria-label="Close">
+        <i class="bi bi-x-lg"></i>
+      </button>
+
+      <div class="confirm-modal-header">
+        <div class="badge-review-status">
+          <i class="bi bi-shield-check"></i>
           <span>مراجعة وتأكيد الطلب النهائي</span>
         </div>
-        <h3 class="modal-title">هل تريد تأكيد إرسال الطلب؟</h3>
-        <p class="modal-sub">يرجى مراجعة تفاصيل أصنافك وعنوان التوصيل قبل إرسال الطلب للمطبخ</p>
-        <button type="button" class="btn-close-modal" (click)="closeConfirmModal()">
-          <i class="bi bi-x-lg"></i>
-        </button>
+        <h2 class="confirm-modal-title">هل تريد تأكيد إرسال الطلب؟</h2>
+        <p class="confirm-modal-subtitle">يرجى مراجعة تفاصيل أصنافك وعنوان التوصيل قبل إرسال الطلب للمطبخ</p>
       </div>
 
-      <div class="modal-body confirm-modal-body">
-        <!-- Customer & Delivery Summary Box -->
-        <div class="info-highlight-box mb-3">
-          <div class="info-pill-row">
-            @if (customerName || authService.currentCustomer()?.fullName) {
-              <div class="info-item">
-                <span class="lbl"><i class="bi bi-person me-1 text-primary"></i> العميل:</span>
-                <span class="val fw-bold">{{ customerName || authService.currentCustomer()?.fullName }}</span>
+      <div class="confirm-modal-body">
+        <!-- 1. Customer & Order Details Card -->
+        <div class="modal-card-box customer-details-card">
+          @if (customerName || authService.currentCustomer()?.fullName) {
+            <div class="card-detail-row">
+              <div class="row-label-side">
+                <div class="icon-avatar blue"><i class="bi bi-person-fill"></i></div>
+                <span class="label-text">العميل</span>
               </div>
-            }
-            <div class="info-item">
-              <span class="lbl"><i class="bi bi-telephone me-1 text-success"></i> الموبايل:</span>
-              <span class="val fw-bold" dir="ltr">{{ customerPhone || authService.currentCustomer()?.usernameOrPhone }}</span>
+              <div class="row-value-side">
+                {{ customerName || authService.currentCustomer()?.fullName }}
+              </div>
+            </div>
+          }
+
+          <div class="card-detail-row">
+            <div class="row-label-side">
+              <div class="icon-avatar green"><i class="bi bi-telephone-fill"></i></div>
+              <span class="label-text">الموبايل</span>
+            </div>
+            <div class="row-value-side" dir="ltr">
+              {{ customerPhone || authService.currentCustomer()?.usernameOrPhone }}
             </div>
           </div>
 
-          <div class="info-pill-row mt-2">
-            <div class="info-item">
-              <span class="lbl"><i class="bi bi-truck me-1 text-primary"></i> طريقة الاستلام:</span>
-              <span class="val badge" [class.bg-primary]="orderType === 'Delivery'" [class.bg-warning]="orderType === 'Pickup'">
-                {{ orderType === 'Delivery' ? 'توصيل للعنوان' : 'استلام من الفرع' }}
-              </span>
+          <div class="card-detail-row">
+            <div class="row-label-side">
+              <div class="icon-avatar amber"><i class="bi bi-truck"></i></div>
+              <span class="label-text">طريقة الاستلام</span>
             </div>
-            <div class="info-item">
-              <span class="lbl"><i class="bi bi-cash-stack me-1 text-success"></i> الدفع:</span>
-              <span class="val fw-bold">كاش عند الاستلام</span>
+            <div class="row-value-side">
+              {{ orderType === 'Delivery' ? 'توصيل للعنوان' : 'استلام من الفرع' }}
+            </div>
+          </div>
+
+          <div class="card-detail-row">
+            <div class="row-label-side">
+              <div class="icon-avatar green"><i class="bi bi-cash-stack"></i></div>
+              <span class="label-text">طريقة الدفع</span>
+            </div>
+            <div class="row-value-side">
+              كاش عند الاستلام
             </div>
           </div>
 
           @if (orderType === 'Delivery') {
-            <div class="address-summary-line mt-2">
-              <div class="address-line-top">
-                <span class="lbl"><i class="bi bi-geo-alt-fill text-danger me-1"></i> عنوان التوصيل بالتفصيل:</span>
-                @if (selectedZone?.name || resolvedZoneName()) {
-                  <span class="zone-pill"><i class="bi bi-pin-map me-1"></i> {{ selectedZone?.name || resolvedZoneName() }}</span>
-                }
+            <div class="card-detail-row address-row">
+              <div class="row-label-side">
+                <div class="icon-avatar red"><i class="bi bi-geo-alt-fill"></i></div>
+                <span class="label-text">العنوان بالتفصيل</span>
               </div>
-              <div class="address-line-detail">{{ streetAddress || fullFormattedAddress }}</div>
+              <div class="row-value-side address-text">
+                @if (selectedZone?.name || resolvedZoneName()) {
+                  <span class="badge bg-light text-dark border me-1">{{ selectedZone?.name || resolvedZoneName() }}</span>
+                }
+                {{ streetAddress || fullFormattedAddress }}
+              </div>
             </div>
           }
 
           @if (prepTimingType() === 'Scheduled' && scheduledDisplaySummary()) {
-            <div class="scheduled-summary-line mt-2 text-primary fw-bold">
-              <i class="bi bi-alarm-fill me-1"></i>
-              <span class="lbl">موعد التجهيز المطلوب:</span>
-              <span class="val ms-1 badge bg-primary text-white">{{ scheduledDisplaySummary() }}</span>
+            <div class="card-detail-row">
+              <div class="row-label-side">
+                <div class="icon-avatar purple"><i class="bi bi-calendar-check-fill"></i></div>
+                <span class="label-text">موعد التجهيز</span>
+              </div>
+              <div class="row-value-side text-primary">
+                {{ scheduledDisplaySummary() }}
+              </div>
+            </div>
+          } @else {
+            <div class="card-detail-row">
+              <div class="row-label-side">
+                <div class="icon-avatar orange"><i class="bi bi-stopwatch-fill"></i></div>
+                <span class="label-text">المدة المتوقعة</span>
+              </div>
+              <div class="row-value-side text-primary">
+                {{ totalEstimatedMinutes }} دقيقة (الوصول: {{ estimatedArrivalFormatted }})
+              </div>
             </div>
           }
 
           @if (notes.trim()) {
-            <div class="notes-summary-line mt-2 text-muted small">
-              <i class="bi bi-chat-left-text me-1"></i>
-              <span>ملاحظات: {{ notes }}</span>
+            <div class="card-detail-row">
+              <div class="row-label-side">
+                <div class="icon-avatar blue-soft"><i class="bi bi-chat-text-fill"></i></div>
+                <span class="label-text">ملاحظات</span>
+              </div>
+              <div class="row-value-side notes-text">
+                {{ notes }}
+              </div>
             </div>
           }
         </div>
 
-        <!-- Items Summary List -->
-        <div class="confirm-items-box mb-3">
-          <div class="section-header-row flex-between mb-2">
-            <h5 class="section-sub-title m-0"><i class="bi bi-basket3-fill text-primary me-2"></i> تفاصيل الأصناف</h5>
-            <span class="items-count-pill">{{ cartService.items().length }} أصناف</span>
+        <!-- 2. Items Details & Calculations Card -->
+        <div class="modal-card-box items-details-card">
+          <div class="items-card-header">
+            <div class="header-right">
+              <div class="icon-avatar blue"><i class="bi bi-basket3-fill"></i></div>
+              <span class="header-title">تفاصيل الأصناف</span>
+            </div>
+            <span class="header-count">{{ cartService.items().length }} أصناف</span>
           </div>
-          <div class="confirm-items-scroll">
+
+          <div class="items-list-container">
             @for (item of cartService.items(); track item.id) {
-              <div class="confirm-item-row">
-                <div class="item-desc">
-                  <div class="item-title">
-                    <strong class="item-name">{{ item.product.nameAr }}</strong>
-                    <span class="badge qty-badge">×{{ item.quantityUnits }}</span>
+              <div class="item-entry-row">
+                <div class="entry-right">
+                  <img [src]="item.product.imageUrl | imageUrl:'product'" [alt]="item.product.nameAr" class="entry-img" />
+                  <div class="entry-info">
+                    <span class="entry-name">{{ item.product.nameAr }}</span>
+                    @if (item.selectedPrepOption) {
+                      <span class="entry-prep"><i class="bi bi-fire text-danger"></i> {{ item.selectedPrepOption.nameAr }}</span>
+                    }
                     @if (item.product.pricingType === 'ByWeight' && (item.customWeightGrams || item.estimatedWeightGrams)) {
-                      <span class="approx-weight-pill">≈ {{ item.customWeightGrams || item.estimatedWeightGrams }} جرام</span>
+                      <span class="entry-weight">≈ {{ item.customWeightGrams || item.estimatedWeightGrams }} جرام</span>
+                    }
+                    @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
+                      <span class="entry-mods">إضافات: {{ getModifiersSummary(item) }}</span>
                     }
                   </div>
-                  @if (item.selectedPrepOption) {
-                    <div class="prep-line"><i class="bi bi-fire text-danger me-1"></i> {{ item.selectedPrepOption.nameAr }}</div>
-                  }
-                  @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
-                    <div class="mods-line">إضافات: {{ getModifiersSummary(item) }}</div>
-                  }
                 </div>
-                <div class="item-total-price">
-                  {{ item.estimatedLineTotal }} ج.م
+                <div class="entry-qty">
+                  ×{{ item.quantityUnits }}
+                  <span class="text-primary ms-1 small fw-bold">({{ item.estimatedLineTotal }} ج.م)</span>
                 </div>
+              </div>
+            }
+          </div>
+
+          <div class="calc-divider"></div>
+
+          <div class="calc-section">
+            @if (serverQuote()) {
+              <div class="calc-row">
+                <span class="calc-lbl">المجموع الفرعي:</span>
+                <span class="calc-val">{{ serverQuote()!.estimatedSubtotal }} ج.م</span>
+              </div>
+
+              @if (orderType === 'Delivery') {
+                <div class="calc-row">
+                  <span class="calc-lbl">رسوم التوصيل:</span>
+                  <span class="calc-val">
+                    @if (serverQuote()!.isFreeDelivery || serverQuote()!.deliveryFee === 0) {
+                      مجاناً
+                    } @else {
+                      {{ serverQuote()!.deliveryFee }} ج.م
+                    }
+                  </span>
+                </div>
+              }
+
+              @if (serverQuote()!.discountAmount > 0) {
+                <div class="calc-row text-success">
+                  <span class="calc-lbl">الخصم:</span>
+                  <span class="calc-val">- {{ serverQuote()!.discountAmount }} ج.م</span>
+                </div>
+              }
+
+              <div class="calc-row total-calc-row">
+                <span class="total-lbl">
+                  @if (cartService.hasWeightedItems()) {
+                    الإجمالي التقديري المطلوب:
+                  } @else {
+                    الإجمالي المطلوب:
+                  }
+                </span>
+                <span class="calc-total-amount">{{ serverQuote()!.estimatedTotal }} ج.م</span>
               </div>
             }
           </div>
         </div>
-
-        <!-- Pricing Summary -->
-        @if (serverQuote()) {
-          <div class="confirm-price-box mb-3">
-            <div class="price-row flex-between">
-              <span class="text-muted">المجموع الفرعي:</span>
-              <span class="val">{{ serverQuote()!.estimatedSubtotal }} ج.م</span>
-            </div>
-            @if (orderType === 'Delivery') {
-              <div class="price-row flex-between">
-                <span class="text-muted">رسوم التوصيل:</span>
-                <span class="val">{{ serverQuote()!.deliveryFee }} ج.م</span>
-              </div>
-            }
-            <div class="total-row flex-between">
-              <span>
-                @if (cartService.hasWeightedItems()) {
-                  الإجمالي التقديري المطلوب:
-                } @else {
-                  الإجمالي المطلوب:
-                }
-              </span>
-              <span class="total-val">{{ serverQuote()!.estimatedTotal }} <small class="curr">ج.م</small></span>
-            </div>
-          </div>
-        }
 
         <!-- Fresh Weight Notice (Only if weighted items in cart) -->
         @if (cartService.hasWeightedItems()) {
-          <div class="weight-disclaimer-alert p-2 rounded mb-3">
-            <small class="d-flex align-items-center">
-              <i class="bi bi-info-circle-fill text-warning fs-5 me-2 flex-shrink-0"></i>
-              <span>نظراً لطبيعة الأسماك الطازجة بالوزن، سيقوم المطبخ بوزن طلبك بدقة وتحديث الفاتورة وإشعارك فوراً عبر الواتساب.</span>
-            </small>
+          <div class="weight-disclaimer-alert">
+            <i class="bi bi-info-circle-fill me-1"></i>
+            نظراً لطبيعة الأسماك الطازجة بالوزن، سيقوم المطبخ بوزن طلبك بدقة وتحديث الفاتورة وإشعارك فوراً عبر الواتساب.
           </div>
         }
-      </div>
 
-      <div class="modal-footer confirm-modal-footer">
-        <button
-          type="button"
-          class="btn-primary w-100 btn-confirm-order-action mb-2"
-          (click)="confirmAndSubmitOrder()"
-          [disabled]="isSubmitting()"
-        >
-          @if (isSubmitting()) {
-            <i class="bi bi-hourglass-split me-2"></i> جاري تأكيد وإرسال الطلب للمطبخ...
-          } @else {
-            <i class="bi bi-check-circle-fill me-2 fs-5"></i> نعم، تأكيد وإرسال الطلب الآن
-          }
-        </button>
+        <!-- 3. Actions -->
+        <div class="confirm-modal-actions">
+          <button
+            type="button"
+            class="btn-confirm-order-submit"
+            (click)="confirmAndSubmitOrder()"
+            [disabled]="isSubmitting()"
+          >
+            @if (isSubmitting()) {
+              <i class="bi bi-hourglass-split me-2"></i> جاري تأكيد وإرسال الطلب للمطبخ...
+            } @else {
+              <i class="bi bi-check-circle-fill me-2 fs-5"></i> نعم، تأكيد وإرسال الطلب الآن
+            }
+          </button>
 
-        <button
-          type="button"
-          class="btn-modify-order w-100"
-          (click)="closeConfirmModal()"
-          [disabled]="isSubmitting()"
-        >
-          <i class="bi bi-pencil-square me-1"></i> تعديل بيانات الطلب
-        </button>
+          <button
+            type="button"
+            class="btn-modify-order-action"
+            (click)="closeConfirmModal()"
+            [disabled]="isSubmitting()"
+          >
+            <i class="bi bi-pencil-square me-1"></i> تعديل بيانات الطلب
+          </button>
+        </div>
       </div>
     </div>
   </div>

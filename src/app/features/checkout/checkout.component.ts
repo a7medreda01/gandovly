@@ -16,10 +16,12 @@ import {
   PaymentMethod
 } from '../../core/models/models';
 
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ImageUrlPipe],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.scss'
 })
