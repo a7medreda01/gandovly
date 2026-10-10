@@ -49,8 +49,8 @@ export class AuthService {
     }
   }
 
-  requestOtp(phoneNumber: string) {
-    return this.api.post<boolean>('auth/otp/request', { phoneNumber });
+  requestOtp(phoneNumber: string, isRetry: boolean = false) {
+    return this.api.post<{ success: boolean; sentViaWhatsApp: boolean; message: string; fallbackCode?: string }>('auth/otp/request', { phoneNumber, isRetry });
   }
 
   verifyOtp(phoneNumber: string, code: string, fullName?: string) {

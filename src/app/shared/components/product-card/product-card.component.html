@@ -1,9 +1,9 @@
-<div class="product-card" [class.is-out-of-stock]="!product.isAvailable" (click)="onSelect()" (mouseenter)="isHovered = true" (mouseleave)="isHovered = false">
+<div class="product-card" [class.is-out-of-stock]="!product.isAvailable" (click)="onSelect()">
   <!-- Image Box with Badges -->
   <div class="card-media">
     <div class="product-img-wrapper">
       <img
-        [src]="(isHovered && secondaryImage ? secondaryImage : product.imageUrl) | imageUrl:'product'"
+        [src]="product.imageUrl | imageUrl:'product':(product.updatedAt || product.id)"
         [alt]="product.nameAr"
         class="product-real-img"
         loading="lazy"

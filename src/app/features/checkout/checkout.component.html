@@ -365,21 +365,10 @@
             <small class="text-muted"><i class="bi bi-info-circle me-1"></i> سنرسل رمز التحقق مباشرة على هذا الرقم عبر واتساب</small>
           </div>
 
-          <div class="form-group mb-4">
-            <label for="mPass"><i class="bi bi-shield-lock me-1"></i> كلمة السر للحساب (اختياري)</label>
-            <input
-              id="mPass"
-              type="password"
-              class="form-control modal-input"
-              placeholder="اختر كلمة سر لتسجيل الدخول مستقبلاً"
-              [(ngModel)]="authPassword"
-            />
-          </div>
-
           <button
             type="button"
-            class="btn-primary w-100 btn-modal-action"
-            (click)="requestAuthOtp()"
+            class="btn-primary w-100 btn-modal-action mt-2"
+            (click)="requestAuthOtp(false)"
             [disabled]="isRequestingOtp() || !authPhone.trim()"
           >
             @if (isRequestingOtp()) {
@@ -391,20 +380,48 @@
         } @else {
           <!-- OTP Verification Stage -->
           <div class="otp-stage text-center py-2">
-            <div class="otp-icon-wrap mb-3">
+            <div class="otp-icon-wrap mb-2">
               <i class="bi bi-chat-left-dots-fill text-success fs-1"></i>
             </div>
 
-            <div class="form-group mb-4">
-              <label for="mOtp" class="mb-2 fw-bold">رمز التحقق المكون من 6 أرقام</label>
+            <!-- Fallback Code Card (When WhatsApp delivery fails) -->
+            @if (fallbackOtpCode()) {
+              <div class="fallback-code-box alert alert-warning text-center p-3 mb-3 border-warning rounded-3 animate-fade-in">
+                <div class="fw-bold mb-1 text-dark">
+                  <i class="bi bi-shield-check text-warning fs-5 me-1"></i> كود التأكيد المباشر:
+                </div>
+                <div class="display-6 fw-bold text-primary my-2" dir="ltr" style="letter-spacing: 6px;">
+                  {{ fallbackOtpCode() }}
+                </div>
+                <p class="small text-muted mb-2">
+                  تعذر إرسال الواتساب حالياً. يمكنك استخدام هذا الكود لتأكيد رقمك وإكمال طلبك فوراً دون أي تأخير.
+                </p>
+                <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3 py-1" (click)="useFallbackCode()">
+                  <i class="bi bi-check-circle-fill me-1"></i> استخدام الكود والتأكيد فوراً
+                </button>
+              </div>
+            } @else if (otpNoticeMessage()) {
+              <div class="alert alert-info py-2 px-3 small text-center mb-3">
+                <i class="bi bi-info-circle me-1"></i> {{ otpNoticeMessage() }}
+              </div>
+            }
+
+            <div class="form-group mb-3">
+              <div class="flex-between mb-2">
+                <label for="mOtp" class="mb-0 fw-bold">رمز التحقق المكون من 6 أرقام</label>
+                <button type="button" class="btn-link-action text-primary small" (click)="pasteFromClipboard()" title="لصق الكود من الحافظة">
+                  <i class="bi bi-clipboard-check me-1"></i> لصق الكود
+                </button>
+              </div>
               <input
                 id="mOtp"
                 type="text"
                 maxlength="6"
                 dir="ltr"
-                class="form-control modal-input otp-code-input text-center"
+                class="form-control modal-input otp-code-input text-center fs-4 fw-bold"
                 placeholder="------"
                 [(ngModel)]="authOtpCode"
+                (ngModelChange)="onOtpCodeChange($event)"
                 (keyup.enter)="verifyAuthOtp()"
                 autofocus
               />
@@ -431,7 +448,7 @@
               @if (otpResendCountdown() > 0) {
                 <span>إعادة الإرسال بعد ({{ otpResendCountdown() }} ثانية)</span>
               } @else {
-                <button type="button" class="btn-link-action text-primary fw-bold" (click)="requestAuthOtp()">
+                <button type="button" class="btn-link-action text-primary fw-bold" (click)="requestAuthOtp(true)">
                   <i class="bi bi-arrow-repeat me-1"></i> إعادة إرسال الكود
                 </button>
               }

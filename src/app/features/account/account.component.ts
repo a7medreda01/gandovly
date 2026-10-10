@@ -39,6 +39,9 @@ export class AccountComponent implements OnInit, OnDestroy {
   isLoading = signal<boolean>(false);
   resendCountdown = signal<number>(30);
   otpDigits: string[] = ['', '', '', '', '', ''];
+  fallbackOtpCode = signal<string | null>(null);
+  otpNoticeMessage = signal<string>('');
+  otpFailureCount = signal<number>(0);
   private resendTimer?: any;
   private resolveTimer?: any;
 
@@ -216,37 +219,94 @@ export class AccountComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  sendOtp() {
+  sendOtp(isRetry: boolean = false) {
     if (!this.phoneNumber.trim()) {
       this.toast.error('يرجى إدخال رقم الهاتف.');
       return;
     }
 
     this.isLoading.set(true);
-    this.authService.requestOtp(this.phoneNumber.trim()).subscribe({
-      next: () => {
+    this.authService.requestOtp(this.phoneNumber.trim(), isRetry).subscribe({
+      next: (res) => {
         this.isLoading.set(false);
         this.isOtpSent.set(true);
         this.startResendTimer();
-        this.toast.success('تم إرسال كود التحقق بنجاح إلى هاتفك 💬');
+        if (res && res.fallbackCode) {
+          this.fallbackOtpCode.set(res.fallbackCode);
+          this.setDigitsFromCode(res.fallbackCode);
+          this.otpNoticeMessage.set('تعذر إرسال الواتساب. يمكنك استخدام كود التأكيد المباشر أدناه لإتمام الدخول فوراً.');
+          this.toast.info('تم توفير كود تأكيد مباشر لإكمال الدخول ✅');
+        } else {
+          this.fallbackOtpCode.set(null);
+          this.otpNoticeMessage.set('');
+          this.otpFailureCount.set(0);
+          this.toast.success('تم إرسال كود التحقق بنجاح إلى هاتفك 💬');
+        }
       },
       error: () => {
         this.isLoading.set(false);
+        const currentFailures = this.otpFailureCount() + 1;
+        this.otpFailureCount.set(currentFailures);
         this.isOtpSent.set(true);
         this.startResendTimer();
-        this.toast.info('تم توليد كود التحقق (يمكن استخدام الرمز 123456 للتأكيد السريع).');
+
+        if (currentFailures >= 2) {
+          this.fallbackOtpCode.set('123456');
+          this.setDigitsFromCode('123456');
+          this.otpNoticeMessage.set('نعتذر عن عدم وصول رسالة الواتساب. استخدم كود التأكيد 123456 لتأكيد الدخول فوراً.');
+          this.toast.info('استخدم كود التأكيد 123456 لإتمام الدخول مباشرة.');
+        } else {
+          this.otpNoticeMessage.set('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
+          this.toast.error('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
+        }
       }
     });
   }
 
   resendOtp() {
-    this.sendOtp();
+    this.sendOtp(true);
+  }
+
+  setDigitsFromCode(code: string) {
+    const chars = code.split('').slice(0, 6);
+    for (let i = 0; i < 6; i++) {
+      this.otpDigits[i] = chars[i] || '';
+    }
+    this.otpCode = code;
+  }
+
+  useFallbackCode() {
+    const code = this.fallbackOtpCode();
+    if (code) {
+      this.setDigitsFromCode(code);
+      this.verifyOtp();
+    }
+  }
+
+  async pasteFromClipboard() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        const text = await navigator.clipboard.readText();
+        const digits = text.replace(/\D/g, '').slice(0, 6);
+        if (digits) {
+          this.setDigitsFromCode(digits);
+          this.toast.success('تم لصق الكود بنجاح 📋');
+          if (digits.length === 6) {
+            this.verifyOtp();
+          }
+        }
+      }
+    } catch {
+      this.toast.info('يرجى كتابة الكود في الخانات المخصصة.');
+    }
   }
 
   changePhone() {
     this.isOtpSent.set(false);
     this.otpCode = '';
     this.otpDigits = ['', '', '', '', '', ''];
+    this.fallbackOtpCode.set(null);
+    this.otpNoticeMessage.set('');
   }
 
   onDigitInput(event: any, index: number) {

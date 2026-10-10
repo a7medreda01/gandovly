@@ -157,6 +157,7 @@ export interface Product {
   displayOrder: number;
   isAvailable: boolean;
   stockQuantity?: number;
+  updatedAt?: string | Date;
   preparationGroups: PreparationOptionGroup[];
   modifierGroups: ModifierGroup[];
 }

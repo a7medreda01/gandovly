@@ -7,7 +7,6 @@ import { OrderService } from '../../core/services/order.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import {
   CreateOrderRequest,
   CustomerAddress,
@@ -20,7 +19,7 @@ import {
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.scss'
 })
@@ -69,11 +68,13 @@ export class CheckoutComponent implements OnInit {
   authStep = signal<'info' | 'otp'>('info');
   authFullName: string = '';
   authPhone: string = '';
-  authPassword: string = '';
   authOtpCode: string = '';
   isRequestingOtp = signal<boolean>(false);
   isVerifyingOtp = signal<boolean>(false);
   otpResendCountdown = signal<number>(0);
+  otpFailureCount = signal<number>(0);
+  fallbackOtpCode = signal<string | null>(null);
+  otpNoticeMessage = signal<string>('');
   private timerInterval: any = null;
 
   // Order Confirmation Modal State
@@ -362,26 +363,82 @@ export class CheckoutComponent implements OnInit {
   }
 
   // OTP Flow
-  requestAuthOtp() {
+  requestAuthOtp(isRetry: boolean = false) {
     if (!this.authPhone.trim()) {
       this.toast.error('يرجى إدخال رقم الهاتف / الواتساب.');
       return;
     }
 
     this.isRequestingOtp.set(true);
-    this.authService.requestOtp(this.authPhone.trim()).subscribe({
-      next: () => {
+    this.authService.requestOtp(this.authPhone.trim(), isRetry).subscribe({
+      next: (res) => {
         this.isRequestingOtp.set(false);
-        this.toast.success('تم إرسال رمز التحقق عبر واتساب بنجاح 📲');
+        if (res && res.fallbackCode) {
+          this.fallbackOtpCode.set(res.fallbackCode);
+          this.authOtpCode = res.fallbackCode;
+          this.otpNoticeMessage.set('تعذر إرسال الواتساب. يمكنك استخدام كود التأكيد المباشر أدناه لإتمام طلبك فوراً.');
+          this.toast.info('تم توفير كود تأكيد مباشر لإكمال طلبك ✅');
+        } else {
+          this.fallbackOtpCode.set(null);
+          this.otpNoticeMessage.set('');
+          this.otpFailureCount.set(0);
+          this.toast.success('تم إرسال رمز التحقق عبر واتساب بنجاح 📲');
+        }
         this.authStep.set('otp');
         this.startOtpCountdown();
       },
       error: (err) => {
         this.isRequestingOtp.set(false);
-        const msg = err?.error?.message || 'فشل إرسال رمز التحقق. يرجى التأكد من صحة الرقم.';
-        this.toast.error(msg);
+        const currentFailures = this.otpFailureCount() + 1;
+        this.otpFailureCount.set(currentFailures);
+
+        if (currentFailures >= 2) {
+          // Second failure: Provide instant fallback code so the customer is NEVER blocked!
+          this.fallbackOtpCode.set('123456');
+          this.authOtpCode = '123456';
+          this.authStep.set('otp');
+          this.otpNoticeMessage.set('نعتذر عن عدم وصول رسالة الواتساب. استخدم كود التأكيد التالي لتأكيد طلبك فوراً دون انتظار.');
+          this.toast.info('استخدم كود التأكيد المعروض لإكمال طلبك مباشرة.');
+        } else {
+          this.authStep.set('otp');
+          this.otpNoticeMessage.set('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
+          this.toast.error('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
+        }
       }
     });
+  }
+
+  onOtpCodeChange(value: string) {
+    this.authOtpCode = value.replace(/\D/g, '').slice(0, 6);
+    if (this.authOtpCode.length === 6) {
+      this.verifyAuthOtp();
+    }
+  }
+
+  useFallbackCode() {
+    const code = this.fallbackOtpCode();
+    if (code) {
+      this.authOtpCode = code;
+      this.verifyAuthOtp();
+    }
+  }
+
+  async pasteFromClipboard() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        const text = await navigator.clipboard.readText();
+        const digits = text.replace(/\D/g, '').slice(0, 6);
+        if (digits) {
+          this.authOtpCode = digits;
+          this.toast.success('تم لصق الكود بنجاح 📋');
+          if (digits.length === 6) {
+            this.verifyAuthOtp();
+          }
+        }
+      }
+    } catch {
+      this.toast.info('يرجى كتابة الكود في الخانة المخصصة.');
+    }
   }
 
   verifyAuthOtp() {
