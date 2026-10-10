@@ -174,14 +174,65 @@
   }
 }
 
-/* Copyright Row */
+/* Copyright & Developer Row */
 .footer-bottom-row {
   padding-top: 0.85rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+  }
 
   p {
     margin: 0;
     font-size: 0.75rem;
     color: #64748b;
+  }
+
+  .developer-credit {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    .runx-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      border-radius: 6px;
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+
+      i {
+        color: #22c55e;
+        font-size: 0.85rem;
+        transition: transform 0.2s;
+      }
+
+      &:hover {
+        color: #ffffff;
+        background: #0284c7;
+        border-color: #38bdf8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+
+        i {
+          color: #ffffff;
+          transform: scale(1.15);
+        }
+      }
+    }
   }
 }

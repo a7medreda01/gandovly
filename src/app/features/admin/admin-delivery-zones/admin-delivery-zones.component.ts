@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
@@ -20,6 +20,19 @@ export class AdminDeliveryZonesComponent implements OnInit {
 
   zones = signal<DeliveryZone[]>([]);
   isLoading = signal<boolean>(false);
+  searchQuery = signal<string>('');
+
+  filteredZones = computed(() => {
+    const q = this.searchQuery().trim().toLowerCase();
+    const list = this.zones();
+    if (!q) return list;
+    return list.filter(z =>
+      (z.name && z.name.toLowerCase().includes(q)) ||
+      (z.city && z.city.toLowerCase().includes(q)) ||
+      (z.parentZoneName && z.parentZoneName.toLowerCase().includes(q)) ||
+      (z.neighborhoodKeywords && z.neighborhoodKeywords.toLowerCase().includes(q))
+    );
+  });
 
   showZoneModal = signal<boolean>(false);
   isEditing = signal<boolean>(false);

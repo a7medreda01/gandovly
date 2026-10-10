@@ -20,8 +20,30 @@
       subtitle="لحظات ويتم جلب كافة الأحياء والحد الأدنى للطلبات"
       [count]="6"
     ></app-loading-state>
-  } @else {
     <div class="zones-card glass-panel">
+    <!-- Search Bar -->
+    <div class="search-filter-bar mb-3 d-flex align-items-center justify-content-between gap-2 flex-wrap">
+      <div class="search-input-wrap position-relative flex-grow-1" style="max-width: 420px;">
+        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+        <input
+          type="text"
+          class="form-control ps-5"
+          placeholder="ابحث بالاسم، المدينة، أو الكلمات المفتاحية..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+          style="padding-right: 2.5rem;"
+        />
+        @if (searchQuery()) {
+          <button type="button" class="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2 text-muted p-0" (click)="searchQuery.set('')">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        }
+      </div>
+      <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill">
+        {{ filteredZones().length }} من أصل {{ zones().length }} منطقة
+      </span>
+    </div>
+
     <!-- Desktop Table View (>= 992px) -->
     <div class="table-responsive desktop-table-wrap">
       <table class="admin-table">
@@ -38,7 +60,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (zone of zones(); track zone.id) {
+          @for (zone of filteredZones(); track zone.id) {
             <tr>
               <td>
                 <div class="d-flex align-items-center gap-2">
@@ -89,7 +111,7 @@
 
     <!-- Mobile Cards View (< 992px) -->
     <div class="mobile-zones-cards">
-      @for (zone of zones(); track zone.id) {
+      @for (zone of filteredZones(); track zone.id) {
         <div class="zone-mobile-card">
           <div class="zone-card-top flex-between">
             <div class="zone-info">

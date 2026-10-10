@@ -49,6 +49,42 @@
     <!-- Tab 1: Products List Table & Mobile Cards -->
     @if (activeTab === 'products') {
     <div class="catalog-card glass-panel">
+      <!-- Search & Category Filter Bar -->
+      <div class="search-filter-bar mb-3 p-3 rounded-3 bg-light d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 520px;">
+          <div class="position-relative flex-grow-1">
+            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+            <input
+              type="text"
+              class="form-control ps-5"
+              placeholder="ابحث باسم الصنف، الكود، أو التفاصيل..."
+              [ngModel]="productSearch()"
+              (ngModelChange)="productSearch.set($event)"
+              style="padding-right: 2.2rem;"
+            />
+            @if (productSearch()) {
+              <button type="button" class="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2 text-muted p-0" (click)="productSearch.set('')">
+                <i class="bi bi-x-circle-fill"></i>
+              </button>
+            }
+          </div>
+          <select
+            class="form-select"
+            style="max-width: 180px;"
+            [ngModel]="categoryFilter()"
+            (ngModelChange)="categoryFilter.set($event)"
+          >
+            <option [ngValue]="null">كل الأقسام</option>
+            @for (c of categories(); track c.id) {
+              <option [ngValue]="c.id">{{ c.nameAr }}</option>
+            }
+          </select>
+        </div>
+        <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill">
+          {{ filteredProducts().length }} من أصل {{ products().length }} صنف
+        </span>
+      </div>
+
       <div class="table-responsive">
         <table class="admin-table">
           <thead>
@@ -63,7 +99,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (prod of products(); track prod.id) {
+            @for (prod of filteredProducts(); track prod.id) {
               <tr>
                 <td>
                   <div class="prod-cell-with-img">
@@ -132,7 +168,7 @@
 
       <!-- Mobile Cards List (shown instead of table on small screens) -->
       <div class="mobile-catalog-list">
-        @for (prod of products(); track prod.id) {
+        @for (prod of filteredProducts(); track prod.id) {
           <div class="mobile-product-card">
             <div class="mobile-card-top">
               <div class="prod-cell-with-img">
@@ -195,6 +231,29 @@
   } @else if (activeTab === 'categories') {
     <!-- Tab 2: Categories List Table & Mobile Cards -->
     <div class="catalog-card glass-panel">
+      <!-- Search Categories Bar -->
+      <div class="search-filter-bar mb-3 p-3 rounded-3 bg-light d-flex align-items-center justify-content-between gap-3 flex-wrap">
+        <div class="position-relative flex-grow-1" style="max-width: 420px;">
+          <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+          <input
+            type="text"
+            class="form-control ps-5"
+            placeholder="ابحث باسم القسم أو الوصف..."
+            [ngModel]="categorySearch()"
+            (ngModelChange)="categorySearch.set($event)"
+            style="padding-right: 2.2rem;"
+          />
+          @if (categorySearch()) {
+            <button type="button" class="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2 text-muted p-0" (click)="categorySearch.set('')">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          }
+        </div>
+        <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill">
+          {{ filteredCategories().length }} من أصل {{ categories().length }} قسم
+        </span>
+      </div>
+
       <!-- Desktop Table -->
       <div class="table-responsive">
         <table class="admin-table">
@@ -209,7 +268,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (cat of categories(); track cat.id) {
+            @for (cat of filteredCategories(); track cat.id) {
               <tr>
                 <td>
                   <div class="cat-cell-with-img">
@@ -266,7 +325,7 @@
 
       <!-- Mobile Categories Cards List -->
       <div class="mobile-catalog-list">
-        @for (cat of categories(); track cat.id) {
+        @for (cat of filteredCategories(); track cat.id) {
           <div class="mobile-product-card">
             <div class="mobile-card-top">
               <div class="cat-cell-with-img">

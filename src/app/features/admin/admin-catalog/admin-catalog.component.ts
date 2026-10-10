@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -37,6 +37,41 @@ export class AdminCatalogComponent implements OnInit {
   isUploadingProductImage = signal<boolean>(false);
   uploadProgressText = signal<string>('');
   isUploadingCategoryImage = signal<boolean>(false);
+
+  // Search & Filter State
+  productSearch = signal<string>('');
+  categoryFilter = signal<number | null>(null);
+  categorySearch = signal<string>('');
+
+  filteredProducts = computed(() => {
+    const q = this.productSearch().trim().toLowerCase();
+    const catId = this.categoryFilter();
+    let list = this.products();
+
+    if (catId !== null) {
+      list = list.filter(p => p.categoryId === catId);
+    }
+
+    if (!q) return list;
+
+    return list.filter(p =>
+      (p.nameAr && p.nameAr.toLowerCase().includes(q)) ||
+      (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
+      (p.categoryNameAr && p.categoryNameAr.toLowerCase().includes(q)) ||
+      (p.description && p.description.toLowerCase().includes(q))
+    );
+  });
+
+  filteredCategories = computed(() => {
+    const q = this.categorySearch().trim().toLowerCase();
+    const list = this.categories();
+    if (!q) return list;
+    return list.filter(c =>
+      (c.nameAr && c.nameAr.toLowerCase().includes(q)) ||
+      (c.nameEn && c.nameEn.toLowerCase().includes(q)) ||
+      (c.description && c.description.toLowerCase().includes(q))
+    );
+  });
 
   // Preparation Option Form Modal
   showPrepOptionModal = signal<boolean>(false);

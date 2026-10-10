@@ -4,7 +4,8 @@
     <div class="luxury-hero-card">
       <img
         [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl || '/uploads/banners/hero-desktop.jpg') | imageUrl:'banner'"
-        alt="أشهى المأكولات البحرية الطازجة - أسماك جندوفلي" class="hero-bg-img" />
+        alt="أشهى المأكولات البحرية الطازجة - أسماك جندوفلي" class="hero-bg-img"
+        fetchpriority="high" />
       <div class="hero-content-overlay">
         <div class="hero-texts">
           <h1 class="hero-title">
