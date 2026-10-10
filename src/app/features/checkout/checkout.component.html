@@ -189,13 +189,10 @@
         }
       </div>
 
-      <!-- 4. Payment & Notes -->
+      <!-- 4. Order Notes -->
       <div class="checkout-card glass-panel">
         <div class="flex-between card-header-row mb-2">
-          <h3 class="card-title mb-0"><i class="bi bi-wallet2 text-primary me-2"></i> 4. طريقة الدفع والملاحظات</h3>
-          <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 fw-bold">
-            <i class="bi bi-cash-stack me-1"></i> الدفع عند الاستلام (كاش)
-          </span>
+          <h3 class="card-title mb-0"><i class="bi bi-chat-dots text-primary me-2"></i> 4. ملاحظات إضافية للطلب (اختياري)</h3>
         </div>
 
         <div class="form-group mb-0 mt-2">
@@ -530,26 +527,16 @@
             </div>
           </div>
 
-          <div class="card-detail-row">
-            <div class="row-label-side">
-              <div class="icon-avatar green"><i class="bi bi-cash-stack"></i></div>
-              <span class="label-text">طريقة الدفع</span>
-            </div>
-            <div class="row-value-side">
-              كاش عند الاستلام
-            </div>
-          </div>
-
           @if (orderType === 'Delivery') {
             <div class="card-detail-row address-row">
               <div class="row-label-side">
                 <div class="icon-avatar red"><i class="bi bi-geo-alt-fill"></i></div>
                 <span class="label-text">العنوان بالتفصيل</span>
+                @if (selectedZone?.name || resolvedZoneName()) {
+                  <span class="badge bg-light text-dark border ms-auto">{{ selectedZone?.name || resolvedZoneName() }}</span>
+                }
               </div>
               <div class="row-value-side address-text">
-                @if (selectedZone?.name || resolvedZoneName()) {
-                  <span class="badge bg-light text-dark border me-1">{{ selectedZone?.name || resolvedZoneName() }}</span>
-                }
                 {{ streetAddress || fullFormattedAddress }}
               </div>
             </div>
