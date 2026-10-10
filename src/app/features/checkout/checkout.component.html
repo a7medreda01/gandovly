@@ -419,6 +419,20 @@
               </div>
             }
 
+            <!-- Customer Name Input (Pre-filled if registered) -->
+            <div class="form-group mb-3 text-start">
+              <label for="mOtpFullName" class="small fw-bold mb-1 d-block text-end">
+                <i class="bi bi-person me-1 text-primary"></i> الاسم بالكامل
+              </label>
+              <input
+                id="mOtpFullName"
+                type="text"
+                class="form-control modal-input text-center"
+                placeholder="اسمك الكريم..."
+                [(ngModel)]="authFullName"
+              />
+            </div>
+
             <div class="form-group mb-3">
               <div class="flex-between mb-2">
                 <label for="mOtp" class="mb-0 fw-bold">رمز التحقق المكون من 6 أرقام</label>
@@ -533,7 +547,9 @@
                 <div class="icon-avatar red"><i class="bi bi-geo-alt-fill"></i></div>
                 <span class="label-text">العنوان بالتفصيل</span>
                 @if (selectedZone?.name || resolvedZoneName()) {
-                  <span class="badge bg-light text-dark border ms-auto">{{ selectedZone?.name || resolvedZoneName() }}</span>
+                  <span class="zone-badge-pill ms-auto" [title]="selectedZone?.name || resolvedZoneName()">
+                    {{ getShortZoneName(selectedZone?.name || resolvedZoneName()) }}
+                  </span>
                 }
               </div>
               <div class="row-value-side address-text">

@@ -375,6 +375,12 @@ export class CheckoutComponent implements OnInit {
     this.authService.requestOtp(this.authPhone.trim(), isRetry).subscribe({
       next: (res) => {
         this.isRequestingOtp.set(false);
+        if (res && res.existingCustomerName) {
+          this.authFullName = res.existingCustomerName;
+          if (!this.customerName.trim() || this.customerName.trim() === 'عميل' || this.customerName.trim() === 'عميل جندوفلي') {
+            this.customerName = res.existingCustomerName;
+          }
+        }
         if (res && res.fallbackCode) {
           this.fallbackOtpCode.set(res.fallbackCode);
           this.authOtpCode = res.fallbackCode;
@@ -391,6 +397,13 @@ export class CheckoutComponent implements OnInit {
       },
       error: (err) => {
         this.isRequestingOtp.set(false);
+        const existingName = err?.error?.data?.existingCustomerName;
+        if (existingName) {
+          this.authFullName = existingName;
+          if (!this.customerName.trim() || this.customerName.trim() === 'عميل' || this.customerName.trim() === 'عميل جندوفلي') {
+            this.customerName = existingName;
+          }
+        }
         const currentFailures = this.otpFailureCount() + 1;
         this.otpFailureCount.set(currentFailures);
 
@@ -408,6 +421,21 @@ export class CheckoutComponent implements OnInit {
         }
       }
     });
+  }
+
+  getShortZoneName(name?: string | null): string {
+    if (!name) return '';
+    const clean = name.trim();
+    // Split by common delimiters: (, -, —, –, /, ،
+    let part = clean.split(/[(\-–—/،]/)[0].trim();
+    const words = part.split(/\s+/);
+    if (words.length > 3 || part.length > 18) {
+      part = words.slice(0, 2).join(' ');
+    }
+    if (part.length < clean.length && !part.endsWith('...')) {
+      return part + '...';
+    }
+    return part;
   }
 
   onOtpCodeChange(value: string) {

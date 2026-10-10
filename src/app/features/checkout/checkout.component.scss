@@ -617,6 +617,8 @@
   padding: 1.25rem 1.15rem 1.15rem;
   box-shadow: 0 25px 65px rgba(15, 23, 42, 0.22);
   border: 1px solid #e2e8f0;
+  box-sizing: border-box;
+  overflow-x: hidden;
 
   .btn-close-modal {
     position: absolute;
@@ -682,6 +684,8 @@
   .confirm-modal-body {
     max-height: 72vh;
     overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
     padding-inline: 0.1rem;
 
     &::-webkit-scrollbar {
@@ -701,6 +705,10 @@
     padding: 0.65rem 0.95rem;
     margin-bottom: 0.65rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   /* 1. Customer & Order Details Card */
@@ -729,7 +737,29 @@
 
         .row-label-side {
           width: 100%;
-          justify-content: flex-start;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.4rem;
+          min-width: 0;
+
+          .zone-badge-pill {
+            max-width: 135px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            flex-shrink: 1;
+            text-align: center;
+          }
         }
 
         .address-text {

@@ -298,6 +298,9 @@ export class AccountComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
         this.isOtpSent.set(true);
         this.startResendTimer();
+        if (res && res.existingCustomerName) {
+          this.fullName = res.existingCustomerName;
+        }
         if (res && res.fallbackCode) {
           this.fallbackOtpCode.set(res.fallbackCode);
           this.setDigitsFromCode(res.fallbackCode);
@@ -310,8 +313,12 @@ export class AccountComponent implements OnInit, OnDestroy {
           this.toast.success('تم إرسال كود التحقق بنجاح إلى هاتفك 💬');
         }
       },
-      error: () => {
+      error: (err) => {
         this.isLoading.set(false);
+        const existingName = err?.error?.data?.existingCustomerName;
+        if (existingName) {
+          this.fullName = existingName;
+        }
         const currentFailures = this.otpFailureCount() + 1;
         this.otpFailureCount.set(currentFailures);
         this.isOtpSent.set(true);
