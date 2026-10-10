@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { OrderService } from '../../core/services/order.service';
@@ -22,6 +22,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   private readonly orderService = inject(OrderService);
   readonly cartService = inject(CartService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   // Tabs
   activeTab = signal<'orders' | 'addresses'>('orders');
@@ -73,6 +74,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.checkCurrentProfile();
     this.loadDeliveryZones();
+    this.handleRouteTracking();
   }
 
   ngOnDestroy() {
@@ -205,6 +207,71 @@ export class AccountComponent implements OnInit, OnDestroy {
 
   openOrderDetails(order: Order) {
     this.selectedOrder.set(order);
+  }
+
+  handleRouteTracking() {
+    // 1. Check path parameter (e.g. /track/:token)
+    const routeToken = this.route.snapshot.paramMap.get('token');
+    if (routeToken) {
+      this.fetchAndOpenOrderByToken(routeToken);
+      return;
+    }
+
+    // 2. Check query parameters (e.g. /account?track=:token or /account?order=:id)
+    this.route.queryParamMap.subscribe(params => {
+      const trackToken = params.get('track') || params.get('token');
+      const orderId = params.get('order') || params.get('orderId');
+      const orderNumber = params.get('orderNumber');
+
+      if (trackToken) {
+        this.fetchAndOpenOrderByToken(trackToken);
+      } else if (orderId) {
+        this.fetchAndOpenOrderById(Number(orderId));
+      } else if (orderNumber) {
+        this.fetchAndOpenOrderByNumber(orderNumber);
+      }
+    });
+  }
+
+  fetchAndOpenOrderByToken(token: string) {
+    this.isLoadingOrders.set(true);
+    this.orderService.getOrderByTrackingToken(token).subscribe({
+      next: (order) => {
+        this.isLoadingOrders.set(false);
+        if (order) {
+          this.selectedOrder.set(order);
+          if (order.customerPhone && !this.phoneNumber) {
+            this.phoneNumber = order.customerPhone;
+          }
+        }
+      },
+      error: () => {
+        this.isLoadingOrders.set(false);
+        this.toast.error('لم نتمكن من جلب تفاصيل هذا الطلب عبر الرابط.');
+      }
+    });
+  }
+
+  fetchAndOpenOrderById(id: number) {
+    this.isLoadingOrders.set(true);
+    this.orderService.getOrderById(id).subscribe({
+      next: (order) => {
+        this.isLoadingOrders.set(false);
+        if (order) {
+          this.selectedOrder.set(order);
+        }
+      },
+      error: () => {
+        this.isLoadingOrders.set(false);
+      }
+    });
+  }
+
+  fetchAndOpenOrderByNumber(orderNumber: string) {
+    const existing = this.customerOrders().find(o => o.orderNumber === orderNumber);
+    if (existing) {
+      this.selectedOrder.set(existing);
+    }
   }
 
   startResendTimer() {

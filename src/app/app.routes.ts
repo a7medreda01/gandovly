@@ -28,8 +28,7 @@ export const routes: Routes = [
       },
       {
         path: 'track/:token',
-        redirectTo: 'account',
-        pathMatch: 'full'
+        loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent)
       },
       {
         path: 'account',
