@@ -1043,6 +1043,64 @@
   padding: 0.85rem 1rem;
 }
 
+.timing-info-box-clean {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 0.9rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+
+  .timing-main-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.88rem;
+    color: #1e293b;
+
+    .icon-highlight {
+      color: #0284c7;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    strong {
+      color: #0284c7;
+      font-weight: 800;
+      margin-inline-start: 0.2rem;
+    }
+  }
+
+  .timing-arrival-tag {
+    display: inline-flex;
+    align-items: center;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.26rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid #bbf7d0;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.55rem 0.75rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+
+    .timing-arrival-tag {
+      align-self: flex-start;
+      font-size: 0.74rem;
+    }
+  }
+}
+
 .schedule-modal {
   max-width: 480px;
   width: 95%;
