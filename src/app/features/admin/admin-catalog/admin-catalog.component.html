@@ -115,7 +115,12 @@
                     }
                     <div class="prod-cell">
                       <span class="prod-name-ar">{{ prod.nameAr }}</span>
-                      @if (prod.nameEn) { <small class="text-muted">{{ prod.nameEn }}</small> }
+                      <div class="d-flex align-items-center gap-2 mt-1">
+                        @if (prod.nameEn) { <small class="text-muted">{{ prod.nameEn }}</small> }
+                        <span class="prep-pill" title="مدة التجهيز والطهي المتوقعة">
+                          <i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes || 25 }} دقيقة
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </td>
@@ -204,6 +209,7 @@
               } @else {
                 <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> طبق ثابت</span>
               }
+              <span class="prep-pill"><i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes || 25 }} د</span>
             </div>
 
             <div class="mobile-card-footer">
@@ -679,10 +685,31 @@
                 <span>السماح للعميل بالطلب بالوزن المباشر بالجرام</span>
               </label>
             </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label><i class="bi bi-clock-history text-primary me-1"></i> مدة التجهيز والطهي (بالدقائق) *</label>
+                <div class="input-with-unit">
+                  <input type="number" min="1" step="5" class="form-control" [(ngModel)]="productForm.preparationTimeMinutes" placeholder="25" />
+                  <span class="unit-text">دقيقة</span>
+                </div>
+                <span class="hint-text">الوقت التقديري المعتمد لتحضير وتجهيز هذا الصنف في المطبخ (يُحسب في وقت التوصيل)</span>
+              </div>
+            </div>
           } @else {
-            <div class="form-group">
-              <label>سعر الطبق / الوحدة (ج.م) *</label>
-              <input type="number" class="form-control" [(ngModel)]="productForm.pricePerUnit" />
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label>سعر الطبق / الوحدة (ج.م) *</label>
+                <input type="number" class="form-control" [(ngModel)]="productForm.pricePerUnit" />
+              </div>
+              <div class="form-group flex-1">
+                <label><i class="bi bi-clock-history text-primary me-1"></i> مدة التجهيز والطهي (بالدقائق) *</label>
+                <div class="input-with-unit">
+                  <input type="number" min="1" step="5" class="form-control" [(ngModel)]="productForm.preparationTimeMinutes" placeholder="25" />
+                  <span class="unit-text">دقيقة</span>
+                </div>
+                <span class="hint-text">الوقت التقديري المتوقع لتحضير هذا الطبق في المطبخ</span>
+              </div>
             </div>
           }
 

@@ -450,6 +450,44 @@
   .flex-1 { flex: 1; }
 }
 
+.input-with-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .form-control {
+    padding-left: 3.5rem !important;
+    font-weight: 700;
+  }
+
+  .unit-text {
+    position: absolute;
+    left: 1rem;
+    color: #64748b;
+    font-weight: 800;
+    font-size: 0.85rem;
+    pointer-events: none;
+    user-select: none;
+  }
+}
+
+.prep-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.22);
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+
+  i {
+    font-size: 0.8rem;
+  }
+}
+
 .checkbox-label {
   display: flex;
   align-items: center;

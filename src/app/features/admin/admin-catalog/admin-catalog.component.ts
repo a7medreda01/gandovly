@@ -269,6 +269,10 @@ export class AdminCatalogComponent implements OnInit {
       this.productForm.averageUnitWeightGrams = undefined;
     }
 
+    if (!this.productForm.preparationTimeMinutes || this.productForm.preparationTimeMinutes < 1) {
+      this.productForm.preparationTimeMinutes = 25;
+    }
+
     if (this.isEditingProduct()) {
       this.adminService.updateProduct(this.productForm.id, this.productForm).subscribe({
         next: () => {
