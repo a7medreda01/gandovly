@@ -81,6 +81,20 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     excludePreviouslyMessaged: true
   };
 
+  // Edit Campaign Form
+  showEditCampaignModal = signal<boolean>(false);
+  isUpdatingCampaign = signal<boolean>(false);
+  editCampaignData = {
+    id: 0,
+    title: '',
+    messageTemplate: '',
+    intervalMinutes: 5,
+    dailyLimit: 50
+  };
+
+  // Web Customers Sync
+  isSyncingWebCustomers = signal<boolean>(false);
+
   // Sheet Upload & Contacts Import
   showImportModal = signal<boolean>(false);
   selectedFile: File | null = null;
@@ -358,10 +372,87 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   // ------------------------------------------
+  // EDIT CAMPAIGN LOGIC
+  // ------------------------------------------
+  openEditCampaignModal(c: WhatsAppCampaign, event?: Event) {
+    event?.stopPropagation();
+    this.editCampaignData = {
+      id: c.id,
+      title: c.title,
+      messageTemplate: c.messageTemplate,
+      intervalMinutes: c.intervalMinutes,
+      dailyLimit: c.dailyLimit || 50
+    };
+    this.showEditCampaignModal.set(true);
+  }
+
+  closeEditCampaignModal() {
+    this.showEditCampaignModal.set(false);
+  }
+
+  insertEditPlaceholder(placeholder: string) {
+    this.editCampaignData.messageTemplate += ' ' + placeholder + ' ';
+  }
+
+  submitUpdateCampaign() {
+    if (!this.editCampaignData.title.trim()) {
+      this.toast.error('يرجى إدخال عنوان أو اسم المهمة');
+      return;
+    }
+    if (!this.editCampaignData.messageTemplate.trim()) {
+      this.toast.error('يرجى إدخال نص الرسالة أو العرض');
+      return;
+    }
+    if (this.editCampaignData.intervalMinutes < 1) {
+      this.toast.error('الفاصل الزمني يجب أن يكون دقيقة واحدة على الأقل');
+      return;
+    }
+
+    this.isUpdatingCampaign.set(true);
+    this.adminService.updateWhatsAppCampaign(this.editCampaignData.id, this.editCampaignData).subscribe({
+      next: () => {
+        this.isUpdatingCampaign.set(false);
+        this.showEditCampaignModal.set(false);
+        this.toast.success('تم حفظ وتعديل بيانات المهمة بنجاح! ✏️');
+        this.loadCampaigns();
+      },
+      error: (err: any) => {
+        this.isUpdatingCampaign.set(false);
+        this.toast.error(err?.error?.message || 'فشل تعديل المهمة');
+      }
+    });
+  }
+
+  isCampaignCompleted(c: WhatsAppCampaign): boolean {
+    return c.status === 'Completed' || (c.totalTargetCount > 0 && (c.sentCount + (c.failedCount || 0)) >= c.totalTargetCount);
+  }
+
+  // ------------------------------------------
+  // WEB CUSTOMERS SYNC
+  // ------------------------------------------
+  syncWebCustomers() {
+    this.isSyncingWebCustomers.set(true);
+    this.adminService.syncWebCustomers().subscribe({
+      next: (res: any) => {
+        this.isSyncingWebCustomers.set(false);
+        this.toast.success(res?.message || 'تمت مزامنة عملاء الموقع والطلبات بنجاح! 🎉');
+        this.loadContactsStats();
+        if (this.activeTab() === 'contacts') {
+          this.loadContacts();
+        }
+      },
+      error: (err: any) => {
+        this.isSyncingWebCustomers.set(false);
+        this.toast.error(err?.error?.message || 'فشل مزامنة عملاء الموقع');
+      }
+    });
+  }
+
+  // ------------------------------------------
   // CONTACTS LIST LOGIC
   // ------------------------------------------
   loadContactsStats() {
-    this.adminService.getContactsStats().subscribe({
+    this.adminService.getWhatsAppDashboardStats().subscribe({
       next: (res: any) => {
         const data = res?.data || res;
         if (data) this.contactsStats.set(data);

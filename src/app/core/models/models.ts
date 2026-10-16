@@ -509,6 +509,13 @@ export interface CreateCampaignRequest {
   targetSourceFilter?: string;
 }
 
+export interface UpdateCampaignRequest {
+  title: string;
+  messageTemplate: string;
+  intervalMinutes: number;
+  dailyLimit?: number;
+}
+
 export interface PostDeliverySettings {
   isEnabled: boolean;
   delayHours: number;

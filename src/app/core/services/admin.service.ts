@@ -241,6 +241,18 @@ export class AdminService {
     return this.api.get<any>(`admin/whatsapp-campaigns/${campaignId}`);
   }
 
+  getWhatsAppDashboardStats(): Observable<any> {
+    return this.api.get<any>('admin/whatsapp-campaigns/dashboard');
+  }
+
+  syncWebCustomers(): Observable<any> {
+    return this.api.post<any>('admin/whatsapp-campaigns/sync-web-customers', {});
+  }
+
+  updateWhatsAppCampaign(campaignId: number, req: any): Observable<any> {
+    return this.api.put<any>(`admin/whatsapp-campaigns/${campaignId}`, req);
+  }
+
   pauseWhatsAppCampaign(campaignId: number): Observable<boolean> {
     return this.api.put<boolean>(`admin/whatsapp-campaigns/${campaignId}/pause`, {});
   }

@@ -21,6 +21,11 @@
         <span>استيراد شيت عملاء</span>
       </button>
 
+      <button class="btn-action-sync" (click)="syncWebCustomers()" [disabled]="isSyncingWebCustomers()" title="سحب جميع أرقام عملاء المتجر والطلبات لقاعدة بيانات الرسائل">
+        <i class="bi bi-arrow-repeat" [class.spin]="isSyncingWebCustomers()"></i>
+        <span>مزامنة عملاء الموقع والطلبات</span>
+      </button>
+
       <button class="btn-refresh" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
         <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
         <span>تحديث</span>
@@ -166,29 +171,30 @@
                 </div>
 
                 <div class="camp-status-col">
-                  @switch (c.status) {
-                    @case ('Running') {
-                      <span class="status-badge badge-running">
-                        <span class="dot-pulse green"></span> قيد التشغيل (نشط)
-                      </span>
-                    }
-                    @case ('Paused') {
-                      <span class="status-badge badge-paused">
-                        <span class="dot-pulse yellow"></span> متوقف مؤقتاً
-                      </span>
-                    }
-                    @case ('Completed') {
-                      <span class="status-badge badge-completed">
-                        <i class="bi bi-check-circle-fill"></i> مكتمل بنجاح
-                      </span>
-                    }
-                    @case ('Cancelled') {
-                      <span class="status-badge badge-cancelled">
-                        <i class="bi bi-x-circle-fill"></i> ملغي
-                      </span>
-                    }
-                    @default {
-                      <span class="status-badge badge-draft">مسودة</span>
+                  @if (isCampaignCompleted(c)) {
+                    <span class="status-badge badge-completed">
+                      <i class="bi bi-check-circle-fill"></i> مكتمل بنجاح
+                    </span>
+                  } @else {
+                    @switch (c.status) {
+                      @case ('Running') {
+                        <span class="status-badge badge-running">
+                          <span class="dot-pulse green"></span> قيد التشغيل (نشط)
+                        </span>
+                      }
+                      @case ('Paused') {
+                        <span class="status-badge badge-paused">
+                          <span class="dot-pulse yellow"></span> متوقف مؤقتاً
+                        </span>
+                      }
+                      @case ('Cancelled') {
+                        <span class="status-badge badge-cancelled">
+                          <i class="bi bi-x-circle-fill"></i> ملغي
+                        </span>
+                      }
+                      @default {
+                        <span class="status-badge badge-draft">مسودة</span>
+                      }
                     }
                   }
                 </div>
@@ -238,13 +244,13 @@
                     </span>
                   }
                   <span class="stat-chip text-muted">
-                    <i class="bi bi-clock"></i> متبقي: {{ c.totalTargetCount - c.sentCount }}
+                    <i class="bi bi-clock"></i> متبقي: {{ c.totalTargetCount - c.sentCount > 0 ? c.totalTargetCount - c.sentCount : 0 }}
                   </span>
                 </div>
               </div>
 
-              <!-- Dispatch Timing Info -->
-              @if (c.status === 'Running' && c.nextScheduledDispatchAt) {
+              <!-- Dispatch Timing Info (Only if running and not completed) -->
+              @if (c.status === 'Running' && !isCampaignCompleted(c) && c.nextScheduledDispatchAt) {
                 <div class="dispatch-time-alert">
                   <i class="bi bi-stopwatch text-primary"></i>
                   <span>الرسالة التالية مجدولة للإرسال: <strong>{{ c.nextScheduledDispatchAt | date:'hh:mm:ss a' }}</strong></span>
@@ -259,23 +265,30 @@
                 </button>
 
                 <div class="camp-control-btns">
-                  @if (c.status === 'Running') {
-                    <button class="btn-ctrl btn-pause" (click)="pauseCampaign(c.id, $event)" title="إيقاف مؤقت">
-                      <i class="bi bi-pause-fill"></i>
-                      <span>إيقاف</span>
-                    </button>
-                  } @else if (c.status === 'Paused') {
-                    <button class="btn-ctrl btn-resume" (click)="resumeCampaign(c.id, $event)" title="استئناف الإرسال">
-                      <i class="bi bi-play-fill"></i>
-                      <span>استئناف</span>
-                    </button>
-                  }
+                  <button class="btn-ctrl btn-edit" (click)="openEditCampaignModal(c, $event)" title="تعديل تفاصيل المهمة">
+                    <i class="bi bi-pencil-square"></i>
+                    <span>تعديل</span>
+                  </button>
 
-                  @if (c.status === 'Running' || c.status === 'Paused') {
-                    <button class="btn-ctrl btn-cancel" (click)="cancelCampaign(c.id, $event)" title="إلغاء المهمة">
-                      <i class="bi bi-stop-fill"></i>
-                      <span>إلغاء</span>
-                    </button>
+                  @if (!isCampaignCompleted(c)) {
+                    @if (c.status === 'Running') {
+                      <button class="btn-ctrl btn-pause" (click)="pauseCampaign(c.id, $event)" title="إيقاف مؤقت">
+                        <i class="bi bi-pause-fill"></i>
+                        <span>إيقاف</span>
+                      </button>
+                    } @else if (c.status === 'Paused') {
+                      <button class="btn-ctrl btn-resume" (click)="resumeCampaign(c.id, $event)" title="استئناف الإرسال">
+                        <i class="bi bi-play-fill"></i>
+                        <span>استئناف</span>
+                      </button>
+                    }
+
+                    @if (c.status === 'Running' || c.status === 'Paused') {
+                      <button class="btn-ctrl btn-cancel" (click)="cancelCampaign(c.id, $event)" title="إلغاء المهمة">
+                        <i class="bi bi-stop-fill"></i>
+                        <span>إلغاء</span>
+                      </button>
+                    }
                   }
                 </div>
               </div>
@@ -850,6 +863,103 @@
             } @else {
               <i class="bi bi-rocket-takeoff-fill"></i>
               <span>بدء وجدولة المهمة الآن</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- MODAL: EDIT CAMPAIGN TASK -->
+  <!-- ============================================================= -->
+  @if (showEditCampaignModal()) {
+    <div class="modal-backdrop-custom" (click)="closeEditCampaignModal()">
+      <div class="modal-card glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <h4>
+            <i class="bi bi-pencil-square text-primary me-2"></i> تعديل بيانات ومحددات المهمة
+          </h4>
+          <button class="btn-close-modal" (click)="closeEditCampaignModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-custom">
+          <!-- Title -->
+          <div class="form-group mb-3">
+            <label class="form-label">عنوان المهمة:</label>
+            <input
+              type="text"
+              class="form-control-custom"
+              [(ngModel)]="editCampaignData.title"
+              placeholder="عنوان المهمة..."
+            />
+          </div>
+
+          <!-- Message Template -->
+          <div class="form-group mb-3">
+            <label class="form-label">نص الرسالة / العرض (سيتم تطبيقه على الرسائل المتبقية قيد الانتظار):</label>
+            <textarea
+              class="form-control-custom"
+              rows="5"
+              [(ngModel)]="editCampaignData.messageTemplate"
+              placeholder="اكتب نص الرسالة..."
+            ></textarea>
+
+            <div class="tags-shortcuts">
+              <span class="tags-label">إدراج متغير:</span>
+              <button type="button" class="tag-pill" (click)="insertEditPlaceholder('{الاسم}')">
+                + &#123;الاسم&#125;
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid: Limit & Interval -->
+          <div class="modal-grid-2">
+            <div class="form-group">
+              <label class="form-label">
+                الفاصل الزمني بين كل رسالة:
+              </label>
+              <div class="input-with-addon">
+                <input
+                  type="number"
+                  class="form-control-custom"
+                  [(ngModel)]="editCampaignData.intervalMinutes"
+                  min="1"
+                  max="120"
+                />
+                <span class="input-addon">دقائق</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                الحد اليومي المستهدف:
+              </label>
+              <div class="input-with-addon">
+                <input
+                  type="number"
+                  class="form-control-custom"
+                  [(ngModel)]="editCampaignData.dailyLimit"
+                  min="1"
+                  max="5000"
+                />
+                <span class="input-addon">عميل</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom">
+          <button class="btn-cancel-modal" (click)="closeEditCampaignModal()">إلغاء</button>
+          <button class="btn-action-primary" (click)="submitUpdateCampaign()" [disabled]="isUpdatingCampaign()">
+            @if (isUpdatingCampaign()) {
+              <i class="bi bi-arrow-clockwise spin"></i>
+              <span>جاري الحفظ والتعديل...</span>
+            } @else {
+              <i class="bi bi-check2-circle"></i>
+              <span>حفظ التعديلات الآن</span>
             }
           </button>
         </div>

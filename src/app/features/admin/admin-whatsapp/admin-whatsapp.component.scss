@@ -92,6 +92,32 @@
   }
 }
 
+.btn-action-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
 .btn-refresh {
   display: inline-flex;
   align-items: center;
@@ -487,6 +513,7 @@
         border: none;
         transition: all 0.15s ease;
 
+        &.btn-edit { background: #e0f2fe; color: #0369a1; &:hover { background: #bae6fd; } }
         &.btn-pause { background: #fff3cd; color: #856404; &:hover { background: #ffeeba; } }
         &.btn-resume { background: #d1e7dd; color: #0f5132; &:hover { background: #badbcc; } }
         &.btn-cancel { background: #f8d7da; color: #842029; &:hover { background: #f5c2c7; } }
@@ -509,7 +536,7 @@
 
   &.badge-running { background: #e8f5e9; color: #2e7d32; }
   &.badge-paused { background: #fff8e1; color: #f57f17; }
-  &.badge-completed { background: #e3f2fd; color: #1565c0; }
+  &.badge-completed { background: #dcfce7; color: #15803d; font-weight: 800; border: 1px solid #bbf7d0; }
   &.badge-cancelled { background: #f5f5f5; color: #616161; }
   &.badge-draft { background: #eeeeee; color: #757575; }
 }
