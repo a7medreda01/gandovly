@@ -17,6 +17,13 @@ export class AdminDashboardComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   stats = signal<DashboardStats | null>(null);
   isLoading = signal<boolean>(false);
+  todayDate = new Date();
+
+  getMaxSoldQuantity(): number {
+    const list = this.stats()?.topProductsToday;
+    if (!list || list.length === 0) return 1;
+    return Math.max(...list.map(p => p.quantitySold), 1);
+  }
 
   ngOnInit() {
     this.loadStats();

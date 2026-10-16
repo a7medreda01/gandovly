@@ -1,103 +1,252 @@
 <div class="dashboard-page">
-  <div class="page-title-row flex-between">
-    <div>
-      <h1 class="page-heading">لوحة المؤشرات والإحصائيات</h1>
-      <p class="page-sub">نظرة عامة على المبيعات، الطلبات النشطة، والمنتجات الأكثر طلباً اليوم</p>
+  <!-- Top Header Banner -->
+  <header class="page-header-card glass-panel">
+    <div class="header-main-info">
+      <div class="header-icon-badge">
+        <i class="bi bi-speedometer2"></i>
+      </div>
+      <div>
+        <div class="header-tag-row">
+          <span class="live-pill">
+            <span class="live-dot"></span>
+            مباشر اليوم
+          </span>
+          <span class="date-chip">
+            <i class="bi bi-calendar3"></i>
+            {{ todayDate | date:'fullDate':'':'ar-EG' }}
+          </span>
+        </div>
+        <h1 class="page-heading">لوحة المؤشرات والإحصائيات</h1>
+        <p class="page-sub">نظرة عامة وفورية على المبيعات، نشاط المطبخ، والوجبات الأكثر طلباً</p>
+      </div>
     </div>
-    <button class="btn-primary" (click)="loadStats()">🔄 تحديث البيانات</button>
-  </div>
+
+    <div class="header-actions">
+      <button class="btn-refresh" (click)="loadStats()" [disabled]="isLoading()" title="تحديث أحدث الأرقام">
+        <i class="bi bi-arrow-clockwise" [class.spin-anim]="isLoading()"></i>
+        <span>تحديث البيانات</span>
+      </button>
+    </div>
+  </header>
 
   @if (isLoading()) {
     <app-loading-state
       mode="spinner"
-      title="جاري تجهيز لوحة المؤشرات والإحصائيات..."
-      subtitle="يتم الآن حساب إجمالي المبيعات، الطلبات النشطة، والأصناف الأكثر مبيعاً"
+      title="جاري تحديث لوحة المؤشرات والإحصائيات..."
+      subtitle="يتم الآن احتساب إجمالي مبيعات اليوم، حالة المطبخ، وأكثر الأصناف طلباً"
       icon="bi-graph-up-arrow"
-      minHeight="300px"
+      minHeight="320px"
     ></app-loading-state>
   } @else if (stats()) {
-    <!-- Stat Cards -->
-    <div class="stats-grid">
-      <div class="stat-card glass-panel">
-        <div class="card-icon blue">🛍️</div>
-        <div class="card-info">
+    <!-- 4 KPI Metrics Cards -->
+    <section class="stats-grid" aria-label="المؤشرات الرئيسية">
+      <!-- Card 1: Today Orders -->
+      <div class="stat-card glass-panel stat-blue">
+        <div class="card-top-row">
           <span class="label">طلبات اليوم</span>
-          <span class="num">{{ stats()!.todayOrdersCount }} طلب</span>
+          <div class="card-icon">
+            <i class="bi bi-bag-check-fill"></i>
+          </div>
+        </div>
+        <div class="card-value-row">
+          <span class="num">{{ stats()!.todayOrdersCount }}</span>
+          <span class="unit">طلب مسجل</span>
+        </div>
+        <div class="card-footer-info">
+          <i class="bi bi-clock-history"></i>
+          <span>إجمالي الطلبات منذ بداية اليوم</span>
         </div>
       </div>
 
-      <div class="stat-card glass-panel">
-        <div class="card-icon green">💰</div>
-        <div class="card-info">
+      <!-- Card 2: Today Revenue -->
+      <div class="stat-card glass-panel stat-emerald">
+        <div class="card-top-row">
           <span class="label">إجمالي مبيعات اليوم</span>
-          <span class="num">{{ stats()!.todayTotalRevenue }} ج.م</span>
+          <div class="card-icon">
+            <i class="bi bi-cash-stack"></i>
+          </div>
+        </div>
+        <div class="card-value-row">
+          <span class="num text-emerald">{{ stats()!.todayTotalRevenue | number:'1.0-2' }}</span>
+          <span class="unit">ج.م</span>
+        </div>
+        <div class="card-footer-info">
+          <i class="bi bi-check-circle-fill text-emerald"></i>
+          <span>إيرادات المبيعات المحققة</span>
         </div>
       </div>
 
-      <div class="stat-card glass-panel">
-        <div class="card-icon amber">⏳</div>
-        <div class="card-info">
+      <!-- Card 3: Kitchen Pending -->
+      <div class="stat-card glass-panel stat-amber">
+        <div class="card-top-row">
           <span class="label">طلبات قيد الطهي والتحضير</span>
-          <span class="num">{{ stats()!.kitchenPendingOrdersCount }} طلب</span>
+          <div class="card-icon">
+            <i class="bi bi-fire"></i>
+          </div>
+        </div>
+        <div class="card-value-row">
+          <span class="num text-amber">{{ stats()!.kitchenPendingOrdersCount }}</span>
+          <span class="unit">طلب بالمطبخ</span>
+        </div>
+        <div class="card-footer-info">
+          <span class="pulse-indicator"></span>
+          <span>تحتاج وزن وطهي بالمطبخ</span>
         </div>
       </div>
 
-      <div class="stat-card glass-panel">
-        <div class="card-icon purple">📊</div>
-        <div class="card-info">
+      <!-- Card 4: Average Order Value -->
+      <div class="stat-card glass-panel stat-indigo">
+        <div class="card-top-row">
           <span class="label">متوسط قيمة الطلب</span>
-          <span class="num">{{ stats()!.averageOrderValue }} ج.م</span>
+          <div class="card-icon">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+        </div>
+        <div class="card-value-row">
+          <span class="num text-indigo">{{ stats()!.averageOrderValue | number:'1.0-2' }}</span>
+          <span class="unit">ج.م / طلب</span>
+        </div>
+        <div class="card-footer-info">
+          <i class="bi bi-pie-chart-fill"></i>
+          <span>متوسط الصرف لكل عميل</span>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Quick Shortcuts & Top Products -->
-    <div class="dashboard-split-grid">
-      <!-- Top Selling Products -->
+    <!-- Split Grid: Top Selling Products & Quick Shortcuts -->
+    <section class="dashboard-split-grid">
+      <!-- Top Selling Products Leaderboard -->
       <div class="box-card glass-panel">
-        <h3 class="box-title">الأسماك والوجبات الأكثر مبيعاً اليوم 🔥</h3>
+        <div class="box-header flex-between">
+          <div class="box-title-group">
+            <span class="box-icon-tag bg-amber-soft">
+              <i class="bi bi-trophy-fill text-amber"></i>
+            </span>
+            <div>
+              <h2 class="box-title">الأسماك والوجبات الأكثر مبيعاً اليوم</h2>
+              <p class="box-sub">ترتيب الأصناف بحسب عدد مرات البيع وإجمالي الإيراد</p>
+            </div>
+          </div>
+          @if (stats()!.topProductsToday.length > 0) {
+            <span class="items-count-badge">
+              {{ stats()!.topProductsToday.length }} أصناف
+            </span>
+          }
+        </div>
+
         @if (stats()!.topProductsToday.length > 0) {
           <div class="top-list">
             @for (prod of stats()!.topProductsToday; track prod.productId; let idx = $index) {
-              <div class="top-item flex-between">
-                <div class="item-rank flex-center">
-                  <span class="rank-num">#{{ idx + 1 }}</span>
-                  <span class="name">{{ prod.productNameAr }}</span>
+              <div class="top-item-row" [class.rank-first]="idx === 0">
+                <div class="rank-badge" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">
+                  @if (idx === 0) {
+                    <i class="bi bi-crown-fill"></i>
+                  } @else {
+                    <span>#{{ idx + 1 }}</span>
+                  }
                 </div>
-                <div class="item-stats">
-                  <span class="qty">{{ prod.quantitySold }} مبيعة</span>
-                  <span class="rev">{{ prod.totalRevenue }} ج.م</span>
+
+                <div class="item-details">
+                  <div class="item-title-row">
+                    <span class="item-name">{{ prod.productNameAr }}</span>
+                    <span class="item-revenue">{{ prod.totalRevenue | number:'1.0-2' }} ج.م</span>
+                  </div>
+
+                  <div class="progress-track">
+                    <div
+                      class="progress-fill"
+                      [style.width.%]="(prod.quantitySold / getMaxSoldQuantity()) * 100"
+                    ></div>
+                  </div>
+
+                  <div class="item-sub-row">
+                    <span class="item-sold-count">
+                      <i class="bi bi-bag-check"></i>
+                      {{ prod.quantitySold }} مبيعة اليوم
+                    </span>
+                    <span class="item-percentage">
+                      {{ ((prod.quantitySold / getMaxSoldQuantity()) * 100) | number:'1.0-0' }}% من الصدارة
+                    </span>
+                  </div>
                 </div>
               </div>
             }
           </div>
         } @else {
-          <p class="text-muted">لا توجد مبيعات مسجلة حتى الآن اليوم.</p>
+          <div class="empty-state-box">
+            <div class="empty-icon-wrap">
+              <i class="bi bi-inbox"></i>
+            </div>
+            <h3 class="empty-title">لا توجد مبيعات مسجلة حتى الآن اليوم</h3>
+            <p class="empty-desc">ستظهر الأصناف والوجبات الأكثر طلباً وترتيبها هنا فور استلام وتسجيل أولى طلبات اليوم.</p>
+          </div>
         }
       </div>
 
-      <!-- Quick Action Cards -->
+      <!-- Quick Actions Grid -->
       <div class="box-card glass-panel">
-        <h3 class="box-title">روابط وإجراءات سريعة ⚡</h3>
+        <div class="box-header">
+          <div class="box-title-group">
+            <span class="box-icon-tag bg-cyan-soft">
+              <i class="bi bi-lightning-charge-fill text-cyan"></i>
+            </span>
+            <div>
+              <h2 class="box-title">روابط وإجراءات سريعة</h2>
+              <p class="box-sub">انتقال فوري لأهم الشاشات التشغيلية للمطعم</p>
+            </div>
+          </div>
+        </div>
+
         <div class="shortcuts-grid">
-          <a routerLink="/kitchen" class="shortcut-card flex-center">
-            <span class="sc-icon">👨‍🍳</span>
-            <span class="sc-title">شاشة المطبخ والأوزان</span>
+          <!-- Kitchen Screen -->
+          <a routerLink="/kitchen" class="shortcut-card action-orange">
+            <div class="sc-icon-wrapper">
+              <i class="bi bi-fire"></i>
+            </div>
+            <div class="sc-content">
+              <span class="sc-title">شاشة المطبخ والأوزان</span>
+              <span class="sc-desc">وزن الأسماك وتأكيد جاهزية الطلب</span>
+            </div>
+            <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>
-          <a routerLink="/admin/orders" class="shortcut-card flex-center">
-            <span class="sc-icon">📋</span>
-            <span class="sc-title">إدارة جميع الطلبات</span>
+
+          <!-- Orders Management -->
+          <a routerLink="/admin/orders" class="shortcut-card action-blue">
+            <div class="sc-icon-wrapper">
+              <i class="bi bi-clipboard2-check-fill"></i>
+            </div>
+            <div class="sc-content">
+              <span class="sc-title">إدارة جميع الطلبات</span>
+              <span class="sc-desc">متابعة الفواتير والحالات والتوصيل</span>
+            </div>
+            <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>
-          <a routerLink="/admin/catalog" class="shortcut-card flex-center">
-            <span class="sc-icon">🐟</span>
-            <span class="sc-title">إضافة / تعديل صنف</span>
+
+          <!-- Menu Catalog -->
+          <a routerLink="/admin/catalog" class="shortcut-card action-purple">
+            <div class="sc-icon-wrapper">
+              <i class="bi bi-grid-fill"></i>
+            </div>
+            <div class="sc-content">
+              <span class="sc-title">الأصناف والمنيو</span>
+              <span class="sc-desc">إضافة وجبات جديدة وتعديل الأسعار</span>
+            </div>
+            <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>
-          <a routerLink="/admin/settings" class="shortcut-card flex-center">
-            <span class="sc-icon">🎨</span>
-            <span class="sc-title">تعديل ألوان وشعار المطعم</span>
+
+          <!-- Restaurant Settings & Colors -->
+          <a routerLink="/admin/settings" class="shortcut-card action-teal">
+            <div class="sc-icon-wrapper">
+              <i class="bi bi-palette-fill"></i>
+            </div>
+            <div class="sc-content">
+              <span class="sc-title">الهوية والإعدادات العامة</span>
+              <span class="sc-desc">الشعار، البانرات، وألوان المطعم</span>
+            </div>
+            <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>
         </div>
       </div>
-    </div>
+    </section>
   }
 </div>

@@ -1,101 +1,295 @@
 <div class="reports-page">
-  <div class="page-title-row flex-between">
-    <div>
-      <h1 class="page-heading">التقارير والمبيعات وتحليل الأوزان 📈</h1>
-      <p class="page-sub">تحليل إجمالي الإيرادات، مبيعات الأصناف، وفروقات الأوزان التقديرية والفعلية للأسماك</p>
+  <!-- Page Header Banner -->
+  <header class="page-header-card glass-panel">
+    <div class="header-main-info">
+      <div class="header-icon-badge">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <div>
+        <h1 class="page-heading">التقارير والمبيعات وتحليل الأوزان</h1>
+        <p class="page-sub">تحليل إجمالي الإيرادات، مبيعات الأصناف، وفروقات الأوزان التقديرية والفعلية للأسماك</p>
+      </div>
     </div>
-    <div class="tab-selectors flex-center">
-      <button class="btn-outline" [class.active]="activeTab === 'sales'" (click)="activeTab = 'sales'">تقرير المبيعات</button>
-      <button class="btn-outline" [class.active]="activeTab === 'variance'" (click)="activeTab = 'variance'">تقرير فروق الأوزان ⚖️</button>
+
+    <div class="header-controls">
+      <!-- Tab Switchers -->
+      <div class="tab-pill-group" role="tablist">
+        <button
+          type="button"
+          class="tab-pill-btn"
+          [class.active]="activeTab === 'sales'"
+          (click)="activeTab = 'sales'"
+        >
+          <i class="bi bi-bar-chart-line-fill"></i>
+          <span>تقرير المبيعات</span>
+        </button>
+
+        <button
+          type="button"
+          class="tab-pill-btn"
+          [class.active]="activeTab === 'variance'"
+          (click)="activeTab = 'variance'"
+        >
+          <i class="bi bi-speedometer2"></i>
+          <span>تقرير فروق الأوزان</span>
+        </button>
+      </div>
+
+      <!-- Refresh Button -->
+      <button class="btn-refresh" (click)="loadData()" [disabled]="isLoading()" title="تحديث بيانات التقارير">
+        <i class="bi bi-arrow-clockwise" [class.spin-anim]="isLoading()"></i>
+      </button>
     </div>
-  </div>
+  </header>
 
   @if (isLoading()) {
     <app-loading-state
       mode="table"
       title="جاري تجهيز التقارير وتحليل الأوزان والمبيعات..."
       subtitle="يتم الآن حساب الإيرادات الفعلية، رسوم التوصيل، وفروقات الأوزان"
+      icon="bi-pie-chart-fill"
       [count]="5"
     ></app-loading-state>
   } @else if (activeTab === 'sales' && salesReport()) {
-    <!-- Sales Summary Cards -->
-    <div class="report-cards-grid">
-      <div class="r-card glass-panel">
-        <span class="label">إجمالي الطلبات الناجحة</span>
-        <span class="num">{{ salesReport()!.totalOrders - salesReport()!.cancelledOrdersCount }}</span>
+    <!-- Sales Summary KPI Cards -->
+    <section class="report-cards-grid" aria-label="ملخص المبيعات">
+      <!-- Successful Orders -->
+      <div class="r-card glass-panel card-blue">
+        <div class="r-top-row">
+          <span class="label">إجمالي الطلبات الناجحة</span>
+          <div class="r-icon">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+        </div>
+        <div class="r-value-row">
+          <span class="num">{{ salesReport()!.totalOrders - salesReport()!.cancelledOrdersCount }}</span>
+          <span class="unit">طلب ناجح</span>
+        </div>
+        <div class="r-footer">
+          <i class="bi bi-bag-check-fill text-blue"></i>
+          <span>طلبات تم تسليمها بنجاح</span>
+        </div>
       </div>
-      <div class="r-card glass-panel">
-        <span class="label">إجمالي الإيرادات الفعلية</span>
-        <span class="num green">{{ salesReport()!.totalFinalRevenue }} ج.م</span>
-      </div>
-      <div class="r-card glass-panel">
-        <span class="label">إجمالي رسوم التوصيل</span>
-        <span class="num">{{ salesReport()!.totalDeliveryFees }} ج.م</span>
-      </div>
-      <div class="r-card glass-panel">
-        <span class="label">طلبات ملغية</span>
-        <span class="num red">{{ salesReport()!.cancelledOrdersCount }}</span>
-      </div>
-    </div>
 
-    <!-- Top Products Table -->
-    <div class="report-table-card glass-panel">
-      <h3 class="card-title">الأصناف الأكثر طلباً ومبيعاً</h3>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>الصنف</th>
-            <th>الكمية المباعة</th>
-            <th>إجمالي الإيرادات</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (prod of salesReport()!.topSellingProducts; track prod.productId) {
-            <tr>
-              <td><strong>{{ prod.productNameAr }}</strong></td>
-              <td>{{ prod.quantitySold }}</td>
-              <td><strong>{{ prod.totalRevenue }} ج.م</strong></td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+      <!-- Total Final Revenue -->
+      <div class="r-card glass-panel card-emerald">
+        <div class="r-top-row">
+          <span class="label">إجمالي الإيرادات الفعلية</span>
+          <div class="r-icon">
+            <i class="bi bi-cash-stack"></i>
+          </div>
+        </div>
+        <div class="r-value-row">
+          <span class="num text-emerald">{{ salesReport()!.totalFinalRevenue | number:'1.0-2' }}</span>
+          <span class="unit">ج.م</span>
+        </div>
+        <div class="r-footer">
+          <i class="bi bi-wallet2 text-emerald"></i>
+          <span>صافي المحصل الفعلي</span>
+        </div>
+      </div>
+
+      <!-- Total Delivery Fees -->
+      <div class="r-card glass-panel card-cyan">
+        <div class="r-top-row">
+          <span class="label">إجمالي رسوم التوصيل</span>
+          <div class="r-icon">
+            <i class="bi bi-bicycle"></i>
+          </div>
+        </div>
+        <div class="r-value-row">
+          <span class="num text-cyan">{{ salesReport()!.totalDeliveryFees | number:'1.0-2' }}</span>
+          <span class="unit">ج.م</span>
+        </div>
+        <div class="r-footer">
+          <i class="bi bi-geo-alt-fill text-cyan"></i>
+          <span>عائدات مناطق الدليفري</span>
+        </div>
+      </div>
+
+      <!-- Cancelled Orders -->
+      <div class="r-card glass-panel card-rose">
+        <div class="r-top-row">
+          <span class="label">طلبات ملغية</span>
+          <div class="r-icon">
+            <i class="bi bi-x-circle"></i>
+          </div>
+        </div>
+        <div class="r-value-row">
+          <span class="num text-rose">{{ salesReport()!.cancelledOrdersCount }}</span>
+          <span class="unit">طلب ملغي</span>
+        </div>
+        <div class="r-footer">
+          <i class="bi bi-info-circle-fill text-rose"></i>
+          <span>تم إلغاؤها أو استرجاعها</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Products Table Section -->
+    <section class="report-table-card glass-panel">
+      <div class="card-header-bar flex-between">
+        <div class="card-title-group">
+          <span class="title-icon-badge bg-amber-soft">
+            <i class="bi bi-trophy-fill text-amber"></i>
+          </span>
+          <div>
+            <h2 class="card-title">الأصناف الأكثر طلباً ومبيعاً</h2>
+            <p class="card-sub">تفصيل كميات المبيعات وإجمالي الدخل لكل صنف</p>
+          </div>
+        </div>
+
+        @if (salesReport()!.topSellingProducts.length > 0) {
+          <span class="count-badge">
+            {{ salesReport()!.topSellingProducts.length }} أصناف مسجلة
+          </span>
+        }
+      </div>
+
+      @if (salesReport()!.topSellingProducts.length > 0) {
+        <div class="table-responsive">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th class="th-rank">#</th>
+                <th>الصنف</th>
+                <th>الكمية المباعة</th>
+                <th class="th-progress">نسبة المبيعات</th>
+                <th class="th-revenue">إجمالي الإيرادات</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (prod of salesReport()!.topSellingProducts; track prod.productId; let idx = $index) {
+                <tr>
+                  <td class="td-rank">
+                    <span class="rank-badge" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">
+                      @if (idx === 0) {
+                        <i class="bi bi-crown-fill"></i>
+                      } @else {
+                        {{ idx + 1 }}
+                      }
+                    </span>
+                  </td>
+                  <td class="td-name">
+                    <span class="product-title">{{ prod.productNameAr }}</span>
+                  </td>
+                  <td class="td-qty">
+                    <span class="qty-pill">
+                      <i class="bi bi-bag-check"></i>
+                      {{ prod.quantitySold }}
+                    </span>
+                  </td>
+                  <td class="td-progress">
+                    <div class="progress-bar-wrap">
+                      <div
+                        class="progress-bar-fill"
+                        [style.width.%]="(prod.quantitySold / getMaxSoldQuantity()) * 100"
+                      ></div>
+                    </div>
+                  </td>
+                  <td class="td-revenue">
+                    <span class="revenue-pill">
+                      {{ prod.totalRevenue | number:'1.0-2' }} ج.م
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="empty-state-box">
+          <div class="empty-icon-wrap">
+            <i class="bi bi-inbox"></i>
+          </div>
+          <h3 class="empty-title">لا توجد مبيعات مسجلة حتى الآن</h3>
+          <p class="empty-desc">ستظهر جميع الأصناف وإحصائيات مبيعاتها فور اكتمال وتسليم الطلبات في النظام.</p>
+        </div>
+      }
+    </section>
   } @else if (activeTab === 'variance') {
-    <!-- Weight Variance Table -->
-    <div class="report-table-card glass-panel">
-      <h3 class="card-title">سجل فروق الأوزان التقديرية والفعلية للأسماك ⚖️</h3>
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>رقم الطلب</th>
-            <th>نوع السمك</th>
-            <th>الوزن التقديري</th>
-            <th>الوزن الفعلي</th>
-            <th>فرق الوزن</th>
-            <th>السعر التقديري</th>
-            <th>السعر النهائي</th>
-            <th>التاريخ</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (v of varianceReport(); track v.orderId) {
-            <tr>
-              <td><strong>#{{ v.orderNumber }}</strong></td>
-              <td>{{ v.productNameAr }}</td>
-              <td>{{ v.estimatedWeightGrams }} جم</td>
-              <td><strong>{{ v.actualWeightGrams }} جم</strong></td>
-              <td>
-                <span class="badge" [class.badge-fresh]="v.varianceGrams >= 0" [class.badge-weight]="v.varianceGrams < 0">
-                  {{ v.varianceGrams > 0 ? '+' : '' }}{{ v.varianceGrams }} جم
-                </span>
-              </td>
-              <td>{{ v.estimatedPrice }} ج.م</td>
-              <td><strong class="green">{{ v.finalPrice }} ج.م</strong></td>
-              <td>{{ v.orderDate | date:'MM/dd' }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+    <!-- Weight Variance Table Section -->
+    <section class="report-table-card glass-panel">
+      <div class="card-header-bar flex-between">
+        <div class="card-title-group">
+          <span class="title-icon-badge bg-primary-soft">
+            <i class="bi bi-speedometer2 text-primary"></i>
+          </span>
+          <div>
+            <h2 class="card-title">سجل فروق الأوزان التقديرية والفعلية للأسماك</h2>
+            <p class="card-sub">مقارنة الوزن المقدر عند الطلب بالوزن الفعلي في المطبخ وفرق السعر الناتج</p>
+          </div>
+        </div>
+
+        @if (varianceReport().length > 0) {
+          <span class="count-badge">
+            {{ varianceReport().length }} سجلات وزن
+          </span>
+        }
+      </div>
+
+      @if (varianceReport().length > 0) {
+        <div class="table-responsive">
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>رقم الطلب</th>
+                <th>نوع السمك</th>
+                <th>الوزن التقديري</th>
+                <th>الوزن الفعلي</th>
+                <th>فرق الوزن</th>
+                <th>السعر التقديري</th>
+                <th>السعر النهائي</th>
+                <th>التاريخ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (v of varianceReport(); track v.orderId) {
+                <tr>
+                  <td>
+                    <span class="order-badge">#{{ v.orderNumber }}</span>
+                  </td>
+                  <td>
+                    <strong class="fish-name">{{ v.productNameAr }}</strong>
+                  </td>
+                  <td class="text-muted">{{ v.estimatedWeightGrams }} جم</td>
+                  <td>
+                    <strong class="actual-weight">{{ v.actualWeightGrams }} جم</strong>
+                  </td>
+                  <td>
+                    <span
+                      class="variance-pill"
+                      [class.variance-plus]="v.varianceGrams >= 0"
+                      [class.variance-minus]="v.varianceGrams < 0"
+                    >
+                      <i class="bi" [class.bi-plus-lg]="v.varianceGrams >= 0" [class.bi-dash-lg]="v.varianceGrams < 0"></i>
+                      {{ v.varianceGrams >= 0 ? v.varianceGrams : (v.varianceGrams * -1) }} جم
+                    </span>
+                  </td>
+                  <td class="text-muted">{{ v.estimatedPrice | number:'1.0-2' }} ج.م</td>
+                  <td>
+                    <strong class="final-price text-emerald">{{ v.finalPrice | number:'1.0-2' }} ج.م</strong>
+                  </td>
+                  <td>
+                    <span class="date-badge">
+                      <i class="bi bi-calendar-event"></i>
+                      {{ v.orderDate | date:'MM/dd' }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="empty-state-box">
+          <div class="empty-icon-wrap">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <h3 class="empty-title">لا توجد سجلات لفروق الأوزان حتى الآن</h3>
+          <p class="empty-desc">يتم تسجيل الفروق تلقائياً عندما يقوم فريق المطبخ بتعديل أوزان الأسماك الطازجة في شاشة المطبخ.</p>
+        </div>
+      }
+    </section>
   }
 </div>
