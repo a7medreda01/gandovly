@@ -15,6 +15,7 @@ import {
 } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
+import { compressImage } from '../../../core/utils/image-compressor.util';
 
 @Component({
   selector: 'app-admin-catalog',
@@ -349,40 +350,53 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   // ===== PRODUCT IMAGES GALLERY =====
-  onProductImagesSelected(event: Event) {
+  async onProductImagesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
     const files = Array.from(input.files);
     this.isUploadingProductImage.set(true);
-    this.uploadProgressText.set(`جاري رفع ${files.length} صورة...`);
+    this.uploadProgressText.set(`جاري ضغط وتحسين ${files.length} صورة بأعلى دقة WebP...`);
 
-    const uploads$ = files.map(file => this.adminService.uploadImage(file, 'products'));
+    try {
+      // Auto compress & convert to ultra-fast WebP without visible quality loss
+      const compressedFiles = await Promise.all(
+        files.map(file => compressImage(file, { maxWidth: 1400, quality: 0.85 }))
+      );
 
-    forkJoin(uploads$).subscribe({
-      next: (urls: string[]) => {
-        for (const url of urls) {
-          if (url && !this.productImages.some(i => i.imageUrl === url)) {
-            this.productImages.push({
-              imageUrl: url,
-              isPrimary: this.productImages.length === 0,
-              displayOrder: this.productImages.length
-            });
+      this.uploadProgressText.set(`جاري رفع ${compressedFiles.length} صورة...`);
+      const uploads$ = compressedFiles.map(file => this.adminService.uploadImage(file, 'products'));
+
+      forkJoin(uploads$).subscribe({
+        next: (urls: string[]) => {
+          for (const url of urls) {
+            if (url && !this.productImages.some(i => i.imageUrl === url)) {
+              this.productImages.push({
+                imageUrl: url,
+                isPrimary: this.productImages.length === 0,
+                displayOrder: this.productImages.length
+              });
+            }
           }
+          this.syncProductImagesToForm();
+          this.isUploadingProductImage.set(false);
+          this.uploadProgressText.set('');
+          this.toast.success(`تم ضغط ورفع ${urls.length} صورة بنجاح بصيغة WebP فائقة السرعة.`);
+          input.value = '';
+        },
+        error: () => {
+          this.isUploadingProductImage.set(false);
+          this.uploadProgressText.set('');
+          this.toast.error('فشل في رفع بعض الصور أو أن حجم الملف كبير (أقصى حجم 10MB).');
+          input.value = '';
         }
-        this.syncProductImagesToForm();
-        this.isUploadingProductImage.set(false);
-        this.uploadProgressText.set('');
-        this.toast.success(`تم رفع ${urls.length} صورة بنجاح.`);
-        input.value = '';
-      },
-      error: () => {
-        this.isUploadingProductImage.set(false);
-        this.uploadProgressText.set('');
-        this.toast.error('فشل في رفع بعض الصور أو أن حجم الملف كبير (أقصى حجم 10MB).');
-        input.value = '';
-      }
-    });
+      });
+    } catch {
+      this.isUploadingProductImage.set(false);
+      this.uploadProgressText.set('');
+      this.toast.error('حدث خطأ أثناء معالجة وضغط الصور.');
+      input.value = '';
+    }
   }
 
   setAsPrimaryProductImage(index: number) {
@@ -410,24 +424,32 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   // ===== CATEGORIES IMAGES =====
-  onCategoryImageSelected(event: Event) {
+  async onCategoryImageSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
     const file = input.files[0];
     this.isUploadingCategoryImage.set(true);
-    this.adminService.uploadImage(file, 'categories').subscribe({
-      next: (url) => {
-        this.categoryForm.imageUrl = url;
-        this.isUploadingCategoryImage.set(false);
-        this.toast.success('تم رفع صورة القسم بنجاح.');
-        input.value = '';
-      },
-      error: () => {
-        this.isUploadingCategoryImage.set(false);
-        this.toast.error('فشل رفع صورة القسم.');
-        input.value = '';
-      }
-    });
+
+    try {
+      const compressed = await compressImage(file, { maxWidth: 800, quality: 0.85 });
+      this.adminService.uploadImage(compressed, 'categories').subscribe({
+        next: (url) => {
+          this.categoryForm.imageUrl = url;
+          this.isUploadingCategoryImage.set(false);
+          this.toast.success('تم ضغط ورفع صورة القسم بنجاح بصيغة WebP.');
+          input.value = '';
+        },
+        error: () => {
+          this.isUploadingCategoryImage.set(false);
+          this.toast.error('فشل رفع صورة القسم.');
+          input.value = '';
+        }
+      });
+    } catch {
+      this.isUploadingCategoryImage.set(false);
+      this.toast.error('حدث خطأ أثناء معالجة صورة القسم.');
+      input.value = '';
+    }
   }
 
   removeCategoryImage() {

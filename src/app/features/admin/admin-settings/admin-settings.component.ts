@@ -7,6 +7,7 @@ import { NotificationService } from '../../../core/services/notification.service
 import { StorefrontSettings } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
+import { compressImage } from '../../../core/utils/image-compressor.util';
 
 @Component({
   selector: 'app-admin-settings',
@@ -81,67 +82,85 @@ export class AdminSettingsComponent implements OnInit {
     });
   }
 
-  onLogoUpload(event: Event) {
+  async onLogoUpload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     this.isUploading.set(true);
-    this.adminService.uploadImage(file, 'branding').subscribe({
-      next: url => {
-        this.isUploading.set(false);
-        if (this.settings()) {
-          this.settings.update(s => s ? { ...s, logoUrl: url } : s);
-          this.saveSettings('branding', true);
-          this.toast.success('تم رفع الشعار وحفظه في قاعدة البيانات بنجاح.');
+    try {
+      const compressed = await compressImage(file, { maxWidth: 600, quality: 0.9 });
+      this.adminService.uploadImage(compressed, 'branding').subscribe({
+        next: url => {
+          this.isUploading.set(false);
+          if (this.settings()) {
+            this.settings.update(s => s ? { ...s, logoUrl: url } : s);
+            this.saveSettings('branding', true);
+            this.toast.success('تم ضغط الشعار ورفعه بنجاح بصيغة WebP.');
+          }
+        },
+        error: () => {
+          this.isUploading.set(false);
+          this.toast.error('فشل رفع الشعار.');
         }
-      },
-      error: () => {
-        this.isUploading.set(false);
-        this.toast.error('فشل رفع الشعار.');
-      }
-    });
+      });
+    } catch {
+      this.isUploading.set(false);
+      this.toast.error('حدث خطأ أثناء معالجة الشعار.');
+    }
   }
 
-  onBannerDesktopUpload(event: Event) {
+  async onBannerDesktopUpload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     this.isUploading.set(true);
-    this.adminService.uploadImage(file, 'banners').subscribe({
-      next: url => {
-        this.isUploading.set(false);
-        if (this.settings()) {
-          this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: url } : s);
-          this.saveSettings('branding', true);
-          this.toast.success('تم رفع البانر وحفظه في قاعدة البيانات بنجاح.');
+    try {
+      const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.85 });
+      this.adminService.uploadImage(compressed, 'banners').subscribe({
+        next: url => {
+          this.isUploading.set(false);
+          if (this.settings()) {
+            this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: url } : s);
+            this.saveSettings('branding', true);
+            this.toast.success('تم ضغط البانر ورفعه بنجاح بصيغة WebP فائقة السرعة.');
+          }
+        },
+        error: () => {
+          this.isUploading.set(false);
+          this.toast.error('فشل رفع البانر.');
         }
-      },
-      error: () => {
-        this.isUploading.set(false);
-        this.toast.error('فشل رفع البانر.');
-      }
-    });
+      });
+    } catch {
+      this.isUploading.set(false);
+      this.toast.error('حدث خطأ أثناء معالجة البانر.');
+    }
   }
 
-  onBannerMobileUpload(event: Event) {
+  async onBannerMobileUpload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     this.isUploading.set(true);
-    this.adminService.uploadImage(file, 'banners').subscribe({
-      next: url => {
-        this.isUploading.set(false);
-        if (this.settings()) {
-          this.settings.update(s => s ? { ...s, heroBannerMobileUrl: url } : s);
-          this.saveSettings('branding', true);
-          this.toast.success('تم رفع بانر الموبايل وحفظه في قاعدة البيانات بنجاح.');
+    try {
+      const compressed = await compressImage(file, { maxWidth: 1080, quality: 0.85 });
+      this.adminService.uploadImage(compressed, 'banners').subscribe({
+        next: url => {
+          this.isUploading.set(false);
+          if (this.settings()) {
+            this.settings.update(s => s ? { ...s, heroBannerMobileUrl: url } : s);
+            this.saveSettings('branding', true);
+            this.toast.success('تم ضغط بانر الموبايل ورفعه بنجاح بصيغة WebP فائقة السرعة.');
+          }
+        },
+        error: () => {
+          this.isUploading.set(false);
+          this.toast.error('فشل رفع بانر الموبايل.');
         }
-      },
-      error: () => {
-        this.isUploading.set(false);
-        this.toast.error('فشل رفع بانر الموبايل.');
-      }
-    });
+      });
+    } catch {
+      this.isUploading.set(false);
+      this.toast.error('حدث خطأ أثناء معالجة بانر الموبايل.');
+    }
   }
 
   removeLogo() {
