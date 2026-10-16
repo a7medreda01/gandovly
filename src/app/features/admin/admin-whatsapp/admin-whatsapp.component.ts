@@ -621,9 +621,17 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   requestPairingCode() {
-    if (!this.pairPhone.trim()) {
+    let phone = this.pairPhone.trim().replace(/[^\d]/g, '');
+    if (!phone) {
       this.toast.error('يرجى إدخال رقم هاتف المطعم.');
       return;
+    }
+
+    if (phone.startsWith('00')) phone = phone.substring(2);
+    if (phone.startsWith('01') && phone.length === 11) {
+      phone = '20' + phone.substring(1);
+    } else if ((phone.startsWith('10') || phone.startsWith('11') || phone.startsWith('12') || phone.startsWith('15')) && phone.length === 10) {
+      phone = '20' + phone;
     }
 
     if (this.connectionStatus() === 'offline') {
@@ -632,7 +640,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     }
 
     this.isRequestingPairCode.set(true);
-    this.adminService.requestWhatsAppPairCode(this.pairPhone.trim()).subscribe({
+    this.adminService.requestWhatsAppPairCode(phone).subscribe({
       next: (res: any) => {
         this.isRequestingPairCode.set(false);
         const data = res?.data || res;
@@ -640,7 +648,12 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
           this.pairingCode.set(data.pairingCode);
           this.toast.success('تم إنشاء كود الاقتران بنجاح! أدخله في تطبيق واتساب بالهاتف.');
         } else {
-          this.toast.error(data?.message || 'تعذر جلب كود الاقتران.');
+          const msg = data?.message || 'تعذر جلب كود الاقتران.';
+          if (msg === 'Connection Closed') {
+            this.toast.error('تم إغلاق الاتصال من خادم واتساب. اضغط على زر "إعادة تشغيل الجلسة" أدناه ثم حاول مجدداً.');
+          } else {
+            this.toast.error(msg);
+          }
         }
       },
       error: (err: any) => {

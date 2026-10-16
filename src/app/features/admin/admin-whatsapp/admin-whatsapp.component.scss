@@ -7,6 +7,14 @@
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.tab-content-area {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ==============================================================
@@ -149,6 +157,14 @@
   padding-bottom: 0.5rem;
   overflow-x: auto;
   white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  width: 100%;
+  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   .nav-tab-btn {
     display: inline-flex;
@@ -212,7 +228,9 @@
    ============================================================== */
 .stats-grid-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  width: 100%;
+  box-sizing: border-box;
   gap: 1rem;
   margin-bottom: 1.25rem;
 
@@ -348,8 +366,10 @@
 
 .campaigns-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .campaign-card {
@@ -358,6 +378,10 @@
   border-radius: var(--radius-lg);
   padding: 1.35rem;
   display: flex;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
   flex-direction: column;
   gap: 1rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
@@ -608,12 +632,16 @@
   background: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .custom-table {
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
   text-align: right;
 
@@ -1138,8 +1166,10 @@
    ============================================================== */
 .admin-wa-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   gap: 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .wa-card {
@@ -1148,6 +1178,10 @@
   border-radius: var(--radius-lg);
   padding: 1.5rem;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 
   .card-header-row {
     display: flex;
@@ -1425,4 +1459,265 @@
   padding: 2.5rem;
   color: var(--text-muted);
   font-weight: 600;
+}
+
+
+/* ==============================================================
+   COMPREHENSIVE MOBILE RESPONSIVE STYLES (Smartphones & Tablets)
+   ============================================================== */
+@media (max-width: 768px) {
+  .admin-wa-page {
+    padding: 0.75rem 0.5rem;
+    gap: 1rem;
+  }
+
+  .page-top-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    .header-text {
+      flex: 1 1 auto;
+      text-align: right;
+    }
+
+    .header-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+      width: 100%;
+
+      button, a {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .wa-nav-tabs {
+    gap: 0.35rem;
+    padding-bottom: 0.4rem;
+
+    .nav-tab-btn {
+      padding: 0.6rem 0.9rem;
+      font-size: 0.82rem;
+    }
+  }
+
+  .stats-grid-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+
+    .stat-card {
+      padding: 0.75rem 0.6rem;
+      gap: 0.5rem;
+
+      .stat-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 1.15rem;
+        border-radius: 10px;
+        flex-shrink: 0;
+      }
+
+      .stat-info {
+        min-width: 0;
+
+        .stat-label {
+          font-size: 0.72rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .stat-value {
+          font-size: 1.25rem;
+        }
+      }
+    }
+  }
+
+  .anti-ban-banner {
+    padding: 0.75rem 0.85rem;
+    gap: 0.65rem;
+
+    .banner-icon {
+      font-size: 1.35rem;
+    }
+
+    .banner-text {
+      font-size: 0.8rem;
+    }
+  }
+
+  .campaigns-section-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    .section-title {
+      font-size: 1.1rem;
+    }
+
+    .section-actions {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+      width: 100%;
+
+      .btn-outline-custom,
+      .btn-create-task {
+        flex: 1;
+        justify-content: center;
+        padding: 0.55rem 0.5rem;
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .campaigns-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .campaign-card {
+    padding: 1rem;
+    gap: 0.75rem;
+
+    .camp-card-header {
+      flex-direction: column-reverse;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .camp-footer-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.75rem;
+
+      .btn-camp-details {
+        justify-content: center;
+        padding: 0.4rem;
+        width: 100%;
+      }
+
+      .camp-control-btns {
+        width: 100%;
+        display: flex;
+        gap: 0.4rem;
+
+        .btn-ctrl {
+          flex: 1;
+          justify-content: center;
+          padding: 0.45rem 0.5rem;
+          font-size: 0.78rem;
+        }
+      }
+    }
+  }
+
+  .contacts-toolbar {
+    padding: 0.85rem;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+
+    .search-box {
+      width: 100%;
+      flex: 1 1 100%;
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .btn-search {
+        padding: 0.6rem 1rem;
+      }
+    }
+
+    .contacts-actions {
+      width: 100%;
+
+      .btn-action-accent {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  .admin-wa-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .wa-card {
+    padding: 1rem;
+
+    .card-header-row {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  }
+
+  .pairing-form,
+  .input-with-button {
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    input {
+      width: 100%;
+      flex: 1 1 100%;
+    }
+
+    button {
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.25rem;
+    }
+  }
+
+  .post-delivery-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .settings-card,
+  .preview-card {
+    padding: 1rem;
+  }
+
+  .modal-card {
+    width: 95%;
+    max-width: 95vw;
+    margin: 0.5rem auto;
+    max-height: 88vh;
+
+    .modal-header-custom {
+      padding: 1rem;
+    }
+
+    .modal-body-custom {
+      padding: 1rem;
+    }
+
+    .modal-footer-custom {
+      padding: 0.75rem 1rem;
+      flex-direction: column-reverse;
+      gap: 0.5rem;
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}
+
+@media (max-width: 440px) {
+  .stats-grid-row {
+    grid-template-columns: 1fr;
+  }
 }
