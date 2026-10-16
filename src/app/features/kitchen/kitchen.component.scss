@@ -721,6 +721,13 @@
   .line-price-box {
     flex-shrink: 0;
 
+    .price-calc-container {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
     .item-price-prominent {
       font-size: 1.25rem;
       font-weight: 900;
@@ -732,6 +739,48 @@
         color: #64748b;
         font-weight: 700;
       }
+    }
+
+    .calc-breakdown-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 0.25rem 0.65rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 800;
+      white-space: nowrap;
+
+      i {
+        font-size: 0.78rem;
+      }
+
+      &.single {
+        background: #f8fafc;
+        color: #475569;
+        border-color: #e2e8f0;
+      }
+
+      &.weight {
+        background: #fff7ed;
+        color: #c2410c;
+        border-color: #fed7aa;
+      }
+    }
+  }
+
+  .line-modifiers-row {
+    .modifier-pill-tag {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
     }
   }
 

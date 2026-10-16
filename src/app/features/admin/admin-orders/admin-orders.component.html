@@ -237,9 +237,35 @@
                     </div>
 
                     <div class="line-price-box">
-                      <strong class="item-price-prominent">{{ (isLineByWeight(l) ? priceInputs[l.id] : null) || l.finalLineTotal || l.estimatedLineTotal }} <small>ج.م</small></strong>
+                      <div class="price-calc-container">
+                        <strong class="item-price-prominent">{{ (isLineByWeight(l) ? priceInputs[l.id] : null) || l.finalLineTotal || l.estimatedLineTotal }} <small>ج.م</small></strong>
+                        @if (!isLineByWeight(l)) {
+                          @if (l.quantityUnits > 1) {
+                            <span class="calc-breakdown-pill" title="تفصيل السعر: العدد × سعر القطعة">
+                              <i class="bi bi-x-lg"></i> {{ l.quantityUnits }} × {{ getLineUnitPrice(l) }} ج.م
+                            </span>
+                          } @else {
+                            <span class="calc-breakdown-pill single" title="سعر القطعة">
+                              <i class="bi bi-tag-fill"></i> سعر القطعة: {{ getLineUnitPrice(l) }} ج.م
+                            </span>
+                          }
+                        } @else {
+                          <span class="calc-breakdown-pill weight" title="سعر الكيلو">
+                            <i class="bi bi-speedometer2"></i> {{ l.unitPriceSnapshot }} ج.م / كجم
+                          </span>
+                        }
+                      </div>
                     </div>
                   </div>
+
+                  @if (l.modifiers && l.modifiers.length > 0) {
+                    <div class="line-modifiers-row mt-2 d-flex align-items-center gap-1 flex-wrap">
+                      <span class="modifier-lbl text-muted small"><i class="bi bi-plus-circle me-1"></i> الإضافات:</span>
+                      @for (mod of l.modifiers; track mod.id) {
+                        <span class="modifier-pill-tag">{{ mod.modifierOptionNameAr }} (+{{ mod.priceSnapshot }} ج.م)</span>
+                      }
+                    </div>
+                  }
 
                   @if (l.specialInstructions) {
                     <div class="instructions-box mt-2">

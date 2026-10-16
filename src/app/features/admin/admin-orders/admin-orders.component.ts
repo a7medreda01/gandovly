@@ -167,6 +167,18 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     return line.pricingType === 'ByWeight';
   }
 
+  getLineUnitPrice(line: OrderLine): number {
+    const total = (this.isLineByWeight(line) ? this.priceInputs[line.id] : null) 
+      ?? line.finalLineTotal 
+      ?? line.estimatedLineTotal 
+      ?? 0;
+    const qty = (this.isLineByWeight(line) ? this.qtyInputs[line.id] : null) 
+      ?? line.quantityUnits 
+      ?? 1;
+    if (qty <= 0) return total;
+    return Math.round((total / qty) * 100) / 100;
+  }
+
   calculatePriceFromWeight(line: OrderLine, grams: number, qtyUnits?: number): number {
     const unitPriceKg = line.unitPriceSnapshot || 0;
     const qty = qtyUnits ?? this.qtyInputs[line.id] ?? line.quantityUnits ?? 1;
