@@ -427,3 +427,91 @@ export interface WhatsAppGatewaySettings {
   cashierNotificationDelaySeconds?: number;
 }
 
+// WhatsApp Campaigns & Marketing
+export interface MarketingContact {
+  id: number;
+  fullName: string;
+  phoneNumber: string;
+  normalizedPhone: string;
+  source?: string;
+  totalCampaignsReceived: number;
+  lastMessagedAt?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface ExcelContactRow {
+  fullName: string;
+  phoneNumber: string;
+  notes?: string;
+  isValid: boolean;
+  errorMessage?: string;
+}
+
+export interface ExcelImportResult {
+  totalRowsFound: number;
+  validCount: number;
+  importedCount: number;
+  duplicateCount: number;
+  invalidCount: number;
+  sourceFileName: string;
+  previewRows: ExcelContactRow[];
+}
+
+export type WhatsAppCampaignStatus = 'Draft' | 'Running' | 'Paused' | 'Completed' | 'Cancelled';
+export type WhatsAppCampaignLogStatus = 'Pending' | 'Sent' | 'Failed' | 'Skipped';
+
+export interface WhatsAppCampaign {
+  id: number;
+  title: string;
+  messageTemplate: string;
+  status: WhatsAppCampaignStatus;
+  intervalMinutes: number;
+  dailyLimit: number;
+  excludePreviouslyMessaged: boolean;
+  totalTargetCount: number;
+  sentCount: number;
+  failedCount: number;
+  skippedCount: number;
+  progressPercentage: number;
+  startedAt?: string;
+  completedAt?: string;
+  nextScheduledDispatchAt?: string;
+  lastDispatchedAt?: string;
+  createdAt: string;
+  createdBy?: string;
+}
+
+export interface WhatsAppCampaignLog {
+  id: number;
+  campaignId: number;
+  contactId?: number;
+  recipientName: string;
+  recipientPhone: string;
+  messageText: string;
+  status: WhatsAppCampaignLogStatus;
+  externalMessageId?: string;
+  errorMessage?: string;
+  sentAt?: string;
+  createdAt: string;
+}
+
+export interface WhatsAppCampaignDetail extends WhatsAppCampaign {
+  logs: WhatsAppCampaignLog[];
+}
+
+export interface CreateCampaignRequest {
+  title: string;
+  messageTemplate: string;
+  intervalMinutes: number;
+  dailyLimit: number;
+  excludePreviouslyMessaged: boolean;
+  targetSourceFilter?: string;
+}
+
+export interface PostDeliverySettings {
+  isEnabled: boolean;
+  delayHours: number;
+  messageTemplate: string;
+}
+

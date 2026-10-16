@@ -3,7 +3,15 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { WhatsAppGatewaySettings } from '../../../core/models/models';
+import {
+  WhatsAppGatewaySettings,
+  WhatsAppCampaign,
+  WhatsAppCampaignDetail,
+  CreateCampaignRequest,
+  ExcelImportResult,
+  MarketingContact,
+  PostDeliverySettings
+} from '../../../core/models/models';
 
 @Component({
   selector: 'app-admin-whatsapp',
@@ -16,13 +24,15 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
 
+  // Active Tab
+  activeTab = signal<'campaigns' | 'gateway' | 'post_delivery' | 'contacts'>('campaigns');
+
   // Status & QR State
   connectionStatus = signal<'connected' | 'qr_ready' | 'connecting' | 'disconnected' | 'offline'>('connecting');
   connectedPhone = signal<string | null>(null);
   qrDataUrl = signal<string | null>(null);
   isLoading = signal<boolean>(false);
   queueLength = signal<number>(0);
-
   lastErrorMessage = signal<string | null>(null);
 
   // Notification Triggers Settings
@@ -52,17 +62,370 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   testMessage: string = 'تجربة إرسال رسالة من منصة أسماك جندوفلي 🐟🌊 - بوابة الواتساب الذاتية تعمل بنجاح!';
   isSendingTest = signal<boolean>(false);
 
+  // ------------------------------------------
+  // CAMPAIGNS & MARKETING STATE
+  // ------------------------------------------
+  campaigns = signal<WhatsAppCampaign[]>([]);
+  isLoadingCampaigns = signal<boolean>(false);
+  selectedCampaign = signal<WhatsAppCampaignDetail | null>(null);
+  isLoadingCampaignDetail = signal<boolean>(false);
+
+  // New Campaign Form
+  showCreateCampaignModal = signal<boolean>(false);
+  isCreatingCampaign = signal<boolean>(false);
+  newCampaign: CreateCampaignRequest = {
+    title: '',
+    messageTemplate: 'أهلاً بك يا {الاسم} 🐟🌊\nعروض أسماك جندوفلي اليومية وصلت! خصم خاص ووجبات سي فود طازجة بتوصيل سريع حتى باب بيتك. اطلب الآن واستمتع بالطعم الأصلي 💙',
+    intervalMinutes: 5,
+    dailyLimit: 50,
+    excludePreviouslyMessaged: true
+  };
+
+  // Sheet Upload & Contacts Import
+  showImportModal = signal<boolean>(false);
+  selectedFile: File | null = null;
+  selectedFileName = signal<string | null>(null);
+  importPreview = signal<ExcelImportResult | null>(null);
+  isUploadingSheet = signal<boolean>(false);
+  isConfirmingImport = signal<boolean>(false);
+
+  // Contacts
+  contacts = signal<MarketingContact[]>([]);
+  totalContacts = signal<number>(0);
+  contactsPage = signal<number>(1);
+  contactSearch: string = '';
+  isLoadingContacts = signal<boolean>(false);
+  contactsStats = signal<{
+    totalContacts: number;
+    messagedContacts: number;
+    freshContacts: number;
+    webCustomersCount: number;
+  }>({
+    totalContacts: 0,
+    messagedContacts: 0,
+    freshContacts: 0,
+    webCustomersCount: 0
+  });
+
+  // Post Delivery Follow-up Settings
+  postDeliverySettings = signal<PostDeliverySettings>({
+    isEnabled: true,
+    delayHours: 24,
+    messageTemplate: 'أهلاً بك يا {اسم_العميل} 🐟🌊، نتمنى أن تكون وجبتك من أسماك جندوفلي نالت إعجابك! نسعد دائماً بخدمتك ويهمنا جداً رأيك وتقييمك لطلبك #{رقم_الطلب}. نسعد بطلبك القادم دائماً! 💙'
+  });
+  isSavingPostDelivery = signal<boolean>(false);
+
   private pollInterval: any = null;
 
   ngOnInit() {
     this.refreshStatusAndQr();
     this.loadGatewaySettings();
-    // Auto-poll status every 5 seconds while on page
+    this.loadCampaigns();
+    this.loadContactsStats();
+    this.loadPostDeliverySettings();
+
+    // Auto-poll status every 6 seconds while on page
     this.pollInterval = setInterval(() => {
       this.refreshStatusSilently();
-    }, 5000);
+      // If campaigns tab active, refresh campaign progress
+      if (this.activeTab() === 'campaigns') {
+        this.refreshCampaignsSilently();
+      }
+    }, 6000);
   }
 
+  ngOnDestroy() {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+    }
+  }
+
+  setTab(tab: 'campaigns' | 'gateway' | 'post_delivery' | 'contacts') {
+    this.activeTab.set(tab);
+    if (tab === 'campaigns') {
+      this.loadCampaigns();
+      this.loadContactsStats();
+    } else if (tab === 'contacts') {
+      this.loadContacts();
+      this.loadContactsStats();
+    } else if (tab === 'post_delivery') {
+      this.loadPostDeliverySettings();
+    }
+  }
+
+  // ------------------------------------------
+  // CAMPAIGNS LOGIC
+  // ------------------------------------------
+  loadCampaigns() {
+    this.isLoadingCampaigns.set(true);
+    this.adminService.getWhatsAppCampaigns().subscribe({
+      next: (list: any) => {
+        this.isLoadingCampaigns.set(false);
+        this.campaigns.set(list?.data || list || []);
+      },
+      error: () => {
+        this.isLoadingCampaigns.set(false);
+      }
+    });
+  }
+
+  refreshCampaignsSilently() {
+    this.adminService.getWhatsAppCampaigns().subscribe({
+      next: (list: any) => {
+        this.campaigns.set(list?.data || list || []);
+        // If viewing details, also refresh details
+        const selected = this.selectedCampaign();
+        if (selected) {
+          this.adminService.getWhatsAppCampaignDetails(selected.id).subscribe({
+            next: (detail: any) => {
+              this.selectedCampaign.set(detail?.data || detail);
+            }
+          });
+        }
+      }
+    });
+  }
+
+  openCreateCampaignModal() {
+    this.newCampaign = {
+      title: 'عرض جديد - ' + new Date().toLocaleDateString('ar-EG'),
+      messageTemplate: 'أهلاً بك يا {الاسم} 🐟🌊\nعروض أسماك جندوفلي اليومية وصلت! خصم خاص ووجبات سي فود طازجة بتوصيل سريع حتى باب بيتك. اطلب الآن واستمتع بالطعم الأصلي 💙',
+      intervalMinutes: 5,
+      dailyLimit: 50,
+      excludePreviouslyMessaged: true
+    };
+    this.showCreateCampaignModal.set(true);
+  }
+
+  closeCreateCampaignModal() {
+    this.showCreateCampaignModal.set(false);
+  }
+
+  insertPlaceholder(placeholder: string) {
+    this.newCampaign.messageTemplate += ' ' + placeholder + ' ';
+  }
+
+  insertPostDeliveryPlaceholder(placeholder: string) {
+    const current = this.postDeliverySettings();
+    this.postDeliverySettings.set({
+      ...current,
+      messageTemplate: current.messageTemplate + ' ' + placeholder + ' '
+    });
+  }
+
+  submitCreateCampaign() {
+    if (!this.newCampaign.title.trim()) {
+      this.toast.error('يرجى إدخال عنوان أو اسم المهمة');
+      return;
+    }
+    if (!this.newCampaign.messageTemplate.trim()) {
+      this.toast.error('يرجى كتابة نص الرسالة أو العرض');
+      return;
+    }
+    if (this.newCampaign.intervalMinutes < 1) {
+      this.toast.error('الفاصل الزمني يجب أن يكون دقيقة واحدة على الأقل');
+      return;
+    }
+
+    this.isCreatingCampaign.set(true);
+    this.adminService.createWhatsAppCampaign(this.newCampaign).subscribe({
+      next: (res: any) => {
+        this.isCreatingCampaign.set(false);
+        this.showCreateCampaignModal.set(false);
+        this.toast.success('تم إنشاء المهمة وجدولة الرسائل بنجاح! 🚀');
+        this.loadCampaigns();
+        this.loadContactsStats();
+      },
+      error: (err: any) => {
+        this.isCreatingCampaign.set(false);
+        this.toast.error(err?.error?.message || 'فشل إنشاء المهمة');
+      }
+    });
+  }
+
+  pauseCampaign(id: number, event?: Event) {
+    event?.stopPropagation();
+    this.adminService.pauseWhatsAppCampaign(id).subscribe({
+      next: () => {
+        this.toast.success('تم إيقاف المهمة مؤقتاً ⏸️');
+        this.loadCampaigns();
+      },
+      error: () => this.toast.error('تعذر إيقاف المهمة')
+    });
+  }
+
+  resumeCampaign(id: number, event?: Event) {
+    event?.stopPropagation();
+    this.adminService.resumeWhatsAppCampaign(id).subscribe({
+      next: () => {
+        this.toast.success('تم استئناف المهمة بنجاح ▶️');
+        this.loadCampaigns();
+      },
+      error: () => this.toast.error('تعذر استئناف المهمة')
+    });
+  }
+
+  cancelCampaign(id: number, event?: Event) {
+    event?.stopPropagation();
+    if (!confirm('هل أنت متأكد من إلغاء هذه المهمة نهائياً؟')) return;
+
+    this.adminService.cancelWhatsAppCampaign(id).subscribe({
+      next: () => {
+        this.toast.success('تم إلغاء المهمة ⏹️');
+        this.loadCampaigns();
+      },
+      error: () => this.toast.error('تعذر إلغاء المهمة')
+    });
+  }
+
+  viewCampaignDetails(campaign: WhatsAppCampaign) {
+    this.isLoadingCampaignDetail.set(true);
+    this.adminService.getWhatsAppCampaignDetails(campaign.id).subscribe({
+      next: (res: any) => {
+        this.isLoadingCampaignDetail.set(false);
+        this.selectedCampaign.set(res?.data || res);
+      },
+      error: () => {
+        this.isLoadingCampaignDetail.set(false);
+        this.toast.error('تعذر تحميل تفاصيل وسجل المهمة');
+      }
+    });
+  }
+
+  closeCampaignDetails() {
+    this.selectedCampaign.set(null);
+  }
+
+  // ------------------------------------------
+  // SHEET IMPORT LOGIC
+  // ------------------------------------------
+  openImportModal() {
+    this.selectedFile = null;
+    this.selectedFileName.set(null);
+    this.importPreview.set(null);
+    this.showImportModal.set(true);
+  }
+
+  closeImportModal() {
+    this.showImportModal.set(false);
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    this.selectedFile = file;
+    this.selectedFileName.set(file.name);
+    this.uploadAndPreviewSheet(file);
+  }
+
+  uploadAndPreviewSheet(file: File) {
+    this.isUploadingSheet.set(true);
+    this.importPreview.set(null);
+
+    this.adminService.previewContactsSheet(file).subscribe({
+      next: (preview: ExcelImportResult) => {
+        this.isUploadingSheet.set(false);
+        this.importPreview.set(preview);
+        this.toast.success(`تم فحص الشيت: وجد ${preview.validCount} رقم صالح من إجمالي ${preview.totalRowsFound}.`);
+      },
+      error: (err: any) => {
+        this.isUploadingSheet.set(false);
+        this.toast.error(err?.error?.message || 'فشل فحص وقراءة ملف الإكسيل.');
+      }
+    });
+  }
+
+  confirmImportSheet() {
+    if (!this.selectedFile) return;
+
+    this.isConfirmingImport.set(true);
+    this.adminService.importContactsSheet(this.selectedFile).subscribe({
+      next: (res: any) => {
+        this.isConfirmingImport.set(false);
+        this.showImportModal.set(false);
+        this.toast.success(res?.message || 'تم حفظ العملاء بنجاح في قاعدة البيانات! 🎉');
+        this.loadContactsStats();
+        if (this.activeTab() === 'contacts') {
+          this.loadContacts();
+        }
+      },
+      error: (err: any) => {
+        this.isConfirmingImport.set(false);
+        this.toast.error(err?.error?.message || 'حدث خطأ أثناء استيراد البيانات.');
+      }
+    });
+  }
+
+  // ------------------------------------------
+  // CONTACTS LIST LOGIC
+  // ------------------------------------------
+  loadContactsStats() {
+    this.adminService.getContactsStats().subscribe({
+      next: (res: any) => {
+        const data = res?.data || res;
+        if (data) this.contactsStats.set(data);
+      }
+    });
+  }
+
+  loadContacts(page: number = 1) {
+    this.isLoadingContacts.set(true);
+    this.contactsPage.set(page);
+
+    this.adminService.getMarketingContacts(page, 30, this.contactSearch).subscribe({
+      next: (res: any) => {
+        this.isLoadingContacts.set(false);
+        const data = res?.data || res;
+        this.contacts.set(data?.items || []);
+        this.totalContacts.set(data?.totalCount || 0);
+      },
+      error: () => {
+        this.isLoadingContacts.set(false);
+      }
+    });
+  }
+
+  onSearchContacts() {
+    this.loadContacts(1);
+  }
+
+  // ------------------------------------------
+  // POST-DELIVERY FOLLOW-UP SETTINGS
+  // ------------------------------------------
+  loadPostDeliverySettings() {
+    this.adminService.getPostDeliverySettings().subscribe({
+      next: (res: any) => {
+        const data = res?.data || res;
+        if (data) {
+          this.postDeliverySettings.set(data);
+        }
+      }
+    });
+  }
+
+  savePostDeliverySettings() {
+    if (!this.postDeliverySettings().messageTemplate.trim()) {
+      this.toast.error('يرجى كتابة نص رسالة المتابعة');
+      return;
+    }
+
+    this.isSavingPostDelivery.set(true);
+    this.adminService.updatePostDeliverySettings(this.postDeliverySettings()).subscribe({
+      next: (res: any) => {
+        this.isSavingPostDelivery.set(false);
+        this.toast.success('تم حفظ إعدادات رسائل ما بعد استلام الطلب بنجاح! 💾');
+      },
+      error: (err: any) => {
+        this.isSavingPostDelivery.set(false);
+        this.toast.error(err?.error?.message || 'فشل حفظ الإعدادات');
+      }
+    });
+  }
+
+  // ------------------------------------------
+  // GATEWAY & CONNECTION LOGIC (EXISTING)
+  // ------------------------------------------
   loadGatewaySettings() {
     this.adminService.getGatewaySettings().subscribe({
       next: (settings) => {
@@ -112,12 +475,6 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-    if (this.pollInterval) {
-      clearInterval(this.pollInterval);
-    }
-  }
-
   refreshStatusAndQr() {
     this.isLoading.set(true);
     this.adminService.getWhatsAppQr().subscribe({
@@ -153,7 +510,6 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
         this.connectedPhone.set(data?.connectedPhone || null);
         this.queueLength.set(data?.queueLength || 0);
 
-        // If status changed or qr was updated, reload QR
         if (newStatus === 'qr_ready' && (!this.qrDataUrl() || prevStatus !== 'qr_ready')) {
           this.refreshQrOnly();
         }
@@ -243,7 +599,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
     this.isSendingTest.set(true);
     this.adminService.sendWhatsAppTestMessage(this.testPhone.trim(), this.testMessage.trim()).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.isSendingTest.set(false);
         this.toast.success('تم إرسال الرسالة التجريبية بنجاح عبر بوابة الواتساب الذاتية! 📲');
       },

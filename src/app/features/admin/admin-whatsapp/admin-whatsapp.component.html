@@ -3,504 +3,1053 @@
   <div class="page-top-header">
     <div class="header-text">
       <h1 class="page-title">
-        <i class="bi bi-whatsapp text-success me-2"></i> بوابة واتساب الذاتية (Local Gateway)
+        <i class="bi bi-whatsapp text-success me-2"></i> مركز إدارة وتسويق الواتساب
       </h1>
       <p class="page-subtitle">
-        ربط مباشر مع رقم هاتف المطعم عبر مسح QR Code لإرسال تأكيدات الطلبات، إشعارات التوصيل، وأكواد OTP التشغيلية
+        حملات تسويقية مجدولة، استيراد شيتات العملاء، رسائل متابعة الطلبات بعد التوصيل، وإدارة بوابة الربط
       </p>
     </div>
 
     <div class="header-actions">
+      <button class="btn-action-primary" (click)="openCreateCampaignModal()">
+        <i class="bi bi-megaphone-fill"></i>
+        <span>إنشاء مهمة إرسال جديدة</span>
+      </button>
+
+      <button class="btn-action-accent" (click)="openImportModal()">
+        <i class="bi bi-file-earmark-excel-fill"></i>
+        <span>استيراد شيت عملاء</span>
+      </button>
+
       <button class="btn-refresh" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
         <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
-        <span>تحديث الحالة</span>
-      </button>
-      <button class="btn-restart" (click)="restartGateway()" [disabled]="isLoading() || connectionStatus() === 'offline'">
-        <i class="bi bi-arrow-repeat"></i>
-        <span>إعادة تشغيل الخادم</span>
+        <span>تحديث</span>
       </button>
     </div>
   </div>
 
-  <!-- Main Grid: 2 Columns on desktop, 1 on mobile -->
-  <div class="admin-wa-grid">
-    <!-- Column 1: Connection & QR Management -->
-    <div class="wa-card glass-panel">
-      <div class="card-header-row">
-        <h3 class="card-title">
-          <i class="bi bi-broadcast text-primary me-2"></i> حالة اتصال البوابة
-        </h3>
+  <!-- Navigation Tabs -->
+  <div class="wa-nav-tabs">
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'campaigns'" (click)="setTab('campaigns')">
+      <i class="bi bi-send-check"></i>
+      <span>مهام وحملات الإرسال ({{ campaigns().length }})</span>
+    </button>
 
-        @switch (connectionStatus()) {
-          @case ('connected') {
-            <span class="status-pill status-connected">
-              <span class="pulse-dot green"></span>
-              <span>متصل ونشط ✅</span>
-            </span>
-          }
-          @case ('qr_ready') {
-            <span class="status-pill status-waiting">
-              <span class="pulse-dot yellow"></span>
-              <span>بانتظار مسح الـ QR</span>
-            </span>
-          }
-          @case ('connecting') {
-            <span class="status-pill status-connecting">
-              <i class="bi bi-hourglass-split spin"></i>
-              <span>جاري الاتصال...</span>
-            </span>
-          }
-          @case ('offline') {
-            <span class="status-pill status-offline">
-              <span>خادم الواتساب متوقف ❌</span>
-            </span>
-          }
-          @default {
-            <span class="status-pill status-disconnected">
-              <span>غير متصل</span>
-            </span>
-          }
-        }
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'contacts'" (click)="setTab('contacts')">
+      <i class="bi bi-people-fill"></i>
+      <span>سجل العملاء والشيتات ({{ contactsStats().totalContacts }})</span>
+    </button>
+
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'post_delivery'" (click)="setTab('post_delivery')">
+      <i class="bi bi-clock-history"></i>
+      <span>رسائل ما بعد استلام الطلب</span>
+      @if (postDeliverySettings().isEnabled) {
+        <span class="mini-badge-active">مفعل</span>
+      }
+    </button>
+
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
+      <i class="bi bi-qr-code-scan"></i>
+      <span>حالة ربط البوابة</span>
+      <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
+    </button>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- TAB 1: CAMPAIGNS & MARKETING TASKS -->
+  <!-- ============================================================= -->
+  @if (activeTab() === 'campaigns') {
+    <div class="tab-content-area">
+      <!-- Top Stats Row -->
+      <div class="stats-grid-row">
+        <div class="stat-card">
+          <div class="stat-icon bg-primary-soft">
+            <i class="bi bi-people"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">إجمالي العملاء المستوردين</span>
+            <span class="stat-value">{{ contactsStats().totalContacts }}</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon bg-success-soft">
+            <i class="bi bi-person-check"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">عملاء جدد (لم نراسلهم)</span>
+            <span class="stat-value text-success">{{ contactsStats().freshContacts }}</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon bg-info-soft">
+            <i class="bi bi-chat-dots"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">عملاء تم مراسلتهم</span>
+            <span class="stat-value text-info">{{ contactsStats().messagedContacts }}</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon bg-accent-soft">
+            <i class="bi bi-bag-check"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">عملاء الموقع والطلبات</span>
+            <span class="stat-value">{{ contactsStats().webCustomersCount }}</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Content based on state -->
-      <div class="wa-card-body">
-        @if (connectionStatus() === 'connected') {
-          <div class="connected-state-box text-center">
-            <div class="phone-icon-bubble">
-              <i class="bi bi-phone-vibrate-fill"></i>
-            </div>
-            <h4 class="connected-title">رقم هاتف المطعم متصل بنجاح</h4>
-            <div class="connected-phone-badge" dir="ltr">
-              +{{ connectedPhone() }}
-            </div>
-            <p class="connected-note">
-              يتم إرسال إشعارات الطلبات المعتمدة وأكواد الـ OTP التشغيلية للعملاء الموافقين مباشرة من هذا الرقم.
-            </p>
+      <!-- Anti-Ban Protection Alert -->
+      <div class="anti-ban-banner">
+        <div class="banner-icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="banner-text">
+          <strong>نظام الإرسال الآمن ومكافحة حظر الواتساب (Anti-Ban Engine) مفعل:</strong>
+          <span>يتم إرسال الرسائل على فترات زمنية متباعدة (مثلاً رسالة واحدة كل 5 دقائق) لتفادي قيام خوادم Meta بحظر رقم الواتساب الخاص بك. كما يمكنك استبعاد الأرقام التي تم مراسلتها سابقاً بضغطة زر.</span>
+        </div>
+      </div>
 
-            <div class="protection-box">
-              <div class="p-header">
-                <i class="bi bi-cpu text-primary fs-5"></i>
-                <span class="fw-bold">التحكم التشغيلي في تدفق الرسائل (Rate Limit)</span>
-              </div>
-              <p class="p-desc">
-                طابور إرسال تشغيلي لحماية موارد الخادم ومنع الإغراق اللحظي مع إمكانية المراقبة المستمرة.
-              </p>
-            </div>
+      <!-- Campaigns List Section -->
+      <div class="campaigns-section-header">
+        <h3 class="section-title">
+          <i class="bi bi-list-task me-2 text-primary"></i> قائمة مهام وحملات الواتساب
+        </h3>
+        <div class="section-actions">
+          <button class="btn-outline-custom" (click)="loadCampaigns()">
+            <i class="bi bi-arrow-clockwise"></i>
+            <span>تحديث المهام</span>
+          </button>
+          <button class="btn-create-task" (click)="openCreateCampaignModal()">
+            <i class="bi bi-plus-lg"></i>
+            <span>إنشاء مهمة جديدة</span>
+          </button>
+        </div>
+      </div>
 
-            <button class="btn-danger-outline" (click)="logoutSession()" [disabled]="isLoading()">
-              <i class="bi bi-box-arrow-right me-1"></i> قطع الارتباط وتسجيل الخروج
+      @if (isLoadingCampaigns()) {
+        <div class="loading-state-box">
+          <i class="bi bi-arrow-clockwise spin"></i>
+          <span>جاري تحميل قائمة المهام...</span>
+        </div>
+      } @else if (campaigns().length === 0) {
+        <div class="empty-state-box glass-panel">
+          <i class="bi bi-inbox text-muted"></i>
+          <h4>لا توجد مهام إرسال حالياً</h4>
+          <p>قم باستيراد شيت عملاء مثل Persons.xls ثم أنشئ أول مهمة إرسال عروض مجدولة.</p>
+          <div class="empty-actions">
+            <button class="btn-action-accent" (click)="openImportModal()">
+              <i class="bi bi-file-earmark-excel"></i>
+              <span>رفع شيت العملاء</span>
+            </button>
+            <button class="btn-action-primary" (click)="openCreateCampaignModal()">
+              <i class="bi bi-megaphone"></i>
+              <span>إنشاء مهمة جديدة</span>
             </button>
           </div>
-        } @else if (connectionStatus() === 'qr_ready' && qrDataUrl()) {
-          <div class="qr-scan-box text-center">
-            <p class="qr-instructions">
-              افتح <strong>واتساب</strong> على الهاتف ➔ <strong>الأجهزة المرتبطة (Linked Devices)</strong> ➔ اضغط <strong>ربط جهاز</strong> ووجّه الكاميرا إلى الكود التالي:
-            </p>
+        </div>
+      } @else {
+        <div class="campaigns-grid">
+          @for (c of campaigns(); track c.id) {
+            <div class="campaign-card glass-panel" [class.card-running]="c.status === 'Running'">
+              <!-- Card Top Header -->
+              <div class="camp-header">
+                <div class="camp-title-col">
+                  <h4 class="camp-title">{{ c.title }}</h4>
+                  <span class="camp-date">
+                    <i class="bi bi-calendar3"></i> {{ c.createdAt | date:'yyyy-MM-dd hh:mm a' }}
+                  </span>
+                </div>
 
-            <div class="qr-frame">
-              <img [src]="qrDataUrl()" alt="WhatsApp QR Code" class="qr-code-img" />
+                <div class="camp-status-col">
+                  @switch (c.status) {
+                    @case ('Running') {
+                      <span class="status-badge badge-running">
+                        <span class="dot-pulse green"></span> قيد التشغيل (نشط)
+                      </span>
+                    }
+                    @case ('Paused') {
+                      <span class="status-badge badge-paused">
+                        <span class="dot-pulse yellow"></span> متوقف مؤقتاً
+                      </span>
+                    }
+                    @case ('Completed') {
+                      <span class="status-badge badge-completed">
+                        <i class="bi bi-check-circle-fill"></i> مكتمل بنجاح
+                      </span>
+                    }
+                    @case ('Cancelled') {
+                      <span class="status-badge badge-cancelled">
+                        <i class="bi bi-x-circle-fill"></i> ملغي
+                      </span>
+                    }
+                    @default {
+                      <span class="status-badge badge-draft">مسودة</span>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Message Preview -->
+              <div class="camp-message-snippet">
+                <i class="bi bi-chat-quote me-1"></i>
+                <span>{{ c.messageTemplate }}</span>
+              </div>
+
+              <!-- Configuration Badges -->
+              <div class="camp-configs">
+                <span class="config-pill">
+                  <i class="bi bi-hourglass-split text-primary"></i> فاصل زمني: <strong>كل {{ c.intervalMinutes }} دقائق</strong>
+                </span>
+                <span class="config-pill">
+                  <i class="bi bi-person-lines-fill text-success"></i> المستهدف: <strong>{{ c.totalTargetCount }} عميل</strong>
+                </span>
+                @if (c.excludePreviouslyMessaged) {
+                  <span class="config-pill text-info">
+                    <i class="bi bi-shield-check"></i> تم استبعاد السابق مراسلتهم
+                  </span>
+                }
+              </div>
+
+              <!-- Progress Bar Section -->
+              <div class="camp-progress-section">
+                <div class="progress-labels">
+                  <span class="label-text">
+                    نسبة الإنجاز: <strong>{{ c.sentCount }} من {{ c.totalTargetCount }}</strong>
+                  </span>
+                  <span class="percentage-text">{{ c.progressPercentage }}%</span>
+                </div>
+
+                <div class="custom-progress-track">
+                  <div class="custom-progress-bar" [style.width.%]="c.progressPercentage"></div>
+                </div>
+
+                <div class="progress-footer-stats">
+                  <span class="stat-chip text-success">
+                    <i class="bi bi-check2"></i> ناجح: {{ c.sentCount }}
+                  </span>
+                  @if (c.failedCount > 0) {
+                    <span class="stat-chip text-danger">
+                      <i class="bi bi-exclamation-triangle"></i> فشل: {{ c.failedCount }}
+                    </span>
+                  }
+                  <span class="stat-chip text-muted">
+                    <i class="bi bi-clock"></i> متبقي: {{ c.totalTargetCount - c.sentCount }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Dispatch Timing Info -->
+              @if (c.status === 'Running' && c.nextScheduledDispatchAt) {
+                <div class="dispatch-time-alert">
+                  <i class="bi bi-stopwatch text-primary"></i>
+                  <span>الرسالة التالية مجدولة للإرسال: <strong>{{ c.nextScheduledDispatchAt | date:'hh:mm:ss a' }}</strong></span>
+                </div>
+              }
+
+              <!-- Card Actions Toolbar -->
+              <div class="camp-footer-actions">
+                <button class="btn-camp-details" (click)="viewCampaignDetails(c)">
+                  <i class="bi bi-card-list"></i>
+                  <span>تفاصيل وسجل الرسائل</span>
+                </button>
+
+                <div class="camp-control-btns">
+                  @if (c.status === 'Running') {
+                    <button class="btn-ctrl btn-pause" (click)="pauseCampaign(c.id, $event)" title="إيقاف مؤقت">
+                      <i class="bi bi-pause-fill"></i>
+                      <span>إيقاف</span>
+                    </button>
+                  } @else if (c.status === 'Paused') {
+                    <button class="btn-ctrl btn-resume" (click)="resumeCampaign(c.id, $event)" title="استئناف الإرسال">
+                      <i class="bi bi-play-fill"></i>
+                      <span>استئناف</span>
+                    </button>
+                  }
+
+                  @if (c.status === 'Running' || c.status === 'Paused') {
+                    <button class="btn-ctrl btn-cancel" (click)="cancelCampaign(c.id, $event)" title="إلغاء المهمة">
+                      <i class="bi bi-stop-fill"></i>
+                      <span>إلغاء</span>
+                    </button>
+                  }
+                </div>
+              </div>
             </div>
+          }
+        </div>
+      }
+    </div>
+  }
 
-            <div class="qr-actions">
-              <button class="btn-secondary-sm" (click)="refreshQrOnly()">
-                <i class="bi bi-arrow-clockwise me-1"></i> تحديث كود المسح
+  <!-- ============================================================= -->
+  <!-- TAB 2: CONTACTS LIST & SHEETS -->
+  <!-- ============================================================= -->
+  @if (activeTab() === 'contacts') {
+    <div class="tab-content-area">
+      <!-- Contacts Header Bar -->
+      <div class="contacts-toolbar glass-panel">
+        <div class="search-box">
+          <i class="bi bi-search"></i>
+          <input
+            type="text"
+            [(ngModel)]="contactSearch"
+            (keyup.enter)="onSearchContacts()"
+            placeholder="ابحث بالاسم أو رقم الهاتف..."
+          />
+          <button class="btn-search" (click)="onSearchContacts()">بحث</button>
+        </div>
+
+        <div class="contacts-actions">
+          <button class="btn-action-accent" (click)="openImportModal()">
+            <i class="bi bi-file-earmark-excel-fill"></i>
+            <span>رفع شيت جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contacts Table -->
+      <div class="table-container glass-panel">
+        @if (isLoadingContacts()) {
+          <div class="loading-state-box">
+            <i class="bi bi-arrow-clockwise spin"></i>
+            <span>جاري تحميل العملاء...</span>
+          </div>
+        } @else if (contacts().length === 0) {
+          <div class="empty-state-box">
+            <i class="bi bi-people text-muted"></i>
+            <h4>لا توجد جهات اتصال مطابقة</h4>
+            <p>قم برفع ملف إكسيل يحتوي على أرقام العملاء والأسماء.</p>
+          </div>
+        } @else {
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>اسم العميل</th>
+                <th>رقم الهاتف</th>
+                <th>مصدر الشيت</th>
+                <th>مرات المراسلة</th>
+                <th>آخر رسالة</th>
+                <th>تاريخ الإضافة</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of contacts(); track item.id; let i = $index) {
+                <tr>
+                  <td>{{ (contactsPage() - 1) * 30 + i + 1 }}</td>
+                  <td>
+                    <strong class="contact-name">{{ item.fullName }}</strong>
+                  </td>
+                  <td>
+                    <span class="phone-code" dir="ltr">{{ item.phoneNumber }}</span>
+                  </td>
+                  <td>
+                    <span class="source-tag">
+                      <i class="bi bi-file-earmark-spreadsheet"></i> {{ item.source || 'شيت عملاء' }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (item.totalCampaignsReceived > 0) {
+                      <span class="badge-count-sent">{{ item.totalCampaignsReceived }} مرات</span>
+                    } @else {
+                      <span class="badge-fresh">جديد لم يراسل</span>
+                    }
+                  </td>
+                  <td>
+                    {{ item.lastMessagedAt ? (item.lastMessagedAt | date:'yyyy-MM-dd') : '—' }}
+                  </td>
+                  <td>
+                    {{ item.createdAt | date:'yyyy-MM-dd' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div class="table-pagination">
+            <button
+              class="btn-page"
+              [disabled]="contactsPage() <= 1"
+              (click)="loadContacts(contactsPage() - 1)"
+            >
+              السابق
+            </button>
+            <span class="page-indicator">صفحة {{ contactsPage() }} (إجمالي {{ totalContacts() }} عميل)</span>
+            <button
+              class="btn-page"
+              [disabled]="contactsPage() * 30 >= totalContacts()"
+              (click)="loadContacts(contactsPage() + 1)"
+            >
+              التالي
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- TAB 3: POST-DELIVERY FOLLOW-UP SETTINGS -->
+  <!-- ============================================================= -->
+  @if (activeTab() === 'post_delivery') {
+    <div class="tab-content-area">
+      <div class="post-delivery-layout">
+        <!-- Settings Form Card -->
+        <div class="settings-card glass-panel">
+          <div class="card-header-row">
+            <h3 class="card-title">
+              <i class="bi bi-patch-check-fill text-primary me-2"></i> إعدادات رسائل ما بعد استلام الطلب
+            </h3>
+            <label class="switch-toggle">
+              <input
+                type="checkbox"
+                [(ngModel)]="postDeliverySettings().isEnabled"
+              />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <p class="section-desc">
+            ميزة ذكية ترسل تلقائياً رسالة واتساب للعميل بعد استلامه للطلب بمدة محددة لقياس رضاه، شكره، وتقديم كود خصم لطلبه القادم لزيادة ولاء العملاء.
+          </p>
+
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="bi bi-clock me-1 text-primary"></i> وقت الإرسال بعد اكتمال الطلب والتوصيل:
+            </label>
+            <div class="input-with-addon">
+              <input
+                type="number"
+                class="form-control-custom"
+                [(ngModel)]="postDeliverySettings().delayHours"
+                min="1"
+                max="720"
+              />
+              <span class="input-addon">ساعة (مثلاً 24 ساعة تعني الإرسال في اليوم التالي للتوصيل)</span>
+            </div>
+            <small class="helper-text">
+              سيقوم النظام بفحص الطلبات المكتملة وتوصيلها، وإرسال الرسالة بمجرد مرور هذا الوقت بدقة دون تكرار.
+            </small>
+          </div>
+
+          <div class="form-group mb-4">
+            <label class="form-label">
+              <i class="bi bi-chat-left-dots me-1 text-primary"></i> نص رسالة المتابعة والتقييم:
+            </label>
+            <textarea
+              class="form-control-custom textarea-large"
+              rows="5"
+              [(ngModel)]="postDeliverySettings().messageTemplate"
+              placeholder="اكتب رسالة التقييم والمتابعة..."
+            ></textarea>
+
+            <div class="tags-shortcuts">
+              <span class="tags-label">اضغط لإدراج متغير:</span>
+              <button type="button" class="tag-pill" (click)="insertPostDeliveryPlaceholder('{اسم_العميل}')">
+                + &#123;اسم_العميل&#125;
+              </button>
+              <button type="button" class="tag-pill" (click)="insertPostDeliveryPlaceholder('{رقم_الطلب}')">
+                + &#123;رقم_الطلب&#125;
+              </button>
+              <button type="button" class="tag-pill" (click)="insertPostDeliveryPlaceholder('{اسم_المطعم}')">
+                + &#123;اسم_المطعم&#125;
               </button>
             </div>
           </div>
-        } @else if (connectionStatus() === 'offline') {
-          <div class="offline-state-box text-center">
-            <div class="offline-icon-bubble">
-              <i class="bi bi-wifi-off"></i>
-            </div>
-            <h4 class="offline-title">خادم بوابة الواتساب غير متاح حالياً</h4>
-            <p class="offline-desc">
-              تعذر الاتصال بمحرك الواتساب على العنوان المضبوط:
-            </p>
-            <div class="offline-url-pill" dir="ltr">
-              {{ gatewaySettings().baseUrl }}
+
+          <div class="form-footer-action">
+            <button
+              class="btn-save-settings"
+              (click)="savePostDeliverySettings()"
+              [disabled]="isSavingPostDelivery()"
+            >
+              @if (isSavingPostDelivery()) {
+                <i class="bi bi-arrow-clockwise spin"></i>
+                <span>جاري الحفظ...</span>
+              } @else {
+                <i class="bi bi-check2-circle"></i>
+                <span>حفظ إعدادات المتابعة التلقائية</span>
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Live WhatsApp Message Preview -->
+        <div class="preview-card glass-panel">
+          <h4 class="preview-title">
+            <i class="bi bi-phone me-2 text-success"></i> معاينة شكل الرسالة لدى العميل
+          </h4>
+          <p class="preview-subtitle">هكذا ستظهر الرسالة في تطبيق واتساب هاتف العميل بعد تسليم طلبه:</p>
+
+          <div class="whatsapp-mockup">
+            <div class="wa-mock-header">
+              <div class="wa-avatar">
+                <i class="bi bi-shop"></i>
+              </div>
+              <div class="wa-contact-info">
+                <strong>أسماك جندوفلي 🐟🌊</strong>
+                <span>حساب أعمال موثق</span>
+              </div>
             </div>
 
-            @if (lastErrorMessage()) {
-              <div class="offline-error-alert" dir="ltr">
-                <small>{{ lastErrorMessage() }}</small>
+            <div class="wa-mock-body">
+              <div class="wa-bubble incoming">
+                <p class="bubble-text">
+                  {{
+                    postDeliverySettings().messageTemplate
+                      .replace('{اسم_العميل}', 'أحمد محمد')
+                      .replace('{الاسم}', 'أحمد محمد')
+                      .replace('{رقم_الطلب}', 'ORD-8942')
+                      .replace('{اسم_المطعم}', 'أسماك جندوفلي')
+                  }}
+                </p>
+                <span class="bubble-time">
+                  12:45 م <i class="bi bi-check2-all text-primary"></i>
+                </span>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- TAB 4: GATEWAY CONNECTION & STATUS (EXISTING INTEGRATION) -->
+  <!-- ============================================================= -->
+  @if (activeTab() === 'gateway') {
+    <div class="tab-content-area">
+      <div class="admin-wa-grid">
+        <!-- Column 1: Connection & QR Management -->
+        <div class="wa-card glass-panel">
+          <div class="card-header-row">
+            <h3 class="card-title">
+              <i class="bi bi-broadcast text-primary me-2"></i> حالة اتصال البوابة
+            </h3>
+
+            @switch (connectionStatus()) {
+              @case ('connected') {
+                <span class="status-pill status-connected">
+                  <span class="pulse-dot green"></span>
+                  <span>متصل ونشط ✅</span>
+                </span>
+              }
+              @case ('qr_ready') {
+                <span class="status-pill status-waiting">
+                  <span class="pulse-dot yellow"></span>
+                  <span>بانتظار مسح الـ QR</span>
+                </span>
+              }
+              @case ('connecting') {
+                <span class="status-pill status-connecting">
+                  <i class="bi bi-hourglass-split spin"></i>
+                  <span>جاري الاتصال...</span>
+                </span>
+              }
+              @case ('offline') {
+                <span class="status-pill status-offline">
+                  <span>خادم الواتساب متوقف ❌</span>
+                </span>
+              }
+              @default {
+                <span class="status-pill status-disconnected">
+                  <span>غير متصل</span>
+                </span>
+              }
             }
+          </div>
 
-            <!-- Instructions -->
-            <div class="gateway-setup-guide">
-              <div class="guide-item">
-                <i class="bi bi-laptop text-primary fs-5"></i>
-                <div>
-                  <strong>إذا كنت تشغّل البوابة على جهازك:</strong>
-                  <p class="mb-0 small text-muted">
-                    تأكد من فتح المجلد <code>whatsapp-service</code> وتشغيل الأمر: <code>npm start</code>، ثم اضغط "إعادة فحص الاتصال".
-                  </p>
-                </div>
+          <!-- Connected State View -->
+          @if (connectionStatus() === 'connected') {
+            <div class="connected-hero-box">
+              <div class="connected-icon-wrapper">
+                <i class="bi bi-check-circle-fill text-success"></i>
+              </div>
+              <h4 class="connected-headline">بوابة الواتساب متصلة بنجاح</h4>
+              <p class="connected-phone-display">
+                رقم الهاتف المتصل: <strong>{{ connectedPhone() || 'تم التحقق' }}</strong>
+              </p>
+
+              <div class="queue-status-bar">
+                <span>طابور الرسائل الحالية:</span>
+                <span class="badge bg-secondary">{{ queueLength() }} رسالة</span>
               </div>
 
-              <div class="guide-item">
-                <i class="bi bi-cloud-arrow-up text-success fs-5"></i>
-                <div>
-                  <strong>لربط الموقع السحابي أونلاين:</strong>
-                  <p class="mb-0 small text-muted">
-                    يمكنك تشغيل البوابة وربطها بنفق عام (مثل Cloudflare Tunnel أو ngrok) أو استضافتها على خادم خارجي، ثم حفظ الرابط بالأسفل:
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gateway URL Direct Input -->
-            <div class="gateway-url-box mt-3 text-start">
-              <label class="form-label fw-bold small">
-                <i class="bi bi-link-45deg me-1"></i> رابط خادم الواتساب (Gateway URL):
-              </label>
-              <div class="input-group">
-                <input
-                  type="url"
-                  dir="ltr"
-                  class="form-control text-start font-monospace"
-                  placeholder="http://127.0.0.1:3001 أو https://your-tunnel.ngrok-free.app"
-                  [(ngModel)]="gatewaySettings().baseUrl"
-                />
-                <button class="btn-save-url" (click)="saveGatewayUrl()" [disabled]="isSavingSettings()">
-                  @if (isSavingSettings()) {
-                    <i class="bi bi-hourglass-split spin"></i>
-                  } @else {
-                    <i class="bi bi-floppy2-fill me-1"></i>
-                    <span>حفظ وتجربة</span>
-                  }
+              <div class="connected-actions">
+                <button class="btn-disconnect" (click)="logoutSession()" [disabled]="isLoading()">
+                  <i class="bi bi-box-arrow-right"></i>
+                  <span>قطع الاتصال وتسجيل الخروج</span>
                 </button>
               </div>
             </div>
+          }
 
-            <div class="offline-actions mt-3">
-              <button class="btn-retry-check" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
-                <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
-                <span>إعادة فحص الاتصال الآن</span>
-              </button>
-            </div>
-          </div>
-        } @else {
-          <div class="loading-state-box text-center">
-            <div class="spinner-bubble">
-              <i class="bi bi-arrow-repeat spin"></i>
-            </div>
-            <h4 class="loading-title">جاري فحص محرك الواتساب وتجهيز الـ QR Code...</h4>
-            <p class="loading-desc">يرجى الانتظار ثوانٍ معدودة...</p>
-          </div>
-        }
+          <!-- QR Code State View -->
+          @if (connectionStatus() === 'qr_ready') {
+            <div class="qr-scan-box">
+              <p class="qr-instructions">
+                افتح تطبيق واتساب على هاتفك، اضغط على <strong>الأجهزة المرتبطة (Linked Devices)</strong>، ثم <strong>ربط جهاز</strong> ووجّه الكاميرا نحو الكود:
+              </p>
 
-        <!-- Alternative: Pairing Code -->
-        @if (connectionStatus() !== 'connected') {
-          <div class="pairing-code-section">
-            <div class="section-title-sm">
-              <i class="bi bi-key-fill text-warning me-1"></i> أو اربط بواسطة كود الاقتران (بدون كاميرا)
-            </div>
-            <div class="pairing-input-row">
-              <input
-                type="tel"
-                class="form-control text-start"
-                dir="ltr"
-                placeholder="010XXXXXXXX"
-                [(ngModel)]="pairPhone"
-                [disabled]="connectionStatus() === 'offline'"
-              />
-              <button
-                class="btn-pair"
-                (click)="requestPairingCode()"
-                [disabled]="isRequestingPairCode() || !pairPhone.trim() || connectionStatus() === 'offline'"
-              >
-                @if (isRequestingPairCode()) {
-                  <i class="bi bi-hourglass-split spin"></i>
+              <div class="qr-image-container">
+                @if (qrDataUrl()) {
+                  <img [src]="qrDataUrl()" alt="WhatsApp QR Code" class="qr-code-img" />
                 } @else {
-                  <span>طلب الكود</span>
+                  <div class="qr-loading">
+                    <i class="bi bi-arrow-clockwise spin"></i>
+                    <span>جاري توليد كود الـ QR...</span>
+                  </div>
                 }
+              </div>
+            </div>
+          }
+
+          <!-- Pairing Code Alternative -->
+          <div class="pairing-code-section">
+            <h5 class="pairing-title">
+              <i class="bi bi-key-fill text-accent me-1"></i> الربط عبر كود الاقتران (بدون كاميرا)
+            </h5>
+            <div class="pairing-form">
+              <input
+                type="text"
+                class="form-control-custom"
+                [(ngModel)]="pairPhone"
+                placeholder="أدخل رقم الهاتف مثل 01010415774"
+                dir="ltr"
+              />
+              <button class="btn-request-code" (click)="requestPairingCode()" [disabled]="isRequestingPairCode()">
+                @if (isRequestingPairCode()) {
+                  <i class="bi bi-arrow-clockwise spin"></i>
+                } @else {
+                  <i class="bi bi-send"></i>
+                }
+                <span>طلب الكود</span>
               </button>
             </div>
-
-            @if (connectionStatus() === 'offline') {
-              <small class="text-muted d-block mt-2">
-                <i class="bi bi-info-circle me-1 text-warning"></i>
-                يتطلب طلب كود الاقتران تشغيل خادم بوابة الواتساب بنجاح.
-              </small>
-            }
 
             @if (pairingCode()) {
               <div class="pairing-result-box">
-                <span class="sub">أدخل هذا الكود في إشعار الواتساب بهاتفك:</span>
-                <span class="code-digits font-monospace">{{ pairingCode() }}</span>
+                <span class="pairing-label">كود الاقتران الخاص بك:</span>
+                <strong class="pairing-digits" dir="ltr">{{ pairingCode() }}</strong>
+                <small class="text-muted d-block mt-1">أدخل هذا الكود في إشعار الواتساب على هاتفك لتأكيد الربط.</small>
               </div>
             }
           </div>
-        }
+        </div>
+
+        <!-- Column 2: Gateway Configuration & Test Send -->
+        <div class="wa-card glass-panel">
+          <h3 class="card-title mb-3">
+            <i class="bi bi-sliders text-primary me-2"></i> إعدادات البوابة والرسائل التشغيلية
+          </h3>
+
+          <div class="form-group mb-3">
+            <label class="form-label">رابط خادم الواتساب (Gateway URL):</label>
+            <div class="input-with-button">
+              <input
+                type="text"
+                class="form-control-custom"
+                [(ngModel)]="gatewaySettings().baseUrl"
+                placeholder="http://whatsservice.runasp.net"
+                dir="ltr"
+              />
+              <button class="btn-save-inline" (click)="saveGatewayUrl()" [disabled]="isSavingSettings()">
+                حفظ الرابط
+              </button>
+            </div>
+          </div>
+
+          <!-- Notification Triggers Toggles -->
+          <div class="triggers-section mb-4">
+            <h5 class="triggers-title">إشعارات الطلبات التشغيلية الفورية:</h5>
+
+            <div class="triggers-list">
+              <label class="trigger-checkbox">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderPlaced" />
+                <span>إرسال إشعار للعميل عند إنشاء الطلب</span>
+              </label>
+
+              <label class="trigger-checkbox">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderConfirmed" />
+                <span>إشعار تأكيد الطلب من الكاشير</span>
+              </label>
+
+              <label class="trigger-checkbox">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnKitchenWeighed" />
+                <span>إشعار الوزن الفعلي والسعر النهائي بعد المطبخ</span>
+              </label>
+
+              <label class="trigger-checkbox">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOutForDelivery" />
+                <span>إشعار خروج الطلب للتوصيل مع الطيار</span>
+              </label>
+
+              <label class="trigger-checkbox">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCompleted" />
+                <span>إشعار تسليم واكتمال الطلب</span>
+              </label>
+            </div>
+
+            <button class="btn-save-triggers mt-3" (click)="saveNotificationTriggers()" [disabled]="isSavingSettings()">
+              حفظ اختيارات الإشعارات
+            </button>
+          </div>
+
+          <!-- Test Send Box -->
+          <div class="test-send-box">
+            <h5 class="test-title">
+              <i class="bi bi-send-check text-success me-1"></i> إرسال رسالة تجريبية
+            </h5>
+            <div class="form-group mb-2">
+              <input
+                type="text"
+                class="form-control-custom"
+                [(ngModel)]="testPhone"
+                placeholder="رقم المستلم للتجربة (مثلاً 01010415774)"
+                dir="ltr"
+              />
+            </div>
+            <div class="form-group mb-2">
+              <textarea
+                class="form-control-custom"
+                rows="2"
+                [(ngModel)]="testMessage"
+                placeholder="نص الرسالة التجريبية..."
+              ></textarea>
+            </div>
+            <button class="btn-send-test" (click)="sendTest()" [disabled]="isSendingTest() || connectionStatus() !== 'connected'">
+              @if (isSendingTest()) {
+                <i class="bi bi-arrow-clockwise spin"></i>
+                <span>جاري الإرسال...</span>
+              } @else {
+                <i class="bi bi-whatsapp"></i>
+                <span>إرسال التجربة الآن</span>
+              }
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+  }
 
-    <!-- Column 2: Notification Event Triggers & Test Sender -->
-    <div class="wa-side-column">
-      <!-- Notification Triggers Control Card -->
-      <div class="wa-card glass-panel mb-4 highlight-trigger-card">
-        <div class="card-header-row mb-2">
-          <h3 class="card-title m-0">
-            <i class="bi bi-bell-fill text-warning me-2"></i> التحكم في إرسال إشعارات العملاء
-          </h3>
-          <span class="badge bg-primary">تحكم فوري</span>
-        </div>
-        <p class="card-subtitle mb-3">حدد الحالات والمراحل التي يتم فيها إرسال رسالة واتساب تلقائية للعميل:</p>
-
-        <div class="triggers-list">
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">عند تسجيل الطلب المبدئي للعميل</span>
-              <small class="trig-desc">إشعار فوري للعميل بوصول طلبه بنجاح وبدء المراجعة</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderPlaced" class="form-check-input" />
-          </label>
-
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">عند تأكيد الطلب للعميل</span>
-              <small class="trig-desc">إرسال تفاصيل الفاتورة، الأصناف، ورابط تتبع الطلب المباشر</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderConfirmed" class="form-check-input" />
-          </label>
-
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">عند قيام المطبخ بوزن الأسماك وتثبيت الحساب</span>
-              <small class="trig-desc">إشعار العميل بالأوزان الحقيقية والإجمالي النهائي للطلب</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnKitchenWeighed" class="form-check-input" />
-          </label>
-
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">عند خروج الطلب للتوصيل (مع الدليفري)</span>
-              <small class="trig-desc">إعلام العميل بأن طلبه في الطريق إليه للتجهيز والاستلام</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOutForDelivery" class="form-check-input" />
-          </label>
-
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">عند اكتمال واستلام الطلب بنجاح</span>
-              <small class="trig-desc">رسالة شكر للعميل وتأكيد انتهاء الطلب</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCompleted" class="form-check-input" />
-          </label>
-
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">عند إلغاء الطلب</span>
-              <small class="trig-desc">إشعار العميل بإلغاء الطلب مع سبب الإلغاء</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCancelled" class="form-check-input" />
-          </label>
+  <!-- ============================================================= -->
+  <!-- MODAL: CREATE CAMPAIGN TASK -->
+  <!-- ============================================================= -->
+  @if (showCreateCampaignModal()) {
+    <div class="modal-backdrop-custom" (click)="closeCreateCampaignModal()">
+      <div class="modal-card glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <h4>
+            <i class="bi bi-megaphone-fill text-primary me-2"></i> إنشاء مهمة إرسال عروض مجدولة
+          </h4>
+          <button class="btn-close-modal" (click)="closeCreateCampaignModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
 
-        <button class="btn-save-triggers mt-3" (click)="saveNotificationTriggers()" [disabled]="isSavingSettings()">
-          @if (isSavingSettings()) {
-            <i class="bi bi-hourglass-split spin me-1"></i>
-            <span>جاري الحفظ...</span>
-          } @else {
-            <i class="bi bi-floppy2-fill me-1"></i>
-            <span>حفظ إعدادات إرسال الإشعارات</span>
-          }
-        </button>
-      </div>
-
-      <!-- Cashier WhatsApp Notification Card -->
-      <div class="wa-card glass-panel mb-4 highlight-cashier-card">
-        <div class="card-header-row mb-2">
-          <h3 class="card-title m-0">
-            <i class="bi bi-person-badge-fill text-success me-2"></i> إشعار الكاشير والإدارة عند كل طلب
-          </h3>
-          <span class="badge bg-success">إشعار فوري</span>
-        </div>
-        <p class="card-subtitle mb-3">
-          إرسال تذكرة تفاصيل الطلب بالكامل إلى واتساب الكاشير فور قيام العميل بالطلب، مع تأخير زمني محسوب:
-        </p>
-
-        <div class="triggers-list mb-3">
-          <label class="trigger-item">
-            <div class="trig-info">
-              <span class="trig-title">تفعيل إرسال إشعار للكاشير عند كل طلب جديد</span>
-              <small class="trig-desc">إرسال بيانات العميل، الأصناف، الإجمالي، والعنوان في رسالة واتساب منظمة</small>
-            </div>
-            <input type="checkbox" [(ngModel)]="gatewaySettings().notifyCashierOnNewOrder" class="form-check-input" />
-          </label>
-        </div>
-
-        <div class="row g-2 mb-3">
-          <div class="col-12 col-sm-7">
-            <label class="form-label fw-bold small">رقم واتساب الكاشير / الإدارة *</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-whatsapp text-success"></i></span>
-              <input
-                type="tel"
-                dir="ltr"
-                class="form-control text-start"
-                placeholder="010XXXXXXXX"
-                [(ngModel)]="gatewaySettings().cashierWhatsAppNumber"
-              />
-            </div>
-            <small class="text-muted d-block mt-1">يصل عليه إشعار الطلب الجديد مباشرة.</small>
-          </div>
-
-          <div class="col-12 col-sm-5">
-            <label class="form-label fw-bold small">فارق التأخير (ثواني) *</label>
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-clock-history text-warning"></i></span>
-              <input
-                type="number"
-                min="1"
-                max="30"
-                class="form-control text-center"
-                [(ngModel)]="gatewaySettings().cashierNotificationDelaySeconds"
-              />
-              <span class="input-group-text">ثانية</span>
-            </div>
-            <small class="text-muted d-block mt-1">تأخير بسيط لتفادي الإرسال المزدوج.</small>
-          </div>
-        </div>
-
-        <button class="btn-save-triggers" (click)="saveNotificationTriggers()" [disabled]="isSavingSettings()">
-          @if (isSavingSettings()) {
-            <i class="bi bi-hourglass-split spin me-1"></i>
-            <span>جاري الحفظ...</span>
-          } @else {
-            <i class="bi bi-floppy2-fill me-1"></i>
-            <span>حفظ إعدادات إشعار الكاشير</span>
-          }
-        </button>
-      </div>
-
-      <!-- Gateway URL Permanent Setting Card -->
-      <div class="wa-card glass-panel mb-4">
-        <div class="card-header-row mb-2">
-          <h3 class="card-title m-0">
-            <i class="bi bi-hdd-network-fill text-info me-2"></i> عنوان ورابط خادم الواتساب
-          </h3>
-          <span class="badge bg-secondary">إعداد الخادم</span>
-        </div>
-        <p class="card-subtitle mb-3">
-          يمكنك ضبط وتغيير عنوان خادم الواتساب الذي يتصل به النظام (محلي 3001 أو رابط سحابي):
-        </p>
-
-        <div class="mb-3">
-          <label class="form-label fw-bold small">رابط خادم الواتساب (Gateway Base URL):</label>
-          <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-globe2 text-primary"></i></span>
+        <div class="modal-body-custom">
+          <!-- Title -->
+          <div class="form-group mb-3">
+            <label class="form-label">عنوان المهمة (لتميزها في الإدارة):</label>
             <input
-              type="url"
-              dir="ltr"
-              class="form-control text-start font-monospace"
-              placeholder="http://127.0.0.1:3001 أو https://your-tunnel.ngrok-free.app"
-              [(ngModel)]="gatewaySettings().baseUrl"
+              type="text"
+              class="form-control-custom"
+              [(ngModel)]="newCampaign.title"
+              placeholder="مثلاً: عرض سمك القاروص والجمبري للويكند"
             />
           </div>
-          <small class="text-muted d-block mt-1">
-            القيمة الافتراضية محلياً: <code>http://127.0.0.1:3001</code>
-          </small>
-        </div>
 
-        <button class="btn-save-triggers" (click)="saveGatewayUrl()" [disabled]="isSavingSettings()">
-          @if (isSavingSettings()) {
-            <i class="bi bi-hourglass-split spin me-1"></i>
-            <span>جاري الحفظ...</span>
-          } @else {
-            <i class="bi bi-floppy2-fill me-1"></i>
-            <span>حفظ وتحديث رابط الخادم</span>
-          }
-        </button>
-      </div>
+          <!-- Message Template -->
+          <div class="form-group mb-3">
+            <label class="form-label">نص الرسالة / العرض:</label>
+            <textarea
+              class="form-control-custom"
+              rows="5"
+              [(ngModel)]="newCampaign.messageTemplate"
+              placeholder="اكتب العرض التسويقي هنا..."
+            ></textarea>
 
-      <!-- Test Sender Card -->
-      <div class="wa-card glass-panel mb-4">
-        <div class="card-header-row mb-2">
-          <h3 class="card-title m-0">
-            <i class="bi bi-send-check-fill text-primary me-2"></i> اختبار إرسال رسالة تجريبية
-          </h3>
-        </div>
-        <p class="card-subtitle mb-3">تأكد من عمل البوابة وتجربة وصول الإشعارات إلى هاتفك مباشرة.</p>
-
-        <div class="form-group mb-3">
-          <label class="form-label fw-bold small">رقم الهاتف المستلم (مع كود الدولة) *</label>
-          <input
-            type="tel"
-            dir="ltr"
-            class="form-control text-start"
-            placeholder="010XXXXXXXX أو 2010XXXXXXXX"
-            [(ngModel)]="testPhone"
-          />
-        </div>
-
-        <div class="form-group mb-3">
-          <label class="form-label fw-bold small">نص الرسالة *</label>
-          <textarea
-            class="form-control"
-            rows="3"
-            [(ngModel)]="testMessage"
-          ></textarea>
-        </div>
-
-        <button
-          class="btn-send-test"
-          (click)="sendTest()"
-          [disabled]="isSendingTest() || connectionStatus() !== 'connected' || !testPhone.trim()"
-        >
-          @if (isSendingTest()) {
-            <i class="bi bi-hourglass-split spin me-2"></i>
-            <span>جاري الإرسال عبر البوابة...</span>
-          } @else {
-            <i class="bi bi-whatsapp me-2 fs-5"></i>
-            <span>إرسال الرسالة التجريبية الآن</span>
-          }
-        </button>
-
-        @if (connectionStatus() !== 'connected') {
-          <div class="notice-alert">
-            <i class="bi bi-exclamation-circle me-1"></i>
-            <span>يجب ربط رقم الواتساب أولاً لتتمكن من إرسال الرسائل التجريبية.</span>
-          </div>
-        }
-      </div>
-
-      <!-- Operational Policies Card -->
-      <div class="wa-card glass-panel">
-        <div class="card-header-row mb-2">
-          <h3 class="card-title m-0">
-            <i class="bi bi-shield-check text-success me-2"></i> السياسات والضوابط التشغيلية
-          </h3>
-        </div>
-
-        <div class="features-list">
-          <div class="feature-item">
-            <div class="f-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="f-content">
-              <strong>رسائل معاملات موثقة فقط</strong>
-              <small>قصر الرسائل على تأكيد الطلب، خروج التوصيل، اكتمال الطلب، ورمز OTP بموافقة العميل.</small>
+            <div class="tags-shortcuts">
+              <span class="tags-label">إدراج متغير:</span>
+              <button type="button" class="tag-pill" (click)="insertPlaceholder('{الاسم}')">
+                + &#123;الاسم&#125;
+              </button>
             </div>
           </div>
 
-          <div class="feature-item">
-            <div class="f-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="f-content">
-              <strong>عدم تعطيل الطلبات عند فشل الإرسال</strong>
-              <small>في حال انقطاع الواتساب يظل الطلب محفوظاً وتتابع مهام المطبخ بصورة طبيعية دون توقف.</small>
+          <!-- Grid: Limit & Interval -->
+          <div class="modal-grid-2">
+            <div class="form-group">
+              <label class="form-label">
+                الفاصل الزمني بين كل رسالة:
+              </label>
+              <div class="input-with-addon">
+                <input
+                  type="number"
+                  class="form-control-custom"
+                  [(ngModel)]="newCampaign.intervalMinutes"
+                  min="1"
+                  max="120"
+                />
+                <span class="input-addon">دقائق (لتفادي الحظر)</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                العدد المستهدف للإرسال:
+              </label>
+              <div class="input-with-addon">
+                <input
+                  type="number"
+                  class="form-control-custom"
+                  [(ngModel)]="newCampaign.dailyLimit"
+                  min="1"
+                  max="5000"
+                />
+                <span class="input-addon">عميل (مثلاً 50 في اليوم)</span>
+              </div>
             </div>
           </div>
 
-          <div class="feature-item">
-            <div class="f-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="f-content">
-              <strong>طابور إرسال Outbox دائم</strong>
-              <small>إعادة محاولات محدودة ومحسوبة مع حفظ سجل الإخفاق المنقح لتدقيق المشرف.</small>
-            </div>
+          <!-- Checkbox: Exclude previously messaged -->
+          <div class="form-checkbox-box mt-3">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="newCampaign.excludePreviouslyMessaged"
+              />
+              <div class="checkbox-text">
+                <strong>استبعاد الأرقام التي تم مراسلتها في مهام سابقة</strong>
+                <span>يضمن عدم إزعاج نفس العميل بعروض مكررة واستهداف العملاء الجدد فقط.</span>
+              </div>
+            </label>
           </div>
+
+          <!-- Calculation Summary -->
+          <div class="summary-box mt-3">
+            <i class="bi bi-info-circle text-primary"></i>
+            <span>
+              سيتم إرسال الرسائل لـ <strong>{{ newCampaign.dailyLimit }}</strong> عميل بفارق <strong>{{ newCampaign.intervalMinutes }}</strong> دقائق بين كل رسالة (الوقت الإجمالي المتوقع: <strong>{{ (newCampaign.dailyLimit * newCampaign.intervalMinutes) / 60 | number:'1.1-1' }}</strong> ساعة).
+            </span>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom">
+          <button class="btn-cancel-modal" (click)="closeCreateCampaignModal()">إلغاء</button>
+          <button class="btn-action-primary" (click)="submitCreateCampaign()" [disabled]="isCreatingCampaign()">
+            @if (isCreatingCampaign()) {
+              <i class="bi bi-arrow-clockwise spin"></i>
+              <span>جاري الإنشاء والجدولة...</span>
+            } @else {
+              <i class="bi bi-rocket-takeoff-fill"></i>
+              <span>بدء وجدولة المهمة الآن</span>
+            }
+          </button>
         </div>
       </div>
     </div>
-  </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- MODAL: UPLOAD EXCEL SHEET -->
+  <!-- ============================================================= -->
+  @if (showImportModal()) {
+    <div class="modal-backdrop-custom" (click)="closeImportModal()">
+      <div class="modal-card modal-lg glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <h4>
+            <i class="bi bi-file-earmark-excel-fill text-success me-2"></i> استيراد بيانات العملاء من شيت إكسيل
+          </h4>
+          <button class="btn-close-modal" (click)="closeImportModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-custom">
+          <!-- Dropzone -->
+          <div class="excel-dropzone" (click)="fileInput.click()">
+            <input
+              #fileInput
+              type="file"
+              accept=".xls,.xlsx,.csv"
+              style="display: none"
+              (change)="onFileSelected($event)"
+            />
+            <div class="dropzone-content">
+              <i class="bi bi-cloud-arrow-up text-primary"></i>
+              <h5>اضغط هنا لاختيار الشيت (مثل Persons.xls أو ملفات xlsx أو csv)</h5>
+              <p>يقوم النظام تلقائياً باستخراج عمود الاسم ورقم الهاتف وتطهير الأرقام المصرية</p>
+              @if (selectedFileName()) {
+                <span class="selected-file-badge">
+                  <i class="bi bi-file-earmark-check"></i> {{ selectedFileName() }}
+                </span>
+              }
+            </div>
+          </div>
+
+          @if (isUploadingSheet()) {
+            <div class="loading-state-box">
+              <i class="bi bi-arrow-clockwise spin"></i>
+              <span>جاري فحص وقراءة بيانات الشيت...</span>
+            </div>
+          }
+
+          <!-- Preview Results -->
+          @if (importPreview(); as p) {
+            <div class="import-preview-results mt-4">
+              <div class="preview-metrics">
+                <span class="metric-pill bg-light">
+                  إجمالي الصفوف: <strong>{{ p.totalRowsFound }}</strong>
+                </span>
+                <span class="metric-pill bg-success-soft text-success">
+                  أرقام صالحة: <strong>{{ p.validCount }}</strong>
+                </span>
+                <span class="metric-pill bg-warning-soft text-warning">
+                  أرقام مكررة: <strong>{{ p.duplicateCount }}</strong>
+                </span>
+                <span class="metric-pill bg-danger-soft text-danger">
+                  غير صالحة: <strong>{{ p.invalidCount }}</strong>
+                </span>
+              </div>
+
+              <h6 class="preview-table-title mt-3">معاينة أولية لأول 50 عميل في الملف:</h6>
+              <div class="preview-table-container">
+                <table class="custom-table table-sm">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>الاسم</th>
+                      <th>رقم الهاتف المعالج</th>
+                      <th>الحالة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of p.previewRows; track $index; let i = $index) {
+                      <tr>
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ row.fullName }}</td>
+                        <td dir="ltr">{{ row.phoneNumber }}</td>
+                        <td>
+                          @if (row.isValid) {
+                            <span class="text-success"><i class="bi bi-check-circle"></i> صالح</span>
+                          } @else {
+                            <span class="text-danger"><i class="bi bi-x-circle"></i> {{ row.errorMessage }}</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer-custom">
+          <button class="btn-cancel-modal" (click)="closeImportModal()">إلغاء</button>
+          <button
+            class="btn-action-accent"
+            (click)="confirmImportSheet()"
+            [disabled]="isConfirmingImport() || !importPreview() || importPreview()!.validCount === 0"
+          >
+            @if (isConfirmingImport()) {
+              <i class="bi bi-arrow-clockwise spin"></i>
+              <span>جاري الحفظ في الداتابيز...</span>
+            } @else {
+              <i class="bi bi-database-fill-check"></i>
+              <span>تأكيد وحفظ العملاء في قاعدة البيانات</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- MODAL: CAMPAIGN DETAILS & LOGS -->
+  <!-- ============================================================= -->
+  @if (selectedCampaign(); as sc) {
+    <div class="modal-backdrop-custom" (click)="closeCampaignDetails()">
+      <div class="modal-card modal-lg glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <h4>
+            <i class="bi bi-card-checklist text-primary me-2"></i> سجل وتفاصيل المهمة: {{ sc.title }}
+          </h4>
+          <button class="btn-close-modal" (click)="closeCampaignDetails()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-custom">
+          <div class="camp-detail-metrics">
+            <div class="metric-item">
+              <span class="m-label">الحالة:</span>
+              <span class="m-val">{{ sc.status }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">الفاصل الزمني:</span>
+              <span class="m-val">كل {{ sc.intervalMinutes }} دقائق</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">تم الإرسال:</span>
+              <span class="m-val text-success">{{ sc.sentCount }} من {{ sc.totalTargetCount }}</span>
+            </div>
+            <div class="metric-item">
+              <span class="m-label">فشل:</span>
+              <span class="m-val text-danger">{{ sc.failedCount }}</span>
+            </div>
+          </div>
+
+          <h6 class="mt-4 mb-2">سجل المستلمين في هذه المهمة:</h6>
+          <div class="logs-table-container">
+            <table class="custom-table table-sm">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>المستلم</th>
+                  <th>رقم الهاتف</th>
+                  <th>الحالة</th>
+                  <th>وقت الإرسال</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (log of sc.logs; track log.id; let i = $index) {
+                  <tr>
+                    <td>{{ i + 1 }}</td>
+                    <td>{{ log.recipientName }}</td>
+                    <td dir="ltr">{{ log.recipientPhone }}</td>
+                    <td>
+                      @switch (log.status) {
+                        @case ('Sent') {
+                          <span class="badge-log-sent"><i class="bi bi-check2-all"></i> تم الإرسال</span>
+                        }
+                        @case ('Pending') {
+                          <span class="badge-log-pending"><i class="bi bi-hourglass-split"></i> قيد الانتظار</span>
+                        }
+                        @case ('Failed') {
+                          <span class="badge-log-failed" [title]="log.errorMessage || ''"><i class="bi bi-exclamation-circle"></i> فشل</span>
+                        }
+                      }
+                    </td>
+                    <td>{{ log.sentAt ? (log.sentAt | date:'hh:mm:ss a') : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom">
+          <button class="btn-cancel-modal" (click)="closeCampaignDetails()">إغلاق</button>
+        </div>
+      </div>
+    </div>
+  }
 </div>

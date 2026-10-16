@@ -206,6 +206,61 @@ export class AdminService {
     return this.api.post<any>('admin/whatsapp/test-send', { recipientPhone, messageText });
   }
 
+  // WhatsApp Marketing Campaigns & Sheets
+  previewContactsSheet(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ success: boolean; data: any; message: string }>(`${this.api.baseUrl}/admin/whatsapp-campaigns/preview-sheet`, formData)
+      .pipe(map(res => res.data));
+  }
+
+  importContactsSheet(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ success: boolean; data: any; message: string }>(`${this.api.baseUrl}/admin/whatsapp-campaigns/import-sheet`, formData)
+      .pipe(map(res => res.data));
+  }
+
+  getMarketingContacts(page = 1, pageSize = 50, search = ''): Observable<any> {
+    return this.api.get<any>(`admin/whatsapp-campaigns/contacts?page=${page}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`);
+  }
+
+  getContactsStats(): Observable<any> {
+    return this.api.get<any>('admin/whatsapp-campaigns/contacts/stats');
+  }
+
+  createWhatsAppCampaign(req: any): Observable<any> {
+    return this.api.post<any>('admin/whatsapp-campaigns', req);
+  }
+
+  getWhatsAppCampaigns(): Observable<any[]> {
+    return this.api.get<any[]>('admin/whatsapp-campaigns');
+  }
+
+  getWhatsAppCampaignDetails(campaignId: number): Observable<any> {
+    return this.api.get<any>(`admin/whatsapp-campaigns/${campaignId}`);
+  }
+
+  pauseWhatsAppCampaign(campaignId: number): Observable<boolean> {
+    return this.api.put<boolean>(`admin/whatsapp-campaigns/${campaignId}/pause`, {});
+  }
+
+  resumeWhatsAppCampaign(campaignId: number): Observable<boolean> {
+    return this.api.put<boolean>(`admin/whatsapp-campaigns/${campaignId}/resume`, {});
+  }
+
+  cancelWhatsAppCampaign(campaignId: number): Observable<boolean> {
+    return this.api.delete<boolean>(`admin/whatsapp-campaigns/${campaignId}`);
+  }
+
+  getPostDeliverySettings(): Observable<any> {
+    return this.api.get<any>('admin/whatsapp-campaigns/post-delivery-settings');
+  }
+
+  updatePostDeliverySettings(settings: any): Observable<any> {
+    return this.api.put<any>('admin/whatsapp-campaigns/post-delivery-settings', settings);
+  }
+
   // Upload Media
   uploadImage(file: File, folder = 'general'): Observable<string> {
     const formData = new FormData();
