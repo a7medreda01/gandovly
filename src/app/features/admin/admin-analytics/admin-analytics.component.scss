@@ -123,6 +123,27 @@
   }
 }
 
+.btn-clear-sim {
+  padding: 0 0.85rem;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px dashed #fca5a5;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #ef4444;
+  }
+}
+
 @keyframes spin {
   100% { transform: rotate(360deg); }
 }

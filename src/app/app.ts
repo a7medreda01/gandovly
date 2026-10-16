@@ -96,7 +96,7 @@ export class App implements OnInit, OnDestroy {
         else if (ua.includes('Edg')) browser = 'Edge';
         else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
 
-        this.apiService.post('api/v1/storefront/analytics/record-visit', {
+        this.apiService.post('storefront/analytics/record-visit', {
           visitorToken,
           path: url,
           referrer: document.referrer || '',

@@ -24,28 +24,28 @@ export class ApiService {
       });
     }
 
-    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/^api\/v1\/?/i, '');
     return this.http
       .get<ApiResponse<T>>(`${this.baseUrl}/${cleanEndpoint}`, { params: httpParams })
       .pipe(map(res => res.data));
   }
 
   post<T>(endpoint: string, body: any): Observable<T> {
-    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/^api\/v1\/?/i, '');
     return this.http
       .post<ApiResponse<T>>(`${this.baseUrl}/${cleanEndpoint}`, body)
       .pipe(map(res => res.data));
   }
 
   put<T>(endpoint: string, body: any): Observable<T> {
-    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/^api\/v1\/?/i, '');
     return this.http
       .put<ApiResponse<T>>(`${this.baseUrl}/${cleanEndpoint}`, body)
       .pipe(map(res => res.data));
   }
 
   patch<T>(endpoint: string, body: any): Observable<T> {
-    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/^api\/v1\/?/i, '');
     return this.http
       .patch<ApiResponse<T>>(`${this.baseUrl}/${cleanEndpoint}`, body)
       .pipe(map(res => res.data));
@@ -61,7 +61,7 @@ export class ApiService {
       });
     }
 
-    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const cleanEndpoint = endpoint.replace(/^\/+/, '').replace(/^api\/v1\/?/i, '');
     return this.http
       .delete<ApiResponse<T>>(`${this.baseUrl}/${cleanEndpoint}`, { params: httpParams })
       .pipe(map(res => res.data));

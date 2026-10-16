@@ -72,8 +72,30 @@ export class AdminAnalyticsComponent implements OnInit {
     });
   }
 
+  isClearing = signal<boolean>(false);
+
   setPeriod(period: 'today' | 'week' | 'month'): void {
+    if (this.activePeriod() === period) return;
     this.activePeriod.set(period);
+    this.loadAnalytics();
+  }
+
+  clearSimulatedData(): void {
+    if (!confirm('هل تريد تصفير وحذف الزيارات التجريبية والبدء بإحصائيات حقيقية 100%؟')) {
+      return;
+    }
+    this.isClearing.set(true);
+    this.adminService.clearSimulatedVisits().subscribe({
+      next: () => {
+        this.isClearing.set(false);
+        this.toast.success('تم حذف البيانات التجريبية، وستظهر الزيارات الحقيقية لحظة بلحظة.');
+        this.loadAnalytics();
+      },
+      error: () => {
+        this.isClearing.set(false);
+        this.toast.error('حدث خطأ أثناء حذف البيانات.');
+      }
+    });
   }
 
   getBarHeightPercent(value: number, max: number): number {

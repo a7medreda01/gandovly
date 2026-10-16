@@ -45,6 +45,14 @@
         </button>
       </div>
 
+      <!-- Clear Simulated Data Button (if any) -->
+      @if (analytics() && analytics()!.overallVisits > 200) {
+      <button class="btn-clear-sim" (click)="clearSimulatedData()" [disabled]="isClearing()" title="تصفير الزيارات التجريبية والبدء ببيانات حقيقية">
+        <i class="bi bi-trash3 text-danger"></i>
+        <span class="d-none d-sm-inline">تصفير التجريبي</span>
+      </button>
+      }
+
       <!-- Refresh Button -->
       <button class="btn-refresh" (click)="loadAnalytics()" [disabled]="isLoading()" title="تحديث البيانات">
         <i class="bi bi-arrow-clockwise" [class.spin-anim]="isLoading()"></i>

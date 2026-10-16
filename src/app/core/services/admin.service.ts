@@ -279,6 +279,10 @@ export class AdminService {
     return this.api.get<VisitAnalytics>('admin/analytics/visits', { timeRange });
   }
 
+  clearSimulatedVisits(): Observable<boolean> {
+    return this.api.post<boolean>('admin/analytics/clear-simulated', {});
+  }
+
   // Upload Media
   uploadImage(file: File, folder = 'general'): Observable<string> {
     const formData = new FormData();
