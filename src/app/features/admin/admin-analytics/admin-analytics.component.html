@@ -1,0 +1,308 @@
+<div class="analytics-page">
+  <!-- Header Banner -->
+  <header class="page-header-card glass-panel">
+    <div class="header-main-info">
+      <div class="header-icon-badge">
+        <i class="bi bi-activity"></i>
+      </div>
+      <div>
+        <h1 class="page-heading">تحليلات وأداء زيارات المتجر</h1>
+        <p class="page-sub">رصد فوري لعدد الزيارات والزوار الفريدين ومعدل التحويل لطلبات وتوزيع الأجهزة بالساعات</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Period Selector Switcher -->
+      <div class="tab-pill-group" role="tablist">
+        <button
+          type="button"
+          class="tab-pill-btn"
+          [class.active]="activePeriod() === 'today'"
+          (click)="setPeriod('today')"
+        >
+          <i class="bi bi-calendar-event"></i>
+          <span>اليوم</span>
+        </button>
+
+        <button
+          type="button"
+          class="tab-pill-btn"
+          [class.active]="activePeriod() === 'week'"
+          (click)="setPeriod('week')"
+        >
+          <i class="bi bi-calendar-week"></i>
+          <span>هذا الأسبوع</span>
+        </button>
+
+        <button
+          type="button"
+          class="tab-pill-btn"
+          [class.active]="activePeriod() === 'month'"
+          (click)="setPeriod('month')"
+        >
+          <i class="bi bi-calendar3"></i>
+          <span>هذا الشهر</span>
+        </button>
+      </div>
+
+      <!-- Refresh Button -->
+      <button class="btn-refresh" (click)="loadAnalytics()" [disabled]="isLoading()" title="تحديث البيانات">
+        <i class="bi bi-arrow-clockwise" [class.spin-anim]="isLoading()"></i>
+      </button>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <app-loading-state
+      mode="cards"
+      title="جاري تجهيز إحصائيات وتحليلات الزيارات..."
+      subtitle="يتم الآن حساب إجمالي الزيارات، الزوار الفريدين، ومعدلات تحويل الطلبات"
+      icon="bi-bar-chart-steps"
+      [count]="4"
+    ></app-loading-state>
+  } @else if (analytics()) {
+    <!-- 1. KPI Cards Grid: Daily, Weekly, Monthly, and Conversion Rate -->
+    <section class="kpi-cards-grid" aria-label="مؤشرات أداء الزيارات">
+      <!-- Daily Visits Card -->
+      <div class="kpi-card glass-panel card-blue" [class.highlighted]="activePeriod() === 'today'">
+        <div class="kpi-top-row">
+          <span class="label">زيارات اليوم (Daily)</span>
+          <div class="kpi-icon"><i class="bi bi-sun-fill"></i></div>
+        </div>
+        <div class="kpi-main-val">
+          {{ analytics()!.today.totalVisits | number }}
+          <span class="unit">زيارة</span>
+        </div>
+        <div class="kpi-footer-row">
+          <span class="growth-chip" [class.positive]="analytics()!.today.growthPercentage >= 0" [class.negative]="analytics()!.today.growthPercentage < 0">
+            <i class="bi" [class.bi-arrow-up-right]="analytics()!.today.growthPercentage >= 0" [class.bi-arrow-down-right]="analytics()!.today.growthPercentage < 0"></i>
+            {{ analytics()!.today.growthPercentage >= 0 ? '+' : '' }}{{ analytics()!.today.growthPercentage }}% عن أمس
+          </span>
+          <span class="unique-txt">
+            <i class="bi bi-people-fill me-1"></i> {{ analytics()!.today.uniqueVisitors }} زائر فريد
+          </span>
+        </div>
+      </div>
+
+      <!-- Weekly Visits Card -->
+      <div class="kpi-card glass-panel card-purple" [class.highlighted]="activePeriod() === 'week'">
+        <div class="kpi-top-row">
+          <span class="label">زيارات الأسبوع (Weekly)</span>
+          <div class="kpi-icon"><i class="bi bi-calendar-check-fill"></i></div>
+        </div>
+        <div class="kpi-main-val">
+          {{ analytics()!.thisWeek.totalVisits | number }}
+          <span class="unit">زيارة</span>
+        </div>
+        <div class="kpi-footer-row">
+          <span class="growth-chip" [class.positive]="analytics()!.thisWeek.growthPercentage >= 0" [class.negative]="analytics()!.thisWeek.growthPercentage < 0">
+            <i class="bi" [class.bi-arrow-up-right]="analytics()!.thisWeek.growthPercentage >= 0" [class.bi-arrow-down-right]="analytics()!.thisWeek.growthPercentage < 0"></i>
+            {{ analytics()!.thisWeek.growthPercentage >= 0 ? '+' : '' }}{{ analytics()!.thisWeek.growthPercentage }}% عن الأسبوع الماضي
+          </span>
+          <span class="unique-txt">
+            <i class="bi bi-people-fill me-1"></i> {{ analytics()!.thisWeek.uniqueVisitors }} زائر فريد
+          </span>
+        </div>
+      </div>
+
+      <!-- Monthly Visits Card -->
+      <div class="kpi-card glass-panel card-teal" [class.highlighted]="activePeriod() === 'month'">
+        <div class="kpi-top-row">
+          <span class="label">زيارات الشهر (Monthly)</span>
+          <div class="kpi-icon"><i class="bi bi-speedometer2"></i></div>
+        </div>
+        <div class="kpi-main-val">
+          {{ analytics()!.thisMonth.totalVisits | number }}
+          <span class="unit">زيارة</span>
+        </div>
+        <div class="kpi-footer-row">
+          <span class="growth-chip" [class.positive]="analytics()!.thisMonth.growthPercentage >= 0" [class.negative]="analytics()!.thisMonth.growthPercentage < 0">
+            <i class="bi" [class.bi-arrow-up-right]="analytics()!.thisMonth.growthPercentage >= 0" [class.bi-arrow-down-right]="analytics()!.thisMonth.growthPercentage < 0"></i>
+            {{ analytics()!.thisMonth.growthPercentage >= 0 ? '+' : '' }}{{ analytics()!.thisMonth.growthPercentage }}% نمو شهري
+          </span>
+          <span class="unique-txt">
+            <i class="bi bi-people-fill me-1"></i> {{ analytics()!.thisMonth.uniqueVisitors }} زائر فريد
+          </span>
+        </div>
+      </div>
+
+      <!-- Conversion Rate Card (CR: Orders / Unique Visitors) -->
+      <div class="kpi-card glass-panel card-emerald">
+        <div class="kpi-top-row">
+          <span class="label">معدل التحويل للطلبات (CR)</span>
+          <div class="kpi-icon"><i class="bi bi-cart-check-fill"></i></div>
+        </div>
+        <div class="kpi-main-val conversion-val">
+          {{ currentPeriodData()?.conversionRate || 0 }}%
+          <span class="conversion-status-pill">
+            <i class="bi bi-fire text-warning me-1"></i> أداء ممتاز
+          </span>
+        </div>
+        <div class="kpi-footer-row">
+          <span class="formula-info">
+            <i class="bi bi-receipt me-1"></i> {{ currentPeriodData()?.totalOrders || 0 }} طلب ناجح
+          </span>
+          <span class="revenue-info">
+            <i class="bi bi-cash-stack me-1"></i> {{ currentPeriodData()?.totalRevenue | number:'1.0-0' }} ج.م إيراد
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Charts Section: Daily Trend & Hourly Peak Distribution -->
+    <section class="charts-section-grid">
+      <!-- Daily Trend Chart (Last 14 Days) -->
+      <div class="chart-card glass-panel">
+        <div class="card-head-row">
+          <div class="chart-head-info">
+            <h2 class="card-title"><i class="bi bi-graph-up text-primary me-2"></i> مسار الزيارات والطلبات اليومي (آخر 14 يوم)</h2>
+            <p class="card-subtitle">مقارنة حركة الزيارات مع الطلبات الفعلية يوماً بيوم</p>
+          </div>
+          <div class="chart-legends">
+            <span class="legend-item"><span class="legend-dot dot-blue"></span> إجمالي الزيارات</span>
+            <span class="legend-item"><span class="legend-dot dot-emerald"></span> الطلبات</span>
+          </div>
+        </div>
+
+        <!-- Interactive Visual Bar Chart -->
+        <div class="visual-bars-container">
+          <div class="bars-grid">
+            @for (point of analytics()!.dailyTrend; track point.date) {
+              <div class="bar-col-group" [title]="point.dayNameAr + ' ' + point.date + ':\n' + point.visits + ' زيارة\n' + point.uniqueVisitors + ' زائر فريد\n' + point.orders + ' طلب'">
+                <div class="bar-fill-track">
+                  <!-- Orders fill (mini) -->
+                  @if (point.orders > 0) {
+                    <div
+                      class="bar-sub-order"
+                      [style.height.%]="getBarHeightPercent(point.orders * 3, maxDailyVisits())"
+                    ></div>
+                  }
+                  <!-- Main Visits fill -->
+                  <div
+                    class="bar-main-fill"
+                    [style.height.%]="getBarHeightPercent(point.visits, maxDailyVisits())"
+                  >
+                    <span class="bar-tooltip-val">{{ point.visits }}</span>
+                  </div>
+                </div>
+                <div class="bar-label-day">{{ point.dayNameAr }}</div>
+                <div class="bar-label-date">{{ point.date.substring(5) }}</div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Hourly Traffic / Peak Hours Heatmap -->
+      <div class="chart-card glass-panel">
+        <div class="card-head-row">
+          <div class="chart-head-info">
+            <h2 class="card-title"><i class="bi bi-clock-history text-warning me-2"></i> أوقات الذروة بالساعات</h2>
+            <p class="card-subtitle">توزيع الزيارات على مدار 24 ساعة لاكتشاف ذروة الغداء والعشاء</p>
+          </div>
+        </div>
+
+        <div class="hourly-bars-container">
+          <div class="hourly-grid">
+            @for (h of analytics()!.hourlyDistribution; track h.hour) {
+              <div class="hour-col" [title]="'الساعة ' + h.hourLabel + ': ' + h.visits + ' زيارة'">
+                <div class="hour-track">
+                  <div
+                    class="hour-fill"
+                    [class.peak]="h.visits >= (maxHourlyVisits() * 0.7)"
+                    [style.height.%]="getBarHeightPercent(h.visits, maxHourlyVisits())"
+                  ></div>
+                </div>
+                <div class="hour-lbl">{{ h.hourLabel }}</div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="peak-note-box mt-3">
+          <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+          <span>أعلى أوقات نشاط للزبائن تتركز بين <strong>01:00 م إلى 05:00 م</strong> (فترة الغداء) ومن <strong>07:00 م إلى 11:00 م</strong> (فترة العشاء).</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Bottom Grid: Top Visited Pages & Devices Breakdown -->
+    <section class="bottom-analytics-grid">
+      <!-- Top Visited Pages -->
+      <div class="sub-analytics-card glass-panel">
+        <div class="card-head-row mb-3">
+          <h2 class="card-title"><i class="bi bi-compass-fill text-info me-2"></i> أكثر الصفحات والأقسام زيارة</h2>
+          <span class="badge bg-secondary-subtle text-secondary">{{ analytics()!.topPages.length }} صفحات نشطة</span>
+        </div>
+
+        <div class="top-pages-list">
+          @for (page of analytics()!.topPages; track page.path) {
+            <div class="page-stat-row">
+              <div class="page-info-col">
+                <strong class="page-name">{{ page.pageNameAr }}</strong>
+                <span class="page-path ltr-text">{{ page.path }}</span>
+              </div>
+              <div class="page-metrics-col">
+                <div class="visits-count">{{ page.visits | number }} <small>زيارة</small></div>
+                <div class="progress-track">
+                  <div class="progress-bar-fill" [style.width.%]="page.percentage"></div>
+                </div>
+                <span class="percent-txt">{{ page.percentage }}%</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Devices Breakdown -->
+      <div class="sub-analytics-card glass-panel">
+        <div class="card-head-row mb-3">
+          <h2 class="card-title"><i class="bi bi-phone-fill text-success me-2"></i> توزيع الأجهزة والمتصفحات</h2>
+          <span class="badge bg-success-subtle text-success">موبايل vs كمبيوتر</span>
+        </div>
+
+        <div class="device-stats-box">
+          <div class="device-bar-multi mb-3">
+            <div class="segment mobile-segment" [style.width.%]="analytics()!.devices.mobilePercent" title="موبايل"></div>
+            <div class="segment desktop-segment" [style.width.%]="analytics()!.devices.desktopPercent" title="كمبيوتر"></div>
+          </div>
+
+          <div class="device-legends-row">
+            <!-- Mobile -->
+            <div class="device-item">
+              <div class="device-icon-box bg-mobile">
+                <i class="bi bi-phone"></i>
+              </div>
+              <div class="device-data">
+                <span class="dev-name">الهواتف الذكية (Mobile)</span>
+                <strong class="dev-val">{{ analytics()!.devices.mobilePercent }}%</strong>
+                <small class="dev-count">{{ analytics()!.devices.mobileCount | number }} زيارة</small>
+              </div>
+            </div>
+
+            <!-- Desktop -->
+            <div class="device-item">
+              <div class="device-icon-box bg-desktop">
+                <i class="bi bi-laptop"></i>
+              </div>
+              <div class="device-data">
+                <span class="dev-name">أجهزة الكمبيوتر (Desktop)</span>
+                <strong class="dev-val">{{ analytics()!.devices.desktopPercent }}%</strong>
+                <small class="dev-count">{{ analytics()!.devices.desktopCount | number }} زيارة</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Optimization Insight -->
+          <div class="insight-callout mt-4">
+            <div class="insight-icon"><i class="bi bi-shield-check"></i></div>
+            <div class="insight-text">
+              <strong>تجربة التصفح فائقة السرعة</strong>
+              <p class="mb-0">أكثر من {{ analytics()!.devices.mobilePercent }}% من الزوار يتصفحون المتجر عبر الهواتف، والضغط التلقائي لصور المنتجات بصيغة WebP يضمن لهم فتح المنيو في أقل من ثانية واحدة.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+</div>

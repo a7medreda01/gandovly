@@ -16,7 +16,8 @@ import {
   SalesReport,
   StorefrontSettings,
   WeightVarianceReport,
-  WhatsAppGatewaySettings
+  WhatsAppGatewaySettings,
+  VisitAnalytics
 } from '../models/models';
 import { Observable, map } from 'rxjs';
 
@@ -271,6 +272,11 @@ export class AdminService {
 
   updatePostDeliverySettings(settings: any): Observable<any> {
     return this.api.put<any>('admin/whatsapp-campaigns/post-delivery-settings', settings);
+  }
+
+  // Traffic & Visits Analytics
+  getVisitAnalytics(timeRange = 'week'): Observable<VisitAnalytics> {
+    return this.api.get<VisitAnalytics>('admin/analytics/visits', { timeRange });
   }
 
   // Upload Media

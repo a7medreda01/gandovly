@@ -90,6 +90,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/admin-reports/admin-reports.component').then(m => m.AdminReportsComponent)
       },
       {
+        path: 'analytics',
+        loadComponent: () => import('./features/admin/admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent)
+      },
+      {
         path: 'whatsapp',
         loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent)
       }

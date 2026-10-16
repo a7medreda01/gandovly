@@ -522,3 +522,60 @@ export interface PostDeliverySettings {
   messageTemplate: string;
 }
 
+export interface PeriodTraffic {
+  periodLabel: string;
+  totalVisits: number;
+  uniqueVisitors: number;
+  totalOrders: number;
+  conversionRate: number;
+  totalRevenue: number;
+  growthPercentage: number;
+}
+
+export interface DailyVisitChartPoint {
+  date: string;
+  dayNameAr: string;
+  visits: number;
+  uniqueVisitors: number;
+  orders: number;
+  revenue: number;
+}
+
+export interface HourlyTrafficPoint {
+  hour: number;
+  hourLabel: string;
+  visits: number;
+}
+
+export interface TopVisitedPage {
+  path: string;
+  pageNameAr: string;
+  visits: number;
+  percentage: number;
+}
+
+export interface DeviceBreakdown {
+  mobileCount: number;
+  desktopCount: number;
+  tabletCount: number;
+  mobilePercent: number;
+  desktopPercent: number;
+}
+
+export interface VisitAnalytics {
+  today: PeriodTraffic;
+  yesterday: PeriodTraffic;
+  thisWeek: PeriodTraffic;
+  lastWeek: PeriodTraffic;
+  thisMonth: PeriodTraffic;
+  lastMonth: PeriodTraffic;
+  overallVisits: number;
+  overallUniqueVisitors: number;
+  overallOrders: number;
+  overallConversionRate: number;
+  dailyTrend: DailyVisitChartPoint[];
+  hourlyDistribution: HourlyTrafficPoint[];
+  topPages: TopVisitedPage[];
+  devices: DeviceBreakdown;
+}
+
