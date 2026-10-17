@@ -478,6 +478,10 @@ export interface WhatsAppCampaign {
   completedAt?: string;
   nextScheduledDispatchAt?: string;
   lastDispatchedAt?: string;
+  consecutiveFailureCount?: number;
+  autoResumeAt?: string;
+  pauseReason?: string;
+  batchSentCount?: number;
   createdAt: string;
   createdBy?: string;
 }

@@ -206,6 +206,23 @@
                 <span>{{ c.messageTemplate }}</span>
               </div>
 
+              <!-- Circuit Breaker Pause Alert & Cooldown Timer -->
+              @if (c.status === 'Paused' && c.pauseReason) {
+                <div class="pause-cooldown-banner">
+                  <div class="d-flex align-items-center gap-2 text-warning fw-bold mb-1">
+                    <i class="bi bi-shield-slash-fill fs-5"></i>
+                    <span>حماية الحظر الذاتية: متوقف مؤقتاً لتفادي تقييد الرقم</span>
+                  </div>
+                  <p class="pause-reason-text mb-1">{{ c.pauseReason }}</p>
+                  @if (c.autoResumeAt) {
+                    <div class="auto-resume-badge mt-1">
+                      <i class="bi bi-alarm me-1"></i>
+                      <span>موعد الاستئناف التلقائي: <strong>{{ c.autoResumeAt | date:'yyyy-MM-dd hh:mm a' }}</strong></span>
+                    </div>
+                  }
+                </div>
+              }
+
               <!-- Configuration Badges -->
               <div class="camp-configs">
                 <span class="config-pill">
