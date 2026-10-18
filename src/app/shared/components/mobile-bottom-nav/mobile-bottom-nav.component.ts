@@ -161,31 +161,37 @@ import { CartService } from '../../../core/services/cart.service';
       .cart-icon-box {
         position: relative;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2px;
       }
 
       &.has-items {
         .cart-icon-box {
           background: linear-gradient(135deg, #00875a 0%, #00b388 100%);
           color: #ffffff;
-          width: 38px;
-          height: 38px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 4px 14px rgba(0, 135, 90, 0.42), 0 0 0 2px rgba(255, 255, 255, 0.9);
-          transform: translateY(-4px);
+          box-shadow: 0 3px 10px rgba(0, 135, 90, 0.35);
+          transform: none;
 
           i {
             color: #ffffff !important;
-            font-size: 1.15rem;
+            font-size: 1.05rem;
           }
         }
 
         .tab-label {
           color: #00875a;
           font-weight: 800;
-          transform: translateY(-2px);
+          transform: none;
         }
       }
 
@@ -200,19 +206,19 @@ import { CartService } from '../../../core/services/cart.service';
 
       .cart-bubble {
         position: absolute;
-        top: -6px;
-        right: -8px;
+        top: -4px;
+        right: -5px;
         background: #e63946;
         color: #ffffff;
-        font-size: 0.65rem;
+        font-size: 0.62rem;
         font-weight: 900;
-        min-width: 18px;
-        height: 18px;
-        line-height: 18px;
-        border-radius: 9px;
+        min-width: 16px;
+        height: 16px;
+        line-height: 16px;
+        border-radius: 8px;
         text-align: center;
         padding: 0 3px;
-        box-shadow: 0 2px 6px rgba(230, 57, 70, 0.5);
+        box-shadow: 0 2px 6px rgba(230, 57, 70, 0.45);
         border: 1.5px solid #ffffff;
         animation: pulseBubble 2.2s infinite ease-in-out;
       }

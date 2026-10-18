@@ -12,6 +12,12 @@ import {
   MarketingContact,
   PostDeliverySettings
 } from '../../../core/models/models';
+import {
+  formatEgyptDateTime,
+  formatEgyptTime,
+  formatEgyptTimeWithSeconds,
+  formatEgyptDate
+} from '../../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-admin-whatsapp',
@@ -23,6 +29,11 @@ import {
 export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
+
+  readonly formatEgyptDateTime = formatEgyptDateTime;
+  readonly formatEgyptTime = formatEgyptTime;
+  readonly formatEgyptTimeWithSeconds = formatEgyptTimeWithSeconds;
+  readonly formatEgyptDate = formatEgyptDate;
 
   // Active Tab
   activeTab = signal<'campaigns' | 'gateway' | 'post_delivery' | 'contacts'>('campaigns');

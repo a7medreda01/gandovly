@@ -166,7 +166,7 @@
                 <div class="camp-title-col">
                   <h4 class="camp-title">{{ c.title }}</h4>
                   <span class="camp-date">
-                    <i class="bi bi-calendar3"></i> {{ c.createdAt | date:'yyyy-MM-dd hh:mm a' }}
+                    <i class="bi bi-calendar3"></i> {{ formatEgyptDateTime(c.createdAt) }}
                   </span>
                 </div>
 
@@ -217,7 +217,7 @@
                   @if (c.autoResumeAt) {
                     <div class="auto-resume-badge mt-1">
                       <i class="bi bi-alarm me-1"></i>
-                      <span>موعد الاستئناف التلقائي: <strong>{{ c.autoResumeAt | date:'yyyy-MM-dd hh:mm a' }}</strong></span>
+                      <span>موعد الاستئناف التلقائي: <strong>{{ formatEgyptDateTime(c.autoResumeAt) }}</strong></span>
                     </div>
                   }
                 </div>
@@ -270,7 +270,7 @@
               @if (c.status === 'Running' && !isCampaignCompleted(c) && c.nextScheduledDispatchAt) {
                 <div class="dispatch-time-alert">
                   <i class="bi bi-stopwatch text-primary"></i>
-                  <span>الرسالة التالية مجدولة للإرسال: <strong>{{ c.nextScheduledDispatchAt | date:'hh:mm:ss a' }}</strong></span>
+                  <span>الرسالة التالية مجدولة للإرسال: <strong>{{ formatEgyptTimeWithSeconds(c.nextScheduledDispatchAt) }}</strong></span>
                 </div>
               }
 
@@ -391,10 +391,10 @@
                     }
                   </td>
                   <td>
-                    {{ item.lastMessagedAt ? (item.lastMessagedAt | date:'yyyy-MM-dd') : '—' }}
+                    {{ item.lastMessagedAt ? formatEgyptDate(item.lastMessagedAt) : '—' }}
                   </td>
                   <td>
-                    {{ item.createdAt | date:'yyyy-MM-dd' }}
+                    {{ formatEgyptDate(item.createdAt) }}
                   </td>
                 </tr>
               }
@@ -1165,7 +1165,7 @@
                         }
                       }
                     </td>
-                    <td>{{ log.sentAt ? (log.sentAt | date:'hh:mm:ss a') : '—' }}</td>
+                    <td>{{ log.sentAt ? formatEgyptTimeWithSeconds(log.sentAt) : '—' }}</td>
                   </tr>
                 }
               </tbody>

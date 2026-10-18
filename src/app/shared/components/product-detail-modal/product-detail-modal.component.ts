@@ -219,7 +219,7 @@ export class ProductDetailModalComponent implements OnInit {
     );
 
     this.toast.success(
-      `تمت إضافة (${this.product.nameAr}) إلى السلة بنجاح 🛒`,
+      'تمت الإضافة إلى السلة بنجاح',
       'عرض السلة',
       () => this.cartService.openDrawer()
     );
@@ -241,9 +241,9 @@ export class ProductDetailModalComponent implements OnInit {
 
     const shareUrl = `${window.location.origin}/menu?product=${this.product.id}`;
     const shareTitle = `${this.product.nameAr} - أسماك جندوفلي`;
-    const shareText = `شاهد تفاصيل واطلب (${this.product.nameAr}) من منيو أسماك جندوفلي 🐟✨\n${shareUrl}`;
+    const shareText = `شاهد تفاصيل واطلب (${this.product.nameAr}) من منيو أسماك جندوفلي 🐟✨`;
 
-    // Native Web Share API (Mobile browsers & supported desktop)
+    // Native Web Share API (Pass text without url so apps like WhatsApp won't duplicate the URL)
     if (navigator.share) {
       try {
         await navigator.share({
@@ -260,13 +260,14 @@ export class ProductDetailModalComponent implements OnInit {
       }
     }
 
-    // Fallback: Clipboard copy
+    // Fallback: Clipboard copy (include URL here so paste has full text + link)
+    const clipboardText = `${shareText}\n${shareUrl}`;
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
+        await navigator.clipboard.writeText(clipboardText);
       } else {
         const textarea = document.createElement('textarea');
-        textarea.value = shareUrl;
+        textarea.value = clipboardText;
         textarea.style.position = 'fixed';
         textarea.style.opacity = '0';
         document.body.appendChild(textarea);
@@ -277,7 +278,7 @@ export class ProductDetailModalComponent implements OnInit {
       }
 
       this.triggerCopiedState();
-      this.toast.success(`تم نسخ رابط (${this.product.nameAr}) بنجاح! 📋`);
+      this.toast.success('تم نسخ الرابط بنجاح! 📋');
     } catch {
       this.toast.info(`رابط الصنف: ${shareUrl}`);
     }

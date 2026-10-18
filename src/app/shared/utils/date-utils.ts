@@ -26,29 +26,85 @@ export function formatEgyptTime(val: string | Date | null | undefined): string {
   if (!val) return '';
   try {
     const d = parseUtcDate(val);
-    return d.toLocaleTimeString('ar-EG', {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Africa/Cairo',
       hour: '2-digit',
-      minute: '2-digit'
-    });
+      minute: '2-digit',
+      hour12: true
+    }).formatToParts(d);
+
+    const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+    const dayPeriod = get('dayPeriod') === 'PM' ? 'م' : 'ص';
+    return `${get('hour')}:${get('minute')} ${dayPeriod}`;
   } catch {
     return String(val);
   }
 }
 
 /**
- * Formats a date into a localized Egyptian date and time (e.g. "السبت، 10 أكتوبر - 01:15 ص").
+ * Formats a UTC date string into Egypt local time with seconds (e.g. "01:15:30 ص").
+ */
+export function formatEgyptTimeWithSeconds(val: string | Date | null | undefined): string {
+  if (!val) return '';
+  try {
+    const d = parseUtcDate(val);
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Africa/Cairo',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    }).formatToParts(d);
+
+    const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+    const dayPeriod = get('dayPeriod') === 'PM' ? 'م' : 'ص';
+    return `${get('hour')}:${get('minute')}:${get('second')} ${dayPeriod}`;
+  } catch {
+    return String(val);
+  }
+}
+
+/**
+ * Formats a date into a localized Egyptian date and time (e.g. "2026-10-19 01:15 ص").
  */
 export function formatEgyptDateTime(val: string | Date | null | undefined): string {
   if (!val) return '';
   try {
     const d = parseUtcDate(val);
-    return d.toLocaleDateString('ar-EG', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Africa/Cairo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
       hour: '2-digit',
-      minute: '2-digit'
-    });
+      minute: '2-digit',
+      hour12: true
+    }).formatToParts(d);
+
+    const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+    const dayPeriod = get('dayPeriod') === 'PM' ? 'م' : 'ص';
+    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')} ${dayPeriod}`;
+  } catch {
+    return String(val);
+  }
+}
+
+/**
+ * Formats a date into a localized Egyptian date (e.g. "2026-10-19").
+ */
+export function formatEgyptDate(val: string | Date | null | undefined): string {
+  if (!val) return '';
+  try {
+    const d = parseUtcDate(val);
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Africa/Cairo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(d);
+
+    const get = (type: string) => parts.find(p => p.type === type)?.value || '';
+    return `${get('year')}-${get('month')}-${get('day')}`;
   } catch {
     return String(val);
   }
