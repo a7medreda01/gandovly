@@ -53,3 +53,61 @@ export function formatEgyptDateTime(val: string | Date | null | undefined): stri
     return String(val);
   }
 }
+
+/**
+ * Formats elapsed time into localized Arabic units:
+ * دقائق، ساعات، أيام، أسابيع، أشهر، سنين.
+ */
+export function formatElapsedTime(val: string | Date | null | undefined, baseDate?: Date): string {
+  if (!val) return '';
+  const now = (baseDate ?? new Date()).getTime();
+  const created = parseUtcDate(val).getTime();
+  const diffSec = Math.max(0, Math.floor((now - created) / 1000));
+
+  if (diffSec < 60) {
+    return 'الآن (<1 د)';
+  }
+
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) {
+    return `${diffMin} دقيقة`;
+  }
+
+  const diffHours = Math.floor(diffMin / 60);
+  const remMin = diffMin % 60;
+  if (diffHours < 24) {
+    return remMin > 0 ? `${diffHours}س ${remMin}د` : `${diffHours} ساعة`;
+  }
+
+  const diffDays = Math.floor(diffHours / 24);
+  const remHours = diffHours % 24;
+  if (diffDays < 7) {
+    if (diffDays === 1) {
+      return remHours > 0 ? `منذ يوم و${remHours}س` : `منذ يوم`;
+    }
+    if (diffDays === 2) {
+      return remHours > 0 ? `منذ يومين و${remHours}س` : `منذ يومين`;
+    }
+    return `منذ ${diffDays} أيام`;
+  }
+
+  const diffWeeks = Math.floor(diffDays / 7);
+  if (diffDays < 30) {
+    if (diffWeeks === 1) return 'منذ أسبوع';
+    if (diffWeeks === 2) return 'منذ أسبوعين';
+    return `منذ ${diffWeeks} أسابيع`;
+  }
+
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffDays < 365) {
+    if (diffMonths === 1) return 'منذ شهر';
+    if (diffMonths === 2) return 'منذ شهرين';
+    if (diffMonths >= 3 && diffMonths <= 10) return `منذ ${diffMonths} أشهر`;
+    return `منذ ${diffMonths} شهر`;
+  }
+
+  const diffYears = Math.floor(diffDays / 365);
+  if (diffYears === 1) return 'منذ سنة';
+  if (diffYears === 2) return 'منذ سنتين';
+  return `منذ ${diffYears} سنوات`;
+}

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { ProductCardSkeletonComponent } from '../../../shared/components/product-card-skeleton/product-card-skeleton.component';
@@ -19,6 +19,7 @@ import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 export class MenuComponent implements OnInit {
   readonly catalogService = inject(CatalogService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   searchTerm: string = '';
   selectedCatId: number | null = null;
@@ -32,6 +33,14 @@ export class MenuComponent implements OnInit {
       this.route.queryParams.subscribe(params => {
         if (params['category']) {
           this.selectedCatId = +params['category'];
+        }
+        if (params['product']) {
+          const prodId = +params['product'];
+          const allProducts: Product[] = (this.catalogService.categories() || []).flatMap(c => c.products || []);
+          const found = allProducts.find(p => p.id === prodId);
+          if (found) {
+            this.selectedProductForModal.set(found);
+          }
         }
         if (typeof window !== 'undefined') {
           setTimeout(() => {
@@ -110,5 +119,13 @@ export class MenuComponent implements OnInit {
 
   closeProductModal() {
     this.selectedProductForModal.set(null);
+    if (this.route.snapshot.queryParams['product']) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { product: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      });
+    }
   }
 }

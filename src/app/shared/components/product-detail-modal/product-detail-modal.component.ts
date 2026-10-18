@@ -194,7 +194,12 @@ export class ProductDetailModalComponent implements OnInit {
     return this.selectedModifiers.some(m => m.id === modId);
   }
 
+  isSuccess = false;
+
   onAddToCart() {
+    if (this.isSuccess) return;
+    this.isSuccess = true;
+
     const qty = this.orderMode === 'pieces'
       ? this.piecesCount
       : Math.max(1, Math.round(this.customWeightGrams / (this.product.averageUnitWeightGrams || 500)));
@@ -213,8 +218,77 @@ export class ProductDetailModalComponent implements OnInit {
       this.orderMode
     );
 
-    this.toast.success(`تمت إضافة (${this.product.nameAr}) إلى السلة 🛒`);
-    this.dismissModal();
+    this.toast.success(
+      `تمت إضافة (${this.product.nameAr}) إلى السلة بنجاح 🛒`,
+      'عرض السلة',
+      () => this.cartService.openDrawer()
+    );
+
+    setTimeout(() => {
+      this.dismissModal();
+    }, 350);
+  }
+
+  isCopied = false;
+  private copyTimeout: any;
+
+  async onShareProduct(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    if (typeof window === 'undefined') return;
+
+    const shareUrl = `${window.location.origin}/menu?product=${this.product.id}`;
+    const shareTitle = `${this.product.nameAr} - أسماك جندوفلي`;
+    const shareText = `شاهد تفاصيل واطلب (${this.product.nameAr}) من منيو أسماك جندوفلي 🐟✨\n${shareUrl}`;
+
+    // Native Web Share API (Mobile browsers & supported desktop)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        });
+        this.triggerCopiedState();
+        return;
+      } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          return;
+        }
+      }
+    }
+
+    // Fallback: Clipboard copy
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = shareUrl;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+
+      this.triggerCopiedState();
+      this.toast.success(`تم نسخ رابط (${this.product.nameAr}) بنجاح! 📋`);
+    } catch {
+      this.toast.info(`رابط الصنف: ${shareUrl}`);
+    }
+  }
+
+  private triggerCopiedState() {
+    this.isCopied = true;
+    if (this.copyTimeout) clearTimeout(this.copyTimeout);
+    this.copyTimeout = setTimeout(() => {
+      this.isCopied = false;
+    }, 2500);
   }
 
   // ===== SWIPE DOWN TO DISMISS (OPTIMIZED & ULTRA RESPONSIVE) =====

@@ -5,7 +5,7 @@ import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { Order, OrderLine, OrderStatus } from '../../core/models/models';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
-import { parseUtcDate, formatEgyptTime, formatEgyptDateTime } from '../../shared/utils/date-utils';
+import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime } from '../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-kitchen',
@@ -45,21 +45,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
   }
 
   getElapsedTime(createdAt: string | Date | undefined): string {
-    if (!createdAt) return '';
-    const now = this.currentTime().getTime();
-    const created = parseUtcDate(createdAt).getTime();
-    const diffSec = Math.max(0, Math.floor((now - created) / 1000));
-
-    const hours = Math.floor(diffSec / 3600);
-    const minutes = Math.floor((diffSec % 3600) / 60);
-
-    if (hours > 0) {
-      return `${hours}س ${minutes}د`;
-    }
-    if (minutes > 0) {
-      return `${minutes} دقيقة`;
-    }
-    return `الآن (<1 د)`;
+    return formatElapsedTime(createdAt, this.currentTime());
   }
 
   getElapsedMinutes(createdAt: string | Date | undefined): number {
@@ -88,12 +74,17 @@ export class KitchenComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.adminService.getKitchenOrders().subscribe({
       next: (ords: Order[]) => {
-        this.orders.set(ords || []);
+        const sorted = (ords || []).slice().sort((a, b) => {
+          const timeA = a.createdAt ? parseUtcDate(a.createdAt).getTime() : 0;
+          const timeB = b.createdAt ? parseUtcDate(b.createdAt).getTime() : 0;
+          return timeB - timeA;
+        });
+        this.orders.set(sorted);
         // Initialize weight & price buffers
-        ords?.forEach(o => this.initOrderBuffers(o));
+        sorted.forEach(o => this.initOrderBuffers(o));
         // If an order was currently selected in modal, update its reference
         if (this.selectedOrder()) {
-          const fresh = ords?.find(o => o.id === this.selectedOrder()!.id);
+          const fresh = sorted.find(o => o.id === this.selectedOrder()!.id);
           if (fresh) {
             this.selectedOrder.set(fresh);
             this.initOrderBuffers(fresh);

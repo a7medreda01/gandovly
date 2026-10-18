@@ -57,11 +57,25 @@
       }
 
       <!-- Cart Button -->
-      <button class="cart-trigger-btn flex-center" (click)="cartService.toggleDrawer()">
-        <i class="bi bi-bag-check cart-icon"></i>
+      <button 
+        type="button"
+        class="cart-trigger-btn flex-center"
+        [class.has-items]="cartService.totalItemsCount() > 0"
+        [class.is-empty]="cartService.totalItemsCount() === 0"
+        [class.cart-bump]="cartService.cartBumped()"
+        (click)="cartService.toggleDrawer()"
+        title="سلة الطلبات"
+        aria-label="سلة الطلبات"
+      >
+        <div class="cart-icon-wrapper">
+          <i class="bi bi-bag-check-fill cart-icon"></i>
+          @if (cartService.totalItemsCount() > 0) {
+            <span class="cart-badge">{{ cartService.totalItemsCount() }}</span>
+          }
+        </div>
         <span class="cart-text">السلة</span>
         @if (cartService.totalItemsCount() > 0) {
-        <span class="cart-badge">{{ cartService.totalItemsCount() }}</span>
+          <span class="cart-count-pill">{{ cartService.totalItemsCount() }}</span>
         }
       </button>
 

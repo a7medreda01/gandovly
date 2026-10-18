@@ -4,6 +4,8 @@ export interface ToastMessage {
   id: string;
   type: 'success' | 'error' | 'info' | 'warning';
   text: string;
+  actionText?: string;
+  actionCallback?: () => void;
 }
 
 @Injectable({
@@ -12,9 +14,15 @@ export interface ToastMessage {
 export class NotificationService {
   toasts = signal<ToastMessage[]>([]);
 
-  show(text: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', durationMs = 4000) {
+  show(
+    text: string,
+    type: 'success' | 'error' | 'info' | 'warning' = 'info',
+    durationMs = 4000,
+    actionText?: string,
+    actionCallback?: () => void
+  ) {
     const id = 'toast_' + Math.random().toString(36).substring(2, 8);
-    const msg: ToastMessage = { id, type, text };
+    const msg: ToastMessage = { id, type, text, actionText, actionCallback };
 
     this.toasts.update(list => [...list, msg]);
 
@@ -23,8 +31,8 @@ export class NotificationService {
     }, durationMs);
   }
 
-  success(text: string) {
-    this.show(text, 'success');
+  success(text: string, actionText?: string, actionCallback?: () => void) {
+    this.show(text, 'success', 4000, actionText, actionCallback);
   }
 
   error(text: string) {

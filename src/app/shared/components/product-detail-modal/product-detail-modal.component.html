@@ -45,9 +45,24 @@
             {{ product.categoryNameAr || 'أسماك جندوفلي' }}
           </span>
 
-          <button class="btn-close-circle" (click)="dismissModal()" aria-label="إغلاق">
-            <i class="bi bi-x-lg"></i>
-          </button>
+          <div class="top-bar-actions">
+            <button 
+              type="button" 
+              class="btn-top-action btn-share-circle" 
+              (click)="onShareProduct($event)" 
+              [title]="isCopied ? 'تم نسخ الرابط!' : 'مشاركة رابط الصنف'" 
+              aria-label="مشاركة"
+            >
+              @if (isCopied) {
+                <i class="bi bi-check2 text-success"></i>
+              } @else {
+                <i class="bi bi-share-fill"></i>
+              }
+            </button>
+            <button type="button" class="btn-top-action btn-close-circle" (click)="dismissModal()" aria-label="إغلاق">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Gallery Arrows (if multiple images) -->
@@ -95,7 +110,24 @@
       <!-- Title & Price Banner -->
       <div class="product-intro-box">
         <div class="title-wrap">
-          <h2 class="product-title">{{ product.nameAr }}</h2>
+          <div class="product-title-row">
+            <h2 class="product-title">{{ product.nameAr }}</h2>
+            <button
+              type="button"
+              class="btn-inline-share"
+              (click)="onShareProduct($event)"
+              [title]="isCopied ? 'تم نسخ الرابط!' : 'مشاركة رابط الصنف'"
+              aria-label="مشاركة"
+            >
+              @if (isCopied) {
+                <i class="bi bi-check2 text-success"></i>
+                <span class="share-txt">تم النسخ</span>
+              } @else {
+                <i class="bi bi-share"></i>
+                <span class="share-txt">مشاركة</span>
+              }
+            </button>
+          </div>
           @if (product.nameEn) {
             <span class="product-subtitle">{{ product.nameEn }}</span>
           }
@@ -319,9 +351,19 @@
         </div>
       </div>
 
-      <button class="btn-add-to-basket" (click)="onAddToCart()">
-        <span class="basket-txt">إضافة للطلب</span>
-        <i class="bi bi-bag-check-fill me-2"></i>
+      <button 
+        class="btn-add-to-basket" 
+        [class.btn-added]="isSuccess" 
+        (click)="onAddToCart()"
+        [disabled]="isSuccess"
+      >
+        @if (isSuccess) {
+          <span class="basket-txt">تمت الإضافة بنجاح!</span>
+          <i class="bi bi-check2-circle me-2"></i>
+        } @else {
+          <span class="basket-txt">إضافة للطلب</span>
+          <i class="bi bi-bag-check-fill me-2"></i>
+        }
       </button>
     </div>
   </div>

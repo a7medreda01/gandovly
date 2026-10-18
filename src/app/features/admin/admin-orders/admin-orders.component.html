@@ -72,7 +72,11 @@
       </div>
     } @else {
       @for (ord of orders(); track ord.id) {
-        <div class="order-row-card" (click)="viewOrder(ord)">
+        <div 
+          class="order-row-card" 
+          [class.terminal-order]="isTerminalStatus(ord.status)"
+          (click)="viewOrder(ord)"
+        >
 
           <!-- TOP BAR: سطر 1 رقم الطلب والحالة | سطر 2 التوقيتات والمجدول -->
           <div class="card-top">
@@ -87,7 +91,7 @@
               <span class="time-chip">
                 <i class="bi bi-clock"></i> {{ formatOrderTime(ord.createdAt) }}
               </span>
-              <span class="live-timer-chip" [ngClass]="getTimerClass(ord.createdAt)" title="الوقت المنقضي على الطلب">
+              <span class="live-timer-chip" [ngClass]="getTimerClass(ord.createdAt, ord.status)" title="الوقت المنقضي على الطلب">
                 <i class="bi bi-stopwatch"></i> {{ getElapsedTime(ord.createdAt) }}
               </span>
               @if (ord.scheduledFor) {
@@ -146,6 +150,104 @@
     }
   </div>
 
+  <!-- Modern Backend Pagination Bar -->
+  @if (!isLoading() && totalCount() > 0) {
+    <div class="pagination-bar glass-panel flex-between flex-wrap gap-3">
+      <!-- Range Info -->
+      <div class="pagination-info">
+        <span class="info-text">
+          عرض
+          <strong>{{ fromItemIndex() }}</strong> - <strong>{{ toItemIndex() }}</strong>
+          من إجمالي
+          <strong class="total-highlight">{{ totalCount() }}</strong>
+          طلب
+        </span>
+      </div>
+
+      <!-- Page Controls -->
+      @if (totalPages() > 1) {
+        <div class="pagination-controls">
+          <!-- First Page -->
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="pageIndex() === 1"
+            (click)="goToPage(1)"
+            title="الصفحة الأولى"
+          >
+            <i class="bi bi-chevron-double-right"></i>
+          </button>
+
+          <!-- Prev Page -->
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="pageIndex() === 1"
+            (click)="prevPage()"
+            title="الصفحة السابقة"
+          >
+            <i class="bi bi-chevron-right"></i>
+          </button>
+
+          <!-- Page Numbers -->
+          <div class="page-numbers-group">
+            @for (p of getPageNumbers(); track $index) {
+              @if (p === '...') {
+                <span class="page-ellipsis">...</span>
+              } @else {
+                <button
+                  type="button"
+                  class="btn-page-num"
+                  [class.active]="p === pageIndex()"
+                  (click)="goToPage(p)"
+                >
+                  {{ p }}
+                </button>
+              }
+            }
+          </div>
+
+          <!-- Next Page -->
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="pageIndex() === totalPages()"
+            (click)="nextPage()"
+            title="الصفحة التالية"
+          >
+            <i class="bi bi-chevron-left"></i>
+          </button>
+
+          <!-- Last Page -->
+          <button
+            type="button"
+            class="btn-page-nav"
+            [disabled]="pageIndex() === totalPages()"
+            (click)="goToPage(totalPages())"
+            title="الصفحة الأخيرة"
+          >
+            <i class="bi bi-chevron-double-left"></i>
+          </button>
+        </div>
+      }
+
+      <!-- Page Size Selector -->
+      <div class="page-size-selector">
+        <label for="pageSizeSelect" class="size-label">عرض بالصفحة:</label>
+        <select
+          id="pageSizeSelect"
+          class="form-control select-page-size"
+          [ngModel]="pageSize()"
+          (ngModelChange)="onPageSizeChange($event)"
+        >
+          @for (opt of pageSizeOptions; track opt) {
+            <option [value]="opt">{{ opt }} طلب</option>
+          }
+        </select>
+      </div>
+    </div>
+  }
+
   <!-- Order Details & Weight Management Modal -->
   @if (selectedOrder()) {
     <div class="modal-backdrop animate-fade-in" (click)="closeModal()">
@@ -155,7 +257,7 @@
           <div class="modal-header-top flex-between">
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <span class="ord-num-large" dir="ltr">#{{ selectedOrder()!.orderNumber }}</span>
-              <span class="modal-live-timer" [ngClass]="getTimerClass(selectedOrder()!.createdAt)" title="الوقت المنقضي على الطلب">
+              <span class="modal-live-timer" [ngClass]="getTimerClass(selectedOrder()!.createdAt, selectedOrder()!.status)" title="الوقت المنقضي على الطلب">
                 <i class="bi bi-stopwatch"></i> {{ getElapsedTime(selectedOrder()!.createdAt) }}
               </span>
             </div>

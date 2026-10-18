@@ -31,7 +31,14 @@ import { CartService } from '../../../core/services/cart.service';
         </a>
 
         <!-- Cart (Center Highlight) -->
-        <button type="button" class="dock-tab cart-tab" (click)="cartService.toggleDrawer()" title="سلة الطلبات">
+        <button 
+          type="button" 
+          class="dock-tab cart-tab" 
+          [class.has-items]="cartService.totalItemsCount() > 0"
+          [class.cart-bump]="cartService.cartBumped()"
+          (click)="cartService.toggleDrawer()" 
+          title="سلة الطلبات"
+        >
           <div class="tab-icon cart-icon-box">
             <i class="bi bi-bag-check-fill"></i>
             @if (cartService.totalItemsCount() > 0) {
@@ -153,26 +160,77 @@ import { CartService } from '../../../core/services/cart.service';
     .cart-tab {
       .cart-icon-box {
         position: relative;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      &.has-items {
+        .cart-icon-box {
+          background: linear-gradient(135deg, #00875a 0%, #00b388 100%);
+          color: #ffffff;
+          width: 38px;
+          height: 38px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 4px 14px rgba(0, 135, 90, 0.42), 0 0 0 2px rgba(255, 255, 255, 0.9);
+          transform: translateY(-4px);
+
+          i {
+            color: #ffffff !important;
+            font-size: 1.15rem;
+          }
+        }
+
+        .tab-label {
+          color: #00875a;
+          font-weight: 800;
+          transform: translateY(-2px);
+        }
+      }
+
+      &.cart-bump {
+        .cart-icon-box {
+          animation: cartWiggle 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        .cart-bubble {
+          animation: badgePop 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+        }
       }
 
       .cart-bubble {
         position: absolute;
         top: -6px;
-        right: -9px;
+        right: -8px;
         background: #e63946;
         color: #ffffff;
-        font-size: 0.62rem;
-        font-weight: 800;
-        min-width: 16px;
-        height: 16px;
-        line-height: 16px;
-        border-radius: 50%;
+        font-size: 0.65rem;
+        font-weight: 900;
+        min-width: 18px;
+        height: 18px;
+        line-height: 18px;
+        border-radius: 9px;
         text-align: center;
         padding: 0 3px;
-        box-shadow: 0 2px 6px rgba(230, 57, 70, 0.4);
+        box-shadow: 0 2px 6px rgba(230, 57, 70, 0.5);
         border: 1.5px solid #ffffff;
-        animation: pulseBubble 2s infinite;
+        animation: pulseBubble 2.2s infinite ease-in-out;
       }
+    }
+
+    @keyframes cartWiggle {
+      0% { transform: scale(1); }
+      20% { transform: scale(1.22) rotate(-6deg); }
+      40% { transform: scale(1.15) rotate(5deg); }
+      60% { transform: scale(1.08) rotate(-3deg); }
+      80% { transform: scale(1.03) rotate(1deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+
+    @keyframes badgePop {
+      0% { transform: scale(0.4); }
+      60% { transform: scale(1.4); }
+      100% { transform: scale(1); }
     }
 
     @keyframes pulseBubble {

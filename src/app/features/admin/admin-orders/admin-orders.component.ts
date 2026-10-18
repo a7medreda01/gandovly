@@ -1,11 +1,11 @@
-import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Order, OrderLine, OrderStatus } from '../../../core/models/models';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
-import { parseUtcDate, formatEgyptTime, formatEgyptDateTime } from '../../../shared/utils/date-utils';
+import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime } from '../../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-admin-orders',
@@ -23,6 +23,26 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   selectedStatus: OrderStatus | '' = '';
   searchTerm: string = '';
   isLoading = signal<boolean>(false);
+
+  // Pagination state (Backend Pagination)
+  pageIndex = signal<number>(1);
+  pageSize = signal<number>(20);
+  readonly pageSizeOptions = [10, 20, 50, 100];
+
+  totalPages = computed(() => {
+    const total = this.totalCount();
+    const size = this.pageSize();
+    return Math.max(1, Math.ceil(total / size));
+  });
+
+  fromItemIndex = computed(() => {
+    if (this.totalCount() === 0) return 0;
+    return (this.pageIndex() - 1) * this.pageSize() + 1;
+  });
+
+  toItemIndex = computed(() => {
+    return Math.min(this.pageIndex() * this.pageSize(), this.totalCount());
+  });
 
   // Live Elapsed Timer
   currentTime = signal<Date>(new Date());
@@ -56,21 +76,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   }
 
   getElapsedTime(createdAt: string | Date | undefined): string {
-    if (!createdAt) return '';
-    const now = this.currentTime().getTime();
-    const created = parseUtcDate(createdAt).getTime();
-    const diffSec = Math.max(0, Math.floor((now - created) / 1000));
-
-    const hours = Math.floor(diffSec / 3600);
-    const minutes = Math.floor((diffSec % 3600) / 60);
-
-    if (hours > 0) {
-      return `${hours}س ${minutes}د`;
-    }
-    if (minutes > 0) {
-      return `${minutes} دقيقة`;
-    }
-    return `الآن (<1 د)`;
+    return formatElapsedTime(createdAt, this.currentTime());
   }
 
   getElapsedMinutes(createdAt: string | Date | undefined): number {
@@ -80,7 +86,10 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     return Math.floor((now - created) / 60000);
   }
 
-  getTimerClass(createdAt: string | Date | undefined): string {
+  getTimerClass(createdAt: string | Date | undefined, status?: OrderStatus | string): string {
+    if (this.isTerminalStatus(status)) {
+      return 'timer-normal';
+    }
     const mins = this.getElapsedMinutes(createdAt);
     if (mins >= 35) return 'timer-critical';
     if (mins >= 20) return 'timer-warning';
@@ -100,16 +109,19 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
       clearTimeout(this.searchTimeout);
     }
     this.searchTimeout = setTimeout(() => {
+      this.pageIndex.set(1);
       this.loadOrders();
     }, 350);
   }
 
   clearSearch() {
     this.searchTerm = '';
+    this.pageIndex.set(1);
     this.loadOrders();
   }
 
   onStatusChange() {
+    this.pageIndex.set(1);
     this.loadOrders();
   }
 
@@ -118,7 +130,14 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     const statusParam = this.selectedStatus ? (this.selectedStatus as OrderStatus) : undefined;
     const search = this.searchTerm ? this.searchTerm.trim() : undefined;
 
-    this.adminService.getOrders(statusParam, undefined, undefined, search).subscribe({
+    this.adminService.getOrders(
+      statusParam,
+      undefined,
+      undefined,
+      search,
+      this.pageIndex(),
+      this.pageSize()
+    ).subscribe({
       next: paged => {
         this.orders.set(paged.items || []);
         this.totalCount.set(paged.totalCount);
@@ -126,6 +145,69 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
       },
       error: () => this.isLoading.set(false)
     });
+  }
+
+  goToPage(page: number | string) {
+    if (typeof page !== 'number') return;
+    if (page < 1 || page > this.totalPages() || page === this.pageIndex()) return;
+    this.pageIndex.set(page);
+    this.loadOrders();
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage() {
+    if (this.pageIndex() < this.totalPages()) {
+      this.goToPage(this.pageIndex() + 1);
+    }
+  }
+
+  prevPage() {
+    if (this.pageIndex() > 1) {
+      this.goToPage(this.pageIndex() - 1);
+    }
+  }
+
+  onPageSizeChange(newSize: any) {
+    this.pageSize.set(Number(newSize));
+    this.pageIndex.set(1);
+    this.loadOrders();
+  }
+
+  getPageNumbers(): (number | string)[] {
+    const total = this.totalPages();
+    const current = this.pageIndex();
+    const pages: (number | string)[] = [];
+
+    if (total <= 7) {
+      for (let i = 1; i <= total; i++) pages.push(i);
+      return pages;
+    }
+
+    pages.push(1);
+    if (current > 3) {
+      pages.push('...');
+    }
+
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+
+    if (current < total - 2) {
+      pages.push('...');
+    }
+    pages.push(total);
+
+    return pages;
+  }
+
+  isTerminalStatus(status: OrderStatus | string | undefined): boolean {
+    if (!status) return false;
+    return status === 'Completed' || status === 'Cancelled' || status === 'Rejected';
   }
 
   viewOrder(ord: Order) {

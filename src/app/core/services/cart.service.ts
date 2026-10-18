@@ -7,6 +7,18 @@ import { CartItem, ModifierOption, PreparationOption, Product } from '../models/
 export class CartService {
   items = signal<CartItem[]>([]);
   isDrawerOpen = signal<boolean>(false);
+  cartBumped = signal<boolean>(false);
+  private bumpTimeout: any;
+
+  triggerCartBump() {
+    this.cartBumped.set(true);
+    if (this.bumpTimeout) {
+      clearTimeout(this.bumpTimeout);
+    }
+    this.bumpTimeout = setTimeout(() => {
+      this.cartBumped.set(false);
+    }, 900);
+  }
 
   // Computed totals
   totalItemsCount = computed(() => {
@@ -103,7 +115,7 @@ export class CartService {
     };
 
     this.items.update(list => [...list, newItem]);
-    this.openDrawer();
+    this.triggerCartBump();
   }
 
   updateQuantity(itemId: string, newQty: number) {

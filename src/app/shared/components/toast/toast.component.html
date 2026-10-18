@@ -1,13 +1,25 @@
-<div class="toast-container">
+<div class="toast-container" dir="rtl">
   @for (toast of notificationService.toasts(); track toast.id) {
     <div class="toast-item" [ngClass]="'toast-' + toast.type" (click)="notificationService.remove(toast.id)">
       <div class="toast-icon">
-        @if (toast.type === 'success') { <span>✓</span> }
-        @if (toast.type === 'error') { <span>✕</span> }
-        @if (toast.type === 'warning') { <span>⚠️</span> }
-        @if (toast.type === 'info') { <span>ℹ️</span> }
+        @if (toast.type === 'success') { <i class="bi bi-check-circle-fill"></i> }
+        @if (toast.type === 'error') { <i class="bi bi-x-circle-fill"></i> }
+        @if (toast.type === 'warning') { <i class="bi bi-exclamation-triangle-fill"></i> }
+        @if (toast.type === 'info') { <i class="bi bi-info-circle-fill"></i> }
       </div>
-      <div class="toast-text">{{ toast.text }}</div>
+      <div class="toast-content-wrapper">
+        <div class="toast-text">{{ toast.text }}</div>
+        @if (toast.actionText && toast.actionCallback) {
+          <button 
+            type="button" 
+            class="toast-action-btn"
+            (click)="$event.stopPropagation(); toast.actionCallback(); notificationService.remove(toast.id)"
+          >
+            <span>{{ toast.actionText }}</span>
+            <i class="bi bi-bag-check-fill ms-1"></i>
+          </button>
+        }
+      </div>
       <button class="toast-close" (click)="notificationService.remove(toast.id); $event.stopPropagation()">×</button>
     </div>
   }
