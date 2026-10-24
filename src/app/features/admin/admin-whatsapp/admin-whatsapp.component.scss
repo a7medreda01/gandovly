@@ -1749,3 +1749,238 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==============================================================
+   MULTI-SESSION WHATSAPP ACCOUNTS TAB & MODALS
+   ============================================================== */
+.accounts-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.account-card {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-radius: var(--radius-lg);
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  &.is-default {
+    border-color: #ffd43b;
+    background: linear-gradient(180deg, #fffdf2 0%, #ffffff 100%);
+    box-shadow: 0 4px 18px rgba(255, 212, 59, 0.15);
+  }
+
+  &.connected {
+    border-right: 4px solid #20c997;
+  }
+
+  .account-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f1f3f5;
+
+    .account-title-box {
+      .account-name {
+        font-size: 1.05rem;
+        font-weight: 800;
+        margin: 0 0 0.35rem 0;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+      }
+
+      .session-id-pill {
+        display: inline-block;
+        font-size: 0.72rem;
+        font-family: monospace;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+      }
+    }
+
+    .account-badges-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.35rem;
+
+      .badge-default-notif {
+        display: inline-flex;
+        align-items: center;
+        background: #fff3bf;
+        color: #856404;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 0.2rem 0.55rem;
+        border-radius: 12px;
+        border: 1px solid #ffe066;
+      }
+    }
+  }
+
+  .account-details-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+
+      .detail-label {
+        color: #64748b;
+        display: flex;
+        align-items: center;
+      }
+
+      .detail-val {
+        font-weight: 700;
+      }
+    }
+
+    .account-disconnect-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      color: #856404;
+      padding: 0.45rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      margin-top: 0.35rem;
+    }
+  }
+
+  .account-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f1f3f5;
+
+    .btn-set-default {
+      background: #fff3bf;
+      color: #795548;
+      border: 1px solid #ffe066;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.15s ease;
+
+      &:hover { background: #ffe066; }
+    }
+
+    .btn-connect-account {
+      background: #0d6efd;
+      color: #ffffff;
+      border: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+      transition: all 0.15s ease;
+
+      &:hover { background: #0b5ed7; }
+    }
+
+    .btn-account-restart,
+    .btn-account-logout,
+    .btn-account-delete {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      padding: 0.35rem 0.55rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+
+      &:hover { background: #e9ecef; }
+    }
+
+    .btn-account-delete:hover {
+      background: #f8d7da;
+      border-color: #f5c2c7;
+    }
+  }
+}
+
+.sender-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #e7f5ff;
+  color: #1971c2;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid #d0ebff;
+}
+
+/* Connect Modal Two-column Layout */
+.account-connect-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+
+  .connect-col-qr,
+  .connect-col-code {
+    background: #fafbfc;
+    border: 1px solid #edf0f2;
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .connect-subtitle {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+  }
+
+  .connect-status-mini-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+}
+

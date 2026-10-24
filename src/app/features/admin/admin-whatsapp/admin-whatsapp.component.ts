@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import {
+  WhatsAppAccount,
   WhatsAppGatewaySettings,
   WhatsAppCampaign,
   WhatsAppCampaignDetail,
@@ -36,9 +37,29 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   readonly formatEgyptDate = formatEgyptDate;
 
   // Active Tab
-  activeTab = signal<'campaigns' | 'gateway' | 'post_delivery' | 'contacts'>('campaigns');
+  activeTab = signal<'campaigns' | 'accounts' | 'gateway' | 'post_delivery' | 'contacts'>('campaigns');
 
-  // Status & QR State
+  // ------------------------------------------
+  // MULTI-SESSION ACCOUNTS STATE
+  // ------------------------------------------
+  accounts = signal<WhatsAppAccount[]>([]);
+  isLoadingAccounts = signal<boolean>(false);
+
+  // Add Account Modal
+  showAddAccountModal = signal<boolean>(false);
+  newAccountDisplayName: string = '';
+  newAccountSessionId: string = '';
+  isCreatingAccount = signal<boolean>(false);
+
+  // Account Connect / QR Modal
+  selectedAccountForConnect = signal<WhatsAppAccount | null>(null);
+  selectedAccountQrUrl = signal<string | null>(null);
+  isLoadingAccountQr = signal<boolean>(false);
+  accountPairPhone: string = '';
+  accountPairingCode = signal<string | null>(null);
+  isRequestingAccountPairCode = signal<boolean>(false);
+
+  // Status & QR State (Main Gateway Legacy / Fast View)
   connectionStatus = signal<'connected' | 'qr_ready' | 'connecting' | 'disconnected' | 'offline'>('connecting');
   connectedPhone = signal<string | null>(null);
   qrDataUrl = signal<string | null>(null);
@@ -59,17 +80,19 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     sendOnOrderCancelled: true,
     notifyCashierOnNewOrder: true,
     cashierWhatsAppNumber: '01000000000',
-    cashierNotificationDelaySeconds: 3
+    cashierNotificationDelaySeconds: 3,
+    defaultNotificationSessionId: 'default'
   });
   isSavingSettings = signal<boolean>(false);
 
-  // Pairing Code Alternative
+  // Pairing Code Alternative (Default Session)
   pairPhone: string = '';
   pairingCode = signal<string | null>(null);
   isRequestingPairCode = signal<boolean>(false);
 
   // Test Message
   testPhone: string = '';
+  testSessionId: string = 'default';
   testMessage: string = 'تجربة إرسال رسالة من منصة أسماك جندوفلي 🐟🌊 - بوابة الواتساب الذاتية تعمل بنجاح!';
   isSendingTest = signal<boolean>(false);
 
@@ -87,6 +110,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   newCampaign: CreateCampaignRequest = {
     title: '',
     messageTemplate: 'أهلاً بك يا {الاسم} 🐟🌊\nعروض أسماك جندوفلي اليومية وصلت! خصم خاص ووجبات سي فود طازجة بتوصيل سريع حتى باب بيتك. اطلب الآن واستمتع بالطعم الأصلي 💙',
+    sessionId: 'default',
     intervalMinutes: 5,
     dailyLimit: 50,
     excludePreviouslyMessaged: true
@@ -99,6 +123,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     id: 0,
     title: '',
     messageTemplate: '',
+    sessionId: 'default',
     intervalMinutes: 5,
     dailyLimit: 50
   };
@@ -143,6 +168,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   private pollInterval: any = null;
 
   ngOnInit() {
+    this.loadAccounts();
     this.refreshStatusAndQr();
     this.loadGatewaySettings();
     this.loadCampaigns();
@@ -152,7 +178,9 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     // Auto-poll status every 6 seconds while on page
     this.pollInterval = setInterval(() => {
       this.refreshStatusSilently();
-      // If campaigns tab active, refresh campaign progress
+      if (this.activeTab() === 'accounts') {
+        this.refreshAccountsSilently();
+      }
       if (this.activeTab() === 'campaigns') {
         this.refreshCampaignsSilently();
       }
@@ -165,10 +193,13 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     }
   }
 
-  setTab(tab: 'campaigns' | 'gateway' | 'post_delivery' | 'contacts') {
+  setTab(tab: 'campaigns' | 'accounts' | 'gateway' | 'post_delivery' | 'contacts') {
     this.activeTab.set(tab);
-    if (tab === 'campaigns') {
+    if (tab === 'accounts') {
+      this.loadAccounts();
+    } else if (tab === 'campaigns') {
       this.loadCampaigns();
+      this.loadAccounts();
       this.loadContactsStats();
     } else if (tab === 'contacts') {
       this.loadContacts();
@@ -176,6 +207,205 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     } else if (tab === 'post_delivery') {
       this.loadPostDeliverySettings();
     }
+  }
+
+  // ------------------------------------------
+  // MULTI-SESSION ACCOUNTS LOGIC
+  // ------------------------------------------
+  loadAccounts() {
+    this.isLoadingAccounts.set(true);
+    this.adminService.getWhatsAppAccounts().subscribe({
+      next: (res: any) => {
+        this.isLoadingAccounts.set(false);
+        const list = res?.data || res || [];
+        this.accounts.set(list);
+      },
+      error: () => {
+        this.isLoadingAccounts.set(false);
+      }
+    });
+  }
+
+  refreshAccountsSilently() {
+    this.adminService.getWhatsAppAccounts().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.accounts.set(list);
+
+        // If connect modal open, refresh current account status
+        const current = this.selectedAccountForConnect();
+        if (current) {
+          const updated = list.find((a: WhatsAppAccount) => a.sessionId === current.sessionId);
+          if (updated) {
+            this.selectedAccountForConnect.set(updated);
+            if (updated.connectionStatus === 'connected' && current.connectionStatus !== 'connected') {
+              this.toast.success(`تم ربط رقم "${updated.displayName}" بنجاح! 🎉`);
+            }
+          }
+        }
+      }
+    });
+  }
+
+  hasConnectedAccount(): boolean {
+    return this.accounts().some(a => a.connectionStatus === 'connected');
+  }
+
+  getAccountDisplayName(sessionId?: string): string {
+    if (!sessionId) return 'الرقم الافتراضي';
+    const acc = this.accounts().find(a => a.sessionId === sessionId);
+    if (!acc) return sessionId;
+    return acc.displayName + (acc.phoneNumber ? ` (${acc.phoneNumber})` : '');
+  }
+
+  openAddAccountModal() {
+    this.newAccountDisplayName = '';
+    this.newAccountSessionId = '';
+    this.showAddAccountModal.set(true);
+  }
+
+  closeAddAccountModal() {
+    this.showAddAccountModal.set(false);
+  }
+
+  submitCreateAccount() {
+    if (!this.newAccountDisplayName.trim()) {
+      this.toast.error('يرجى كتابة اسم تعريفي لرقم الواتساب الجديد (مثل: رقم العروض 1)');
+      return;
+    }
+
+    this.isCreatingAccount.set(true);
+    this.adminService.createWhatsAppAccount({
+      displayName: this.newAccountDisplayName.trim(),
+      sessionId: this.newAccountSessionId.trim() || undefined
+    }).subscribe({
+      next: (res: any) => {
+        this.isCreatingAccount.set(false);
+        this.showAddAccountModal.set(false);
+        this.toast.success('تم إنشاء حساب الواتساب بنجاح! جاري فتح نافذة الربط...');
+        this.loadAccounts();
+
+        const created = res?.data || res;
+        if (created) {
+          setTimeout(() => this.openConnectAccountModal(created), 500);
+        }
+      },
+      error: (err: any) => {
+        this.isCreatingAccount.set(false);
+        this.toast.error(err?.error?.message || 'فشل إنشاء الحساب.');
+      }
+    });
+  }
+
+  openConnectAccountModal(account: WhatsAppAccount) {
+    this.selectedAccountForConnect.set(account);
+    this.accountPairPhone = '';
+    this.accountPairingCode.set(null);
+    this.selectedAccountQrUrl.set(null);
+    this.refreshAccountQr(account.sessionId);
+  }
+
+  closeConnectAccountModal() {
+    this.selectedAccountForConnect.set(null);
+    this.selectedAccountQrUrl.set(null);
+    this.accountPairingCode.set(null);
+    this.loadAccounts();
+  }
+
+  refreshAccountQr(sessionId: string) {
+    this.isLoadingAccountQr.set(true);
+    this.adminService.getWhatsAppAccountQr(sessionId).subscribe({
+      next: (res: any) => {
+        this.isLoadingAccountQr.set(false);
+        const data = res?.data || res;
+        this.selectedAccountQrUrl.set(data?.qrDataUrl || null);
+      },
+      error: () => {
+        this.isLoadingAccountQr.set(false);
+      }
+    });
+  }
+
+  requestAccountPairCode() {
+    const acc = this.selectedAccountForConnect();
+    if (!acc) return;
+
+    let phone = this.accountPairPhone.trim().replace(/[^\d]/g, '');
+    if (!phone) {
+      this.toast.error('يرجى إدخال رقم الهاتف لطلب كود الاقتران.');
+      return;
+    }
+
+    this.isRequestingAccountPairCode.set(true);
+    this.adminService.requestWhatsAppAccountPairCode(acc.sessionId, phone).subscribe({
+      next: (res: any) => {
+        this.isRequestingAccountPairCode.set(false);
+        const data = res?.data || res;
+        if (data?.pairingCode) {
+          this.accountPairingCode.set(data.pairingCode);
+          this.toast.success('تم استخراج كود الاقتران بنجاح! أدخله في تطبيق واتساب بالهاتف.');
+        } else {
+          this.toast.error(data?.message || 'تعذر جلب كود الاقتران.');
+        }
+      },
+      error: (err: any) => {
+        this.isRequestingAccountPairCode.set(false);
+        this.toast.error(err?.error?.message || 'حدث خطأ أثناء طلب كود الاقتران.');
+      }
+    });
+  }
+
+  setDefaultAccount(account: WhatsAppAccount) {
+    this.adminService.setDefaultWhatsAppAccount(account.sessionId).subscribe({
+      next: () => {
+        this.toast.success(`تم تعيين رقم "${account.displayName}" كرقم افتراضي لجميع إشعارات النظام والطلبات ⭐`);
+        this.loadAccounts();
+        this.loadGatewaySettings();
+      },
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل تعيين الرقم الافتراضي.');
+      }
+    });
+  }
+
+  logoutAccount(account: WhatsAppAccount) {
+    if (!confirm(`هل أنت متأكد من رغبتك في تسجيل خروج وفصل رقم "${account.displayName}"؟`)) return;
+
+    this.adminService.logoutWhatsAppAccount(account.sessionId).subscribe({
+      next: () => {
+        this.toast.success(`تم تسجيل خروج رقم "${account.displayName}" بنجاح.`);
+        this.loadAccounts();
+      },
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل تسجيل الخروج.');
+      }
+    });
+  }
+
+  restartAccount(account: WhatsAppAccount) {
+    this.adminService.restartWhatsAppAccount(account.sessionId).subscribe({
+      next: () => {
+        this.toast.success(`جاري إعادة تشغيل جلسة "${account.displayName}"...`);
+        setTimeout(() => this.loadAccounts(), 1500);
+      },
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل إعادة التشغيل.');
+      }
+    });
+  }
+
+  deleteAccount(account: WhatsAppAccount) {
+    if (!confirm(`هل أنت متأكد من حذف رقم "${account.displayName}" بالكامل؟`)) return;
+
+    this.adminService.deleteWhatsAppAccount(account.sessionId).subscribe({
+      next: () => {
+        this.toast.success(`تم حذف رقم "${account.displayName}" بنجاح.`);
+        this.loadAccounts();
+      },
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل حذف الحساب.');
+      }
+    });
   }
 
   // ------------------------------------------
@@ -198,7 +428,6 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     this.adminService.getWhatsAppCampaigns().subscribe({
       next: (list: any) => {
         this.campaigns.set(list?.data || list || []);
-        // If viewing details, also refresh details
         const selected = this.selectedCampaign();
         if (selected) {
           this.adminService.getWhatsAppCampaignDetails(selected.id).subscribe({
@@ -212,9 +441,12 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   openCreateCampaignModal() {
+    // Select default notification session or first available account
+    const defaultAcc = this.accounts().find(a => a.isDefaultNotifications) || this.accounts()[0];
     this.newCampaign = {
       title: 'عرض جديد - ' + new Date().toLocaleDateString('ar-EG'),
       messageTemplate: 'أهلاً بك يا {الاسم} 🐟🌊\nعروض أسماك جندوفلي اليومية وصلت! خصم خاص ووجبات سي فود طازجة بتوصيل سريع حتى باب بيتك. اطلب الآن واستمتع بالطعم الأصلي 💙',
+      sessionId: defaultAcc?.sessionId || 'default',
       intervalMinutes: 5,
       dailyLimit: 50,
       excludePreviouslyMessaged: true
@@ -251,13 +483,17 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
       this.toast.error('الفاصل الزمني يجب أن يكون دقيقة واحدة على الأقل');
       return;
     }
+    if (this.newCampaign.dailyLimit < 1) {
+      this.toast.error('العدد المستهدف يجب أن يكون 1 على الأقل');
+      return;
+    }
 
     this.isCreatingCampaign.set(true);
     this.adminService.createWhatsAppCampaign(this.newCampaign).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.isCreatingCampaign.set(false);
         this.showCreateCampaignModal.set(false);
-        this.toast.success('تم إنشاء المهمة وجدولة الرسائل بنجاح! 🚀');
+        this.toast.success('تم إنشاء المهمة بنجاح وبدأت في الجدولة والإرسال الآمن! 🚀');
         this.loadCampaigns();
         this.loadContactsStats();
       },
@@ -268,51 +504,58 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     });
   }
 
-  pauseCampaign(id: number, event?: Event) {
+  pauseCampaign(campaignId: number, event?: Event) {
     event?.stopPropagation();
-    this.adminService.pauseWhatsAppCampaign(id).subscribe({
+    this.adminService.pauseWhatsAppCampaign(campaignId).subscribe({
       next: () => {
-        this.toast.success('تم إيقاف المهمة مؤقتاً ⏸️');
+        this.toast.info('تم إيقاف المهمة مؤقتاً ⏸️');
         this.loadCampaigns();
       },
-      error: () => this.toast.error('تعذر إيقاف المهمة')
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل إيقاف المهمة');
+      }
     });
   }
 
-  resumeCampaign(id: number, event?: Event) {
+  resumeCampaign(campaignId: number, event?: Event) {
     event?.stopPropagation();
-    this.adminService.resumeWhatsAppCampaign(id).subscribe({
+    this.adminService.resumeWhatsAppCampaign(campaignId).subscribe({
       next: () => {
         this.toast.success('تم استئناف المهمة بنجاح ▶️');
         this.loadCampaigns();
       },
-      error: () => this.toast.error('تعذر استئناف المهمة')
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل استئناف المهمة');
+      }
     });
   }
 
-  cancelCampaign(id: number, event?: Event) {
+  cancelCampaign(campaignId: number, event?: Event) {
     event?.stopPropagation();
     if (!confirm('هل أنت متأكد من إلغاء هذه المهمة نهائياً؟')) return;
 
-    this.adminService.cancelWhatsAppCampaign(id).subscribe({
+    this.adminService.cancelWhatsAppCampaign(campaignId).subscribe({
       next: () => {
-        this.toast.success('تم إلغاء المهمة ⏹️');
+        this.toast.warning('تم إلغاء المهمة ⏹️');
         this.loadCampaigns();
       },
-      error: () => this.toast.error('تعذر إلغاء المهمة')
+      error: (err: any) => {
+        this.toast.error(err?.error?.message || 'فشل إلغاء المهمة');
+      }
     });
   }
 
-  viewCampaignDetails(campaign: WhatsAppCampaign) {
+  viewCampaignDetails(c: WhatsAppCampaign) {
     this.isLoadingCampaignDetail.set(true);
-    this.adminService.getWhatsAppCampaignDetails(campaign.id).subscribe({
-      next: (res: any) => {
+    this.selectedCampaign.set(null);
+    this.adminService.getWhatsAppCampaignDetails(c.id).subscribe({
+      next: (detail: any) => {
         this.isLoadingCampaignDetail.set(false);
-        this.selectedCampaign.set(res?.data || res);
+        this.selectedCampaign.set(detail?.data || detail);
       },
       error: () => {
         this.isLoadingCampaignDetail.set(false);
-        this.toast.error('تعذر تحميل تفاصيل وسجل المهمة');
+        this.toast.error('تعذر جلب تفاصيل وسجل المهمة');
       }
     });
   }
@@ -341,22 +584,18 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
     this.selectedFile = file;
     this.selectedFileName.set(file.name);
-    this.uploadAndPreviewSheet(file);
-  }
-
-  uploadAndPreviewSheet(file: File) {
     this.isUploadingSheet.set(true);
     this.importPreview.set(null);
 
     this.adminService.previewContactsSheet(file).subscribe({
-      next: (preview: ExcelImportResult) => {
+      next: (res: any) => {
         this.isUploadingSheet.set(false);
-        this.importPreview.set(preview);
-        this.toast.success(`تم فحص الشيت: وجد ${preview.validCount} رقم صالح من إجمالي ${preview.totalRowsFound}.`);
+        this.importPreview.set(res?.data || res);
+        this.toast.info(`تم فحص الشيت: وجدنا ${res?.data?.validCount || 0} أرقام صالحة`);
       },
       error: (err: any) => {
         this.isUploadingSheet.set(false);
-        this.toast.error(err?.error?.message || 'فشل فحص وقراءة ملف الإكسيل.');
+        this.toast.error(err?.error?.message || 'فشل فحص الملف. تأكد من صيغة Excel أو CSV');
       }
     });
   }
@@ -369,7 +608,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.isConfirmingImport.set(false);
         this.showImportModal.set(false);
-        this.toast.success(res?.message || 'تم حفظ العملاء بنجاح في قاعدة البيانات! 🎉');
+        const count = res?.data?.importedCount || res?.importedCount || 0;
+        this.toast.success(`تم استيراد وحفظ ${count} عميل بنجاح في قاعدة البيانات! 🎉`);
         this.loadContactsStats();
         if (this.activeTab() === 'contacts') {
           this.loadContacts();
@@ -391,6 +631,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
       id: c.id,
       title: c.title,
       messageTemplate: c.messageTemplate,
+      sessionId: c.sessionId || 'default',
       intervalMinutes: c.intervalMinutes,
       dailyLimit: c.dailyLimit || 50
     };
@@ -514,7 +755,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
     this.isSavingPostDelivery.set(true);
     this.adminService.updatePostDeliverySettings(this.postDeliverySettings()).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.isSavingPostDelivery.set(false);
         this.toast.success('تم حفظ إعدادات رسائل ما بعد استلام الطلب بنجاح! 💾');
       },
@@ -526,7 +767,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   // ------------------------------------------
-  // GATEWAY & CONNECTION LOGIC (EXISTING)
+  // GATEWAY & CONNECTION LOGIC
   // ------------------------------------------
   loadGatewaySettings() {
     this.adminService.getGatewaySettings().subscribe({
@@ -659,12 +900,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
           this.pairingCode.set(data.pairingCode);
           this.toast.success('تم إنشاء كود الاقتران بنجاح! أدخله في تطبيق واتساب بالهاتف.');
         } else {
-          const msg = data?.message || 'تعذر جلب كود الاقتران.';
-          if (msg === 'Connection Closed') {
-            this.toast.error('تم إغلاق الاتصال من خادم واتساب. اضغط على زر "إعادة تشغيل الجلسة" أدناه ثم حاول مجدداً.');
-          } else {
-            this.toast.error(msg);
-          }
+          this.toast.error(data?.message || 'تعذر جلب كود الاقتران.');
         }
       },
       error: (err: any) => {
@@ -713,7 +949,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     }
 
     this.isSendingTest.set(true);
-    this.adminService.sendWhatsAppTestMessage(this.testPhone.trim(), this.testMessage.trim()).subscribe({
+    this.adminService.sendWhatsAppTestMessage(this.testPhone.trim(), this.testMessage.trim(), this.testSessionId).subscribe({
       next: () => {
         this.isSendingTest.set(false);
         this.toast.success('تم إرسال الرسالة التجريبية بنجاح عبر بوابة الواتساب الذاتية! 📲');

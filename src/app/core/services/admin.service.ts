@@ -182,29 +182,66 @@ export class AdminService {
     return this.api.post<boolean>('admin/notifications/test', { recipientPhone, messageText });
   }
 
-  // Local WhatsApp Gateway
-  getWhatsAppStatus() {
-    return this.api.get<any>('admin/whatsapp/status');
+  // Local WhatsApp Gateway & Multi-Session Accounts
+  getWhatsAppAccounts(): Observable<any> {
+    return this.api.get<any>('admin/whatsapp/accounts');
   }
 
-  getWhatsAppQr() {
-    return this.api.get<any>('admin/whatsapp/qr');
+  createWhatsAppAccount(data: { displayName: string; sessionId?: string }): Observable<any> {
+    return this.api.post<any>('admin/whatsapp/accounts', data);
   }
 
-  requestWhatsAppPairCode(phoneNumber: string) {
-    return this.api.post<any>('admin/whatsapp/pair-code', { phoneNumber });
+  getWhatsAppAccountQr(sessionId: string): Observable<any> {
+    return this.api.get<any>(`admin/whatsapp/accounts/${sessionId}/qr`);
   }
 
-  logoutWhatsApp() {
-    return this.api.post<any>('admin/whatsapp/logout', {});
+  requestWhatsAppAccountPairCode(sessionId: string, phoneNumber: string): Observable<any> {
+    return this.api.post<any>(`admin/whatsapp/accounts/${sessionId}/pair-code`, { phoneNumber });
   }
 
-  restartWhatsApp() {
-    return this.api.post<any>('admin/whatsapp/restart', {});
+  setDefaultWhatsAppAccount(sessionId: string): Observable<any> {
+    return this.api.post<any>(`admin/whatsapp/accounts/${sessionId}/set-default`, {});
   }
 
-  sendWhatsAppTestMessage(recipientPhone: string, messageText: string) {
-    return this.api.post<any>('admin/whatsapp/test-send', { recipientPhone, messageText });
+  logoutWhatsAppAccount(sessionId: string): Observable<any> {
+    return this.api.post<any>(`admin/whatsapp/accounts/${sessionId}/logout`, {});
+  }
+
+  restartWhatsAppAccount(sessionId: string): Observable<any> {
+    return this.api.post<any>(`admin/whatsapp/accounts/${sessionId}/restart`, {});
+  }
+
+  deleteWhatsAppAccount(sessionId: string): Observable<any> {
+    return this.api.delete<any>(`admin/whatsapp/accounts/${sessionId}`);
+  }
+
+  getWhatsAppStatus(sessionId?: string) {
+    const url = sessionId ? `admin/whatsapp/status?sessionId=${encodeURIComponent(sessionId)}` : 'admin/whatsapp/status';
+    return this.api.get<any>(url);
+  }
+
+  getWhatsAppQr(sessionId?: string) {
+    const url = sessionId ? `admin/whatsapp/qr?sessionId=${encodeURIComponent(sessionId)}` : 'admin/whatsapp/qr';
+    return this.api.get<any>(url);
+  }
+
+  requestWhatsAppPairCode(phoneNumber: string, sessionId?: string) {
+    const url = sessionId ? `admin/whatsapp/pair-code?sessionId=${encodeURIComponent(sessionId)}` : 'admin/whatsapp/pair-code';
+    return this.api.post<any>(url, { phoneNumber });
+  }
+
+  logoutWhatsApp(sessionId?: string) {
+    const url = sessionId ? `admin/whatsapp/logout?sessionId=${encodeURIComponent(sessionId)}` : 'admin/whatsapp/logout';
+    return this.api.post<any>(url, {});
+  }
+
+  restartWhatsApp(sessionId?: string) {
+    const url = sessionId ? `admin/whatsapp/restart?sessionId=${encodeURIComponent(sessionId)}` : 'admin/whatsapp/restart';
+    return this.api.post<any>(url, {});
+  }
+
+  sendWhatsAppTestMessage(recipientPhone: string, messageText: string, sessionId?: string) {
+    return this.api.post<any>('admin/whatsapp/test-send', { recipientPhone, messageText, sessionId });
   }
 
   // WhatsApp Marketing Campaigns & Sheets

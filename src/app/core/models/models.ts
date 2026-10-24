@@ -425,6 +425,22 @@ export interface WhatsAppGatewaySettings {
   notifyCashierOnNewOrder?: boolean;
   cashierWhatsAppNumber?: string;
   cashierNotificationDelaySeconds?: number;
+  defaultNotificationSessionId?: string;
+}
+
+export interface WhatsAppAccount {
+  id: number;
+  sessionId: string;
+  displayName: string;
+  phoneNumber?: string | null;
+  isDefaultNotifications: boolean;
+  isActive: boolean;
+  connectionStatus: 'connected' | 'qr_ready' | 'connecting' | 'disconnected' | 'offline';
+  hasQr: boolean;
+  queueLength: number;
+  lastDisconnectReason?: string | null;
+  createdAt: string;
+  lastConnectedAt?: string | null;
 }
 
 // WhatsApp Campaigns & Marketing
@@ -465,6 +481,7 @@ export interface WhatsAppCampaign {
   id: number;
   title: string;
   messageTemplate: string;
+  sessionId: string;
   status: WhatsAppCampaignStatus;
   intervalMinutes: number;
   dailyLimit: number;
@@ -507,6 +524,7 @@ export interface WhatsAppCampaignDetail extends WhatsAppCampaign {
 export interface CreateCampaignRequest {
   title: string;
   messageTemplate: string;
+  sessionId?: string;
   intervalMinutes: number;
   dailyLimit: number;
   excludePreviouslyMessaged: boolean;
@@ -516,6 +534,7 @@ export interface CreateCampaignRequest {
 export interface UpdateCampaignRequest {
   title: string;
   messageTemplate: string;
+  sessionId?: string;
   intervalMinutes: number;
   dailyLimit?: number;
 }

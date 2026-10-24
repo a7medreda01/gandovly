@@ -53,9 +53,15 @@
       }
     </button>
 
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'accounts'" (click)="setTab('accounts')">
+      <i class="bi bi-phone-fill"></i>
+      <span>أرقام وجلسات الواتساب ({{ accounts().length }})</span>
+      <span class="status-indicator-dot" [class.connected]="hasConnectedAccount()"></span>
+    </button>
+
     <button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
       <i class="bi bi-qr-code-scan"></i>
-      <span>حالة ربط البوابة</span>
+      <span>إعدادات البوابة</span>
       <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
     </button>
   </div>
@@ -225,6 +231,9 @@
 
               <!-- Configuration Badges -->
               <div class="camp-configs">
+                <span class="config-pill sender-pill">
+                  <i class="bi bi-phone-fill text-success"></i> رقم الإرسال: <strong>{{ getAccountDisplayName(c.sessionId) }}</strong>
+                </span>
                 <span class="config-pill">
                   <i class="bi bi-hourglass-split text-primary"></i> فاصل زمني: <strong>كل {{ c.intervalMinutes }} دقائق</strong>
                 </span>
@@ -551,6 +560,156 @@
   }
 
   <!-- ============================================================= -->
+  <!-- TAB: MULTI-SESSION WHATSAPP ACCOUNTS -->
+  <!-- ============================================================= -->
+  @if (activeTab() === 'accounts') {
+    <div class="tab-content-area">
+      <!-- Top Section Header -->
+      <div class="campaigns-section-header mb-4">
+        <div>
+          <h3 class="section-title">
+            <i class="bi bi-phone-fill me-2 text-success"></i> إدارة أرقام وجلسات الواتساب
+          </h3>
+          <p class="text-muted m-0 small">
+            اربط أكثر من رقم واتساب للمطعم، حدد رقم الإشعارات وتأكيدات الطلبات الافتراضي، واختر رقم الإرسال المفضل لكل حملة تسويقية.
+          </p>
+        </div>
+        <div class="section-actions">
+          <button class="btn-outline-custom" (click)="loadAccounts()" [disabled]="isLoadingAccounts()">
+            <i class="bi bi-arrow-clockwise" [class.spin]="isLoadingAccounts()"></i>
+            <span>تحديث الأرقام</span>
+          </button>
+          <button class="btn-create-task" (click)="openAddAccountModal()">
+            <i class="bi bi-plus-lg"></i>
+            <span>ربط رقم جديد</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Accounts Grid -->
+      @if (isLoadingAccounts()) {
+        <div class="loading-state-box">
+          <i class="bi bi-arrow-clockwise spin"></i>
+          <span>جاري فحص وحصر أرقام الواتساب المربوطة...</span>
+        </div>
+      } @else if (accounts().length === 0) {
+        <div class="empty-state-box glass-panel">
+          <i class="bi bi-phone text-muted"></i>
+          <h4>لا توجد أرقام واتساب مسجلة حالياً</h4>
+          <p>اضغط على زر "ربط رقم جديد" لبدء تشغيل وربط أول رقم واتساب للمطعم.</p>
+          <button class="btn-action-primary mt-3" (click)="openAddAccountModal()">
+            <i class="bi bi-plus-lg"></i>
+            <span>ربط رقم جديد الآن</span>
+          </button>
+        </div>
+      } @else {
+        <div class="accounts-cards-grid">
+          @for (acc of accounts(); track acc.sessionId) {
+            <div class="account-card glass-panel" [class.is-default]="acc.isDefaultNotifications" [class.connected]="acc.connectionStatus === 'connected'">
+              <!-- Card Top Header -->
+              <div class="account-card-header">
+                <div class="account-title-box">
+                  <h4 class="account-name">
+                    <i class="bi bi-whatsapp text-success me-1"></i>
+                    {{ acc.displayName }}
+                  </h4>
+                  <span class="session-id-pill" title="معرف الجلسة الداخلي">ID: {{ acc.sessionId }}</span>
+                </div>
+
+                <div class="account-badges-box">
+                  @if (acc.isDefaultNotifications) {
+                    <span class="badge-default-notif">
+                      <i class="bi bi-star-fill text-warning me-1"></i>
+                      <span>رقم الإشعارات الافتراضي</span>
+                    </span>
+                  }
+
+                  @switch (acc.connectionStatus) {
+                    @case ('connected') {
+                      <span class="status-pill status-connected">
+                        <span class="pulse-dot green"></span>
+                        <span>متصل بنجاح ✅</span>
+                      </span>
+                    }
+                    @case ('qr_ready') {
+                      <span class="status-pill status-waiting">
+                        <span class="pulse-dot yellow"></span>
+                        <span>بانتظار مسح QR</span>
+                      </span>
+                    }
+                    @case ('connecting') {
+                      <span class="status-pill status-connecting">
+                        <i class="bi bi-hourglass-split spin"></i>
+                        <span>جاري الاتصال...</span>
+                      </span>
+                    }
+                    @default {
+                      <span class="status-pill status-disconnected">
+                        <span>غير متصل ❌</span>
+                      </span>
+                    }
+                  }
+                </div>
+              </div>
+
+              <!-- Phone Details -->
+              <div class="account-details-body">
+                <div class="detail-row">
+                  <span class="detail-label"><i class="bi bi-telephone me-1"></i> رقم الهاتف:</span>
+                  <strong class="detail-val text-primary" dir="ltr">{{ acc.phoneNumber || 'لم يتم ربط رقم بعد' }}</strong>
+                </div>
+
+                <div class="detail-row">
+                  <span class="detail-label"><i class="bi bi-layers me-1"></i> طابور الإرسال:</span>
+                  <span class="detail-val">{{ acc.queueLength }} رسالة قيد المعالجة</span>
+                </div>
+
+                @if (acc.lastDisconnectReason && acc.connectionStatus !== 'connected') {
+                  <div class="account-disconnect-notice">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                    <span>آخر سبب للفصل: {{ acc.lastDisconnectReason }}</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Card Action Buttons -->
+              <div class="account-card-footer">
+                @if (!acc.isDefaultNotifications && acc.connectionStatus === 'connected') {
+                  <button class="btn-set-default" (click)="setDefaultAccount(acc)" title="جعله الرقم الذي يُرسل إشعارات الطلبات والفواتير للعملاء">
+                    <i class="bi bi-star me-1"></i>
+                    <span>تعيين للإشعارات</span>
+                  </button>
+                }
+
+                <button class="btn-connect-account" (click)="openConnectAccountModal(acc)">
+                  <i class="bi bi-qr-code me-1"></i>
+                  <span>{{ acc.connectionStatus === 'connected' ? 'فحص / إعادة ربط' : 'مسح الـ QR أو كود' }}</span>
+                </button>
+
+                <button class="btn-account-restart" (click)="restartAccount(acc)" title="إعادة تشغيل المحرك">
+                  <i class="bi bi-arrow-repeat"></i>
+                </button>
+
+                @if (acc.connectionStatus === 'connected') {
+                  <button class="btn-account-logout text-danger" (click)="logoutAccount(acc)" title="تسجيل الخروج وفصل الرقم">
+                    <i class="bi bi-box-arrow-right"></i>
+                  </button>
+                }
+
+                @if (acc.sessionId !== 'default') {
+                  <button class="btn-account-delete text-danger" (click)="deleteAccount(acc)" title="حذف هذا الحساب نهائياً">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ============================================================= -->
   <!-- TAB 4: GATEWAY CONNECTION & STATUS (EXISTING INTEGRATION) -->
   <!-- ============================================================= -->
   @if (activeTab() === 'gateway') {
@@ -737,6 +896,18 @@
               <i class="bi bi-send-check text-success me-1"></i> إرسال رسالة تجريبية
             </h5>
             <div class="form-group mb-2">
+              <label class="form-label small text-muted mb-1">
+                <i class="bi bi-phone me-1"></i> الإرسال عبر حساب/رقم:
+              </label>
+              <select class="form-control-custom form-select" [(ngModel)]="testSessionId">
+                @for (acc of accounts(); track acc.sessionId) {
+                  <option [value]="acc.sessionId">
+                    {{ acc.displayName }} ({{ acc.phoneNumber || acc.sessionId }}) {{ acc.connectionStatus === 'connected' ? '✅' : '❌' }}
+                  </option>
+                }
+              </select>
+            </div>
+            <div class="form-group mb-2">
               <input
                 type="text"
                 class="form-control-custom"
@@ -753,7 +924,7 @@
                 placeholder="نص الرسالة التجريبية..."
               ></textarea>
             </div>
-            <button class="btn-send-test" (click)="sendTest()" [disabled]="isSendingTest() || connectionStatus() !== 'connected'">
+            <button class="btn-send-test" (click)="sendTest()" [disabled]="isSendingTest()">
               @if (isSendingTest()) {
                 <i class="bi bi-arrow-clockwise spin"></i>
                 <span>جاري الإرسال...</span>
@@ -786,13 +957,31 @@
         <div class="modal-body-custom">
           <!-- Title -->
           <div class="form-group mb-3">
-            <label class="form-label">عنوان المهمة (لتميزها في الإدارة):</label>
+            <label class="form-label fw-bold">عنوان المهمة (لتميزها في الإدارة):</label>
             <input
               type="text"
               class="form-control-custom"
               [(ngModel)]="newCampaign.title"
               placeholder="مثلاً: عرض سمك القاروص والجمبري للويكند"
             />
+          </div>
+
+          <!-- WhatsApp Sender Account Selection -->
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold">
+              <i class="bi bi-phone-fill text-success me-1"></i>
+              رقم الواتساب المرسل للحملة (حساب الإرسال):
+            </label>
+            <select class="form-control-custom form-select" [(ngModel)]="newCampaign.sessionId">
+              @for (acc of accounts(); track acc.sessionId) {
+                <option [value]="acc.sessionId">
+                  {{ acc.displayName }} ({{ acc.phoneNumber || acc.sessionId }}) — [{{ acc.connectionStatus === 'connected' ? 'متصل ✅' : 'غير متصل ⚠️' }}] {{ acc.isDefaultNotifications ? '⭐ [رقم الإشعارات]' : '' }}
+                </option>
+              }
+            </select>
+            <small class="text-muted d-block mt-1">
+              اختر الرقم الذي سيقوم بإرسال هذه الحملة. يمكنك ربط أرقام متعددة من تبويب "أرقام وجلسات الواتساب".
+            </small>
           </div>
 
           <!-- Message Template -->
@@ -912,6 +1101,24 @@
               [(ngModel)]="editCampaignData.title"
               placeholder="عنوان المهمة..."
             />
+          </div>
+
+          <!-- WhatsApp Sender Account Selection -->
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold">
+              <i class="bi bi-phone-fill text-success me-1"></i>
+              رقم الواتساب المرسل للحملة:
+            </label>
+            <select class="form-control-custom form-select" [(ngModel)]="editCampaignData.sessionId">
+              @for (acc of accounts(); track acc.sessionId) {
+                <option [value]="acc.sessionId">
+                  {{ acc.displayName }} ({{ acc.phoneNumber || acc.sessionId }}) — [{{ acc.connectionStatus === 'connected' ? 'متصل ✅' : 'غير متصل ⚠️' }}] {{ acc.isDefaultNotifications ? '⭐ [رقم الإشعارات]' : '' }}
+                </option>
+              }
+            </select>
+            <small class="text-muted d-block mt-1">
+              سيتم إرسال الرسائل المتبقية قيد الانتظار في هذه الحملة عبر هذا الرقم.
+            </small>
           </div>
 
           <!-- Message Template -->
@@ -1121,6 +1328,10 @@
               <span class="m-val">{{ sc.status }}</span>
             </div>
             <div class="metric-item">
+              <span class="m-label">رقم الإرسال:</span>
+              <span class="m-val text-primary">{{ getAccountDisplayName(sc.sessionId) }}</span>
+            </div>
+            <div class="metric-item">
               <span class="m-label">الفاصل الزمني:</span>
               <span class="m-val">كل {{ sc.intervalMinutes }} دقائق</span>
             </div>
@@ -1175,6 +1386,184 @@
 
         <div class="modal-footer-custom">
           <button class="btn-cancel-modal" (click)="closeCampaignDetails()">إغلاق</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD WHATSAPP ACCOUNT -->
+  <!-- ============================================================= -->
+  @if (showAddAccountModal()) {
+    <div class="modal-backdrop-custom" (click)="closeAddAccountModal()">
+      <div class="modal-card glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <h4>
+            <i class="bi bi-plus-circle-fill text-success me-2"></i> ربط رقم واتساب جديد
+          </h4>
+          <button class="btn-close-modal" (click)="closeAddAccountModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-custom">
+          <p class="section-desc mb-3">
+            أضف رقماً جديداً للمطعم لإرسال الحملات الإعلانية دون التأثير على رقم الطلبات والإشعارات الأساسي.
+          </p>
+
+          <div class="form-group mb-3">
+            <label class="form-label fw-bold">اسم الحساب / الرقم (لتمييزه في لوحة التحكم):</label>
+            <input
+              type="text"
+              class="form-control-custom"
+              [(ngModel)]="newAccountDisplayName"
+              placeholder="مثال: رقم عروض جندوفلي 1، أو رقم خدمة العملاء"
+            />
+          </div>
+
+          <div class="form-group mb-3">
+            <label class="form-label">معرف الجلسة الداخلي (اختياري - بالإنجليزية بدون مسافات):</label>
+            <input
+              type="text"
+              class="form-control-custom"
+              [(ngModel)]="newAccountSessionId"
+              placeholder="اتركه فارغاً ليتم إنشاؤه تلقائياً"
+              dir="ltr"
+            />
+            <small class="text-muted d-block mt-1">يُفضل تركه فارغاً ليقوم النظام بتوليد معرف فريد تلقائياً.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom">
+          <button class="btn-cancel-modal" (click)="closeAddAccountModal()">إلغاء</button>
+          <button class="btn-action-primary" (click)="submitCreateAccount()" [disabled]="isCreatingAccount()">
+            @if (isCreatingAccount()) {
+              <i class="bi bi-arrow-clockwise spin"></i>
+              <span>جاري الإنشاء...</span>
+            } @else {
+              <i class="bi bi-check-lg"></i>
+              <span>إنشاء وبدء الربط الآن</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ============================================================= -->
+  <!-- MODAL: CONNECT / PAIR ACCOUNT -->
+  <!-- ============================================================= -->
+  @if (selectedAccountForConnect(); as acc) {
+    <div class="modal-backdrop-custom" (click)="closeConnectAccountModal()">
+      <div class="modal-card modal-lg glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header-custom">
+          <h4>
+            <i class="bi bi-qr-code-scan text-primary me-2"></i> ربط الحساب: {{ acc.displayName }} (ID: {{ acc.sessionId }})
+          </h4>
+          <button class="btn-close-modal" (click)="closeConnectAccountModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-custom">
+          <div class="account-connect-grid">
+            <!-- QR Section -->
+            <div class="connect-col-qr">
+              <h5 class="connect-subtitle">
+                <i class="bi bi-camera me-1"></i> الطريقة الأولى: مسح الـ QR كود بالكاميرا
+              </h5>
+              <p class="qr-instructions small">
+                افتح واتساب > الأجهزة المرتبطة > ربط جهاز، ووجه الكاميرا نحو الكود:
+              </p>
+
+              <div class="qr-image-container">
+                @if (isLoadingAccountQr()) {
+                  <div class="qr-loading">
+                    <i class="bi bi-arrow-clockwise spin"></i>
+                    <span>جاري توليد الكود...</span>
+                  </div>
+                } @else if (selectedAccountQrUrl()) {
+                  <img [src]="selectedAccountQrUrl()" alt="WhatsApp QR Code" class="qr-code-img" />
+                } @else {
+                  <div class="qr-loading">
+                    @if (acc.connectionStatus === 'connected') {
+                      <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+                      <span class="text-success fw-bold mt-2">هذا الرقم متصل بالفعل ✅</span>
+                    } @else {
+                      <i class="bi bi-hourglass-split"></i>
+                      <span>بانتظار تجهيز الكود...</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="text-center mt-2">
+                <button class="btn-outline-custom btn-sm" (click)="refreshAccountQr(acc.sessionId)" [disabled]="isLoadingAccountQr()">
+                  <i class="bi bi-arrow-clockwise" [class.spin]="isLoadingAccountQr()"></i>
+                  <span>تحديث رمز الـ QR</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Pairing Code Section -->
+            <div class="connect-col-code">
+              <h5 class="connect-subtitle">
+                <i class="bi bi-key-fill text-accent me-1"></i> الطريقة الثانية: كود الاقتران (بدون كاميرا)
+              </h5>
+              <p class="small text-muted mb-3">
+                أدخل رقم الهاتف المراد ربطه للحصول على كود مكوّن من 8 خانات لتأكيد الاتصال من هاتفك مباشرة.
+              </p>
+
+              <div class="pairing-form mb-3">
+                <input
+                  type="text"
+                  class="form-control-custom"
+                  [(ngModel)]="accountPairPhone"
+                  placeholder="رقم الهاتف (مثل: 01010415774)"
+                  dir="ltr"
+                />
+                <button class="btn-request-code" (click)="requestAccountPairCode()" [disabled]="isRequestingAccountPairCode()">
+                  @if (isRequestingAccountPairCode()) {
+                    <i class="bi bi-arrow-clockwise spin"></i>
+                  } @else {
+                    <i class="bi bi-send"></i>
+                  }
+                  <span>طلب الكود</span>
+                </button>
+              </div>
+
+              @if (accountPairingCode()) {
+                <div class="pairing-result-box">
+                  <span class="pairing-label">كود الاقتران الخاص بك:</span>
+                  <strong class="pairing-digits" dir="ltr">{{ accountPairingCode() }}</strong>
+                  <small class="text-muted d-block mt-1">أدخل هذا الكود في إشعار الواتساب على هاتفك لتأكيد الربط.</small>
+                </div>
+              }
+
+              <!-- Status card -->
+              <div class="connect-status-mini-card mt-3">
+                <div class="d-flex justify-content-between align-items-center">
+                  <span>حالة الاتصال الحالية:</span>
+                  @if (acc.connectionStatus === 'connected') {
+                    <span class="badge bg-success">متصل بنجاح ✅</span>
+                  } @else if (acc.connectionStatus === 'qr_ready') {
+                    <span class="badge bg-warning text-dark">بانتظار المسح ⏳</span>
+                  } @else {
+                    <span class="badge bg-secondary">{{ acc.connectionStatus || 'غير متصل' }}</span>
+                  }
+                </div>
+                @if (acc.phoneNumber) {
+                  <div class="mt-2 text-muted small">
+                    رقم الهاتف: <strong dir="ltr">{{ acc.phoneNumber }}</strong>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer-custom">
+          <button class="btn-action-primary" (click)="closeConnectAccountModal()">إتمام وإغلاق</button>
         </div>
       </div>
     </div>
