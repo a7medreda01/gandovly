@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import { DashboardStats } from '../../../core/models/models';
 
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
@@ -15,6 +16,11 @@ import { LoadingStateComponent } from '../../../shared/components/loading-state/
 })
 export class AdminDashboardComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
   stats = signal<DashboardStats | null>(null);
   isLoading = signal<boolean>(false);
   todayDate = new Date();

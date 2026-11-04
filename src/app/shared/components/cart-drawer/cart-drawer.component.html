@@ -28,9 +28,9 @@
               <i class="bi bi-cart-x"></i>
             </div>
             <h3>السلة فارغة حالياً</h3>
-            <p>تصفح أشهى الأسماك والمأكولات البحرية وأضفها إلى سلتك!</p>
+            <p>تصفح كتالوج المنتجات وأضف ما ترغب به إلى سلتك!</p>
             <button class="btn-browse-menu" (click)="goToMenu()" type="button">
-              <span>تصفح المنيو الآن</span>
+              <span>تصفح المنتجات الآن</span>
             </button>
           </div>
         } @else {
@@ -75,7 +75,7 @@
                       <!-- If ordered by weight and allows pieces: show estimated pieces badge -->
                       @if (item.orderMode === 'weight' && item.product.allowOrderByPieces) {
                         <span class="item-weight-badge">
-                          <i class="bi bi-fish"></i> ≈ {{ item.quantityUnits }} سمكة
+                          <i class="bi bi-box-seam"></i> ≈ {{ item.quantityUnits }} قطعة
                         </span>
                       }
                     </div>
@@ -119,7 +119,7 @@
                           </button>
                         </div>
                       }
-                      <!-- Case 2: Customer chose By Pieces (for fish) -->
+                      <!-- Case 2: Customer chose By Pieces (for units) -->
                       @else if (item.orderMode === 'pieces' && item.product.pricingType === 'ByWeight') {
                         <div class="qty-control flex-center">
                           <button
@@ -127,16 +127,16 @@
                             class="btn-qty"
                             (click)="cartService.updateQuantity(item.id, item.quantityUnits - 1)"
                             [disabled]="item.quantityUnits <= 1"
-                            aria-label="تقليل عدد السمك"
+                            aria-label="تقليل الكمية"
                           >
                             <i class="bi bi-dash"></i>
                           </button>
-                          <span class="qty-val">{{ item.quantityUnits }} <small class="unit-sub">سمكة</small></span>
+                          <span class="qty-val">{{ item.quantityUnits }} <small class="unit-sub">قطعة</small></span>
                           <button
                             type="button"
                             class="btn-qty"
                             (click)="cartService.updateQuantity(item.id, item.quantityUnits + 1)"
-                            aria-label="زيادة عدد السمك"
+                            aria-label="زيادة الكمية"
                           >
                             <i class="bi bi-plus"></i>
                           </button>
@@ -168,7 +168,7 @@
                       <!-- Item Total Price -->
                       <div class="item-price">
                         <span class="amount">{{ item.estimatedLineTotal }}</span>
-                        <span class="currency">ج.م</span>
+                        <span class="currency">{{ settingsService.settings().currencySymbol || 'ج.م' }}</span>
                       </div>
                     </div>
                   </div>
@@ -191,13 +191,13 @@
                   إجمالي الأصناف:
                 }
               </span>
-              <span class="val">{{ cartService.estimatedSubtotal() }} ج.م</span>
+              <span class="val">{{ cartService.estimatedSubtotal() }} {{ settingsService.settings().currencySymbol || 'ج.م' }}</span>
             </div>
           </div>
 
           @if (cartService.hasWeightedItems()) {
             <div class="disclaimer-mini">
-              <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ settingsService.settings().estimatedWeightDisclaimer || 'السعر تقريبي ويعتمد على الوزن الفعلي للأسماك بعد الوزن' }}</small>
+              <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ settingsService.settings().estimatedWeightDisclaimer || 'السعر تقريبي ويعتمد على الوزن الفعلي للمنتجات بعد الوزن' }}</small>
             </div>
           }
 

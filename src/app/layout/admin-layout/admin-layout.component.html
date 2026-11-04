@@ -4,14 +4,20 @@
   <div class="admin-sidebar-backdrop" (click)="closeSidebar()"></div>
   }
 
-  <!-- Sidebar -->
+  <!-- Sidebar (ثابت ولا يتحرك مع السكرول) -->
   <aside class="admin-sidebar" [class.open]="isSidebarOpen">
     <div class="sidebar-header flex-between">
-      <div class="flex-center gap-2">
-        <i class="bi bi-water text-primary fs-2"></i>
+      <div class="header-brand-wrap flex-center gap-2">
+        @if (settingsService.settings().logoUrl) {
+          <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'" [alt]="settingsService.settings().restaurantName" class="admin-logo-img" />
+        } @else {
+          <div class="admin-logo-fallback flex-center">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+        }
         <div class="header-titles">
-          <h2>{{ settingsService.settings().restaurantName }}</h2>
-          <span class="portal-tag">لوحة تحكم الإدارة</span>
+          <h2 class="admin-store-name">{{ settingsService.settings().restaurantName || 'لوحة الإدارة' }}</h2>
+          <span class="portal-tag"><i class="bi bi-patch-check-fill me-1"></i> لوحة التحكم المركزية</span>
         </div>
       </div>
       <!-- Close button on mobile -->
@@ -21,58 +27,65 @@
     </div>
 
     <nav class="sidebar-nav">
+      <div class="nav-group-title">العمليات والطلبات</div>
+
       <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-speedometer2 icon"></i>
+        <div class="nav-icon-box"><i class="bi bi-speedometer2"></i></div>
         <span>لوحة المؤشرات</span>
       </a>
 
       <a routerLink="/admin/orders" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-receipt icon"></i>
+        <div class="nav-icon-box"><i class="bi bi-receipt"></i></div>
         <span>إدارة الطلبات</span>
       </a>
 
       <a routerLink="/admin/kitchen" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-fire icon text-danger"></i>
-        <span>شاشة المطبخ والأوزان</span>
+        <div class="nav-icon-box icon-kitchen"><i class="bi bi-box-seam"></i></div>
+        <span>شاشة المستودع والعمليات</span>
       </a>
 
+      <div class="nav-group-title mt-2">المتجر والمنتجات</div>
+
       <a routerLink="/admin/catalog" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-grid icon"></i>
-        <span>الأصناف وأقسام المنيو</span>
+        <div class="nav-icon-box"><i class="bi bi-grid"></i></div>
+        <span>كتالوج المنتجات والخيارات</span>
       </a>
 
       <a routerLink="/admin/delivery-zones" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-geo-alt icon"></i>
+        <div class="nav-icon-box"><i class="bi bi-geo-alt"></i></div>
         <span>مناطق ورسوم التوصيل</span>
       </a>
 
       <a routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-palette icon"></i>
+        <div class="nav-icon-box icon-settings"><i class="bi bi-palette"></i></div>
         <span>الهوية والإعدادات العامة</span>
       </a>
 
+      <div class="nav-group-title mt-2">التقارير والتواصل</div>
+
       <a routerLink="/admin/reports" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-graph-up-arrow icon"></i>
+        <div class="nav-icon-box"><i class="bi bi-graph-up-arrow"></i></div>
         <span>التقارير والمبيعات</span>
       </a>
 
       <a routerLink="/admin/analytics" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-activity icon text-info"></i>
+        <div class="nav-icon-box icon-analytics"><i class="bi bi-activity"></i></div>
         <span>تحليلات وزيارات المتجر</span>
       </a>
 
       <a routerLink="/admin/whatsapp" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <i class="bi bi-whatsapp icon text-success"></i>
+        <div class="nav-icon-box icon-whatsapp"><i class="bi bi-whatsapp"></i></div>
         <span>بوابة وإشعارات الواتساب</span>
       </a>
     </nav>
 
     <div class="sidebar-footer">
-      <a routerLink="/" class="btn-storefront flex-center gap-2">
+      <a routerLink="/" class="btn-storefront flex-center gap-2" title="الذهاب للمتجر">
         <i class="bi bi-shop"></i>
         <span>زيارة المتجر</span>
+        <i class="bi bi-box-arrow-up-left ms-auto fs-6 opacity-75"></i>
       </a>
-      <button class="btn-logout flex-center gap-2" (click)="logout()">
+      <button class="btn-logout flex-center gap-2" (click)="logout()" title="تسجيل الخروج">
         <i class="bi bi-box-arrow-right"></i>
         <span>تسجيل الخروج</span>
       </button>
@@ -86,16 +99,18 @@
         <button class="btn-mobile-nav-toggle d-md-none" (click)="toggleSidebar()" aria-label="فتح القائمة">
           <i class="bi bi-list fs-3"></i>
         </button>
-        <span class="topbar-portal-name">لوحة الإدارة</span>
+        <span class="topbar-portal-name">لوحة الإدارة المركزية</span>
         <span class="topbar-date d-none d-lg-inline text-muted ms-2">
           <i class="bi bi-calendar3 me-1"></i> {{ todayDate | date:'d MMMM yyyy' }}
         </span>
       </div>
 
       <div class="topbar-user flex-center gap-2">
-        <div class="user-pill flex-center gap-1">
-          <i class="bi bi-person-circle text-primary"></i>
-          <span class="user-name">{{ authService.currentAdmin()?.fullName || 'المدير' }}</span>
+        <div class="user-pill flex-center gap-2">
+          <div class="admin-avatar-circle flex-center">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <span class="user-name">{{ authService.currentAdmin()?.fullName || 'المدير العام' }}</span>
         </div>
         <a routerLink="/" class="btn-store-link" title="معاينة المتجر">
           <i class="bi bi-box-arrow-up-right"></i>

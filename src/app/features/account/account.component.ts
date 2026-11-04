@@ -6,13 +6,15 @@ import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { OrderService } from '../../core/services/order.service';
 import { CartService } from '../../core/services/cart.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { CustomerAddress, CustomerProfile, DeliveryZone, Order, OrderStatus, Product, PreparationOption } from '../../core/models/models';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
+import { PhoneInputComponent } from '../../shared/components/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingStateComponent],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingStateComponent, PhoneInputComponent],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss'
 })
@@ -23,6 +25,11 @@ export class AccountComponent implements OnInit, OnDestroy {
   readonly cartService = inject(CartService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
 
   // Tabs
   activeTab = signal<'orders' | 'addresses'>('orders');
@@ -61,7 +68,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   isSavingAddress = signal<boolean>(false);
   newAddress = {
     label: 'المنزل',
-    city: 'الجيزة',
+    city: 'الرياض',
     district: '',
     streetAddress: '',
     buildingNumber: '',
@@ -113,7 +120,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     if (this.resolveTimer) clearTimeout(this.resolveTimer);
     this.resolveTimer = setTimeout(() => {
       this.isResolvingZone.set(true);
-      this.orderService.resolveDeliveryZone(this.newAddress.city || 'الجيزة', addr).subscribe({
+      this.orderService.resolveDeliveryZone(this.newAddress.city || 'الرياض', addr).subscribe({
         next: (res) => {
           this.isResolvingZone.set(false);
           if (res?.matchFound && res.resolvedZone) {
@@ -192,9 +199,9 @@ export class AccountComponent implements OnInit, OnDestroy {
       case 'Placed': return 'تم استلام الطلب';
       case 'AwaitingConfirmation': return 'بانتظار التأكيد';
       case 'Confirmed': return 'تم التأكيد';
-      case 'Preparing': return 'قيد التحضير والوزن بالمطبخ 🍳';
+      case 'Preparing': return 'قيد التجهيز والتعبئة 📦';
       case 'ReadyForPickup': return 'جاهز للاستلام';
-      case 'OutForDelivery': return 'خرج للتوصيل مع الدليفري 🛵';
+      case 'OutForDelivery': return 'خرج للتوصيل 🚚';
       case 'Completed': return 'تم التسليم بنجاح ✅';
       case 'Cancelled': return 'تم إلغاء الطلب ❌';
       default: return status;
@@ -536,7 +543,7 @@ export class AccountComponent implements OnInit, OnDestroy {
         this.showAddressModal.set(false);
         this.newAddress = {
           label: 'المنزل',
-          city: 'الجيزة',
+          city: 'الرياض',
           district: this.deliveryZones()[0]?.name || '',
           streetAddress: '',
           buildingNumber: '',

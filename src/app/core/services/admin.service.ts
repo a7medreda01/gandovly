@@ -11,6 +11,7 @@ import {
   PreparationOption,
   PreparationOptionGroup,
   ModifierGroup,
+  ModifierOption,
   Product,
   ProductImage,
   SalesReport,
@@ -55,8 +56,15 @@ export class AdminService {
   }
 
   // Catalog Products
-  getProducts(categoryId?: number) {
-    return this.api.get<Product[]>('admin/catalog/products', { categoryId });
+  getProducts(params?: { categoryId?: number | null; search?: string; page?: number; pageSize?: number; activeOnly?: boolean; sortBy?: string }) {
+    const queryParams: any = {};
+    if (params?.categoryId) queryParams.categoryId = params.categoryId;
+    if (params?.search) queryParams.search = params.search;
+    if (params?.page) queryParams.page = params.page;
+    if (params?.pageSize) queryParams.pageSize = params.pageSize;
+    if (params?.activeOnly !== undefined) queryParams.activeOnly = params.activeOnly;
+    if (params?.sortBy) queryParams.sortBy = params.sortBy;
+    return this.api.get<PagedResult<Product>>('admin/catalog/products', queryParams);
   }
 
   createProduct(dto: any) {
@@ -107,6 +115,30 @@ export class AdminService {
     return this.api.get<ModifierGroup[]>('admin/catalog/modifier-groups');
   }
 
+  createModifierGroup(dto: any) {
+    return this.api.post<ModifierGroup>('admin/catalog/modifier-groups', dto);
+  }
+
+  updateModifierGroup(id: number, dto: any) {
+    return this.api.put<ModifierGroup>(`admin/catalog/modifier-groups/${id}`, dto);
+  }
+
+  deleteModifierGroup(id: number) {
+    return this.api.delete<boolean>(`admin/catalog/modifier-groups/${id}`);
+  }
+
+  createModifierOption(groupId: number, dto: any) {
+    return this.api.post<ModifierOption>(`admin/catalog/modifier-groups/${groupId}/options`, dto);
+  }
+
+  updateModifierOption(id: number, dto: any) {
+    return this.api.put<ModifierOption>(`admin/catalog/modifier-options/${id}`, dto);
+  }
+
+  deleteModifierOption(id: number) {
+    return this.api.delete<boolean>(`admin/catalog/modifier-options/${id}`);
+  }
+
   // Delivery Zones
   getDeliveryZones() {
     return this.api.get<DeliveryZone[]>('admin/delivery-zones');
@@ -148,7 +180,7 @@ export class AdminService {
     return this.api.put<Order>(`admin/orders/${orderId}/status`, { newStatus, note, changedBy });
   }
 
-  updateActualWeights(orderId: number, items: { orderLineId: number; actualWeightGrams: number; quantityUnits?: number }[], updatedBy = 'المطبخ', reasonOrNotes?: string) {
+  updateActualWeights(orderId: number, items: { orderLineId: number; actualWeightGrams: number; quantityUnits?: number }[], updatedBy = 'المستودع', reasonOrNotes?: string) {
     return this.api.put<Order>(`admin/orders/${orderId}/actual-weights`, { items, updatedBy, reasonOrNotes });
   }
 

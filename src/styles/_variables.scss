@@ -111,4 +111,17 @@
   --shadow-sm: 0 2px 8px rgba(18, 38, 63, 0.04);
   --shadow-md: var(--shadow-card);
   --shadow-lg: var(--shadow-modal);
+
+  // Extended Storefront Customization Tokens
+  --navbar-bg: #FFFFFF;
+  --navbar-text: #0F172A;
+  --footer-bg: #0A1928;
+  --footer-text: #FFFFFF;
+  --btn-primary-bg: var(--primary-color, #0D2B45);
+  --btn-primary-text: #FFFFFF;
+  --btn-accent-bg: var(--accent-color, #E76F51);
+  --btn-accent-text: #FFFFFF;
+  --success-color: #00875A;
+  --warning-color: #D97706;
+  --error-color: #DC2626;
 }

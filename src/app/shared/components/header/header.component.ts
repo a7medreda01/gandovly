@@ -4,6 +4,8 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { SettingsService } from '../../../core/services/settings.service';
 import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 
@@ -18,15 +20,23 @@ export class HeaderComponent {
   readonly settingsService = inject(SettingsService);
   readonly cartService = inject(CartService);
   readonly authService = inject(AuthService);
+  readonly languageService = inject(LanguageService);
+  readonly wishlistService = inject(WishlistService);
 
   isMobileMenuOpen = false;
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = this.isMobileMenuOpen ? 'hidden' : '';
+    }
   }
 
   closeMobileMenu() {
     this.isMobileMenuOpen = false;
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = '';
+    }
   }
 
   get isKitchenAllowed(): boolean {

@@ -3,66 +3,41 @@
   <div class="page-top-header">
     <div class="header-text">
       <h1 class="page-title">
-        <i class="bi bi-whatsapp text-success me-2"></i> مركز إدارة وتسويق الواتساب
+        <i class="bi bi-whatsapp text-success me-2"></i> إعدادات وإشعارات الواتساب التشغيلية
       </h1>
       <p class="page-subtitle">
-        حملات تسويقية مجدولة، استيراد شيتات العملاء، رسائل متابعة الطلبات بعد التوصيل، وإدارة بوابة الربط
+        ربط البوابة بالواتساب، إشعار المدير فور ورود الطلبات الجديدة، وإرسال تنبيهات حالة وتتبع الطلبات للعملاء
       </p>
     </div>
 
     <div class="header-actions">
-      <button class="btn-action-primary" (click)="openCreateCampaignModal()">
-        <i class="bi bi-megaphone-fill"></i>
-        <span>إنشاء مهمة إرسال جديدة</span>
-      </button>
-
-      <button class="btn-action-accent" (click)="openImportModal()">
-        <i class="bi bi-file-earmark-excel-fill"></i>
-        <span>استيراد شيت عملاء</span>
-      </button>
-
-      <button class="btn-action-sync" (click)="syncWebCustomers()" [disabled]="isSyncingWebCustomers()" title="سحب جميع أرقام عملاء المتجر والطلبات لقاعدة بيانات الرسائل">
-        <i class="bi bi-arrow-repeat" [class.spin]="isSyncingWebCustomers()"></i>
-        <span>مزامنة عملاء الموقع والطلبات</span>
-      </button>
-
       <button class="btn-refresh" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
         <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
-        <span>تحديث</span>
+        <span>تحديث حالة الاتصال</span>
       </button>
     </div>
   </div>
 
   <!-- Navigation Tabs -->
   <div class="wa-nav-tabs">
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'campaigns'" (click)="setTab('campaigns')">
-      <i class="bi bi-send-check"></i>
-      <span>مهام وحملات الإرسال ({{ campaigns().length }})</span>
-    </button>
-
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'contacts'" (click)="setTab('contacts')">
-      <i class="bi bi-people-fill"></i>
-      <span>سجل العملاء والشيتات ({{ contactsStats().totalContacts }})</span>
-    </button>
-
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'post_delivery'" (click)="setTab('post_delivery')">
-      <i class="bi bi-clock-history"></i>
-      <span>رسائل ما بعد استلام الطلب</span>
-      @if (postDeliverySettings().isEnabled) {
-        <span class="mini-badge-active">مفعل</span>
-      }
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
+      <i class="bi bi-qr-code-scan"></i>
+      <span>إعدادات البوابة والإشعارات التشغيلية</span>
+      <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
     </button>
 
     <button class="nav-tab-btn" [class.active]="activeTab() === 'accounts'" (click)="setTab('accounts')">
       <i class="bi bi-phone-fill"></i>
-      <span>أرقام وجلسات الواتساب ({{ accounts().length }})</span>
+      <span>الأرقام والجلسات المتصلة ({{ accounts().length }})</span>
       <span class="status-indicator-dot" [class.connected]="hasConnectedAccount()"></span>
     </button>
 
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
-      <i class="bi bi-qr-code-scan"></i>
-      <span>إعدادات البوابة</span>
-      <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
+    <button class="nav-tab-btn" [class.active]="activeTab() === 'post_delivery'" (click)="setTab('post_delivery')">
+      <i class="bi bi-clock-history"></i>
+      <span>رسائل ما بعد الاستلام والتقييم (24 ساعة)</span>
+      @if (postDeliverySettings().isEnabled) {
+        <span class="status-indicator-dot connected" title="الميزة مفعلة"></span>
+      }
     </button>
   </div>
 
@@ -496,8 +471,8 @@
               <button type="button" class="tag-pill" (click)="insertPostDeliveryPlaceholder('{رقم_الطلب}')">
                 + &#123;رقم_الطلب&#125;
               </button>
-              <button type="button" class="tag-pill" (click)="insertPostDeliveryPlaceholder('{اسم_المطعم}')">
-                + &#123;اسم_المطعم&#125;
+              <button type="button" class="tag-pill" (click)="insertPostDeliveryPlaceholder('{اسم_المؤسسة}')">
+                + &#123;اسم_المؤسسة&#125;
               </button>
             </div>
           </div>
@@ -532,7 +507,7 @@
                 <i class="bi bi-shop"></i>
               </div>
               <div class="wa-contact-info">
-                <strong>أسماك جندوفلي 🐟🌊</strong>
+                <strong>خدمة عملاء المتجر 🛒</strong>
                 <span>حساب أعمال موثق</span>
               </div>
             </div>
@@ -545,7 +520,7 @@
                       .replace('{اسم_العميل}', 'أحمد محمد')
                       .replace('{الاسم}', 'أحمد محمد')
                       .replace('{رقم_الطلب}', 'ORD-8942')
-                      .replace('{اسم_المطعم}', 'أسماك جندوفلي')
+                      .replace('{اسم_المؤسسة}', 'شرق الوادي')
                   }}
                 </p>
                 <span class="bubble-time">
@@ -571,7 +546,7 @@
             <i class="bi bi-phone-fill me-2 text-success"></i> إدارة أرقام وجلسات الواتساب
           </h3>
           <p class="text-muted m-0 small">
-            اربط أكثر من رقم واتساب للمطعم، حدد رقم الإشعارات وتأكيدات الطلبات الافتراضي، واختر رقم الإرسال المفضل لكل حملة تسويقية.
+            اربط أكثر من رقم واتساب للمؤسسة، حدد رقم الإشعارات وتأكيدات الطلبات الافتراضي، واختر رقم الإرسال المفضل لكل حملة تسويقية.
           </p>
         </div>
         <div class="section-actions">
@@ -596,7 +571,7 @@
         <div class="empty-state-box glass-panel">
           <i class="bi bi-phone text-muted"></i>
           <h4>لا توجد أرقام واتساب مسجلة حالياً</h4>
-          <p>اضغط على زر "ربط رقم جديد" لبدء تشغيل وربط أول رقم واتساب للمطعم.</p>
+          <p>اضغط على زر "ربط رقم جديد" لبدء تشغيل وربط أول رقم واتساب للمؤسسة.</p>
           <button class="btn-action-primary mt-3" (click)="openAddAccountModal()">
             <i class="bi bi-plus-lg"></i>
             <span>ربط رقم جديد الآن</span>
@@ -696,11 +671,9 @@
                   </button>
                 }
 
-                @if (acc.sessionId !== 'default') {
-                  <button class="btn-account-delete text-danger" (click)="deleteAccount(acc)" title="حذف هذا الحساب نهائياً">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                }
+                <button class="btn-account-delete text-danger" (click)="deleteAccount(acc)" title="حذف هذا الحساب نهائياً">
+                  <i class="bi bi-trash"></i>
+                </button>
               </div>
             </div>
           }
@@ -856,7 +829,45 @@
 
           <!-- Notification Triggers Toggles -->
           <div class="triggers-section mb-4">
-            <h5 class="triggers-title">إشعارات الطلبات التشغيلية الفورية:</h5>
+            <h5 class="triggers-title mb-3">إشعارات الطلبات التشغيلية الفورية:</h5>
+
+            <!-- Admin / Cashier New Order WhatsApp Notification -->
+            <div class="cashier-notification-box mb-3 p-3 rounded border" style="background: rgba(var(--primary-rgb, 18, 38, 63), 0.04); border-color: rgba(var(--primary-rgb, 18, 38, 63), 0.25) !important;">
+              <label class="trigger-checkbox font-bold mb-2 cursor-pointer d-flex align-items-center gap-2">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().notifyCashierOnNewOrder" />
+                <span class="text-primary font-bold">🔔 تنبيه الإدارة / المسؤول على واتساب فور ورود أي طلب جديد</span>
+              </label>
+
+              @if (gatewaySettings().notifyCashierOnNewOrder) {
+                <div class="row g-2 mt-2">
+                  <div class="col-12 col-md-8">
+                    <label class="small text-muted mb-1 d-block font-bold">رقم واتساب الإدارة / المسؤول لاستلام تفاصيل الطلب:</label>
+                    <input
+                      type="tel"
+                      class="form-control-custom"
+                      placeholder="010XXXXXXXX"
+                      [(ngModel)]="gatewaySettings().cashierWhatsAppNumber"
+                      dir="ltr"
+                    />
+                    <small class="text-muted d-block mt-1">يصل هذا الرقم إشعار فوري بكافة تفاصيل الطلب، اسم العميل، الهاتف، العنوان، والأصناف المطلوبة.</small>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="small text-muted mb-1 d-block font-bold">مهلة إرسال التنبيه (ثواني):</label>
+                    <input
+                      type="number"
+                      class="form-control-custom"
+                      min="1"
+                      max="60"
+                      [(ngModel)]="gatewaySettings().cashierNotificationDelaySeconds"
+                      dir="ltr"
+                    />
+                    <small class="text-muted d-block mt-1">تأخير بسيط لتجنب تضارب الإرسال المتزامن مع إشعار العميل.</small>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <h6 class="small text-muted font-bold mt-3 mb-2">إشعارات تتبع الطلبات المرسلة للعملاء:</h6>
 
             <div class="triggers-list">
               <label class="trigger-checkbox">
@@ -866,27 +877,27 @@
 
               <label class="trigger-checkbox">
                 <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderConfirmed" />
-                <span>إشعار تأكيد الطلب من الكاشير</span>
-              </label>
-
-              <label class="trigger-checkbox">
-                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnKitchenWeighed" />
-                <span>إشعار الوزن الفعلي والسعر النهائي بعد المطبخ</span>
+                <span>إشعار تأكيد وقبول الطلب</span>
               </label>
 
               <label class="trigger-checkbox">
                 <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOutForDelivery" />
-                <span>إشعار خروج الطلب للتوصيل مع الطيار</span>
+                <span>إشعار خروج الطلب للتوصيل مع المندوب</span>
               </label>
 
               <label class="trigger-checkbox">
                 <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCompleted" />
-                <span>إشعار تسليم واكتمال الطلب</span>
+                <span>إشعار تسليم واكتمال الطلب بنجاح</span>
+              </label>
+
+              <label class="trigger-checkbox">
+                <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOrderCancelled" />
+                <span>إشعار إلغاء الطلب</span>
               </label>
             </div>
 
             <button class="btn-save-triggers mt-3" (click)="saveNotificationTriggers()" [disabled]="isSavingSettings()">
-              حفظ اختيارات الإشعارات
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ إعدادات إشعار المدير والعملاء
             </button>
           </div>
 
@@ -962,7 +973,7 @@
               type="text"
               class="form-control-custom"
               [(ngModel)]="newCampaign.title"
-              placeholder="مثلاً: عرض سمك القاروص والجمبري للويكند"
+              placeholder="مثلاً: عروض نهاية الأسبوع وتخفيضات البقالة"
             />
           </div>
 
@@ -1219,7 +1230,7 @@
             <div class="dropzone-content">
               <i class="bi bi-cloud-arrow-up text-primary"></i>
               <h5>اضغط هنا لاختيار الشيت (مثل Persons.xls أو ملفات xlsx أو csv)</h5>
-              <p>يقوم النظام تلقائياً باستخراج عمود الاسم ورقم الهاتف وتطهير الأرقام المصرية</p>
+              <p>يقوم النظام تلقائياً باستخراج عمود الاسم ورقم الهاتف وتطهير الأرقام السعودية (05xxxxxxx)</p>
               @if (selectedFileName()) {
                 <span class="selected-file-badge">
                   <i class="bi bi-file-earmark-check"></i> {{ selectedFileName() }}
@@ -1408,7 +1419,7 @@
 
         <div class="modal-body-custom">
           <p class="section-desc mb-3">
-            أضف رقماً جديداً للمطعم لإرسال الحملات الإعلانية دون التأثير على رقم الطلبات والإشعارات الأساسي.
+            أضف رقماً جديداً للمؤسسة لإرسال الحملات الإعلانية دون التأثير على رقم الطلبات والإشعارات الأساسي.
           </p>
 
           <div class="form-group mb-3">
@@ -1417,7 +1428,7 @@
               type="text"
               class="form-control-custom"
               [(ngModel)]="newAccountDisplayName"
-              placeholder="مثال: رقم عروض جندوفلي 1، أو رقم خدمة العملاء"
+              placeholder="مثال: رقم المبيعات، أو رقم خدمة العملاء"
             />
           </div>
 

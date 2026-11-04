@@ -1,8 +1,13 @@
 <div class="account-page container">
   @if (!authService.currentCustomer()) {
     <!-- Guest Must Authenticate with Mobile Phone -->
-    <div class="guest-auth-card glass-panel animate-fade-in">
+    <div class="guest-auth-card animate-fade-in">
       <div class="auth-header text-center">
+        <div class="auth-pill-tag">
+          <i class="bi bi-shield-check text-success"></i>
+          <span>بوابة الدخول السريع والآمن</span>
+        </div>
+
         <div class="auth-icon-badge">
           @if (!isOtpSent()) {
             <i class="bi bi-shield-lock-fill"></i>
@@ -10,9 +15,16 @@
             <i class="bi bi-chat-square-dots-fill"></i>
           }
         </div>
+
         @if (!isOtpSent()) {
           <h1 class="page-title">تسجيل الدخول إلى حسابك</h1>
-          <p class="page-subtitle">سجل برقم هاتفك لمتابعة طلباتك الحالية، تكرار طلباتك المفضلة، وحفظ عناوينك الدائمة</p>
+          <p class="page-subtitle">سجل برقم هاتفك لمتابعة طلباتك الحالية، تكرار مشترياتك المفضلة، وحفظ عناوينك الدائمة</p>
+
+          <div class="auth-perks-row">
+            <span class="auth-perk-item"><i class="bi bi-box-seam text-primary"></i> تتبع فوري</span>
+            <span class="auth-perk-item"><i class="bi bi-lightning-charge-fill text-warning"></i> بدون كلمة سر</span>
+            <span class="auth-perk-item"><i class="bi bi-whatsapp text-success"></i> كود واتساب</span>
+          </div>
         } @else {
           <h1 class="page-title">رمز التحقق السريع</h1>
           <p class="page-subtitle">أدخل الرمز المكون من 6 أرقام لتأكيد رقم هاتفك والبدء فوراً</p>
@@ -22,35 +34,38 @@
       <div class="auth-box-body">
         @if (!isOtpSent()) {
           <div class="auth-form">
-            <div class="form-group mb-3">
-              <label for="pPhone" class="auth-input-label text-end d-block">
-                <i class="bi bi-phone me-1 text-primary"></i> رقم الهاتف المحمول:
+            <div class="form-group mb-4">
+              <label for="pPhone" class="auth-input-label text-end d-flex align-items-center justify-content-between mb-2">
+                <span>
+                  <i class="bi bi-phone-fill me-1 text-primary"></i> رقم الهاتف المحمول
+                </span>
+                <span class="required-badge">مطلوب</span>
               </label>
-              <div class="phone-input-wrapper" dir="ltr">
-                <span class="country-prefix">+20</span>
-                <input
-                  id="pPhone"
-                  type="tel"
-                  class="form-control phone-input"
-                  placeholder="01012345678"
-                  [(ngModel)]="phoneNumber"
-                  (keyup.enter)="sendOtp()"
-                  autofocus
-                />
+
+              <app-phone-input
+                inputId="pPhone"
+                [(ngModel)]="phoneNumber"
+                (enterPressed)="sendOtp()"
+                [autoFocus]="true"
+              ></app-phone-input>
+
+              <div class="auth-input-hint-box mt-2">
+                <i class="bi bi-whatsapp text-success fs-6"></i>
+                <span>سيصلك كود التحقق في رسالة واتساب فوراً لتأكيد الدخول</span>
               </div>
-              <small class="auth-input-hint d-block mt-2 text-end">
-                <i class="bi bi-shield-check text-success me-1"></i>سيصلك كود التحقق عبر واتساب 
-              </small>
             </div>
 
             <button class="btn-auth-submit" (click)="sendOtp()" [disabled]="isLoading() || !phoneNumber.trim()">
               @if (isLoading()) { 
                 <span class="d-flex align-items-center justify-content-center gap-2">
                   <span class="spinner-border spinner-border-sm" role="status"></span>
-                  جاري إرسال الرمز...
+                  جاري إرسال رمز التحقق...
                 </span> 
               } @else { 
-                <span>إرسال كود التحقق</span> 
+                <span class="d-flex align-items-center justify-content-center gap-2">
+                  <span>إرسال كود التحقق</span>
+                  <i class="bi bi-arrow-left"></i>
+                </span> 
               }
             </button>
           </div>
@@ -176,7 +191,7 @@
         <div class="user-info d-flex align-items-center gap-3">
           <div class="user-avatar-circle"></div>
           <div>
-            <h2 class="user-name mb-1">{{ authService.currentCustomer()!.fullName || 'عميل جندوفلي' }}</h2>
+            <h2 class="user-name mb-1">{{ authService.currentCustomer()!.fullName || 'عميل شرق الوادي' }}</h2>
             <span class="phone-badge" dir="ltr"> {{ authService.currentCustomer()!.usernameOrPhone }}</span>
           </div>
         </div>
@@ -249,7 +264,7 @@
                   <div class="card-bottom-row">
                     <div class="price-box">
                       <span class="price-label">الإجمالي:</span>
-                      <strong class="total-amount">{{ ord.finalTotal || ord.estimatedTotal }} ج.م</strong>
+                      <strong class="total-amount">{{ ord.finalTotal || ord.estimatedTotal }} {{ currencySymbol }}</strong>
                     </div>
 
                     <div class="card-actions-group">
@@ -271,9 +286,9 @@
                 <i class="bi bi-bag-x"></i>
               </div>
               <h4 class="empty-title">لا توجد طلبات سابقة حتى الآن</h4>
-              <p class="empty-desc">استكشف منيو أسماك جندوفلي الطازجة واطلب وجبتك البحرية المفضلة الآن!</p>
+              <p class="empty-desc">استكشف كتالوج المنتجات والعروض المميزة واطلب احتياجاتك الآن!</p>
               <a routerLink="/menu" class="btn-menu-cta">
-                <span>تصفح المنيو واطلب الآن</span>
+                <span>تصفح المنتجات واطلب الآن</span>
                 <i class="bi bi-arrow-left"></i>
               </a>
             </div>
@@ -443,8 +458,8 @@
               </div>
               <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 2"></div>
               <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 2">
-                <div class="node-circle"><i class="bi bi-fire"></i></div>
-                <span class="node-label">المطبخ والوزن</span>
+                <div class="node-circle"><i class="bi bi-gear-wide-connected"></i></div>
+                <span class="node-label">التجهيز والعمليات</span>
               </div>
               <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 3"></div>
               <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 3">
@@ -464,7 +479,7 @@
             <i class="bi bi-geo-alt-fill text-danger fs-5 me-2"></i>
             <div>
               <span class="tile-label d-block text-muted small">عنوان التوصيل</span>
-              <strong class="tile-val">{{ selectedOrder()!.deliveryAddress || selectedOrder()!.deliveryZoneName || 'استلام من المطعم' }}</strong>
+              <strong class="tile-val">{{ selectedOrder()!.deliveryAddress || selectedOrder()!.deliveryZoneName || 'استلام من المستودع' }}</strong>
             </div>
           </div>
 
@@ -486,7 +501,7 @@
                       }
                     </div>
                   </div>
-                  <strong class="item-price">{{ line.finalLineTotal || line.estimatedLineTotal }} ج.م</strong>
+                  <strong class="item-price">{{ line.finalLineTotal || line.estimatedLineTotal }} {{ currencySymbol }}</strong>
                 </div>
               }
             </div>
@@ -496,17 +511,17 @@
           <div class="price-summary-box mb-2">
             <div class="summary-line">
               <span>إجمالي الأصناف:</span>
-              <span>{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} ج.م</span>
+              <span>{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} {{ currencySymbol }}</span>
             </div>
             @if (selectedOrder()!.deliveryFee > 0) {
               <div class="summary-line">
                 <span>رسوم التوصيل:</span>
-                <span>{{ selectedOrder()!.deliveryFee }} ج.م</span>
+                <span>{{ selectedOrder()!.deliveryFee }} {{ currencySymbol }}</span>
               </div>
             }
             <div class="summary-line total-line">
               <strong>المبلغ الإجمالي:</strong>
-              <strong class="total-number">{{ selectedOrder()!.finalTotal || selectedOrder()!.estimatedTotal }} ج.م</strong>
+              <strong class="total-number">{{ selectedOrder()!.finalTotal || selectedOrder()!.estimatedTotal }} {{ currencySymbol }}</strong>
             </div>
           </div>
         </div>

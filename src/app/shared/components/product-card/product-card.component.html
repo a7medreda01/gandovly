@@ -12,47 +12,41 @@
 
     <!-- Badges (Top Right) -->
     <div class="card-badges">
-      <span class="badge badge-fire"><i class="bi bi-fire"></i> عرض خاص</span>
+      @if (hasDiscount) {
+        <span class="badge badge-discount"><i class="bi bi-tag-fill"></i> خصم {{ discountPercent }}%</span>
+      }
     </div>
-
-    <!-- Favorite Circle Button (Top Left) -->
-    <button
-      type="button"
-      class="favorite-circle-btn"
-      [class.active]="isFavorite"
-      (click)="toggleFavorite($event)"
-      title="إضافة للمفضلة"
-      aria-label="إضافة للمفضلة"
-    >
-      <i class="bi" [class.bi-heart-fill]="isFavorite" [class.bi-heart]="!isFavorite"></i>
-    </button>
-
-    <!-- Quick plus action badge (Bottom Left) -->
-    <button
-      type="button"
-      class="quick-plus-btn"
-      (click)="$event.stopPropagation(); onSelect()"
-      title="تفاصيل واختيار"
-      aria-label="اختيار"
-    >
-      <i class="bi bi-plus-lg"></i>
-    </button>
   </div>
 
   <!-- Content Box -->
   <div class="card-body">
     <div class="title-row">
-      <h3 class="product-name" [title]="product.nameAr">{{ product.nameAr }}</h3>
+      <div class="brand-line">
+        @if (product.brand) {
+          <span class="product-brand-tag">{{ product.brand }}</span>
+        }
+      </div>
+      <h3 class="product-name" [title]="languageService.getLocalizedName(product)">{{ languageService.getLocalizedName(product) }}</h3>
     </div>
 
-    <!-- Pricing Row (Price on right, dark navy cart button on left in RTL) -->
+    <!-- Pricing Row (Price on right, dark cart button on left in RTL) -->
     <div class="pricing-row">
       <div class="price-box">
-        <span class="amount">{{ displayPrice }}</span>
-        <span class="currency">ج.م</span>
-        @if (isWeightBased) {
-          <span class="unit-label">/ كجم</span>
-        }
+        <div class="current-price">
+          <span class="amount">{{ displayPrice | number:'1.2-2' }}</span>
+          <span class="currency">{{ currencySymbol }}</span>
+          @if (isWeightBased) {
+            <span class="unit-label">/ كجم</span>
+          }
+        </div>
+        <div class="old-price-line">
+          @if (hasDiscount && product.originalPrice) {
+            <div class="old-price">
+              <span class="strike">{{ product.originalPrice | number:'1.2-2' }}</span>
+              <span class="old-curr">{{ currencySymbol }}</span>
+            </div>
+          }
+        </div>
       </div>
 
       <button

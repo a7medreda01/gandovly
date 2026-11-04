@@ -84,8 +84,8 @@
                   <span class="text-muted small">- رئيسية -</span>
                 }
               </td>
-              <td><strong class="fee-text">{{ zone.deliveryFee }} ج.م</strong></td>
-              <td>{{ zone.minimumOrder }} ج.م</td>
+              <td><strong class="fee-text">{{ zone.deliveryFee }} {{ currencySymbol }}</strong></td>
+              <td>{{ zone.minimumOrder }} {{ currencySymbol }}</td>
               <td>{{ zone.estimatedDeliveryTimeMinutes }} دقيقة</td>
               <td class="keywords-cell">
                 <span class="kw-text" [title]="zone.neighborhoodKeywords">{{ zone.neighborhoodKeywords }}</span>
@@ -137,11 +137,11 @@
           <div class="zone-metrics-grid">
             <div class="metric-item">
               <span class="m-label">التوصيل</span>
-              <span class="m-val highlight">{{ zone.deliveryFee }} ج.م</span>
+              <span class="m-val highlight">{{ zone.deliveryFee }} {{ currencySymbol }}</span>
             </div>
             <div class="metric-item">
               <span class="m-label">الحد الأدنى</span>
-              <span class="m-val">{{ zone.minimumOrder }} ج.م</span>
+              <span class="m-val">{{ zone.minimumOrder }} {{ currencySymbol }}</span>
             </div>
             <div class="metric-item">
               <span class="m-label">الوقت التقديري</span>
@@ -226,14 +226,14 @@
                 <label>رسوم التوصيل *</label>
                 <div class="input-with-suffix">
                   <input type="number" class="form-control text-center" [(ngModel)]="zoneForm.deliveryFee" />
-                  <span class="suffix-text">ج.م</span>
+                  <span class="suffix-text">{{ currencySymbol }}</span>
                 </div>
               </div>
               <div class="form-group">
                 <label>الحد الأدنى للطلب *</label>
                 <div class="input-with-suffix">
                   <input type="number" class="form-control text-center" [(ngModel)]="zoneForm.minimumOrder" />
-                  <span class="suffix-text">ج.م</span>
+                  <span class="suffix-text">{{ currencySymbol }}</span>
                 </div>
               </div>
               <div class="form-group">

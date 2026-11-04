@@ -19,7 +19,7 @@ export class StatusTimelineComponent {
       {
         key: 'Placed',
         label: 'تم الاستلام',
-        desc: 'تم تسجيل طلبك بنجاح وجاري إرساله للمطبخ',
+        desc: 'تم تسجيل طلبك بنجاح وجاري إرساله للمستودع والعمليات',
         icon: 'bi-receipt-cutoff'
       },
       {
@@ -30,20 +30,20 @@ export class StatusTimelineComponent {
       },
       {
         key: 'Preparing',
-        label: 'التحضير والطهي',
-        desc: 'السمك طازة في التتبيل والطهي بالفرن أو الشواية',
-        icon: 'bi-fire'
+        label: 'التجهيز والتغليف',
+        desc: 'جاري تجهيز وتعبئة المنتجات وفحص الجودة بعناية',
+        icon: 'bi-box-seam'
       },
       {
         key: isDelivery ? 'OutForDelivery' : 'ReadyForPickup',
         label: isDelivery ? 'خرج للتوصيل' : 'جاهز للاستلام',
-        desc: isDelivery ? 'الطيار في الطريق إليك ومعه الطلب ساخن' : 'طلبك جاهز تماماً للاستلام من الفرع',
-        icon: isDelivery ? 'bi-bicycle' : 'bi-bag-check-fill'
+        desc: isDelivery ? 'مندوب التوصيل في الطريق إلى عنوانك' : 'طلبك جاهز تماماً للاستلام من الفرع',
+        icon: isDelivery ? 'bi-truck' : 'bi-shop'
       },
       {
         key: 'Completed',
-        label: 'تم التسليم',
-        desc: 'بالهناء والشفاء! نتشرف دائماً بخدمتكم',
+        label: 'تم التسليم بنجاح',
+        desc: 'نسعد دائماً بخدمتكم ونتمنى لكم تجربة تسوق رائعة!',
         icon: 'bi-check2-all'
       }
     ];

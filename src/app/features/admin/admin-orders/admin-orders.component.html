@@ -37,7 +37,7 @@
           <option value="">جميع الحالات ({{ totalCount() }})</option>
           <option value="Placed">تم استلام الطلب</option>
           <option value="Confirmed">تم التأكيد</option>
-          <option value="Preparing">قيد التحضير والطهي</option>
+          <option value="Preparing">قيد التجهيز والتوريد</option>
           <option value="ReadyForPickup">جاهز للاستلام</option>
           <option value="OutForDelivery">خرج للتوصيل</option>
           <option value="Completed">تم التسليم بنجاح</option>
@@ -139,7 +139,7 @@
               </span>
             </div>
             <div class="footer-actions">
-              <span class="price-val">{{ ord.finalTotal || ord.estimatedTotal }}<small> ج.م</small></span>
+              <span class="price-val">{{ ord.finalTotal || ord.estimatedTotal }}<small> {{ currencySymbol }}</small></span>
               <button class="btn-open" (click)="$event.stopPropagation(); viewOrder(ord)">
                 <i class="bi bi-chevron-left"></i>
               </button>
@@ -340,20 +340,20 @@
 
                     <div class="line-price-box">
                       <div class="price-calc-container">
-                        <strong class="item-price-prominent">{{ (isLineByWeight(l) ? priceInputs[l.id] : null) || l.finalLineTotal || l.estimatedLineTotal }} <small>ج.م</small></strong>
+                        <strong class="item-price-prominent">{{ (isLineByWeight(l) ? priceInputs[l.id] : null) || l.finalLineTotal || l.estimatedLineTotal }} <small>{{ currencySymbol }}</small></strong>
                         @if (!isLineByWeight(l)) {
                           @if (l.quantityUnits > 1) {
                             <span class="calc-breakdown-pill" title="تفصيل السعر: العدد × سعر القطعة">
-                              <i class="bi bi-x-lg"></i> {{ l.quantityUnits }} × {{ getLineUnitPrice(l) }} ج.م
+                              <i class="bi bi-x-lg"></i> {{ l.quantityUnits }} × {{ getLineUnitPrice(l) }} {{ currencySymbol }}
                             </span>
                           } @else {
                             <span class="calc-breakdown-pill single" title="سعر القطعة">
-                              <i class="bi bi-tag-fill"></i> سعر القطعة: {{ getLineUnitPrice(l) }} ج.م
+                              <i class="bi bi-tag-fill"></i> سعر القطعة: {{ getLineUnitPrice(l) }} {{ currencySymbol }}
                             </span>
                           }
                         } @else {
                           <span class="calc-breakdown-pill weight" title="سعر الكيلو">
-                            <i class="bi bi-speedometer2"></i> {{ l.unitPriceSnapshot }} ج.م / كجم
+                            <i class="bi bi-speedometer2"></i> {{ l.unitPriceSnapshot }} {{ currencySymbol }} / كجم
                           </span>
                         }
                       </div>
@@ -364,7 +364,7 @@
                     <div class="line-modifiers-row mt-2 d-flex align-items-center gap-1 flex-wrap">
                       <span class="modifier-lbl text-muted small"><i class="bi bi-plus-circle me-1"></i> الإضافات:</span>
                       @for (mod of l.modifiers; track mod.id) {
-                        <span class="modifier-pill-tag">{{ mod.modifierOptionNameAr }} (+{{ mod.priceSnapshot }} ج.م)</span>
+                        <span class="modifier-pill-tag">{{ mod.modifierOptionNameAr }} (+{{ mod.priceSnapshot }} {{ currencySymbol }})</span>
                       }
                     </div>
                   }
@@ -380,7 +380,7 @@
                   @if (isLineByWeight(l)) {
                     <div class="dual-input-row mt-2">
                       <div class="input-col col-qty">
-                        <label class="col-lbl">العدد (سمكات/قطع):</label>
+                        <label class="col-lbl">العدد (قطع / وحدات):</label>
                         <div class="custom-input-box">
                           <input
                             type="number"
@@ -391,7 +391,7 @@
                             [ngModel]="qtyInputs[l.id]"
                             (ngModelChange)="onQtyChanged(l, $event)"
                           />
-                          <span class="unit">سمكة</span>
+                          <span class="unit">قطعة</span>
                         </div>
                       </div>
 
@@ -416,18 +416,18 @@
                       </div>
 
                       <div class="input-col">
-                        <label class="col-lbl">إجمالي سعر الصنف (ج.م):</label>
+                        <label class="col-lbl">إجمالي سعر الصنف ({{ currencySymbol }}):</label>
                         <div class="custom-input-box">
                           <input
                             type="number"
                             class="form-control"
                             step="1"
                             min="0"
-                            placeholder="السعر بالجنيه"
+                            placeholder="السعر"
                             [ngModel]="priceInputs[l.id]"
                             (ngModelChange)="onPriceChanged(l, $event)"
                           />
-                          <span class="unit">ج.م</span>
+                          <span class="unit">{{ currencySymbol }}</span>
                         </div>
                       </div>
                     </div>
@@ -455,7 +455,7 @@
           <div class="order-summary-box mb-3">
             <div class="summary-line flex-between">
               <span class="text-muted">المجموع الفرعي للأصناف:</span>
-              <strong class="text-dark">{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} ج.م</strong>
+              <strong class="text-dark">{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} {{ currencySymbol }}</strong>
             </div>
 
             @if (selectedOrder()!.orderType === 'Delivery') {
@@ -464,7 +464,7 @@
                   <i class="bi bi-scooter text-primary me-1"></i>
                   رسوم التوصيل ({{ selectedOrder()!.deliveryZoneName || 'دليفري' }}):
                 </span>
-                <strong class="text-dark">{{ selectedOrder()!.deliveryFee || 0 }} ج.م</strong>
+                <strong class="text-dark">{{ selectedOrder()!.deliveryFee || 0 }} {{ currencySymbol }}</strong>
               </div>
             }
 
@@ -474,26 +474,26 @@
                   <i class="bi bi-tag-fill me-1"></i>
                   الخصم المطبق ({{ selectedOrder()!.discountDescription || 'خصم' }}):
                 </span>
-                <strong>-{{ selectedOrder()!.discountAmount }} ج.م</strong>
+                <strong>-{{ selectedOrder()!.discountAmount }} {{ currencySymbol }}</strong>
               </div>
             }
 
             <div class="summary-line flex-between" style="border-top: 1px dashed #cbd5e1; padding-top: 0.4rem; margin-top: 0.2rem;">
               <span class="text-muted">الإجمالي التقديري للطلب:</span>
-              <strong>{{ selectedOrder()!.estimatedTotal }} ج.م</strong>
+              <strong>{{ selectedOrder()!.estimatedTotal }} {{ currencySymbol }}</strong>
             </div>
 
             @if (hasWeightItems(selectedOrder()!)) {
               <div class="summary-line flex-between text-primary">
                 <span>الإجمالي بعد تعديل الأوزان (شامل التوصيل):</span>
-                <strong>{{ getCalculatedOrderTotal(selectedOrder()!) }} ج.م</strong>
+                <strong>{{ getCalculatedOrderTotal(selectedOrder()!) }} {{ currencySymbol }}</strong>
               </div>
             }
 
             @if (selectedOrder()!.finalTotal) {
               <div class="summary-line flex-between final-line">
                 <span class="final-lbl">الإجمالي النهائي المعتمد:</span>
-                <strong class="final-val">{{ selectedOrder()!.finalTotal }} ج.م</strong>
+                <strong class="final-val">{{ selectedOrder()!.finalTotal }} {{ currencySymbol }}</strong>
               </div>
             }
           </div>
@@ -513,7 +513,7 @@
             <span class="status-title-lbl">تحديث مرحلة الطلب:</span>
             <div class="status-action-btns">
               <button class="btn-st st-confirmed" (click)="updateOrderStatus(selectedOrder()!.id, 'Confirmed')">تأكيد الطلب</button>
-              <button class="btn-st st-preparing" (click)="updateOrderStatus(selectedOrder()!.id, 'Preparing')">قيد الطهي</button>
+              <button class="btn-st st-preparing" (click)="updateOrderStatus(selectedOrder()!.id, 'Preparing')">قيد التجهيز</button>
               <button class="btn-st st-ready" (click)="updateOrderStatus(selectedOrder()!.id, 'ReadyForPickup')">جاهز للاستلام</button>
               <button class="btn-st st-delivery" (click)="updateOrderStatus(selectedOrder()!.id, 'OutForDelivery')">خرج للتوصيل</button>
               <button class="btn-st st-completed" (click)="updateOrderStatus(selectedOrder()!.id, 'Completed')">تم التسليم</button>

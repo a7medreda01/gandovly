@@ -3,11 +3,11 @@
   <div class="kitchen-header glass-panel">
     <div class="header-info">
       <div class="header-icon-box">
-        <i class="bi bi-fire text-danger fs-2"></i>
+        <i class="bi bi-box-seam text-primary fs-2"></i>
       </div>
       <div class="header-text">
-        <h1 class="page-title">شاشة المطبخ وإعداد الوجبات 👨‍🍳</h1>
-        <p class="page-subtitle">متابعة تحضير الطلبات، تحديث الأوزان الفعلية للأسماك، ونقل المراحل</p>
+        <h1 class="page-title">شاشة التجهيز والعمليات 📦</h1>
+        <p class="page-subtitle">متابعة تجهيز وتعبئة الطلبات ونقل مراحل التوصيل والتسليم للعملاء</p>
       </div>
     </div>
     <div class="header-actions">
@@ -26,8 +26,8 @@
   @if (isLoading()) {
     <app-loading-state
       mode="kitchen"
-      title="جاري تحديث شاشة المطبخ والطلبات النشطة..."
-      subtitle="يتم الآن جلب تفاصيل التجهيز، الأوزان، والملاحظات الخاصة"
+      title="جاري تحديث شاشة العمليات والتجهيز والطلبات النشطة..."
+      subtitle="يتم الآن جلب تفاصيل التجهيز، الكميات، والملاحظات الخاصة"
       [count]="4"
     ></app-loading-state>
   } @else if (orders().length === 0) {
@@ -35,8 +35,8 @@
       <div class="empty-icon-ring">
         <i class="bi bi-check2-all"></i>
       </div>
-      <h3 class="empty-title">المطبخ جاهز بالكامل! 👨‍🍳</h3>
-      <p class="empty-desc">لا توجد طلبات معلقة أو قيد التحضير حالياً. جميع الطلبات تم تجهيزها بنجاح أو بانتظار طلبات واردة جديدة.</p>
+      <h3 class="empty-title">المستودع جاهز بالكامل! 🔧</h3>
+      <p class="empty-desc">لا توجد طلبات معلقة أو قيد التجهيز حالياً. جميع الطلبات تم تجهيزها بنجاح أو بانتظار طلبات واردة جديدة.</p>
       <button class="btn-check-new" (click)="loadOrders()" [disabled]="isLoading()" type="button">
         <i class="bi bi-arrow-clockwise me-1" [class.spin]="isLoading()"></i>
         <span>التحقق من طلبات جديدة</span>
@@ -109,7 +109,7 @@
               </span>
             </div>
             <div class="footer-actions">
-              <span class="price-val">{{ ord.finalTotal || ord.estimatedTotal }}<small> ج.م</small></span>
+              <span class="price-val">{{ ord.finalTotal || ord.estimatedTotal }}<small> {{ currencySymbol }}</small></span>
               <button class="btn-open-modal" (click)="$event.stopPropagation(); openOrderModal(ord)">
                 <i class="bi bi-chevron-left"></i>
               </button>
@@ -211,20 +211,20 @@
 
                     <div class="line-price-box">
                       <div class="price-calc-container">
-                        <strong class="item-price-prominent">{{ (isLineByWeight(line) ? priceInputs[line.id] : null) || line.finalLineTotal || line.estimatedLineTotal }} <small>ج.م</small></strong>
+                        <strong class="item-price-prominent">{{ (isLineByWeight(line) ? priceInputs[line.id] : null) || line.finalLineTotal || line.estimatedLineTotal }} <small>{{ currencySymbol }}</small></strong>
                         @if (!isLineByWeight(line)) {
                           @if (line.quantityUnits > 1) {
                             <span class="calc-breakdown-pill" title="تفصيل السعر: العدد × سعر القطعة">
-                              <i class="bi bi-x-lg"></i> {{ line.quantityUnits }} × {{ getLineUnitPrice(line) }} ج.م
+                              <i class="bi bi-x-lg"></i> {{ line.quantityUnits }} × {{ getLineUnitPrice(line) }} {{ currencySymbol }}
                             </span>
                           } @else {
                             <span class="calc-breakdown-pill single" title="سعر القطعة">
-                              <i class="bi bi-tag-fill"></i> سعر القطعة: {{ getLineUnitPrice(line) }} ج.م
+                              <i class="bi bi-tag-fill"></i> سعر القطعة: {{ getLineUnitPrice(line) }} {{ currencySymbol }}
                             </span>
                           }
                         } @else {
                           <span class="calc-breakdown-pill weight" title="سعر الكيلو">
-                            <i class="bi bi-speedometer2"></i> {{ line.unitPriceSnapshot }} ج.م / كجم
+                            <i class="bi bi-speedometer2"></i> {{ line.unitPriceSnapshot }} {{ currencySymbol }} / كجم
                           </span>
                         }
                       </div>
@@ -235,7 +235,7 @@
                     <div class="line-modifiers-row mt-2 d-flex align-items-center gap-1 flex-wrap">
                       <span class="modifier-lbl text-muted small"><i class="bi bi-plus-circle me-1"></i> الإضافات:</span>
                       @for (mod of line.modifiers; track mod.id) {
-                        <span class="modifier-pill-tag">{{ mod.modifierOptionNameAr }} (+{{ mod.priceSnapshot }} ج.م)</span>
+                        <span class="modifier-pill-tag">{{ mod.modifierOptionNameAr }} (+{{ mod.priceSnapshot }} {{ currencySymbol }})</span>
                       }
                     </div>
                   }
@@ -251,7 +251,7 @@
                   @if (isLineByWeight(line)) {
                     <div class="dual-input-container mt-2">
                       <div class="input-card qty-card">
-                        <label class="input-lbl"><i class="bi bi-123 me-1"></i> العدد (سمكات/قطع):</label>
+                        <label class="input-lbl"><i class="bi bi-123 me-1"></i> العدد (قطع / وحدات):</label>
                         <div class="input-group-custom">
                           <input
                             type="number"
@@ -262,7 +262,7 @@
                             [ngModel]="qtyInputs[line.id]"
                             (ngModelChange)="onQtyChanged(line, $event)"
                           />
-                          <span class="addon">سمكة</span>
+                          <span class="addon">قطعة</span>
                         </div>
                       </div>
 
@@ -287,18 +287,18 @@
                       </div>
 
                       <div class="input-card price-card">
-                        <label class="input-lbl"><i class="bi bi-cash-coin me-1"></i> إجمالي سعر الصنف (ج.م):</label>
+                        <label class="input-lbl"><i class="bi bi-cash-coin me-1"></i> إجمالي سعر الصنف ({{ currencySymbol }}):</label>
                         <div class="input-group-custom">
                           <input
                             type="number"
                             class="form-control"
                             step="1"
                             min="0"
-                            placeholder="السعر بالجنيه"
+                            placeholder="السعر"
                             [ngModel]="priceInputs[line.id]"
                             (ngModelChange)="onPriceChanged(line, $event)"
                           />
-                          <span class="addon">ج.م</span>
+                          <span class="addon">{{ currencySymbol }}</span>
                         </div>
                       </div>
                     </div>
@@ -313,20 +313,20 @@
             <div class="weight-save-box flex-between flex-wrap gap-2 p-3 mb-3">
               <div>
                 <span class="subtotal-lbl">المجموع المحتسب للأصناف:</span>
-                <strong class="subtotal-val ms-2">{{ getCalculatedOrderSubtotal(selectedOrder()!) }} ج.م</strong>
+                <strong class="subtotal-val ms-2">{{ getCalculatedOrderSubtotal(selectedOrder()!) }} {{ currencySymbol }}</strong>
                 <small class="text-muted d-block">(يتم تحديث الفاتورة وإرسال الإشعار للعميل بالوزن والعدد الفعلي)</small>
               </div>
 
               <button class="btn-save-weights" (click)="saveActualWeights(selectedOrder()!)">
                 <i class="bi bi-floppy2-fill me-1"></i>
-                <span>حفظ وتثبيت الأوزان والعدد</span>
+                <span>حفظ وتثبيت الكميات والمواصفات</span>
               </button>
             </div>
           }
 
           <!-- Quick Stage Actions -->
           <div class="stage-actions-box">
-            <span class="actions-title"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> تغيير مرحلة التحضير بالمطبخ:</span>
+            <span class="actions-title"><i class="bi bi-lightning-charge-fill me-1 text-warning"></i> تغيير مرحلة التجهيز والعمليات:</span>
             <div class="stage-btns-row">
               @if (selectedOrder()!.status === 'Placed' || selectedOrder()!.status === 'AwaitingConfirmation') {
                 <button class="btn-stage btn-confirm" (click)="updateStatus(selectedOrder()!, 'Confirmed')">
@@ -336,18 +336,18 @@
 
               @if (selectedOrder()!.status === 'Confirmed') {
                 <button class="btn-stage btn-prep" (click)="updateStatus(selectedOrder()!, 'Preparing')">
-                  <i class="bi bi-fire me-1"></i> بدء الطهي والتجهيز
+                  <i class="bi bi-gear-wide-connected me-1"></i> بدء التجهيز والتجميع
                 </button>
               }
 
               @if (selectedOrder()!.status === 'Preparing') {
                 @if (selectedOrder()!.orderType === 'Delivery') {
                   <button class="btn-stage btn-delivery" (click)="updateStatus(selectedOrder()!, 'OutForDelivery')">
-                    <i class="bi bi-scooter me-1"></i> خرج للتوصيل مع الدليفري
+                    <i class="bi bi-truck me-1"></i> خرج للتوصيل مع المندوب
                   </button>
                 } @else {
                   <button class="btn-stage btn-pickup" (click)="updateStatus(selectedOrder()!, 'ReadyForPickup')">
-                    <i class="bi bi-bag-check-fill me-1"></i> جاهز لاستلام العميل
+                    <i class="bi bi-shop me-1"></i> جاهز للاستلام من الفرع
                   </button>
                 }
               }

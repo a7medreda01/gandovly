@@ -17,11 +17,12 @@ import {
 } from '../../core/models/models';
 
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { PhoneInputComponent } from '../../shared/components/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe],
+  imports: [CommonModule, FormsModule, ImageUrlPipe, PhoneInputComponent],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.scss'
 })
@@ -33,6 +34,10 @@ export class CheckoutComponent implements OnInit {
   private readonly toast = inject(NotificationService);
   private readonly router = inject(Router);
 
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
+
   // Form Fields
   customerName: string = '';
   customerPhone: string = '';
@@ -41,9 +46,22 @@ export class CheckoutComponent implements OnInit {
   notes: string = '';
 
   // Address
-  city: string = 'القاهرة';
+  city: string = 'الرياض';
   district: string = '';
   streetAddress: string = '';
+
+  // Payment & Clipboard State
+  copiedField: string | null = null;
+  copyToClipboard(text: string, field: string) {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(text);
+    }
+    this.copiedField = field;
+    this.toast.success('تم نسخ الرقم بنجاح 📋');
+    setTimeout(() => {
+      if (this.copiedField === field) this.copiedField = null;
+    }, 2500);
+  }
 
   // Saved Customer Addresses State
   savedAddresses = signal<CustomerAddress[]>([]);
@@ -143,7 +161,7 @@ export class CheckoutComponent implements OnInit {
     this.isCustomAddress.set(false);
     this.streetAddress = addr.streetAddress;
     this.district = addr.district;
-    this.city = addr.city || 'القاهرة';
+    this.city = addr.city || 'الرياض';
 
     if (addr.deliveryZoneId) {
       this.selectedZoneId = addr.deliveryZoneId;
@@ -213,7 +231,7 @@ export class CheckoutComponent implements OnInit {
     if (matched) {
       this.resolvedZoneName.set(matched.name);
       this.district = matched.name;
-      this.zoneResolutionMessage.set(`تم تحديد المنطقة: ${matched.name} (رسوم التوصيل: ${matched.deliveryFee} ج.م) 🛵`);
+      this.zoneResolutionMessage.set(`تم تحديد المنطقة: ${matched.name} (رسوم التوصيل: ${matched.deliveryFee} ${this.currencySymbol}) 🛵`);
     }
     this.fetchQuote();
   }
@@ -228,7 +246,8 @@ export class CheckoutComponent implements OnInit {
       customWeightGrams: i.customWeightGrams,
       preparationOptionId: i.selectedPrepOption?.id,
       modifierOptionIds: i.selectedModifiers.map(m => m.id),
-      specialInstructions: i.specialInstructions
+      pipeMeters: i.pipeMeters,
+      specialInstructions: i.pipeMeters ? `${i.specialInstructions ? i.specialInstructions + ' | ' : ''}[خدمات إضافية: ${i.pipeMeters} وحدة]` : i.specialInstructions
     }));
 
     this.orderService.calculateQuote({
@@ -269,7 +288,7 @@ export class CheckoutComponent implements OnInit {
   get longestItemPrepTime(): { minutes: number; productName: string } {
     const items = this.cartService.items();
     if (!items || items.length === 0) {
-      return { minutes: 25, productName: 'الوجبات البحرية' };
+      return { minutes: 30, productName: 'منتجات المتجر' };
     }
 
     let maxTime = 0;
@@ -347,7 +366,7 @@ export class CheckoutComponent implements OnInit {
 
     const quote = this.serverQuote();
     if (quote && !quote.meetsMinimumOrder) {
-      this.toast.error(`قيمة الطلب أقل من الحد الأدنى (${quote.minimumOrderRequired} ج.م).`);
+      this.toast.error(`قيمة الطلب أقل من الحد الأدنى (${quote.minimumOrderRequired} ${this.currencySymbol}).`);
       return;
     }
 
@@ -377,7 +396,7 @@ export class CheckoutComponent implements OnInit {
         this.isRequestingOtp.set(false);
         if (res && res.existingCustomerName) {
           this.authFullName = res.existingCustomerName;
-          if (!this.customerName.trim() || this.customerName.trim() === 'عميل' || this.customerName.trim() === 'عميل جندوفلي') {
+          if (!this.customerName.trim() || this.customerName.trim() === 'عميل' || this.customerName.trim() === 'عميل شرق الوادي') {
             this.customerName = res.existingCustomerName;
           }
         }
@@ -400,7 +419,7 @@ export class CheckoutComponent implements OnInit {
         const existingName = err?.error?.data?.existingCustomerName;
         if (existingName) {
           this.authFullName = existingName;
-          if (!this.customerName.trim() || this.customerName.trim() === 'عميل' || this.customerName.trim() === 'عميل جندوفلي') {
+          if (!this.customerName.trim() || this.customerName.trim() === 'عميل' || this.customerName.trim() === 'عميل شرق الوادي') {
             this.customerName = existingName;
           }
         }
@@ -483,7 +502,7 @@ export class CheckoutComponent implements OnInit {
       next: (res) => {
         this.isVerifyingOtp.set(false);
         this.toast.success('تم تسجيل الدخول وتأكيد الحساب بنجاح ✅');
-        this.customerName = resolvedName || res.fullName || 'عميل جندوفلي';
+        this.customerName = resolvedName || res.fullName || 'عميل شرق الوادي';
         this.customerPhone = this.authPhone.trim();
         this.showAuthModal.set(false);
         this.loadSavedAddresses(res.userId || this.customerPhone);
@@ -584,12 +603,12 @@ export class CheckoutComponent implements OnInit {
     this.prepTimingType.set('Scheduled');
 
     // Create friendly summary
-    const dayName = targetDate.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
-    const timeFormatted = targetDate.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    const dayName = targetDate.toLocaleDateString('ar-SA', { weekday: 'long', day: 'numeric', month: 'long' });
+    const timeFormatted = targetDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
     this.scheduledDisplaySummary.set(`${dayName} - الساعة ${timeFormatted}`);
 
     this.showScheduleModal.set(false);
-    this.toast.success(`تم ضبط موعد التجهيز: ${this.scheduledDisplaySummary()} 🕒`);
+    this.toast.success(`تم ضبط موعد التوريد: ${this.scheduledDisplaySummary()} 📅`);
   }
 
   // Final Order Submission
@@ -597,9 +616,18 @@ export class CheckoutComponent implements OnInit {
     this.isSubmitting.set(true);
 
     const isSched = this.prepTimingType() === 'Scheduled' && !!this.scheduledForDate();
-    const finalNotes = isSched && this.scheduledDisplaySummary()
-      ? `[طلب مجدول للتجهيز: ${this.scheduledDisplaySummary()}] ${this.notes.trim()}`.trim()
-      : (this.notes.trim() || undefined);
+    
+    let noteParts: string[] = [];
+    if (this.paymentMethod === 'WalletTransfer') {
+      noteParts.push('[طريقة الدفع: تحويل إلكتروني / محفظة]');
+    }
+    if (isSched && this.scheduledDisplaySummary()) {
+      noteParts.push(`[موعد التوريد المجدول: ${this.scheduledDisplaySummary()}]`);
+    }
+    if (this.notes.trim()) {
+      noteParts.push(this.notes.trim());
+    }
+    const finalNotes = noteParts.join(' ');
 
     const request: CreateOrderRequest = {
       customerId: this.authService.currentCustomer()?.userId,
@@ -617,7 +645,8 @@ export class CheckoutComponent implements OnInit {
         customWeightGrams: i.customWeightGrams,
         preparationOptionId: i.selectedPrepOption?.id,
         modifierOptionIds: i.selectedModifiers.map(m => m.id),
-        specialInstructions: i.specialInstructions
+        pipeMeters: i.pipeMeters,
+        specialInstructions: i.pipeMeters ? `${i.specialInstructions ? i.specialInstructions + ' | ' : ''}[خدمات إضافية: ${i.pipeMeters} وحدة]` : i.specialInstructions
       }))
     };
 
@@ -626,22 +655,22 @@ export class CheckoutComponent implements OnInit {
         this.isSubmitting.set(false);
         this.showConfirmModal.set(false);
         this.cartService.clearCart();
-        this.toast.success('تم إنشاء طلبك بنجاح! تم إرسال رسالة التأكيد عبر واتساب 🐟');
+        this.toast.success('تم استلام طلب التوريد بنجاح! تم إرسال رسالة التأكيد عبر واتساب 🔥');
 
-        // Auto-save new address to profile automatically as 'المنزل'
+        // Auto-save new address to profile automatically as 'موقع المشروع / المقر'
         if (this.orderType === 'Delivery' && (this.isCustomAddress() || !this.selectedAddressId())) {
           const user = this.authService.currentCustomer();
           const identifier = user?.userId || user?.usernameOrPhone || this.customerPhone.trim();
           if (identifier && this.streetAddress.trim()) {
             this.authService.addCustomerAddress(identifier, {
-              label: 'المنزل',
-              city: this.city || 'القاهرة',
+              label: 'موقع المشروع / المقر',
+              city: this.city || 'الرياض',
               district: this.district || this.resolvedZoneName() || 'المنطقة المركزية',
               streetAddress: this.streetAddress.trim(),
               deliveryZoneId: this.selectedZoneId || undefined,
               isDefault: true
             }).subscribe({
-              next: () => console.log('Address successfully auto-saved to account as default المنزل'),
+              next: () => console.log('Address successfully auto-saved to account as default موقع المشروع'),
               error: (e) => console.warn('Could not auto-save address', e)
             });
           }

@@ -1,23 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { CartDrawerComponent } from '../../shared/components/cart-drawer/cart-drawer.component';
 import { MobileBottomNavComponent } from '../../shared/components/mobile-bottom-nav/mobile-bottom-nav.component';
+import { WhatsAppFabComponent } from '../../shared/components/whatsapp-fab/whatsapp-fab.component';
+import { SettingsService } from '../../core/services/settings.service';
 
 @Component({
   selector: 'app-storefront-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent, CartDrawerComponent, MobileBottomNavComponent],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent, CartDrawerComponent, MobileBottomNavComponent, WhatsAppFabComponent],
   template: `
-    <div class="storefront-wrapper">
+    <div class="storefront-wrapper" [style.background]="settingsService.settings().footerBgColor || 'var(--footer-bg, #081827)'">
       <app-header></app-header>
       <main class="main-content">
         <router-outlet></router-outlet>
       </main>
       <app-footer></app-footer>
       <app-cart-drawer></app-cart-drawer>
+      <app-whatsapp-fab></app-whatsapp-fab>
       <app-mobile-bottom-nav></app-mobile-bottom-nav>
     </div>
   `,
@@ -27,12 +30,22 @@ import { MobileBottomNavComponent } from '../../shared/components/mobile-bottom-
       flex-direction: column;
       min-height: 100vh;
       min-height: 100dvh;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--footer-bg, #081827); /* Matches footer to ensure zero white line at viewport bottom */
     }
     .main-content {
       flex: 1 0 auto;
       display: flex;
       flex-direction: column;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      background: var(--surface-color, #ffffff);
     }
   `]
 })
-export class StorefrontLayoutComponent {}
+export class StorefrontLayoutComponent {
+  readonly settingsService = inject(SettingsService);
+}

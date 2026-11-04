@@ -1,9 +1,13 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ModifierOption, PreparationOption, Product } from '../../../core/models/models';
+import { Router } from '@angular/router';
+import { ModifierGroup, ModifierOption, PreparationOption, Product } from '../../../core/models/models';
 import { CartService } from '../../../core/services/cart.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { SettingsService } from '../../../core/services/settings.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 
 @Component({
@@ -17,8 +21,31 @@ export class ProductDetailModalComponent implements OnInit {
   @Input({ required: true }) product!: Product;
   @Output() closeModal = new EventEmitter<void>();
 
+  private readonly router = inject(Router);
   private readonly cartService = inject(CartService);
   private readonly toast = inject(NotificationService);
+  readonly settingsService = inject(SettingsService);
+  readonly wishlistService = inject(WishlistService);
+  readonly languageService = inject(LanguageService);
+
+  openFullPage(): void {
+    this.dismissModal();
+    this.router.navigate(['/product', this.product.id]);
+  }
+
+  toggleWishlist(event: Event): void {
+    event.stopPropagation();
+    const res = this.wishlistService.toggle(this.product.id);
+    if (res === 'added') {
+      this.toast.success('تمت إضافة الصنف للمفضلة ❤️');
+    } else {
+      this.toast.info('تمت إزالة الصنف من المفضلة');
+    }
+  }
+
+  get currencySymbol(): string {
+    return this.settingsService.settings()?.currencySymbol || 'ج.م';
+  }
 
   // Order mode for weighed items: 'pieces' or 'weight'
   orderMode: 'pieces' | 'weight' = 'pieces';
@@ -26,9 +53,127 @@ export class ProductDetailModalComponent implements OnInit {
   customWeightGrams: number = 500;
 
   selectedPrepOption: PreparationOption | null = null;
-  selectedModifiers: ModifierOption[] = [];
+  selectedModifiersByGroup: { [groupId: number]: ModifierOption | null } = {};
+  multiSelectedModifiers: ModifierOption[] = [];
   specialInstructions: string = '';
   activeImageIndex: number = 0;
+  showSpecsModal: boolean = false;
+
+  get previewDescription(): string {
+    if (!this.product.description) return '';
+    let text = this.product.description
+      .replace(/&nbsp;/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (text.length > 220) {
+      const cut = text.substring(0, 220);
+      const lastSpace = cut.lastIndexOf(' ');
+      return (lastSpace > 160 ? cut.substring(0, lastSpace) : cut) + '...';
+    }
+    return text;
+  }
+
+  get parsedKeySpecs(): { label: string; value: string; fullValue?: string; icon?: string }[] {
+    const items: { label: string; value: string; fullValue?: string; icon?: string }[] = [];
+
+    // 1. Parse structured specificationsJson if available (Carrefour / seeded products)
+    let specsObj: { [key: string]: any } | null = null;
+    if (this.product.specificationsJson) {
+      try {
+        specsObj = JSON.parse(this.product.specificationsJson);
+      } catch { specsObj = null; }
+    }
+
+    if (specsObj) {
+      const specMap: { [key: string]: { label: string; icon: string } } = {
+        brand: { label: 'الماركة', icon: 'bi-award-fill' },
+        brand_ar: { label: 'الماركة', icon: 'bi-award-fill' },
+        origin: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
+        origin_ar: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
+        weight: { label: 'الوزن / الحجم', icon: 'bi-speedometer' },
+        weight_ar: { label: 'الوزن / الحجم', icon: 'bi-speedometer' },
+        size: { label: 'الحجم / الكمية', icon: 'bi-box' },
+        size_ar: { label: 'الحجم / الكمية', icon: 'bi-box' },
+        unitSize: { label: 'حجم الوحدة', icon: 'bi-box' },
+        originCountry: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
+        storageType: { label: 'طريقة التخزين', icon: 'bi-thermometer-half' },
+        storage: { label: 'طريقة التخزين', icon: 'bi-thermometer-half' },
+        caloriesper100g: { label: 'السعرات لكل 100 جرام', icon: 'bi-fire' },
+        calories: { label: 'السعرات الحرارية', icon: 'bi-fire' },
+        ingredients: { label: 'المكونات الرئيسية', icon: 'bi-list-ul' },
+        ingredients_ar: { label: 'المكونات', icon: 'bi-list-ul' },
+        category: { label: 'التصنيف', icon: 'bi-tag-fill' },
+        type: { label: 'النوع', icon: 'bi-grid-fill' },
+        flavor: { label: 'النكهة', icon: 'bi-stars' },
+        flavor_ar: { label: 'النكهة', icon: 'bi-stars' },
+        packSize: { label: 'عبوة / عدد القطع', icon: 'bi-stack' },
+        sku: { label: 'الرقم المرجعي', icon: 'bi-upc' },
+        barcode: { label: 'الباركود', icon: 'bi-upc-scan' },
+      };
+
+      const addedLabels = new Set<string>();
+      for (const [key, meta] of Object.entries(specMap)) {
+        // skip _ar duplicate if non-ar base key already exists in object
+        if (key.endsWith('_ar')) {
+          const base = key.replace('_ar', '');
+          if (specsObj[base]) continue;
+        }
+        const val = specsObj[key];
+        if (val !== undefined && val !== null && String(val).trim() && !addedLabels.has(meta.label)) {
+          items.push({ label: meta.label, value: String(val).trim(), icon: meta.icon });
+          addedLabels.add(meta.label);
+        }
+        if (items.length >= 6) break;
+      }
+    }
+
+    // Also add brand from product model if not in specs
+    if (this.product.brand && !items.some(i => i.label === 'الماركة')) {
+      items.unshift({ label: 'الماركة', value: this.product.brand, icon: 'bi-award-fill' });
+    }
+
+    // 2. Fallback: parse from description text (rich text products)
+    if (items.length === 0 && this.product.description) {
+      const text = this.product.description.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+
+      const capM = text.match(/(?:[-–—•\s]|^)السعة\s*:\s*([^-\n•]+?)(?=\s*(?:[-–—•\s]*(?:النوع|الأبعاد|الوزن|الصناعة|تصنيف|الاسعار|الأسعار))|$)/i);
+      if (capM && capM[1].trim()) items.push({ label: 'السعة والنوع', value: capM[1].trim(), icon: 'bi-droplet-half' });
+
+      const dimM = text.match(/(?:[-–—•\s]|^)الأبعاد\s*:\s*([^•]+?)(?=\s*(?:[-–—•\s]*(?:الوزن|الصناعة|تصنيف|الاسعار|الأسعار|ما هو))|$)/i);
+      if (dimM && dimM[1].trim()) {
+        const cleanDim = dimM[1].replace(/^-+\s*|-+\s*$/g, '').trim();
+        items.push({ label: 'الأبعاد والمقاسات', value: cleanDim, icon: 'bi-aspect-ratio' });
+      }
+
+      const wM = text.match(/(?:[-–—•\s]|^)الوزن\s*:\s*([^-\n•]+?)(?=\s*(?:[-–—•\s]*(?:الصناعة|تصنيف|الاسعار|الأسعار|الأبعاد|ما هو))|$)/i);
+      if (wM && wM[1].trim()) items.push({ label: 'الوزن التقريبي', value: wM[1].trim(), icon: 'bi-speedometer' });
+
+      const orgM = text.match(/(?:[-–—•\s]|^)الصناعة\s*:\s*([^-\n•]+?)(?=\s*(?:[-–—•\s]*(?:الاسعار|الأسعار|ما هو|الضمان))|$)/i);
+      if (orgM && orgM[1].trim()) {
+        const cleanOrg = orgM[1].trim();
+        items.push({ label: 'بلد الصنع', value: cleanOrg, icon: 'bi-patch-check-fill' });
+      }
+    }
+
+    return items;
+  }
+
+  get truncatedOverviewText(): string {
+    if (!this.product.description) return '';
+    const text = this.product.description;
+    if (text.length <= 135) return text;
+    return text.substring(0, 130) + '...';
+  }
+
+  openSpecsModal(event?: Event) {
+    if (event) event.stopPropagation();
+    this.showSpecsModal = true;
+  }
+
+  closeSpecsModal(event?: Event) {
+    if (event) event.stopPropagation();
+    this.showSpecsModal = false;
+  }
 
   ngOnInit() {
     // Default preparation selection
@@ -36,6 +181,15 @@ export class ProductDetailModalComponent implements OnInit {
       const firstGroup = this.product.preparationGroups[0];
       if (firstGroup.options && firstGroup.options.length > 0) {
         this.selectedPrepOption = firstGroup.options[0];
+      }
+    }
+
+    // Initialize modifier groups
+    if (this.product.modifierGroups && this.product.modifierGroups.length > 0) {
+      for (const grp of this.product.modifierGroups) {
+        if (grp.maxSelection === 1 || grp.isRequired) {
+          this.selectedModifiersByGroup[grp.id] = null;
+        }
       }
     }
 
@@ -47,9 +201,8 @@ export class ProductDetailModalComponent implements OnInit {
       } else if (!this.product.allowOrderByPieces) {
         this.orderMode = 'weight';
       } else {
-        // Both are allowed: default to pieces for whole fish, or weight for shrimp/calamari/etc.
-        const isFish = this.product.nameAr.includes('سمك') || this.product.nameAr.includes('بلطي') || this.product.nameAr.includes('بوري') || this.product.nameAr.includes('دنيس') || this.product.nameAr.includes('قاروص');
-        this.orderMode = isFish ? 'pieces' : 'weight';
+        // Both are allowed: default to pieces
+        this.orderMode = 'pieces';
       }
 
       const avg = this.product.averageUnitWeightGrams || 500;
@@ -117,6 +270,48 @@ export class ProductDetailModalComponent implements OnInit {
     return this.piecesCount * avg;
   }
 
+  get allSelectedModifiers(): ModifierOption[] {
+    const list: ModifierOption[] = [...this.multiSelectedModifiers];
+    for (const key of Object.keys(this.selectedModifiersByGroup)) {
+      const opt = this.selectedModifiersByGroup[Number(key)];
+      if (opt && !list.some(m => m.id === opt.id)) {
+        list.push(opt);
+      }
+    }
+
+    // Smart pipe extension modifier if selected
+    if (this.selectedPipeType !== 'none') {
+      const pGroup = this.pipeGroup;
+      const rate = this.selectedPipeRate;
+      const typeLabel = this.selectedPipeType === 'install_only' 
+        ? 'تمديد وتركيب فقط' 
+        : 'توريد وتركيب شامل المواسير';
+
+      let optId = 99901;
+      if (pGroup && pGroup.options) {
+        const found = pGroup.options.find(o => 
+          this.selectedPipeType === 'install_only' 
+            ? (o.nameAr.includes('تركيب فقط') || o.price === 25)
+            : (o.nameAr.includes('توريد وتركيب') || o.price === 85)
+        );
+        if (found) optId = found.id;
+      }
+
+      const pipeMod: ModifierOption = {
+        id: optId,
+        groupId: pGroup?.id ?? 999,
+        nameAr: `خدمة إضافية: ${typeLabel} (${this.pipeMeters} وحدة × ${rate} = ${this.pipeTotalCost})`,
+        price: this.pipeTotalCost,
+        isAvailable: true,
+        displayOrder: 99
+      };
+
+      list.push(pipeMod);
+    }
+
+    return list;
+  }
+
   get calculatedEstimatedTotal(): number {
     let total = 0;
 
@@ -135,8 +330,9 @@ export class ProductDetailModalComponent implements OnInit {
         }
       }
 
-      if (this.selectedModifiers.length > 0) {
-        const modSum = this.selectedModifiers.reduce((acc, m) => acc + m.price, 0);
+      const mods = this.allSelectedModifiers;
+      if (mods.length > 0) {
+        const modSum = mods.reduce((acc, m) => acc + m.price, 0);
         total += modSum * units;
       }
     } else {
@@ -150,8 +346,9 @@ export class ProductDetailModalComponent implements OnInit {
         }
       }
 
-      if (this.selectedModifiers.length > 0) {
-        const modSum = this.selectedModifiers.reduce((acc, m) => acc + m.price, 0);
+      const mods = this.allSelectedModifiers;
+      if (mods.length > 0) {
+        const modSum = mods.reduce((acc, m) => acc + m.price, 0);
         total += modSum * this.piecesCount;
       }
     }
@@ -181,22 +378,158 @@ export class ProductDetailModalComponent implements OnInit {
     this.selectedPrepOption = option;
   }
 
-  toggleModifier(mod: ModifierOption) {
-    const exists = this.selectedModifiers.some(m => m.id === mod.id);
-    if (exists) {
-      this.selectedModifiers = this.selectedModifiers.filter(m => m.id !== mod.id);
-    } else {
-      this.selectedModifiers = [...this.selectedModifiers, mod];
+  get selectedActivityName(): string | null {
+    for (const key of Object.keys(this.selectedModifiersByGroup)) {
+      const opt = this.selectedModifiersByGroup[Number(key)];
+      if (opt && (opt.nameAr === 'سكني' || opt.nameAr === 'تجاري')) {
+        return opt.nameAr;
+      }
+    }
+    return null;
+  }
+
+  // --- Smart Pipe Extension Network (Meters Counter) ---
+  selectedPipeType: 'none' | 'install_only' | 'supply_and_install' = 'none';
+  pipeMeters: number = 20;
+
+  isPipeGroup(group: ModifierGroup): boolean {
+    return group.nameAr.includes('مواسير') || group.nameAr.includes('تمديد شبكة');
+  }
+
+  get pipeGroup(): ModifierGroup | undefined {
+    return this.product.modifierGroups?.find(g => this.isPipeGroup(g));
+  }
+
+  get isTank(): boolean {
+    return false;
+  }
+
+  get selectedPipeRate(): number {
+    if (this.selectedPipeType === 'install_only') return 25;
+    if (this.selectedPipeType === 'supply_and_install') return 85;
+    return 0;
+  }
+
+  get pipeTotalCost(): number {
+    if (this.selectedPipeType === 'none') return 0;
+    return this.pipeMeters * this.selectedPipeRate;
+  }
+
+  selectPipeType(type: 'none' | 'install_only' | 'supply_and_install') {
+    this.selectedPipeType = type;
+    if (type !== 'none' && this.pipeMeters < 20) {
+      this.pipeMeters = 20;
     }
   }
 
-  isModifierSelected(modId: number): boolean {
-    return this.selectedModifiers.some(m => m.id === modId);
+  changePipeMeters(delta: number) {
+    const next = this.pipeMeters + delta;
+    if (next >= 20 && next <= 1000) {
+      this.pipeMeters = next;
+    }
+  }
+
+  setPipeMeters(meters: number) {
+    if (meters >= 20) {
+      this.pipeMeters = meters;
+    }
+  }
+
+  onPipeMetersManualChange(val: any) {
+    const num = Number(val);
+    if (!isNaN(num) && num >= 20) {
+      this.pipeMeters = Math.min(1000, num);
+    }
+  }
+
+  onPipeMetersBlur() {
+    if (!this.pipeMeters || this.pipeMeters < 20) {
+      this.pipeMeters = 20;
+    }
+  }
+
+  isGroupVisible(group: ModifierGroup): boolean {
+    if (this.isPipeGroup(group)) {
+      return false; // Handled by dedicated smart pipes component
+    }
+    if (group.nameAr.includes('منظم أو بدون')) {
+      return !!this.selectedActivityName;
+    }
+    return true;
+  }
+
+  getFilteredGroupOptions(group: ModifierGroup): ModifierOption[] {
+    if (!group.options) return [];
+    if (group.nameAr.includes('منظم أو بدون')) {
+      const activity = this.selectedActivityName;
+      if (activity === 'سكني') {
+        return group.options.filter(o => o.nameAr === 'بدون' || o.nameAr.includes('سكني') || (!o.nameAr.includes('ضغط عالي') && !o.nameAr.includes('تجاري')));
+      } else if (activity === 'تجاري') {
+        return group.options.filter(o => o.nameAr === 'بدون' || o.nameAr.includes('ضغط عالي') || o.nameAr.includes('تجاري'));
+      }
+    }
+    return group.options;
+  }
+
+  onSingleModifierChange(group: ModifierGroup, optionIdVal: any) {
+    if (optionIdVal === null || optionIdVal === undefined || optionIdVal === 'null') {
+      this.selectedModifiersByGroup[group.id] = null;
+      if (group.nameAr.includes('نوع النشاط')) {
+        this.resetRegulatorSelection(false);
+      }
+      return;
+    }
+    const optionId = Number(optionIdVal);
+    const found = group.options?.find(o => o.id === optionId) || null;
+    this.selectedModifiersByGroup[group.id] = found;
+
+    if (group.nameAr.includes('نوع النشاط')) {
+      this.resetRegulatorSelection(true);
+    }
+  }
+
+  private resetRegulatorSelection(selectDefaultBedoon = false) {
+    if (!this.product.modifierGroups) return;
+    const regGroup = this.product.modifierGroups.find(g => g.nameAr.includes('منظم أو بدون'));
+    if (regGroup) {
+      if (selectDefaultBedoon) {
+        const bedoon = regGroup.options?.find(o => o.nameAr === 'بدون') || null;
+        this.selectedModifiersByGroup[regGroup.id] = bedoon;
+      } else {
+        this.selectedModifiersByGroup[regGroup.id] = null;
+      }
+    }
+  }
+
+  toggleMultiModifier(mod: ModifierOption) {
+    const exists = this.multiSelectedModifiers.some(m => m.id === mod.id);
+    if (exists) {
+      this.multiSelectedModifiers = this.multiSelectedModifiers.filter(m => m.id !== mod.id);
+    } else {
+      this.multiSelectedModifiers = [...this.multiSelectedModifiers, mod];
+    }
+  }
+
+  isMultiModifierSelected(modId: number): boolean {
+    return this.multiSelectedModifiers.some(m => m.id === modId);
   }
 
   isSuccess = false;
 
   onAddToCart() {
+    // Validate required modifier groups
+    if (this.product.modifierGroups) {
+      for (const grp of this.product.modifierGroups) {
+        if (!this.isGroupVisible(grp)) continue;
+        if (grp.isRequired && (grp.maxSelection === 1 || grp.minSelection >= 1)) {
+          if (!this.selectedModifiersByGroup[grp.id]) {
+            this.toast.error(`يرجى تحديد (${grp.nameAr}) للمتابعة`);
+            return;
+          }
+        }
+      }
+    }
+
     if (this.isSuccess) return;
     this.isSuccess = true;
 
@@ -212,10 +545,11 @@ export class ProductDetailModalComponent implements OnInit {
       this.product,
       qty,
       this.selectedPrepOption ?? undefined,
-      this.selectedModifiers,
+      this.allSelectedModifiers,
       customGrams,
       this.specialInstructions,
-      this.orderMode
+      this.orderMode,
+      this.selectedPipeType !== 'none' ? this.pipeMeters : undefined
     );
 
     this.toast.success(
@@ -240,8 +574,9 @@ export class ProductDetailModalComponent implements OnInit {
     if (typeof window === 'undefined') return;
 
     const shareUrl = `${window.location.origin}/menu?product=${this.product.id}`;
-    const shareTitle = `${this.product.nameAr} - أسماك جندوفلي`;
-    const shareText = `شاهد تفاصيل واطلب (${this.product.nameAr}) من منيو أسماك جندوفلي 🐟✨`;
+    const storeName = this.settingsService.settings().restaurantName || 'منصة التجارة';
+    const shareTitle = `${this.product.nameAr} - ${storeName}`;
+    const shareText = `شاهد تفاصيل ومواصفات (${this.product.nameAr}) من ${storeName} 🛒`;
 
     // Native Web Share API (Pass text without url so apps like WhatsApp won't duplicate the URL)
     if (navigator.share) {
@@ -292,7 +627,9 @@ export class ProductDetailModalComponent implements OnInit {
     }, 2500);
   }
 
-  // ===== SWIPE DOWN TO DISMISS (OPTIMIZED & ULTRA RESPONSIVE) =====
+  // ===== TOUCH GESTURES (SWIPE BETWEEN IMAGES + SWIPE DOWN TO DISMISS) =====
+  touchStartX = 0;
+  touchCurrentX = 0;
   touchStartY = 0;
   touchCurrentY = 0;
   private touchStartTime = 0;
@@ -324,6 +661,8 @@ export class ProductDetailModalComponent implements OnInit {
 
   onTouchStart(event: TouchEvent) {
     if (event.touches.length === 1) {
+      this.touchStartX = event.touches[0].clientX;
+      this.touchCurrentX = this.touchStartX;
       this.touchStartY = event.touches[0].clientY;
       this.touchCurrentY = this.touchStartY;
       this.touchStartTime = performance.now();
@@ -333,8 +672,20 @@ export class ProductDetailModalComponent implements OnInit {
 
   onTouchMove(event: TouchEvent) {
     if (!this.isDragging || event.touches.length !== 1) return;
+    this.touchCurrentX = event.touches[0].clientX;
     this.touchCurrentY = event.touches[0].clientY;
+    const deltaX = this.touchCurrentX - this.touchStartX;
     const deltaY = this.touchCurrentY - this.touchStartY;
+
+    // Horizontal swipe on images: don't pull down modal
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      this.dragTranslateY = 0;
+      if (event.cancelable) {
+        event.preventDefault();
+      }
+      return;
+    }
+
     if (deltaY > 0) {
       this.dragTranslateY = deltaY;
       if (event.cancelable && deltaY > 6) {
@@ -348,12 +699,26 @@ export class ProductDetailModalComponent implements OnInit {
   onTouchEnd() {
     if (!this.isDragging) return;
     this.isDragging = false;
+    const deltaX = this.touchCurrentX - this.touchStartX;
     const deltaY = this.touchCurrentY - this.touchStartY;
     const deltaTime = performance.now() - this.touchStartTime;
-    const velocityY = deltaY / Math.max(1, deltaTime);
 
-    // Fast flick or pulled down more than 35px
-    if (deltaY > 35 || (deltaY > 15 && velocityY > 0.3)) {
+    // 1. Horizontal swipe gesture between product images
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 35 && this.galleryImages.length > 1) {
+      if (deltaX < -35) {
+        // Swiped left -> next image
+        this.nextImage();
+      } else if (deltaX > 35) {
+        // Swiped right -> previous image
+        this.prevImage();
+      }
+      this.dragTranslateY = 0;
+      return;
+    }
+
+    // 2. Vertical swipe gesture to dismiss modal
+    const velocityY = deltaY / Math.max(1, deltaTime);
+    if (deltaY > 55 || (deltaY > 25 && velocityY > 0.35)) {
       this.dismissModal();
     } else {
       this.dragTranslateY = 0;
@@ -363,6 +728,8 @@ export class ProductDetailModalComponent implements OnInit {
   onPointerDown(event: PointerEvent) {
     if (event.pointerType === 'touch') return;
     if (event.button !== 0) return;
+    this.touchStartX = event.clientX;
+    this.touchCurrentX = this.touchStartX;
     this.touchStartY = event.clientY;
     this.touchCurrentY = this.touchStartY;
     this.touchStartTime = performance.now();
@@ -373,8 +740,14 @@ export class ProductDetailModalComponent implements OnInit {
   onPointerMove(event: PointerEvent) {
     if (event.pointerType === 'touch') return;
     if (!this.isDragging) return;
+    this.touchCurrentX = event.clientX;
     this.touchCurrentY = event.clientY;
+    const deltaX = this.touchCurrentX - this.touchStartX;
     const deltaY = this.touchCurrentY - this.touchStartY;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      this.dragTranslateY = 0;
+      return;
+    }
     this.dragTranslateY = deltaY > 0 ? deltaY : 0;
   }
 
@@ -383,11 +756,23 @@ export class ProductDetailModalComponent implements OnInit {
     if (!this.isDragging) return;
     this.isDragging = false;
     (event.target as HTMLElement)?.releasePointerCapture?.(event.pointerId);
+    const deltaX = this.touchCurrentX - this.touchStartX;
     const deltaY = this.touchCurrentY - this.touchStartY;
     const deltaTime = performance.now() - this.touchStartTime;
-    const velocityY = deltaY / Math.max(1, deltaTime);
 
-    if (deltaY > 35 || (deltaY > 15 && velocityY > 0.3)) {
+    // Horizontal swipe on images
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30 && this.galleryImages.length > 1) {
+      if (deltaX < -30) {
+        this.nextImage();
+      } else if (deltaX > 30) {
+        this.prevImage();
+      }
+      this.dragTranslateY = 0;
+      return;
+    }
+
+    const velocityY = deltaY / Math.max(1, deltaTime);
+    if (deltaY > 40 || (deltaY > 15 && velocityY > 0.3)) {
       this.dismissModal();
     } else {
       this.dragTranslateY = 0;

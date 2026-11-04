@@ -10,37 +10,44 @@ export class SettingsService {
   private readonly api = inject(ApiService);
 
   private readonly defaultSettings: StorefrontSettings = {
-    restaurantName: 'أسماك جندوفلي',
-    tagline: 'أشهى المأكولات البحرية والأسماك الطازجة يومياً',
-    description: 'مطعم أسماك جندوفلي يقدم أشهى الأسماك الطازجة وطواجن السي فود والجمبري والصواني بأعلى جودة وطرق طهي متنوعة.',
-    logoUrl: '/assets/branding/logo.png',
-    heroBannerDesktopUrl: '/assets/branding/hero-desktop.jpg',
-    heroBannerMobileUrl: '/assets/branding/hero-mobile.jpg',
-    faviconUrl: '/favicon.ico',
-    primaryColor: '#0d2b45',
-    secondaryColor: '#203c56',
-    accentColor: '#f4a261',
-    surfaceColor: '#fafafa',
-    phone: '+201012345678',
-    whatsapp: '+201012345678',
-    address: 'شارع الجمهورية - كورنيش البحر',
+    defaultDomain: 'Supermarket',
+    isMultiDomain: true,
+    businessDomainLabel: 'سوبر ماركت MeCart',
+    restaurantName: 'MeCart | مي كارت',
+    tagline: 'تسوق كل احتياجاتك بذكاء وسرعة | عروض السوبرماركت والتوصيل الفوري',
+    description: 'منصة MeCart للتجارة والتسوق الذكي السريع - تسوق أكثر من 1000 صنف غذائي واستهلاكي بأفضل عروض الأسعار وتوصيل فوري.',
+    logoUrl: '/assets/images/branding/mecart-logo.png',
+    heroBannerDesktopUrl: '/assets/images/banners/mecart-hero-desktop.jpg',
+    heroBannerMobileUrl: '/assets/images/banners/mecart-hero-mobile.jpg',
+    faviconUrl: '/favicon.png',
+    primaryColor: '#0a3d62',
+    secondaryColor: '#00a8cc',
+    accentColor: '#e76f51',
+    surfaceColor: '#f8fafd',
+    fontFamily: 'Cairo',
+    countryCode: 'EG',
+    phoneCountryCode: '+20',
+    cashierWhatsAppNumber: '+201000000000',
+    phone: '16061',
+    whatsapp: '+201000000000',
+    address: 'القاهرة - جمهورية مصر العربية',
     city: 'القاهرة',
     currencyCode: 'EGP',
     currencySymbol: 'ج.م',
     timeZone: 'Africa/Cairo',
     locale: 'ar-EG',
     isOrdersOpen: true,
-    minimumOrderAmount: 60,
+    minimumOrderAmount: 100,
     defaultDeliveryFee: 25,
-    isFreeDeliveryEnabled: false,
-    freeDeliveryMinOrderAmount: 300,
+    isFreeDeliveryEnabled: true,
+    freeDeliveryMinOrderAmount: 500,
     isTieredDiscountEnabled: false,
-    tieredDiscountThresholdAmount: 500,
-    tieredDiscountPercentage: 10,
+    tieredDiscountThresholdAmount: 1000,
+    tieredDiscountPercentage: 5,
     isFlatDiscountEnabled: false,
-    flatDiscountPercentage: 5,
-    activePromotionBanner: '',
-    estimatedWeightDisclaimer: 'الوزن والسعر تقديريان، ويتم تحديدهما نهائياً بعد الوزن الفعلي في المطبخ وقد يختلفان قليلاً.',
+    flatDiscountPercentage: 0,
+    activePromotionBanner: '🔥 مرحباً بك في MeCart: تسوق الآن واستمتع بتوصيل فوري وعروض حصرية على كافة الأقسام!',
+    estimatedWeightDisclaimer: 'الأسعار شاملة ضريبة القيمة المضافة، والمنتجات بالوزن تخضع للوزن الفعلي عند التعبئة.',
     branches: []
   };
 
@@ -66,13 +73,93 @@ export class SettingsService {
     );
   }
 
+  private hexToRgb(hex: string): string {
+    const clean = hex.replace('#', '');
+    if (clean.length === 3) {
+      const r = parseInt(clean[0] + clean[0], 16);
+      const g = parseInt(clean[1] + clean[1], 16);
+      const b = parseInt(clean[2] + clean[2], 16);
+      return `${r}, ${g}, ${b}`;
+    }
+    if (clean.length >= 6) {
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+      return `${r}, ${g}, ${b}`;
+    }
+    return '18, 38, 63';
+  }
+
   applyCssThemeVariables(settings: StorefrontSettings) {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
-    if (settings.primaryColor) root.style.setProperty('--primary-color', settings.primaryColor);
-    if (settings.secondaryColor) root.style.setProperty('--secondary-color', settings.secondaryColor);
-    if (settings.accentColor) root.style.setProperty('--accent-color', settings.accentColor);
-    if (settings.surfaceColor) root.style.setProperty('--surface-color', settings.surfaceColor);
+
+    if (settings.primaryColor) {
+      root.style.setProperty('--primary-color', settings.primaryColor);
+      root.style.setProperty('--color-primary', settings.primaryColor);
+      root.style.setProperty('--bs-primary', settings.primaryColor);
+      root.style.setProperty('--primary-rgb', this.hexToRgb(settings.primaryColor));
+    }
+    // Main text color should remain a clean neutral dark unless explicitly customized
+    const textColor = settings.textColor || '#0f172a';
+    root.style.setProperty('--ink', textColor);
+    root.style.setProperty('--text-main', textColor);
+    if (settings.secondaryColor) {
+      root.style.setProperty('--secondary-color', settings.secondaryColor);
+      root.style.setProperty('--text-2', settings.secondaryColor);
+    }
+    if (settings.accentColor) {
+      root.style.setProperty('--accent-color', settings.accentColor);
+      root.style.setProperty('--color-accent', settings.accentColor);
+      root.style.setProperty('--brand-orange', settings.accentColor);
+      root.style.setProperty('--brand-orange-hover', settings.accentColor);
+      root.style.setProperty('--accent-rgb', this.hexToRgb(settings.accentColor));
+    }
+    if (settings.surfaceColor) {
+      root.style.setProperty('--surface-color', settings.surfaceColor);
+      root.style.setProperty('--surface', settings.surfaceColor);
+      root.style.setProperty('--page-bg', settings.surfaceColor);
+    }
+
+    // Extended UI Colors
+    if (settings.navbarBgColor) root.style.setProperty('--navbar-bg', settings.navbarBgColor);
+    if (settings.navbarTextColor) root.style.setProperty('--navbar-text', settings.navbarTextColor);
+    if (settings.footerBgColor) root.style.setProperty('--footer-bg', settings.footerBgColor);
+    if (settings.footerTextColor) root.style.setProperty('--footer-text', settings.footerTextColor);
+    if (settings.cardBgColor) {
+      root.style.setProperty('--card-bg', settings.cardBgColor);
+      root.style.setProperty('--surface-white', settings.cardBgColor);
+    }
+    if (settings.borderColor) {
+      root.style.setProperty('--border-color', settings.borderColor);
+      root.style.setProperty('--line', settings.borderColor);
+    }
+    if (settings.btnPrimaryBg) root.style.setProperty('--btn-primary-bg', settings.btnPrimaryBg);
+    if (settings.btnPrimaryText) root.style.setProperty('--btn-primary-text', settings.btnPrimaryText);
+    if (settings.btnAccentBg) root.style.setProperty('--btn-accent-bg', settings.btnAccentBg);
+    if (settings.btnAccentText) root.style.setProperty('--btn-accent-text', settings.btnAccentText);
+    if (settings.successColor) root.style.setProperty('--success-color', settings.successColor);
+    if (settings.errorColor) root.style.setProperty('--error-color', settings.errorColor);
+    if (settings.warningColor) root.style.setProperty('--warning-color', settings.warningColor);
+
+    // Shapes & Border Radius
+    if (settings.borderRadius) {
+      root.style.setProperty('--radius-card', settings.borderRadius);
+      root.style.setProperty('--radius-box', settings.borderRadius);
+    }
+    if (settings.buttonBorderRadius) {
+      root.style.setProperty('--radius-control', settings.buttonBorderRadius);
+    }
+    if (settings.fontSizeBase) {
+      root.style.setProperty('--font-size-base', `${settings.fontSizeBase}px`);
+    }
+
+    if (settings.fontFamily) {
+      const font = settings.fontFamily.trim();
+      const fontVal = `"${font}", "Cairo", "Tajawal", "Almarai", system-ui, -apple-system, sans-serif`;
+      root.style.setProperty('--font-family-base', fontVal);
+      document.body.style.fontFamily = fontVal;
+    }
   }
 
   applyTheme(settings: StorefrontSettings) {

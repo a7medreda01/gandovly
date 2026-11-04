@@ -6,8 +6,8 @@
         <i class="bi bi-graph-up-arrow"></i>
       </div>
       <div>
-        <h1 class="page-heading">التقارير والمبيعات وتحليل الأوزان</h1>
-        <p class="page-sub">تحليل إجمالي الإيرادات، مبيعات الأصناف، وفروقات الأوزان التقديرية والفعلية للأسماك</p>
+        <h1 class="page-heading">التقارير والمبيعات وتحليل التوريد والكميات</h1>
+        <p class="page-sub">تحليل إجمالي الإيرادات، مبيعات الأصناف، وفروقات القياسات والتوريد المعتمدة</p>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
           (click)="activeTab = 'variance'"
         >
           <i class="bi bi-speedometer2"></i>
-          <span>تقرير فروق الأوزان</span>
+          <span>تقرير فروق التوريد</span>
         </button>
       </div>
 
@@ -81,7 +81,7 @@
         </div>
         <div class="r-value-row">
           <span class="num text-emerald">{{ salesReport()!.totalFinalRevenue | number:'1.0-2' }}</span>
-          <span class="unit">ج.م</span>
+          <span class="unit">{{ currencySymbol }}</span>
         </div>
         <div class="r-footer">
           <i class="bi bi-wallet2 text-emerald"></i>
@@ -99,7 +99,7 @@
         </div>
         <div class="r-value-row">
           <span class="num text-cyan">{{ salesReport()!.totalDeliveryFees | number:'1.0-2' }}</span>
-          <span class="unit">ج.م</span>
+          <span class="unit">{{ currencySymbol }}</span>
         </div>
         <div class="r-footer">
           <i class="bi bi-geo-alt-fill text-cyan"></i>
@@ -189,7 +189,7 @@
                   </td>
                   <td class="td-revenue">
                     <span class="revenue-pill">
-                      {{ prod.totalRevenue | number:'1.0-2' }} ج.م
+                      {{ prod.totalRevenue | number:'1.0-2' }} {{ currencySymbol }}
                     </span>
                   </td>
                 </tr>
@@ -216,14 +216,14 @@
             <i class="bi bi-speedometer2 text-primary"></i>
           </span>
           <div>
-            <h2 class="card-title">سجل فروق الأوزان التقديرية والفعلية للأسماك</h2>
-            <p class="card-sub">مقارنة الوزن المقدر عند الطلب بالوزن الفعلي في المطبخ وفرق السعر الناتج</p>
+            <h2 class="card-title">سجل فروقات الأوزان والقياسات</h2>
+            <p class="card-sub">مقارنة الوزن/القياس المقدر بالفعلي عند التسليم وفرق السعر الناتج</p>
           </div>
         </div>
 
         @if (varianceReport().length > 0) {
           <span class="count-badge">
-            {{ varianceReport().length }} سجلات وزن
+            {{ varianceReport().length }} سجلات توريد
           </span>
         }
       </div>
@@ -234,10 +234,10 @@
             <thead>
               <tr>
                 <th>رقم الطلب</th>
-                <th>نوع السمك</th>
-                <th>الوزن التقديري</th>
-                <th>الوزن الفعلي</th>
-                <th>فرق الوزن</th>
+                <th>اسم المنتج</th>
+                <th>الكمية المقدرة</th>
+                <th>الكمية الفعلية</th>
+                <th>فرق القياس</th>
                 <th>السعر التقديري</th>
                 <th>السعر النهائي</th>
                 <th>التاريخ</th>
@@ -252,9 +252,9 @@
                   <td>
                     <strong class="fish-name">{{ v.productNameAr }}</strong>
                   </td>
-                  <td class="text-muted">{{ v.estimatedWeightGrams }} جم</td>
+                  <td class="text-muted">{{ v.estimatedWeightGrams }} جم / وحدة</td>
                   <td>
-                    <strong class="actual-weight">{{ v.actualWeightGrams }} جم</strong>
+                    <strong class="actual-weight">{{ v.actualWeightGrams }} جم / وحدة</strong>
                   </td>
                   <td>
                     <span
@@ -263,12 +263,12 @@
                       [class.variance-minus]="v.varianceGrams < 0"
                     >
                       <i class="bi" [class.bi-plus-lg]="v.varianceGrams >= 0" [class.bi-dash-lg]="v.varianceGrams < 0"></i>
-                      {{ v.varianceGrams >= 0 ? v.varianceGrams : (v.varianceGrams * -1) }} جم
+                      {{ v.varianceGrams >= 0 ? v.varianceGrams : (v.varianceGrams * -1) }}
                     </span>
                   </td>
-                  <td class="text-muted">{{ v.estimatedPrice | number:'1.0-2' }} ج.م</td>
+                  <td class="text-muted">{{ v.estimatedPrice | number:'1.0-2' }} {{ currencySymbol }}</td>
                   <td>
-                    <strong class="final-price text-emerald">{{ v.finalPrice | number:'1.0-2' }} ج.م</strong>
+                    <strong class="final-price text-emerald">{{ v.finalPrice | number:'1.0-2' }} {{ currencySymbol }}</strong>
                   </td>
                   <td>
                     <span class="date-badge">
@@ -286,8 +286,8 @@
           <div class="empty-icon-wrap">
             <i class="bi bi-check2-circle"></i>
           </div>
-          <h3 class="empty-title">لا توجد سجلات لفروق الأوزان حتى الآن</h3>
-          <p class="empty-desc">يتم تسجيل الفروق تلقائياً عندما يقوم فريق المطبخ بتعديل أوزان الأسماك الطازجة في شاشة المطبخ.</p>
+          <h3 class="empty-title">لا توجد سجلات لفروق التوريد حتى الآن</h3>
+          <p class="empty-desc">يتم تسجيل الفروق تلقائياً عندما يقوم فريق المستودع والعمليات بتحديث قياسات ومواصفات التوريد.</p>
         </div>
       }
     </section>

@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import {
+  BusinessDomain,
   MenuCategory,
   ModifierGroup,
+  ModifierOption,
   PreparationOption,
   PreparationOptionGroup,
   PricingType,
@@ -26,9 +29,19 @@ import { compressImage } from '../../../core/utils/image-compressor.util';
 })
 export class AdminCatalogComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  readonly settingsService = inject(SettingsService);
   private readonly toast = inject(NotificationService);
 
-  activeTab: 'products' | 'categories' | 'cooking-methods' = 'products';
+  readonly isEnglishEnabled = computed(() => {
+    const s = this.settingsService.settings();
+    return s.languageMode !== 'ar_only' && s.enableEnglish !== false;
+  });
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
+
+  activeTab: 'products' | 'categories' | 'modifiers' | 'cooking-methods' = 'products';
 
   categories = signal<MenuCategory[]>([]);
   products = signal<Product[]>([]);
@@ -39,29 +52,44 @@ export class AdminCatalogComponent implements OnInit {
   uploadProgressText = signal<string>('');
   isUploadingCategoryImage = signal<boolean>(false);
 
-  // Search & Filter State
+  // Search & Filter & Pagination State
   productSearch = signal<string>('');
   categoryFilter = signal<number | null>(null);
   categorySearch = signal<string>('');
+  pageIndex = signal<number>(1);
+  pageSize = signal<number>(20);
+  totalProductsCount = signal<number>(0);
+  totalPages = signal<number>(1);
+  isLoadingProducts = signal<boolean>(false);
+  private searchDebounceTimer?: any;
 
-  filteredProducts = computed(() => {
-    const q = this.productSearch().trim().toLowerCase();
-    const catId = this.categoryFilter();
-    let list = this.products();
+  // Modifier Groups & Options Management
+  showModifierGroupModal = signal<boolean>(false);
+  isEditingModifierGroup = signal<boolean>(false);
+  modifierGroupForm = {
+    id: 0,
+    nameAr: '',
+    nameEn: '',
+    isRequired: false,
+    minSelection: 0,
+    maxSelection: 1,
+    displayOrder: 1
+  };
 
-    if (catId !== null) {
-      list = list.filter(p => p.categoryId === catId);
-    }
+  showModifierOptionModal = signal<boolean>(false);
+  isEditingModifierOption = signal<boolean>(false);
+  targetModifierGroupId = signal<number>(1);
+  modifierOptionForm = {
+    id: 0,
+    groupId: 1,
+    nameAr: '',
+    nameEn: '',
+    price: 0,
+    isAvailable: true,
+    displayOrder: 1
+  };
 
-    if (!q) return list;
-
-    return list.filter(p =>
-      (p.nameAr && p.nameAr.toLowerCase().includes(q)) ||
-      (p.nameEn && p.nameEn.toLowerCase().includes(q)) ||
-      (p.categoryNameAr && p.categoryNameAr.toLowerCase().includes(q)) ||
-      (p.description && p.description.toLowerCase().includes(q))
-    );
-  });
+  filteredProducts = computed(() => this.products());
 
   filteredCategories = computed(() => {
     const q = this.categorySearch().trim().toLowerCase();
@@ -91,31 +119,77 @@ export class AdminCatalogComponent implements OnInit {
   // Product Images Gallery State
   productImages: { id?: number; imageUrl: string; isPrimary: boolean; displayOrder: number }[] = [];
 
+  // Business Domains Catalog
+  businessDomains: { id: BusinessDomain; label: string; icon: string; description: string }[] = [
+    { id: 'Supermarket', label: 'سوبرماركت ومواد غذائية', icon: 'bi-basket2-fill', description: 'أغذية، مشروبات، معلبات، منظفات، مجمدات' },
+    { id: 'Restaurant', label: 'مطاعم ومأكولات وكافيهات', icon: 'bi-cup-hot-fill', description: 'وجبات، سندوتشات، مشروبات، حلويات' },
+    { id: 'Pharmacy', label: 'صيدلية وعناية طبية', icon: 'bi-capsule', description: 'أدوية، فيتامينات، مستحضرات تجميل، أجهزة طبية' },
+    { id: 'AutoParts', label: 'قطع غيار سيارات وورش', icon: 'bi-gear-wide-connected', description: 'قطع غيار، إطارات، بطاريات، فلاتر وزيوت' },
+    { id: 'Electronics', label: 'إلكترونيات وأجهزة منزلية', icon: 'bi-tv-fill', description: 'شاشات، هواتف، أجهزة مطبخ، لابتوبات، كابلات' },
+    { id: 'GeneralRetail', label: 'تجارة عامة وتوريدات وخدمات', icon: 'bi-shop', description: 'أدوات، ملابس، خدمات، توريدات ومقاولات' },
+  ];
+
   // Product Form Modal
   showProductModal = signal<boolean>(false);
   isEditingProduct = signal<boolean>(false);
   productForm = {
     id: 0,
     categoryId: 1,
+    domain: 'Supermarket' as BusinessDomain,
     nameAr: '',
     nameEn: '',
     description: '',
+    descriptionEn: '',
     imageUrl: '',
     secondaryImageUrl: '',
     images: [] as { id?: number; imageUrl: string; isPrimary: boolean; displayOrder: number }[],
-    pricingType: 'ByWeight' as PricingType,
+    brand: '',
+    sku: '',
+    barcode: '',
+    pricingType: 'FixedPerUnit' as PricingType,
     pricePerUnit: 0,
+    originalPrice: null as number | null,
     pricePerKg: 0 as number | undefined,
     averageUnitWeightGrams: 500 as number | undefined,
     allowOrderByPieces: true,
-    allowOrderByWeight: true,
-    preparationTimeMinutes: 25,
+    allowOrderByWeight: false,
+    preparationTimeMinutes: 0,
     allergyNotice: '',
     displayOrder: 0,
     isAvailable: true,
+    stockQuantity: 100 as number | null,
+    specificationsJson: '',
     preparationOptionGroupIds: [] as number[],
-    modifierGroupIds: [] as number[]
+    modifierGroupIds: [] as number[],
+
+    // Domain Specific Presets & Key-Value Specs
+    unitSize: '',
+    originCountry: '',
+    storageType: '',
+    activeIngredient: '',
+    dosageForm: '',
+    requiresPrescription: false,
+    oemNumber: '',
+    compatibleVehicles: '',
+    partCondition: 'جديد أصلي',
+    warrantyYears: '',
+    powerVoltage: '',
+    customSpecs: [] as { key: string; value: string }[]
   };
+
+  // Quick Add Modifier / Options inside Product Modal
+  showQuickModifierPanel = signal<boolean>(false);
+  quickModifierMode: 'new_group' | 'add_to_existing' = 'new_group';
+  quickSelectedGroupId: number = 0;
+  quickGroupNameAr = '';
+  quickGroupType: 'single' | 'multiple' = 'single';
+  quickGroupIsRequired = false;
+  quickGroupOptions: { nameAr: string; price: number }[] = [
+    { nameAr: '', price: 0 }
+  ];
+  quickExistingOptionNameAr = '';
+  quickExistingOptionPrice = 0;
+  isSavingQuickModifier = signal<boolean>(false);
 
   // Category Form Modal
   showCategoryModal = signal<boolean>(false);
@@ -125,7 +199,10 @@ export class AdminCatalogComponent implements OnInit {
     nameAr: '',
     nameEn: '',
     description: '',
+    descriptionEn: '',
     imageUrl: '',
+    iconName: 'bi-grid-fill',
+    domain: 'Supermarket' as BusinessDomain,
     displayOrder: 0,
     isActive: true
   };
@@ -137,41 +214,118 @@ export class AdminCatalogComponent implements OnInit {
   loadAll() {
     this.isLoading.set(true);
     this.adminService.getCategories().subscribe(cats => this.categories.set(cats || []));
-    this.adminService.getProducts().subscribe(prods => {
-      this.products.set(prods || []);
-      this.isLoading.set(false);
-    });
+    this.loadProducts(1);
     this.adminService.getPreparationGroups().subscribe(groups => this.prepGroups.set(groups || []));
     this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+  }
+
+  loadProducts(page: number = 1) {
+    this.pageIndex.set(page);
+    this.isLoadingProducts.set(true);
+    this.adminService.getProducts({
+      categoryId: this.categoryFilter(),
+      search: this.productSearch().trim() || undefined,
+      page: page,
+      pageSize: this.pageSize()
+    }).subscribe({
+      next: (res) => {
+        this.products.set(res?.items || []);
+        this.totalProductsCount.set(res?.totalCount || 0);
+        this.totalPages.set(res?.totalPages || Math.ceil((res?.totalCount || 0) / this.pageSize()) || 1);
+        this.isLoadingProducts.set(false);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.isLoadingProducts.set(false);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onProductSearchChange(val: string) {
+    this.productSearch.set(val);
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.loadProducts(1);
+    }, 300);
+  }
+
+  onCategoryFilterChange(catId: any) {
+    const parsed = (catId === 'null' || catId === null || catId === '') ? null : Number(catId);
+    this.categoryFilter.set(parsed);
+    this.loadProducts(1);
+  }
+
+  onPageSizeChange(size: any) {
+    this.pageSize.set(Number(size));
+    this.loadProducts(1);
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages() && page !== this.pageIndex()) {
+      this.loadProducts(page);
+    }
   }
 
   openNewProductModal() {
     this.isEditingProduct.set(false);
     this.productImages = [];
-    const firstCat = this.categories()[0]?.id || 1;
+    const firstCat = this.categories()[0];
+    const catId = firstCat?.id || 1;
+    const catDomain = firstCat?.domain || 'Supermarket';
     this.productForm = {
       id: 0,
-      categoryId: firstCat,
+      categoryId: catId,
+      domain: catDomain,
       nameAr: '',
       nameEn: '',
       description: '',
+      descriptionEn: '',
       imageUrl: '',
       secondaryImageUrl: '',
       images: [],
-      pricingType: 'ByWeight',
+      brand: '',
+      sku: '',
+      barcode: '',
+      pricingType: 'FixedPerUnit',
       pricePerUnit: 0,
-      pricePerKg: 150,
-      averageUnitWeightGrams: 500,
+      originalPrice: null,
+      pricePerKg: undefined,
+      averageUnitWeightGrams: undefined,
       allowOrderByPieces: true,
-      allowOrderByWeight: true,
-      preparationTimeMinutes: 25,
+      allowOrderByWeight: false,
+      preparationTimeMinutes: 0,
       allergyNotice: '',
       displayOrder: 0,
       isAvailable: true,
-      preparationOptionGroupIds: [] as number[],
-      modifierGroupIds: [] as number[]
+      stockQuantity: 100,
+      specificationsJson: '',
+      preparationOptionGroupIds: [],
+      modifierGroupIds: [],
+      unitSize: '',
+      originCountry: '',
+      storageType: '',
+      activeIngredient: '',
+      dosageForm: '',
+      requiresPrescription: false,
+      oemNumber: '',
+      compatibleVehicles: '',
+      partCondition: 'جديد أصلي',
+      warrantyYears: '',
+      powerVoltage: '',
+      customSpecs: []
     };
+    this.showQuickModifierPanel.set(false);
     this.showProductModal.set(true);
+  }
+
+  onProductCategoryChange(catId: any) {
+    const num = Number(catId);
+    this.productForm.categoryId = num;
+    const cat = this.categories().find(c => c.id === num);
+    if (cat?.domain) {
+      this.productForm.domain = cat.domain;
+    }
   }
 
   openEditProductModal(prod: Product) {
@@ -207,17 +361,26 @@ export class AdminCatalogComponent implements OnInit {
     }
     this.productImages = imgs;
 
+    const cat = this.categories().find(c => c.id === prod.categoryId);
+    const domain = prod.domain || cat?.domain || 'Supermarket';
+
     this.productForm = {
       id: prod.id,
       categoryId: prod.categoryId,
+      domain: domain,
       nameAr: prod.nameAr,
       nameEn: prod.nameEn || '',
       description: prod.description || '',
+      descriptionEn: prod.descriptionEn || '',
       imageUrl: prod.imageUrl || '',
       secondaryImageUrl: prod.secondaryImageUrl || '',
       images: imgs,
+      brand: prod.brand || '',
+      sku: prod.sku || '',
+      barcode: prod.barcode || '',
       pricingType: prod.pricingType,
       pricePerUnit: prod.pricePerUnit,
+      originalPrice: prod.originalPrice || null,
       pricePerKg: prod.pricePerKg || prod.pricePerUnit,
       averageUnitWeightGrams: prod.averageUnitWeightGrams || 500,
       allowOrderByPieces: prod.allowOrderByPieces,
@@ -226,11 +389,237 @@ export class AdminCatalogComponent implements OnInit {
       allergyNotice: prod.allergyNotice || '',
       displayOrder: prod.displayOrder,
       isAvailable: prod.isAvailable,
+      stockQuantity: prod.stockQuantity ?? 100,
+      specificationsJson: prod.specificationsJson || '',
       preparationOptionGroupIds: prod.preparationGroups?.map(g => g.id) || [],
-      modifierGroupIds: prod.modifierGroups?.map(g => g.id) || []
+      modifierGroupIds: prod.modifierGroups?.map(g => g.id) || [],
+      unitSize: '',
+      originCountry: '',
+      storageType: '',
+      activeIngredient: '',
+      dosageForm: '',
+      requiresPrescription: false,
+      oemNumber: '',
+      compatibleVehicles: '',
+      partCondition: 'جديد أصلي',
+      warrantyYears: '',
+      powerVoltage: '',
+      customSpecs: []
     };
+
+    this.parseSpecificationsJson(prod.specificationsJson);
     this.syncProductImagesToForm();
+    this.showQuickModifierPanel.set(false);
     this.showProductModal.set(true);
+  }
+
+  // Specifications Parsing & Building
+  addCustomSpec() {
+    this.productForm.customSpecs.push({ key: '', value: '' });
+  }
+
+  removeCustomSpec(index: number) {
+    this.productForm.customSpecs.splice(index, 1);
+  }
+
+  buildSpecificationsJson(): string {
+    const specs: { [key: string]: any } = {};
+
+    if (this.productForm.unitSize?.trim()) specs['unitSize'] = this.productForm.unitSize.trim();
+    if (this.productForm.originCountry?.trim()) specs['originCountry'] = this.productForm.originCountry.trim();
+    if (this.productForm.storageType?.trim()) specs['storageType'] = this.productForm.storageType.trim();
+    if (this.productForm.activeIngredient?.trim()) specs['activeIngredient'] = this.productForm.activeIngredient.trim();
+    if (this.productForm.dosageForm?.trim()) specs['dosageForm'] = this.productForm.dosageForm.trim();
+    if (this.productForm.requiresPrescription) specs['requiresPrescription'] = 'نعم - يلزم وصفة طبية';
+    if (this.productForm.oemNumber?.trim()) specs['oemNumber'] = this.productForm.oemNumber.trim();
+    if (this.productForm.compatibleVehicles?.trim()) specs['compatibleVehicles'] = this.productForm.compatibleVehicles.trim();
+    if (this.productForm.partCondition?.trim()) specs['partCondition'] = this.productForm.partCondition.trim();
+    if (this.productForm.warrantyYears?.trim()) specs['warrantyYears'] = this.productForm.warrantyYears.trim();
+    if (this.productForm.powerVoltage?.trim()) specs['powerVoltage'] = this.productForm.powerVoltage.trim();
+
+    if (this.productForm.customSpecs && this.productForm.customSpecs.length > 0) {
+      for (const row of this.productForm.customSpecs) {
+        if (row.key?.trim() && row.value?.trim()) {
+          specs[row.key.trim()] = row.value.trim();
+        }
+      }
+    }
+
+    return Object.keys(specs).length > 0 ? JSON.stringify(specs) : '';
+  }
+
+  parseSpecificationsJson(jsonStr?: string) {
+    this.productForm.unitSize = '';
+    this.productForm.originCountry = '';
+    this.productForm.storageType = '';
+    this.productForm.activeIngredient = '';
+    this.productForm.dosageForm = '';
+    this.productForm.requiresPrescription = false;
+    this.productForm.oemNumber = '';
+    this.productForm.compatibleVehicles = '';
+    this.productForm.partCondition = 'جديد أصلي';
+    this.productForm.warrantyYears = '';
+    this.productForm.powerVoltage = '';
+    this.productForm.customSpecs = [];
+
+    if (!jsonStr) return;
+
+    try {
+      const obj = JSON.parse(jsonStr);
+      if (typeof obj === 'object' && obj !== null) {
+        if (obj['unitSize']) this.productForm.unitSize = obj['unitSize'];
+        if (obj['originCountry']) this.productForm.originCountry = obj['originCountry'];
+        if (obj['storageType']) this.productForm.storageType = obj['storageType'];
+        if (obj['activeIngredient']) this.productForm.activeIngredient = obj['activeIngredient'];
+        if (obj['dosageForm']) this.productForm.dosageForm = obj['dosageForm'];
+        if (obj['requiresPrescription']) this.productForm.requiresPrescription = true;
+        if (obj['oemNumber']) this.productForm.oemNumber = obj['oemNumber'];
+        if (obj['compatibleVehicles']) this.productForm.compatibleVehicles = obj['compatibleVehicles'];
+        if (obj['partCondition']) this.productForm.partCondition = obj['partCondition'];
+        if (obj['warrantyYears']) this.productForm.warrantyYears = obj['warrantyYears'];
+        if (obj['powerVoltage']) this.productForm.powerVoltage = obj['powerVoltage'];
+
+        const standardKeys = new Set([
+          'unitSize', 'originCountry', 'storageType', 'activeIngredient',
+          'dosageForm', 'requiresPrescription', 'oemNumber', 'compatibleVehicles',
+          'partCondition', 'warrantyYears', 'powerVoltage', 'category'
+        ]);
+
+        for (const [k, v] of Object.entries(obj)) {
+          if (!standardKeys.has(k) && typeof v === 'string' && v.trim()) {
+            this.productForm.customSpecs.push({ key: k, value: v.trim() });
+          }
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  // Quick Add Options & Modifiers Methods
+  toggleQuickModifierPanel() {
+    this.showQuickModifierPanel.update(v => !v);
+    if (this.showQuickModifierPanel()) {
+      this.resetQuickModifierForm();
+    }
+  }
+
+  resetQuickModifierForm() {
+    this.quickGroupNameAr = '';
+    this.quickGroupType = 'single';
+    this.quickGroupIsRequired = false;
+    this.quickGroupOptions = [{ nameAr: '', price: 0 }];
+    this.quickSelectedGroupId = this.modifierGroups()[0]?.id || 0;
+    this.quickExistingOptionNameAr = '';
+    this.quickExistingOptionPrice = 0;
+  }
+
+  addQuickOptionRow() {
+    this.quickGroupOptions.push({ nameAr: '', price: 0 });
+  }
+
+  removeQuickOptionRow(index: number) {
+    if (this.quickGroupOptions.length > 1) {
+      this.quickGroupOptions.splice(index, 1);
+    }
+  }
+
+  saveQuickModifierGroup() {
+    const name = this.quickGroupNameAr.trim();
+    if (!name) {
+      this.toast.error('يرجى كتابة اسم مجموعة الخيارات (مثال: الحجم، الإضافات، اللون...)');
+      return;
+    }
+
+    const validOptions = this.quickGroupOptions.filter(o => o.nameAr.trim().length > 0);
+    if (validOptions.length === 0) {
+      this.toast.error('يرجى إضافة خيار واحد على الأقل داخل المجموعة (مثال: حجم كبير، صوص خاص...)');
+      return;
+    }
+
+    this.isSavingQuickModifier.set(true);
+
+    const groupDto = {
+      nameAr: name,
+      isRequired: this.quickGroupIsRequired,
+      minSelection: this.quickGroupIsRequired ? 1 : 0,
+      maxSelection: this.quickGroupType === 'single' ? 1 : 10,
+      displayOrder: this.modifierGroups().length + 1
+    };
+
+    this.adminService.createModifierGroup(groupDto).subscribe({
+      next: (createdGroup) => {
+        const optionObservables = validOptions.map((opt, idx) =>
+          this.adminService.createModifierOption(createdGroup.id, {
+            nameAr: opt.nameAr.trim(),
+            price: Number(opt.price) || 0,
+            displayOrder: idx + 1,
+            isAvailable: true
+          })
+        );
+
+        forkJoin(optionObservables).subscribe({
+          next: () => {
+            this.adminService.getModifierGroups().subscribe(groups => {
+              this.modifierGroups.set(groups || []);
+              if (!this.productForm.modifierGroupIds.includes(createdGroup.id)) {
+                this.productForm.modifierGroupIds.push(createdGroup.id);
+              }
+              this.isSavingQuickModifier.set(false);
+              this.showQuickModifierPanel.set(false);
+              this.toast.success(`تم إنشاء مجموعة "${name}" وربطها بالصنف بنجاح! 🎉`);
+            });
+          },
+          error: () => {
+            this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+            this.productForm.modifierGroupIds.push(createdGroup.id);
+            this.isSavingQuickModifier.set(false);
+            this.showQuickModifierPanel.set(false);
+            this.toast.success(`تم إنشاء المجموعة وربطها بالصنف.`);
+          }
+        });
+      },
+      error: () => {
+        this.isSavingQuickModifier.set(false);
+        this.toast.error('حدث خطأ أثناء إنشاء مجموعة الخيارات.');
+      }
+    });
+  }
+
+  saveQuickOptionToExisting() {
+    const optName = this.quickExistingOptionNameAr.trim();
+    if (!this.quickSelectedGroupId) {
+      this.toast.error('يرجى اختيار المجموعة لإضافة الخيار إليها');
+      return;
+    }
+    if (!optName) {
+      this.toast.error('يرجى كتابة اسم الإضافة أو الخيار');
+      return;
+    }
+
+    this.isSavingQuickModifier.set(true);
+    this.adminService.createModifierOption(this.quickSelectedGroupId, {
+      nameAr: optName,
+      price: Number(this.quickExistingOptionPrice) || 0,
+      displayOrder: 99,
+      isAvailable: true
+    }).subscribe({
+      next: () => {
+        this.adminService.getModifierGroups().subscribe(groups => {
+          this.modifierGroups.set(groups || []);
+          if (!this.productForm.modifierGroupIds.includes(this.quickSelectedGroupId)) {
+            this.productForm.modifierGroupIds.push(this.quickSelectedGroupId);
+          }
+          this.isSavingQuickModifier.set(false);
+          this.showQuickModifierPanel.set(false);
+          this.toast.success(`تم إضافة الخيار "${optName}" وربطه بالصنف بنجاح! 🎉`);
+        });
+      },
+      error: () => {
+        this.isSavingQuickModifier.set(false);
+        this.toast.error('حدث خطأ أثناء إضافة الخيار.');
+      }
+    });
   }
 
   syncProductImagesToForm() {
@@ -270,12 +659,40 @@ export class AdminCatalogComponent implements OnInit {
       this.productForm.averageUnitWeightGrams = undefined;
     }
 
-    if (!this.productForm.preparationTimeMinutes || this.productForm.preparationTimeMinutes < 1) {
-      this.productForm.preparationTimeMinutes = 25;
-    }
+    // Build specs JSON from domain inputs + custom specs
+    this.productForm.specificationsJson = this.buildSpecificationsJson();
+
+    const payload: any = {
+      categoryId: this.productForm.categoryId,
+      nameAr: this.productForm.nameAr.trim(),
+      nameEn: this.productForm.nameEn?.trim() || null,
+      description: this.productForm.description?.trim() || null,
+      descriptionEn: this.productForm.descriptionEn?.trim() || null,
+      imageUrl: this.productForm.imageUrl,
+      secondaryImageUrl: this.productForm.secondaryImageUrl,
+      images: this.productForm.images,
+      brand: this.productForm.brand?.trim() || null,
+      sku: this.productForm.sku?.trim() || null,
+      barcode: this.productForm.barcode?.trim() || null,
+      pricingType: this.productForm.pricingType,
+      pricePerUnit: Number(this.productForm.pricePerUnit) || 0,
+      originalPrice: this.productForm.originalPrice ? Number(this.productForm.originalPrice) : null,
+      pricePerKg: this.productForm.pricePerKg ? Number(this.productForm.pricePerKg) : null,
+      averageUnitWeightGrams: this.productForm.averageUnitWeightGrams ? Number(this.productForm.averageUnitWeightGrams) : null,
+      allowOrderByPieces: this.productForm.allowOrderByPieces,
+      allowOrderByWeight: this.productForm.allowOrderByWeight,
+      preparationTimeMinutes: Number(this.productForm.preparationTimeMinutes) || 0,
+      allergyNotice: this.productForm.allergyNotice?.trim() || null,
+      specificationsJson: this.productForm.specificationsJson || null,
+      displayOrder: Number(this.productForm.displayOrder) || 0,
+      isAvailable: this.productForm.isAvailable,
+      stockQuantity: this.productForm.stockQuantity !== null && this.productForm.stockQuantity !== undefined ? Number(this.productForm.stockQuantity) : null,
+      preparationOptionGroupIds: this.productForm.preparationOptionGroupIds,
+      modifierGroupIds: this.productForm.modifierGroupIds
+    };
 
     if (this.isEditingProduct()) {
-      this.adminService.updateProduct(this.productForm.id, this.productForm).subscribe({
+      this.adminService.updateProduct(this.productForm.id, payload).subscribe({
         next: () => {
           this.toast.success('تم حفظ وتحديث الصنف بنجاح.');
           this.showProductModal.set(false);
@@ -284,7 +701,7 @@ export class AdminCatalogComponent implements OnInit {
         error: () => this.toast.error('حدث خطأ أثناء تعديل الصنف.')
       });
     } else {
-      this.adminService.createProduct(this.productForm).subscribe({
+      this.adminService.createProduct(payload).subscribe({
         next: () => {
           this.toast.success('تم إضافة الصنف بنجاح.');
           this.showProductModal.set(false);
@@ -465,7 +882,10 @@ export class AdminCatalogComponent implements OnInit {
       nameAr: '',
       nameEn: '',
       description: '',
+      descriptionEn: '',
       imageUrl: '',
+      iconName: 'bi-grid-fill',
+      domain: 'Supermarket',
       displayOrder: this.categories().length + 1,
       isActive: true
     };
@@ -479,7 +899,10 @@ export class AdminCatalogComponent implements OnInit {
       nameAr: cat.nameAr,
       nameEn: cat.nameEn || '',
       description: cat.description || '',
+      descriptionEn: cat.descriptionEn || '',
       imageUrl: cat.imageUrl || '',
+      iconName: cat.iconName || 'bi-grid-fill',
+      domain: cat.domain || 'Supermarket',
       displayOrder: cat.displayOrder,
       isActive: cat.isActive
     };
@@ -492,8 +915,20 @@ export class AdminCatalogComponent implements OnInit {
       return;
     }
 
+    const payload: any = {
+      nameAr: this.categoryForm.nameAr.trim(),
+      nameEn: this.categoryForm.nameEn?.trim() || null,
+      description: this.categoryForm.description?.trim() || null,
+      descriptionEn: this.categoryForm.descriptionEn?.trim() || null,
+      imageUrl: this.categoryForm.imageUrl || null,
+      iconName: this.categoryForm.iconName || 'bi-grid-fill',
+      domain: this.categoryForm.domain || 'Supermarket',
+      displayOrder: Number(this.categoryForm.displayOrder) || 0,
+      isActive: this.categoryForm.isActive
+    };
+
     if (this.isEditingCategory()) {
-      this.adminService.updateCategory(this.categoryForm.id, this.categoryForm).subscribe({
+      this.adminService.updateCategory(this.categoryForm.id, payload).subscribe({
         next: () => {
           this.toast.success('تم تعديل القسم بنجاح.');
           this.showCategoryModal.set(false);
@@ -505,7 +940,7 @@ export class AdminCatalogComponent implements OnInit {
         }
       });
     } else {
-      this.adminService.createCategory(this.categoryForm).subscribe({
+      this.adminService.createCategory(payload).subscribe({
         next: () => {
           this.toast.success('تم إضافة القسم بنجاح.');
           this.showCategoryModal.set(false);
@@ -577,6 +1012,169 @@ export class AdminCatalogComponent implements OnInit {
     return this.products().filter(p => p.categoryId === catId).length;
   }
 
+  // Modifier Groups Management
+  openNewModifierGroupModal() {
+    this.isEditingModifierGroup.set(false);
+    this.modifierGroupForm = {
+      id: 0,
+      nameAr: '',
+      nameEn: '',
+      isRequired: false,
+      minSelection: 0,
+      maxSelection: 1,
+      displayOrder: (this.modifierGroups()?.length || 0) + 1
+    };
+    this.showModifierGroupModal.set(true);
+  }
+
+  openEditModifierGroupModal(grp: ModifierGroup) {
+    this.isEditingModifierGroup.set(true);
+    this.modifierGroupForm = {
+      id: grp.id,
+      nameAr: grp.nameAr,
+      nameEn: grp.nameEn || '',
+      isRequired: grp.isRequired,
+      minSelection: grp.minSelection,
+      maxSelection: grp.maxSelection,
+      displayOrder: grp.displayOrder
+    };
+    this.showModifierGroupModal.set(true);
+  }
+
+  saveModifierGroup() {
+    if (!this.modifierGroupForm.nameAr.trim()) {
+      this.toast.error('يرجى إدخال اسم مجموعة الخيارات والمواصفات.');
+      return;
+    }
+
+    if (this.isEditingModifierGroup()) {
+      this.adminService.updateModifierGroup(this.modifierGroupForm.id, {
+        nameAr: this.modifierGroupForm.nameAr.trim(),
+        nameEn: this.modifierGroupForm.nameEn.trim(),
+        isRequired: this.modifierGroupForm.isRequired,
+        minSelection: Number(this.modifierGroupForm.minSelection) || 0,
+        maxSelection: Number(this.modifierGroupForm.maxSelection) || 1,
+        displayOrder: this.modifierGroupForm.displayOrder
+      }).subscribe({
+        next: () => {
+          this.toast.success('تم تعديل مجموعة الخيارات بنجاح!');
+          this.showModifierGroupModal.set(false);
+          this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+        },
+        error: () => this.toast.error('فشل حفظ التعديلات.')
+      });
+    } else {
+      this.adminService.createModifierGroup({
+        nameAr: this.modifierGroupForm.nameAr.trim(),
+        nameEn: this.modifierGroupForm.nameEn.trim(),
+        isRequired: this.modifierGroupForm.isRequired,
+        minSelection: Number(this.modifierGroupForm.minSelection) || 0,
+        maxSelection: Number(this.modifierGroupForm.maxSelection) || 1,
+        displayOrder: this.modifierGroupForm.displayOrder
+      }).subscribe({
+        next: () => {
+          this.toast.success('تمت إضافة مجموعة الخيارات بنجاح!');
+          this.showModifierGroupModal.set(false);
+          this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+        },
+        error: () => this.toast.error('فشل في إضافة مجموعة الخيارات.')
+      });
+    }
+  }
+
+  deleteModifierGroup(grp: ModifierGroup) {
+    if (!confirm(`هل أنت متأكد من حذف مجموعة الخيارات "${grp.nameAr}" وجميع خياراتها؟`)) return;
+
+    this.adminService.deleteModifierGroup(grp.id).subscribe({
+      next: () => {
+        this.toast.success('تم حذف مجموعة الخيارات بنجاح.');
+        this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+      },
+      error: () => this.toast.error('فشل في حذف مجموعة الخيارات.')
+    });
+  }
+
+  // Modifier Options Management
+  openNewModifierOptionModal(group: ModifierGroup) {
+    this.isEditingModifierOption.set(false);
+    this.targetModifierGroupId.set(group.id);
+    this.modifierOptionForm = {
+      id: 0,
+      groupId: group.id,
+      nameAr: '',
+      nameEn: '',
+      price: 0,
+      isAvailable: true,
+      displayOrder: (group.options?.length || 0) + 1
+    };
+    this.showModifierOptionModal.set(true);
+  }
+
+  openEditModifierOptionModal(opt: ModifierOption) {
+    this.isEditingModifierOption.set(true);
+    this.targetModifierGroupId.set(opt.groupId);
+    this.modifierOptionForm = {
+      id: opt.id,
+      groupId: opt.groupId,
+      nameAr: opt.nameAr,
+      nameEn: opt.nameEn || '',
+      price: opt.price,
+      isAvailable: opt.isAvailable,
+      displayOrder: opt.displayOrder
+    };
+    this.showModifierOptionModal.set(true);
+  }
+
+  saveModifierOption() {
+    if (!this.modifierOptionForm.nameAr.trim()) {
+      this.toast.error('يرجى إدخال اسم الخيار أو الملحق.');
+      return;
+    }
+
+    if (this.isEditingModifierOption()) {
+      this.adminService.updateModifierOption(this.modifierOptionForm.id, {
+        nameAr: this.modifierOptionForm.nameAr.trim(),
+        nameEn: this.modifierOptionForm.nameEn.trim(),
+        price: Number(this.modifierOptionForm.price) || 0,
+        isAvailable: this.modifierOptionForm.isAvailable,
+        displayOrder: this.modifierOptionForm.displayOrder
+      }).subscribe({
+        next: () => {
+          this.toast.success('تم تعديل الخيار بنجاح!');
+          this.showModifierOptionModal.set(false);
+          this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+        },
+        error: () => this.toast.error('فشل في حفظ التعديلات.')
+      });
+    } else {
+      this.adminService.createModifierOption(this.targetModifierGroupId(), {
+        nameAr: this.modifierOptionForm.nameAr.trim(),
+        nameEn: this.modifierOptionForm.nameEn.trim(),
+        price: Number(this.modifierOptionForm.price) || 0,
+        displayOrder: this.modifierOptionForm.displayOrder
+      }).subscribe({
+        next: () => {
+          this.toast.success('تمت إضافة الخيار بنجاح!');
+          this.showModifierOptionModal.set(false);
+          this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+        },
+        error: () => this.toast.error('فشل في إضافة الخيار.')
+      });
+    }
+  }
+
+  deleteModifierOption(opt: ModifierOption) {
+    if (!confirm(`هل أنت متأكد من حذف الخيار "${opt.nameAr}"؟`)) return;
+
+    this.adminService.deleteModifierOption(opt.id).subscribe({
+      next: () => {
+        this.toast.success('تم حذف الخيار بنجاح.');
+        this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
+      },
+      error: () => this.toast.error('فشل في حذف الخيار.')
+    });
+  }
+
   // Preparation Methods Management
   openNewPrepOptionModal(group: PreparationOptionGroup) {
     this.isEditingPrepOption.set(false);
@@ -610,7 +1208,7 @@ export class AdminCatalogComponent implements OnInit {
 
   savePrepOption() {
     if (!this.prepOptionForm.nameAr.trim()) {
-      this.toast.error('يرجى إدخال اسم طريقة الطهي.');
+      this.toast.error('يرجى إدخال اسم الخدمة.');
       return;
     }
 
@@ -623,7 +1221,7 @@ export class AdminCatalogComponent implements OnInit {
         displayOrder: this.prepOptionForm.displayOrder
       }).subscribe({
         next: () => {
-          this.toast.success('تم تعديل طريقة الطهي وتكلفتها بنجاح!');
+          this.toast.success('تم تعديل الخدمة وتكلفتها بنجاح!');
           this.showPrepOptionModal.set(false);
           this.adminService.getPreparationGroups().subscribe(groups => this.prepGroups.set(groups || []));
         },
@@ -637,24 +1235,24 @@ export class AdminCatalogComponent implements OnInit {
         displayOrder: this.prepOptionForm.displayOrder
       }).subscribe({
         next: () => {
-          this.toast.success('تمت إضافة طريقة الطهي بنجاح!');
+          this.toast.success('تمت إضافة الخدمة بنجاح!');
           this.showPrepOptionModal.set(false);
           this.adminService.getPreparationGroups().subscribe(groups => this.prepGroups.set(groups || []));
         },
-        error: () => this.toast.error('فشل في إضافة طريقة الطهي.')
+        error: () => this.toast.error('فشل في إضافة الخدمة.')
       });
     }
   }
 
   deletePrepOption(opt: PreparationOption) {
-    if (!confirm(`هل أنت متأكد من حذف طريقة الطهي "${opt.nameAr}"؟`)) return;
+    if (!confirm(`هل أنت متأكد من حذف الخدمة "${opt.nameAr}"؟`)) return;
 
     this.adminService.deletePreparationOption(opt.id).subscribe({
       next: () => {
-        this.toast.success('تم حذف طريقة الطهي بنجاح.');
+        this.toast.success('تم حذف الخدمة بنجاح.');
         this.adminService.getPreparationGroups().subscribe(groups => this.prepGroups.set(groups || []));
       },
-      error: () => this.toast.error('فشل حذف طريقة الطهي.')
+      error: () => this.toast.error('فشل حذف الخدمة.')
     });
   }
 }

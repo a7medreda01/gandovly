@@ -1,62 +1,67 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { CartService } from '../../../core/services/cart.service';
+import { SettingsService } from '../../../core/services/settings.service';
+import { WishlistService } from '../../../core/services/wishlist.service';
 
 @Component({
   selector: 'app-mobile-bottom-nav',
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <nav
-      class="ios-dock-nav d-md-none"
-      [class.dock-shrunk]="isScrollingDown"
-      aria-label="شريط التنقل السفلي"
-    >
-      <div class="dock-glass-capsule">
-        <!-- Home -->
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="dock-tab">
-          <div class="tab-icon">
-            <i class="bi bi-house-door-fill"></i>
-          </div>
-          <span class="tab-label">الرئيسية</span>
-        </a>
+    @if (!isCheckoutPage()) {
+      <nav
+        class="ios-dock-nav d-md-none"
+        [class.dock-shrunk]="isScrollingDown"
+        aria-label="شريط التنقل السفلي"
+      >
+        <div class="dock-glass-capsule">
+          <!-- Home -->
+          <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="dock-tab">
+            <div class="tab-icon">
+              <i class="bi bi-house-door-fill"></i>
+            </div>
+            <span class="tab-label">الرئيسية</span>
+          </a>
 
-        <!-- Menu / Categories -->
-        <a routerLink="/menu" routerLinkActive="active" class="dock-tab">
-          <div class="tab-icon">
-            <i class="bi bi-grid-fill"></i>
-          </div>
-          <span class="tab-label">المنيو</span>
-        </a>
+          <!-- Products / Categories -->
+          <a routerLink="/menu" routerLinkActive="active" class="dock-tab">
+            <div class="tab-icon">
+              <i class="bi bi-grid-fill"></i>
+            </div>
+            <span class="tab-label">{{ settingsService.settings().labelProducts || 'المنتجات' }}</span>
+          </a>
 
-        <!-- Cart (Center Highlight) -->
-        <button 
-          type="button" 
-          class="dock-tab cart-tab" 
-          [class.has-items]="cartService.totalItemsCount() > 0"
-          [class.cart-bump]="cartService.cartBumped()"
-          (click)="cartService.toggleDrawer()" 
-          title="سلة الطلبات"
-        >
-          <div class="tab-icon cart-icon-box">
-            <i class="bi bi-bag-check-fill"></i>
-            @if (cartService.totalItemsCount() > 0) {
-              <span class="cart-bubble">{{ cartService.totalItemsCount() }}</span>
-            }
-          </div>
-          <span class="tab-label">السلة</span>
-        </button>
+          <!-- Cart (Center Highlight) -->
+          <button 
+            type="button" 
+            class="dock-tab cart-tab" 
+            [class.has-items]="cartService.totalItemsCount() > 0"
+            [class.cart-bump]="cartService.cartBumped()"
+            (click)="cartService.toggleDrawer()" 
+            title="سلة الطلبات"
+          >
+            <div class="tab-icon cart-icon-box">
+              <i class="bi bi-bag-check-fill"></i>
+              @if (cartService.totalItemsCount() > 0) {
+                <span class="cart-bubble">{{ cartService.totalItemsCount() }}</span>
+              }
+            </div>
+            <span class="tab-label">{{ settingsService.settings().labelCart || 'السلة' }}</span>
+          </button>
 
-        <!-- Account & Orders -->
-        <a routerLink="/account" routerLinkActive="active" class="dock-tab">
-          <div class="tab-icon">
-            <i class="bi bi-person-circle"></i>
-          </div>
-          <span class="tab-label">طلباتي</span>
-        </a>
-      </div>
-    </nav>
+          <!-- Account & Orders -->
+          <a routerLink="/account" routerLinkActive="active" class="dock-tab">
+            <div class="tab-icon">
+              <i class="bi bi-person-circle"></i>
+            </div>
+            <span class="tab-label">{{ settingsService.settings().labelOrders || 'طلباتي' }}</span>
+          </a>
+        </div>
+      </nav>
+    }
   `,
   styles: [`
     .ios-dock-nav {
@@ -65,19 +70,19 @@ import { CartService } from '../../../core/services/cart.service';
       left: 0;
       right: 0;
       z-index: 1040;
-      padding: 6px 12px 10px;
+      padding: 4px 10px 8px;
       pointer-events: none;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
       &.dock-shrunk {
-        padding: 4px 16px 6px;
-        transform: translateY(4px) scale(0.95);
+        padding: 2px 14px 4px;
+        transform: translateY(4px) scale(0.96);
         opacity: 0.92;
 
         .dock-glass-capsule {
-          padding: 3px 6px;
-          border-radius: 24px;
-          background: rgba(255, 255, 255, 0.72);
+          padding: 2px 4px;
+          border-radius: 20px;
+          background: rgba(255, 255, 255, 0.75);
         }
 
         .tab-label {
@@ -85,7 +90,7 @@ import { CartService } from '../../../core/services/cart.service';
         }
 
         .tab-icon {
-          font-size: 1.15rem;
+          font-size: 1rem;
           margin-bottom: 0;
         }
       }
@@ -93,17 +98,17 @@ import { CartService } from '../../../core/services/cart.service';
 
     .dock-glass-capsule {
       pointer-events: auto;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(28px) saturate(210%);
-      -webkit-backdrop-filter: blur(28px) saturate(210%);
-      border: 1px solid rgba(255, 255, 255, 0.85);
-      box-shadow: 0 8px 32px rgba(10, 25, 41, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
-      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(24px) saturate(200%);
+      -webkit-backdrop-filter: blur(24px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 6px 24px rgba(10, 25, 41, 0.1), 0 1px 4px rgba(0, 0, 0, 0.04);
+      border-radius: 26px;
       display: flex;
       align-items: center;
       justify-content: space-around;
-      padding: 6px 8px;
-      max-width: 400px;
+      padding: 4px 6px;
+      max-width: 320px;
       margin: 0 auto;
       transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -117,24 +122,25 @@ import { CartService } from '../../../core/services/cart.service';
       color: #64748b;
       background: transparent;
       border: none;
-      padding: 4px 8px;
-      border-radius: 18px;
+      padding: 2px 4px;
+      border-radius: 14px;
       transition: all 0.2s ease;
       cursor: pointer;
       flex: 1;
       position: relative;
 
       .tab-icon {
-        font-size: 1.18rem;
+        font-size: 1.05rem;
         line-height: 1;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
         transition: transform 0.2s ease, color 0.2s ease;
       }
 
       .tab-label {
-        font-size: 0.68rem;
+        font-size: 0.62rem;
         font-weight: 700;
         letter-spacing: -0.2px;
+        line-height: 1.2;
         transition: color 0.2s ease;
       }
 
@@ -143,16 +149,27 @@ import { CartService } from '../../../core/services/cart.service';
       }
 
       &.active {
-        color: #00875a;
+        color: var(--primary-color, #00875a);
 
         .tab-icon {
-          transform: translateY(-1px) scale(1.08);
-          color: #00875a;
+          transform: translateY(-1px) scale(1.06);
+          color: var(--primary-color, #00875a);
         }
 
         .tab-label {
-          color: #00875a;
+          color: var(--primary-color, #00875a);
           font-weight: 800;
+        }
+      }
+
+      &.wishlist-tab {
+        &.active, &:has(.bi-heart-fill) {
+          color: #EF4444;
+          .tab-icon { color: #EF4444; }
+          .tab-label { color: #EF4444; font-weight: 800; }
+        }
+        .wishlist-bubble {
+          background: #EF4444;
         }
       }
     }
@@ -161,35 +178,35 @@ import { CartService } from '../../../core/services/cart.service';
       .cart-icon-box {
         position: relative;
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        width: 30px;
-        height: 30px;
+        width: 26px;
+        height: 26px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 2px;
+        margin: 0 auto 1px;
       }
 
       &.has-items {
         .cart-icon-box {
-          background: linear-gradient(135deg, #00875a 0%, #00b388 100%);
+          background: var(--primary-color, #00875a);
           color: #ffffff;
-          width: 30px;
-          height: 30px;
+          width: 26px;
+          height: 26px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: 0 3px 10px rgba(0, 135, 90, 0.35);
+          box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
           transform: none;
 
           i {
             color: #ffffff !important;
-            font-size: 1.05rem;
+            font-size: 0.92rem;
           }
         }
 
         .tab-label {
-          color: #00875a;
+          color: var(--primary-color, #00875a);
           font-weight: 800;
           transform: none;
         }
@@ -246,10 +263,26 @@ import { CartService } from '../../../core/services/cart.service';
   `]
 })
 export class MobileBottomNavComponent {
+  private router = inject(Router);
+  readonly cartService = inject(CartService);
+  readonly settingsService = inject(SettingsService);
+  readonly wishlistService = inject(WishlistService);
   private lastScrollY = 0;
   isScrollingDown = false;
+  currentUrl = signal<string>(typeof window !== 'undefined' ? window.location.pathname : this.router.url);
 
-  constructor(public cartService: CartService) {}
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentUrl.set(event.urlAfterRedirects || event.url);
+    });
+  }
+
+  isCheckoutPage = computed(() => {
+    const url = this.currentUrl().toLowerCase();
+    return url.includes('checkout');
+  });
 
   @HostListener('window:scroll')
   onWindowScroll() {

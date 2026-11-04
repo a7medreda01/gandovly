@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { VisitAnalytics, PeriodTraffic, DailyVisitChartPoint, HourlyTrafficPoint, TopVisitedPage, DeviceBreakdown } from '../../../core/models/models';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
@@ -16,6 +17,11 @@ import { LoadingStateComponent } from '../../../shared/components/loading-state/
 export class AdminAnalyticsComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
 
   isLoading = signal<boolean>(false);
   activePeriod = signal<'today' | 'week' | 'month'>('week');

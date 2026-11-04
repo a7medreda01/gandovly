@@ -17,9 +17,14 @@ export class AdminLoginComponent {
   private readonly toast = inject(NotificationService);
   private readonly router = inject(Router);
 
-  username: string = 'admin';
-  password: string = 'Admin@123';
+  username: string = '';
+  password: string = '';
+  showPassword = signal<boolean>(false);
   isLoading = signal<boolean>(false);
+
+  toggleShowPassword() {
+    this.showPassword.update(v => !v);
+  }
 
   login() {
     if (!this.username.trim() || !this.password.trim()) {

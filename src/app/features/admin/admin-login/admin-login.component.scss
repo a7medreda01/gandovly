@@ -29,18 +29,39 @@
   }
 }
 
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .form-control {
+    width: 100%;
+    padding-left: 2.5rem;
+  }
+
+  .btn-toggle-pass {
+    position: absolute;
+    left: 10px;
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 1.15rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #0e2a47;
+    }
+  }
+}
+
 .btn-block {
   width: 100%;
   padding: 0.85rem;
   font-size: 1rem;
   margin-top: 0.5rem;
-}
-
-.hint-credentials {
-  margin-top: 1.5rem;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  background: #f8fafd;
-  padding: 0.5rem;
-  border-radius: var(--radius-sm);
 }

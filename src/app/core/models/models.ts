@@ -18,6 +18,7 @@ export interface PagedResult<T> {
 }
 
 // Enums
+export type BusinessDomain = 'Supermarket' | 'Restaurant' | 'Pharmacy' | 'AutoParts' | 'Electronics' | 'GeneralRetail';
 export type PricingType = 'FixedPerUnit' | 'ByWeight';
 export type PreparationPricingType = 'AddOn' | 'FinalPrice';
 export type OrderType = 'Delivery' | 'Pickup';
@@ -31,11 +32,14 @@ export type OrderStatus =
   | 'Completed'
   | 'Cancelled'
   | 'Rejected';
-export type PaymentMethod = 'CashOnDelivery' | 'CardOnDelivery' | 'OnlinePayment';
+export type PaymentMethod = 'CashOnDelivery' | 'CardOnDelivery' | 'OnlinePayment' | 'WalletTransfer';
 export type PaymentStatus = 'CashDue' | 'Pending' | 'Paid' | 'Failed' | 'Refunded';
 
 // Settings
 export interface StorefrontSettings {
+  defaultDomain?: BusinessDomain;
+  isMultiDomain?: boolean;
+  businessDomainLabel?: string;
   restaurantName: string;
   tagline: string;
   description: string;
@@ -47,12 +51,22 @@ export interface StorefrontSettings {
   secondaryColor: string;
   accentColor: string;
   surfaceColor: string;
+  textColor?: string;
   phone: string;
   whatsapp: string;
   address: string;
   city: string;
   facebookUrl?: string;
   instagramUrl?: string;
+  tikTokUrl?: string;
+  youTubeUrl?: string;
+  twitterUrl?: string;
+  snapchatUrl?: string;
+  locationUrl?: string;
+  fontFamily?: string;
+  countryCode?: string;
+  phoneCountryCode?: string;
+  cashierWhatsAppNumber?: string;
   currencyCode: string;
   currencySymbol: string;
   timeZone: string;
@@ -71,6 +85,100 @@ export interface StorefrontSettings {
   activePromotionBanner?: string;
   estimatedWeightDisclaimer: string;
   termsAndPrivacyText?: string;
+  vodafoneCashNumber?: string;
+  instaPayAccount?: string;
+
+  // Extended Colors
+  navbarBgColor?: string;
+  navbarTextColor?: string;
+  footerBgColor?: string;
+  footerTextColor?: string;
+  cardBgColor?: string;
+  borderColor?: string;
+  btnPrimaryBg?: string;
+  btnPrimaryText?: string;
+  btnAccentBg?: string;
+  btnAccentText?: string;
+  successColor?: string;
+  errorColor?: string;
+  warningColor?: string;
+
+  // Design & Typography
+  borderRadius?: string;
+  buttonBorderRadius?: string;
+  cardShadowStyle?: string;
+  fontSizeBase?: number;
+
+  // Navbar Brand & Elements
+  navbarBrandMode?: string;
+  showNavbarTagline?: boolean;
+  showWhatsAppInNavbar?: boolean;
+  showPhoneInNavbar?: boolean;
+  showSearchBar?: boolean;
+  showCartBadge?: boolean;
+
+  // FAB
+  showWhatsAppFab?: boolean;
+  fabPosition?: string;
+
+  // Wishlist
+  enableWishlist?: boolean;
+  showWishlistInMobileNav?: boolean;
+  showWishlistInSidebar?: boolean;
+
+  // Homepage Visibility
+  showHeroBanner?: boolean;
+  showCategoriesRow?: boolean;
+  showCategoriesGrid?: boolean;
+  showPromotionStrip?: boolean;
+  showCustomerServiceBar?: boolean;
+  showSocialMediaInFooter?: boolean;
+  showLocationInFooter?: boolean;
+
+  // Mobile Bottom Nav
+  showWhatsAppInMobileNav?: boolean;
+  showCallInMobileNav?: boolean;
+
+  // Product Detail View Mode ('modal' | 'page')
+  productDetailViewMode?: 'modal' | 'page';
+
+  // Checkout
+  checkoutEnableDelivery?: boolean;
+  checkoutEnablePickup?: boolean;
+  checkoutEnableScheduled?: boolean;
+  pickupLocationLabel?: string;
+  pickupLocationAddress?: string;
+  pickupWorkingHours?: string;
+  pickupInstructions?: string;
+
+  paymentEnableCOD?: boolean;
+  paymentEnableWalletTransfer?: boolean;
+  paymentEnableOnlineCard?: boolean;
+  paymentGatewayProvider?: string;
+  paymentGatewayPublicKey?: string;
+
+  checkoutPageTitle?: string;
+  checkoutPageSubtitle?: string;
+  checkoutSubmitBtnText?: string;
+  checkoutSuccessMessage?: string;
+
+  // Custom Labels
+  labelOrder?: string;
+  labelOrders?: string;
+  labelProduct?: string;
+  labelProducts?: string;
+  labelCategory?: string;
+  labelCategories?: string;
+  labelCart?: string;
+  labelDelivery?: string;
+  labelPickup?: string;
+  labelWishlist?: string;
+
+  // Multi-Language
+  languageMode?: string;
+  defaultLanguage?: string;
+  enableEnglish?: boolean;
+
   branches: Branch[];
 }
 
@@ -90,6 +198,7 @@ export interface PreparationOption {
   nameAr: string;
   nameEn?: string;
   description?: string;
+  descriptionEn?: string;
   pricingType: PreparationPricingType;
   price: number;
   isAvailable: boolean;
@@ -101,6 +210,7 @@ export interface PreparationOptionGroup {
   nameAr: string;
   nameEn?: string;
   description?: string;
+  descriptionEn?: string;
   isRequired: boolean;
   maxSelection: number;
   displayOrder: number;
@@ -140,20 +250,27 @@ export interface Product {
   id: number;
   categoryId: number;
   categoryNameAr?: string;
+  domain?: BusinessDomain;
+  brand?: string;
+  sku?: string;
+  barcode?: string;
   nameAr: string;
   nameEn?: string;
   description?: string;
+  descriptionEn?: string;
   imageUrl?: string;
   secondaryImageUrl?: string;
   images?: ProductImage[];
   pricingType: PricingType;
   pricePerUnit: number;
+  originalPrice?: number;
   pricePerKg?: number;
   averageUnitWeightGrams?: number;
   allowOrderByPieces: boolean;
   allowOrderByWeight: boolean;
   preparationTimeMinutes: number;
   allergyNotice?: string;
+  specificationsJson?: string;
   displayOrder: number;
   isAvailable: boolean;
   stockQuantity?: number;
@@ -167,7 +284,10 @@ export interface MenuCategory {
   nameAr: string;
   nameEn?: string;
   description?: string;
+  descriptionEn?: string;
   imageUrl?: string;
+  iconName?: string;
+  domain?: BusinessDomain;
   displayOrder: number;
   isActive: boolean;
   products: Product[];
@@ -208,6 +328,7 @@ export interface CartItem {
   orderMode?: 'pieces' | 'weight';
   selectedPrepOption?: PreparationOption;
   selectedModifiers: ModifierOption[];
+  pipeMeters?: number;
   specialInstructions?: string;
   estimatedWeightGrams?: number;
   estimatedUnitPrice: number;
@@ -221,6 +342,7 @@ export interface CreateOrderLineRequest {
   customWeightGrams?: number;
   preparationOptionId?: number;
   modifierOptionIds: number[];
+  pipeMeters?: number;
   specialInstructions?: string;
 }
 

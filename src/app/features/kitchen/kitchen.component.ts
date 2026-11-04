@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { SettingsService } from '../../core/services/settings.service';
 import { Order, OrderLine, OrderStatus } from '../../core/models/models';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
 import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime } from '../../shared/utils/date-utils';
@@ -17,6 +18,11 @@ import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime }
 export class KitchenComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
 
   orders = signal<Order[]>([]);
   isLoading = signal<boolean>(false);
@@ -192,7 +198,7 @@ export class KitchenComponent implements OnInit, OnDestroy {
   }
 
   updateStatus(order: Order, newStatus: OrderStatus) {
-    this.adminService.updateOrderStatus(order.id, newStatus, 'تحديث من شاشة المطبخ', 'المطبخ').subscribe({
+    this.adminService.updateOrderStatus(order.id, newStatus, 'تحديث من شاشة المستودع والعمليات', 'المستودع').subscribe({
       next: () => {
         this.toast.success(`تم تحديث حالة الطلب #${order.orderNumber} إلى ${this.getStatusLabel(newStatus)}`);
         this.loadOrders();
@@ -217,9 +223,9 @@ export class KitchenComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.adminService.updateActualWeights(order.id, items, 'المطبخ', 'تم إدخال الوزن الفعلي والعدد من شاشة المطبخ').subscribe({
+    this.adminService.updateActualWeights(order.id, items, 'المستودع', 'تم إدخال المواصفات والكميات من شاشة المستودع').subscribe({
       next: (updated: Order) => {
-        this.toast.success(`تم تسجيل الأوزان وتحديث إجمالي الفاتورة: ${updated.finalTotal || updated.estimatedTotal} ج.م`);
+        this.toast.success(`تم تسجيل الأوزان وتحديث إجمالي الفاتورة: ${updated.finalTotal || updated.estimatedTotal} ${this.currencySymbol}`);
         this.initOrderBuffers(updated);
         this.loadOrders();
       },

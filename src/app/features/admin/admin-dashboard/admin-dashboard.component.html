@@ -17,7 +17,7 @@
           </span>
         </div>
         <h1 class="page-heading">لوحة المؤشرات والإحصائيات</h1>
-        <p class="page-sub">نظرة عامة وفورية على المبيعات، نشاط المطبخ، والوجبات الأكثر طلباً</p>
+        <p class="page-sub">نظرة عامة وفورية على المبيعات، نشاط التوريد، والمنتجات الأكثر طلباً</p>
       </div>
     </div>
 
@@ -33,7 +33,7 @@
     <app-loading-state
       mode="spinner"
       title="جاري تحديث لوحة المؤشرات والإحصائيات..."
-      subtitle="يتم الآن احتساب إجمالي مبيعات اليوم، حالة المطبخ، وأكثر الأصناف طلباً"
+      subtitle="يتم الآن احتساب إجمالي مبيعات اليوم، حالة العمليات والمستودع، وأكثر الأصناف طلباً"
       icon="bi-graph-up-arrow"
       minHeight="320px"
     ></app-loading-state>
@@ -68,7 +68,7 @@
         </div>
         <div class="card-value-row">
           <span class="num text-emerald">{{ stats()!.todayTotalRevenue | number:'1.0-2' }}</span>
-          <span class="unit">ج.م</span>
+          <span class="unit">{{ currencySymbol }}</span>
         </div>
         <div class="card-footer-info">
           <i class="bi bi-check-circle-fill text-emerald"></i>
@@ -76,21 +76,21 @@
         </div>
       </div>
 
-      <!-- Card 3: Kitchen Pending -->
+      <!-- Card 3: Warehouse Pending -->
       <div class="stat-card glass-panel stat-amber">
         <div class="card-top-row">
-          <span class="label">طلبات قيد الطهي والتحضير</span>
+          <span class="label">طلبات قيد التجهيز والتوريد</span>
           <div class="card-icon">
-            <i class="bi bi-fire"></i>
+            <i class="bi bi-box-seam"></i>
           </div>
         </div>
         <div class="card-value-row">
           <span class="num text-amber">{{ stats()!.kitchenPendingOrdersCount }}</span>
-          <span class="unit">طلب بالمطبخ</span>
+          <span class="unit">طلب بالمستودع</span>
         </div>
         <div class="card-footer-info">
           <span class="pulse-indicator"></span>
-          <span>تحتاج وزن وطهي بالمطبخ</span>
+          <span>تحتاج تجهيز وتوريد بالمستودع</span>
         </div>
       </div>
 
@@ -104,7 +104,7 @@
         </div>
         <div class="card-value-row">
           <span class="num text-indigo">{{ stats()!.averageOrderValue | number:'1.0-2' }}</span>
-          <span class="unit">ج.م / طلب</span>
+          <span class="unit">{{ currencySymbol }} / طلب</span>
         </div>
         <div class="card-footer-info">
           <i class="bi bi-pie-chart-fill"></i>
@@ -123,7 +123,7 @@
               <i class="bi bi-trophy-fill text-amber"></i>
             </span>
             <div>
-              <h2 class="box-title">الأسماك والوجبات الأكثر مبيعاً اليوم</h2>
+              <h2 class="box-title">المنتجات الأكثر طلباً اليوم</h2>
               <p class="box-sub">ترتيب الأصناف بحسب عدد مرات البيع وإجمالي الإيراد</p>
             </div>
           </div>
@@ -149,7 +149,7 @@
                 <div class="item-details">
                   <div class="item-title-row">
                     <span class="item-name">{{ prod.productNameAr }}</span>
-                    <span class="item-revenue">{{ prod.totalRevenue | number:'1.0-2' }} ج.م</span>
+                    <span class="item-revenue">{{ prod.totalRevenue | number:'1.0-2' }} {{ currencySymbol }}</span>
                   </div>
 
                   <div class="progress-track">
@@ -178,7 +178,7 @@
               <i class="bi bi-inbox"></i>
             </div>
             <h3 class="empty-title">لا توجد مبيعات مسجلة حتى الآن اليوم</h3>
-            <p class="empty-desc">ستظهر الأصناف والوجبات الأكثر طلباً وترتيبها هنا فور استلام وتسجيل أولى طلبات اليوم.</p>
+            <p class="empty-desc">ستظهر الأصناف والمنتجات الأكثر طلباً وترتيبها هنا فور استلام وتسجيل أولى طلبات اليوم.</p>
           </div>
         }
       </div>
@@ -192,20 +192,20 @@
             </span>
             <div>
               <h2 class="box-title">روابط وإجراءات سريعة</h2>
-              <p class="box-sub">انتقال فوري لأهم الشاشات التشغيلية للمطعم</p>
+              <p class="box-sub">انتقال فوري لأهم الشاشات التشغيلية للمتجر والمستودع</p>
             </div>
           </div>
         </div>
 
         <div class="shortcuts-grid">
-          <!-- Kitchen Screen -->
+          <!-- Warehouse Screen -->
           <a routerLink="/kitchen" class="shortcut-card action-orange">
             <div class="sc-icon-wrapper">
-              <i class="bi bi-fire"></i>
+              <i class="bi bi-box-seam"></i>
             </div>
             <div class="sc-content">
-              <span class="sc-title">شاشة المطبخ والأوزان</span>
-              <span class="sc-desc">وزن الأسماك وتأكيد جاهزية الطلب</span>
+              <span class="sc-title">شاشة المستودع والعمليات</span>
+              <span class="sc-desc">تجهيز وتوريد وتأكيد جاهزية الطلب</span>
             </div>
             <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>
@@ -228,8 +228,8 @@
               <i class="bi bi-grid-fill"></i>
             </div>
             <div class="sc-content">
-              <span class="sc-title">الأصناف والمنيو</span>
-              <span class="sc-desc">إضافة وجبات جديدة وتعديل الأسعار</span>
+              <span class="sc-title">كتالوج المنتجات والخيارات</span>
+              <span class="sc-desc">إضافة منتجات وتعديل الأسعار والمخزون</span>
             </div>
             <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>
@@ -241,7 +241,7 @@
             </div>
             <div class="sc-content">
               <span class="sc-title">الهوية والإعدادات العامة</span>
-              <span class="sc-desc">الشعار، البانرات، وألوان المطعم</span>
+              <span class="sc-desc">الشعار، البانرات، وألوان المتجر</span>
             </div>
             <i class="bi bi-arrow-left-short sc-arrow"></i>
           </a>

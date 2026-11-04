@@ -1,7 +1,10 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Product } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
+import { SettingsService } from '../../../core/services/settings.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-product-card',
@@ -11,6 +14,10 @@ import { ImageUrlPipe } from '../../pipes/image-url.pipe';
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {
+  private readonly settingsService = inject(SettingsService);
+  private readonly router = inject(Router);
+  readonly languageService = inject(LanguageService);
+
   @Input({ required: true }) product!: Product;
   @Output() selectProduct = new EventEmitter<Product>();
 
@@ -18,16 +25,13 @@ export class ProductCardComponent {
   isHovered = false;
   isFavorite = false;
 
+  get currencySymbol(): string {
+    return this.settingsService.settings()?.currencySymbol || 'ج.م';
+  }
+
   get isWeightBased(): boolean {
     if (!this.product) return false;
-    if (this.product.pricingType === 'FixedPerUnit' || (this.product.pricingType as any) === 0) {
-      return false;
-    }
-    return (
-      this.product.pricingType === 'ByWeight' ||
-      (this.product.pricingType as any) === 1 ||
-      (this.product.pricingType as any) === 'WeightedByKilo'
-    );
+    return this.product.pricingType === 'ByWeight' || (this.product.pricingType as any) === 1 || (this.product.pricingType as any) === 'WeightedByKilo';
   }
 
   get displayPrice(): number {
@@ -36,6 +40,15 @@ export class ProductCardComponent {
       return this.product.pricePerKg;
     }
     return this.product.pricePerUnit || 0;
+  }
+
+  get hasDiscount(): boolean {
+    return !!(this.product?.originalPrice && this.product.originalPrice > this.displayPrice);
+  }
+
+  get discountPercent(): number {
+    if (!this.hasDiscount || !this.product.originalPrice) return 0;
+    return Math.round(((this.product.originalPrice - this.displayPrice) / this.product.originalPrice) * 100);
   }
 
   get secondaryImage(): string | undefined {
@@ -55,6 +68,10 @@ export class ProductCardComponent {
   }
 
   onSelect() {
-    this.selectProduct.emit(this.product);
+    if (this.settingsService.settings()?.productDetailViewMode === 'page') {
+      this.router.navigate(['/product', this.product.id]);
+    } else {
+      this.selectProduct.emit(this.product);
+    }
   }
 }

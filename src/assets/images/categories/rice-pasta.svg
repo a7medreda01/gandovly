@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="grad-rice-pasta" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+    <filter id="shadow-rice-pasta" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#D97706" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#grad-rice-pasta)" filter="url(#shadow-rice-pasta)" />
+  <circle cx="60" cy="60" r="36" fill="#ffffff" fill-opacity="0.22"/>
+  <text x="60" y="72" font-size="42" text-anchor="middle" dominant-baseline="central">🍚</text>
+</svg>

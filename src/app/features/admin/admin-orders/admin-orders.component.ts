@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import { Order, OrderLine, OrderStatus } from '../../../core/models/models';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
 import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime } from '../../../shared/utils/date-utils';
@@ -17,6 +18,11 @@ import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime }
 export class AdminOrdersComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
 
   orders = signal<Order[]>([]);
   totalCount = signal<number>(0);
@@ -329,7 +335,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
 
     this.adminService.updateActualWeights(order.id, items, 'الإدارة', 'تم تحديث الوزن الفعلي والعدد وإعادة احتساب الفاتورة').subscribe({
       next: (updated: Order) => {
-        this.toast.success(`تم حفظ الأوزان والكميات بنجاح. الإجمالي الجديد: ${updated.finalTotal || updated.estimatedTotal} ج.م`);
+        this.toast.success(`تم حفظ الأوزان والكميات بنجاح. الإجمالي الجديد: ${updated.finalTotal || updated.estimatedTotal} ${this.currencySymbol}`);
         this.selectedOrder.set(updated);
         this.initBuffers(updated);
         this.loadOrders();
@@ -361,7 +367,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
       Placed: 'تم استلام الطلب',
       AwaitingConfirmation: 'بانتظار التأكيد',
       Confirmed: 'تم التأكيد',
-      Preparing: 'قيد الطهي والتجهيز',
+      Preparing: 'قيد التجهيز والتوريد',
       ReadyForPickup: 'جاهز للاستلام',
       OutForDelivery: 'خرج للتوصيل',
       Completed: 'تم التسليم بنجاح',

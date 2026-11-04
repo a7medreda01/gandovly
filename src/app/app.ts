@@ -15,7 +15,7 @@ import { ApiService } from './core/services/api.service';
   styleUrls: ['./app.scss']
 })
 export class App implements OnInit, OnDestroy {
-  title = 'أسماك جندوفلي';
+  title = 'MeCart | مي كارت - متجر السوبرماركت والتسوق السريع';
   private modalObserver?: MutationObserver;
   private routerSub?: Subscription;
 

@@ -36,8 +36,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   readonly formatEgyptTimeWithSeconds = formatEgyptTimeWithSeconds;
   readonly formatEgyptDate = formatEgyptDate;
 
-  // Active Tab
-  activeTab = signal<'campaigns' | 'accounts' | 'gateway' | 'post_delivery' | 'contacts'>('campaigns');
+  // Active Tab - Operational notifications & Gateway by default
+  activeTab = signal<'gateway' | 'accounts' | 'campaigns' | 'post_delivery' | 'contacts'>('gateway');
 
   // ------------------------------------------
   // MULTI-SESSION ACCOUNTS STATE
@@ -81,7 +81,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     notifyCashierOnNewOrder: true,
     cashierWhatsAppNumber: '01000000000',
     cashierNotificationDelaySeconds: 3,
-    defaultNotificationSessionId: 'default'
+    defaultNotificationSessionId: 'sm_e4b8a21f'
   });
   isSavingSettings = signal<boolean>(false);
 
@@ -92,8 +92,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
   // Test Message
   testPhone: string = '';
-  testSessionId: string = 'default';
-  testMessage: string = 'تجربة إرسال رسالة من منصة أسماك جندوفلي 🐟🌊 - بوابة الواتساب الذاتية تعمل بنجاح!';
+  testSessionId: string = 'sm_e4b8a21f';
+  testMessage: string = 'تجربة إرسال رسالة من منصة المتجر الإلكتروني 🔥 - بوابة الواتساب الذاتية تعمل بنجاح!';
   isSendingTest = signal<boolean>(false);
 
   // ------------------------------------------
@@ -109,7 +109,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   isCreatingCampaign = signal<boolean>(false);
   newCampaign: CreateCampaignRequest = {
     title: '',
-    messageTemplate: 'أهلاً بك يا {الاسم} 🐟🌊\nعروض أسماك جندوفلي اليومية وصلت! خصم خاص ووجبات سي فود طازجة بتوصيل سريع حتى باب بيتك. اطلب الآن واستمتع بالطعم الأصلي 💙',
+    messageTemplate: 'أهلاً بك يا {الاسم} 🔥\nعروض وتخفيضات كبرى على كافة المنتجات والبقالة وصلت! تسوق الآن واستمتع بتوصيل سريع لباب منزلك 🛒',
     sessionId: 'default',
     intervalMinutes: 5,
     dailyLimit: 50,
@@ -161,7 +161,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   postDeliverySettings = signal<PostDeliverySettings>({
     isEnabled: true,
     delayHours: 24,
-    messageTemplate: 'أهلاً بك يا {اسم_العميل} 🐟🌊، نتمنى أن تكون وجبتك من أسماك جندوفلي نالت إعجابك! نسعد دائماً بخدمتك ويهمنا جداً رأيك وتقييمك لطلبك #{رقم_الطلب}. نسعد بطلبك القادم دائماً! 💙'
+    messageTemplate: 'أهلاً بك يا {اسم_العميل} 🔥، نسعد بخدمتك في متجرنا لطلبك #{رقم_الطلب}. نأمل أن تكون راضياً عن جودة المنتجات وسرعة التوصيل! لأي استفسار: {هاتف_المتجر}'
   });
   isSavingPostDelivery = signal<boolean>(false);
 
@@ -260,7 +260,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
   openAddAccountModal() {
     this.newAccountDisplayName = '';
-    this.newAccountSessionId = '';
+    const randomHex = Math.random().toString(36).substring(2, 8);
+    this.newAccountSessionId = `sm_${randomHex}`;
     this.showAddAccountModal.set(true);
   }
 
@@ -444,9 +445,9 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     // Select default notification session or first available account
     const defaultAcc = this.accounts().find(a => a.isDefaultNotifications) || this.accounts()[0];
     this.newCampaign = {
-      title: 'عرض جديد - ' + new Date().toLocaleDateString('ar-EG'),
-      messageTemplate: 'أهلاً بك يا {الاسم} 🐟🌊\nعروض أسماك جندوفلي اليومية وصلت! خصم خاص ووجبات سي فود طازجة بتوصيل سريع حتى باب بيتك. اطلب الآن واستمتع بالطعم الأصلي 💙',
-      sessionId: defaultAcc?.sessionId || 'default',
+      title: 'عرض جديد - ' + new Date().toLocaleDateString('ar-SA'),
+      messageTemplate: 'أهلاً بك يا {الاسم} 🔥\nعروض وتخفيضات كبرى على كافة المنتجات والبقالة وصلت! تسوق الآن واستمتع بتوصيل سريع لباب منزلك 🛒',
+      sessionId: defaultAcc?.sessionId || 'sm_e4b8a21f',
       intervalMinutes: 5,
       dailyLimit: 50,
       excludePreviouslyMessaged: true
@@ -818,9 +819,15 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     });
   }
 
+  getMainSessionId(): string {
+    const defaultAcc = this.accounts().find(a => a.isDefaultNotifications) || this.accounts()[0];
+    return defaultAcc?.sessionId || 'sm_e4b8a21f';
+  }
+
   refreshStatusAndQr() {
     this.isLoading.set(true);
-    this.adminService.getWhatsAppQr().subscribe({
+    const sessId = this.getMainSessionId();
+    this.adminService.getWhatsAppQr(sessId).subscribe({
       next: (res: any) => {
         this.isLoading.set(false);
         const data = res?.data || res;
@@ -843,7 +850,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   refreshStatusSilently() {
-    this.adminService.getWhatsAppStatus().subscribe({
+    const sessId = this.getMainSessionId();
+    this.adminService.getWhatsAppStatus(sessId).subscribe({
       next: (res: any) => {
         const data = res?.data || res;
         const prevStatus = this.connectionStatus();
@@ -864,7 +872,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   refreshQrOnly() {
-    this.adminService.getWhatsAppQr().subscribe({
+    const sessId = this.getMainSessionId();
+    this.adminService.getWhatsAppQr(sessId).subscribe({
       next: (res: any) => {
         const data = res?.data || res;
         this.qrDataUrl.set(data?.qrDataUrl || null);
@@ -875,7 +884,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   requestPairingCode() {
     let phone = this.pairPhone.trim().replace(/[^\d]/g, '');
     if (!phone) {
-      this.toast.error('يرجى إدخال رقم هاتف المطعم.');
+      this.toast.error('يرجى إدخال رقم هاتف خدمة العملاء / المؤسسة.');
       return;
     }
 
@@ -891,8 +900,9 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const sessId = this.getMainSessionId();
     this.isRequestingPairCode.set(true);
-    this.adminService.requestWhatsAppPairCode(phone).subscribe({
+    this.adminService.requestWhatsAppPairCode(phone, sessId).subscribe({
       next: (res: any) => {
         this.isRequestingPairCode.set(false);
         const data = res?.data || res;
@@ -914,7 +924,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     if (!confirm('هل أنت متأكد من رغبتك في تسجيل الخروج وقطع ارتباط رقم الواتساب؟')) return;
 
     this.isLoading.set(true);
-    this.adminService.logoutWhatsApp().subscribe({
+    const sessId = this.getMainSessionId();
+    this.adminService.logoutWhatsApp(sessId).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.toast.success('تم تسجيل الخروج بنجاح. جاري تجهيز كود QR جديد...');
@@ -929,7 +940,8 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
   restartGateway() {
     this.isLoading.set(true);
-    this.adminService.restartWhatsApp().subscribe({
+    const sessId = this.getMainSessionId();
+    this.adminService.restartWhatsApp(sessId).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.toast.success('جاري إعادة تشغيل محرك الواتساب...');

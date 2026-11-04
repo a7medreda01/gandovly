@@ -151,7 +151,7 @@
             <i class="bi bi-receipt me-1"></i> {{ currentPeriodData()?.totalOrders || 0 }} طلب ناجح
           </span>
           <span class="revenue-info">
-            <i class="bi bi-cash-stack me-1"></i> {{ currentPeriodData()?.totalRevenue | number:'1.0-0' }} ج.م إيراد
+            <i class="bi bi-cash-stack me-1"></i> {{ currentPeriodData()?.totalRevenue | number:'1.0-0' }} {{ currencySymbol }} إيراد
           </span>
         </div>
       </div>
@@ -306,7 +306,7 @@
             <div class="insight-icon"><i class="bi bi-shield-check"></i></div>
             <div class="insight-text">
               <strong>تجربة التصفح فائقة السرعة</strong>
-              <p class="mb-0">أكثر من {{ analytics()!.devices.mobilePercent }}% من الزوار يتصفحون المتجر عبر الهواتف، والضغط التلقائي لصور المنتجات بصيغة WebP يضمن لهم فتح المنيو في أقل من ثانية واحدة.</p>
+              <p class="mb-0">أكثر من {{ analytics()!.devices.mobilePercent }}% من الزوار يتصفحون المتجر عبر الهواتف، والضغط التلقائي لصور المنتجات بصيغة WebP يضمن لهم تصفح المتجر في أقل من ثانية واحدة.</p>
             </div>
           </div>
         </div>

@@ -20,12 +20,12 @@
 
     <button
       type="button"
-      class="tab-btn"
+      class="tab-btn highlight-tab"
       [class.active]="activeTab() === 'branding'"
       (click)="activeTab.set('branding')"
     >
       <i class="bi bi-palette-fill me-2"></i>
-      <span>الهوية البصرية والميديا 🎨</span>
+      <span>الهوية البصرية وتخصيص الواجهة والتصميم 🎨✨</span>
     </button>
 
     <button
@@ -45,7 +45,7 @@
       (click)="activeTab.set('info')"
     >
       <i class="bi bi-telephone-fill me-2"></i>
-      <span>بيانات المطعم والاتصال 📞</span>
+      <span>بيانات المؤسسة والاتصال 📞</span>
     </button>
   </div>
 
@@ -88,10 +88,10 @@
             </div>
             @if (settings()!.isFreeDeliveryEnabled) {
               <div class="form-group mb-0 mt-3 animate-fade-in">
-                <label class="small text-muted font-bold">الحد الأدنى لقيمة الطلب للحصول على توصيل مجاني (ج.م) - اتركها 0 للتوصيل مجاناً لأي طلب:</label>
+                <label class="small text-muted font-bold">الحد الأدنى لقيمة الطلب للحصول على توصيل مجاني ({{ settings()!.currencySymbol || 'ج.م' }}) - اتركها 0 للتوصيل مجاناً لأي طلب:</label>
                 <div class="input-with-unit">
-                  <input type="number" class="form-control" placeholder="مثال: 300" [(ngModel)]="settings()!.freeDeliveryMinOrderAmount" />
-                  <span class="unit-text">ج.م</span>
+                  <input type="number" class="form-control" placeholder="مثال: 500" [(ngModel)]="settings()!.freeDeliveryMinOrderAmount" />
+                  <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
                 </div>
               </div>
             }
@@ -113,10 +113,10 @@
             @if (settings()!.isTieredDiscountEnabled) {
               <div class="form-row mt-3 animate-fade-in">
                 <div class="form-group flex-1 mb-0">
-                  <label class="small text-muted font-bold">الحد الأدنى لقيمة الطلب لتفعيل الخصم (ج.م):</label>
+                  <label class="small text-muted font-bold">الحد الأدنى لقيمة الطلب لتفعيل الخصم ({{ settings()!.currencySymbol || 'ج.م' }}):</label>
                   <div class="input-with-unit">
-                    <input type="number" class="form-control" placeholder="مثال: 500" [(ngModel)]="settings()!.tieredDiscountThresholdAmount" />
-                    <span class="unit-text">ج.م</span>
+                    <input type="number" class="form-control" placeholder="مثال: 2000" [(ngModel)]="settings()!.tieredDiscountThresholdAmount" />
+                    <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
                   </div>
                 </div>
                 <div class="form-group flex-1 mb-0">
@@ -162,7 +162,7 @@
             <input
               type="text"
               class="form-control"
-              placeholder="مثال: خصم 10% على كل الأوردرات فوق 500 ج.م لفترة محدودة! 🔥"
+              placeholder="مثال: خصم 10% على باقات التمديد وخزانات الغاز لفترة محدودة! 🔥"
               [(ngModel)]="settings()!.activePromotionBanner"
             />
             <small class="text-muted mt-1 d-block">يظهر هذا النص كشريط متحرك أو بارز في أعلى المتجر للعملاء لجذب الانتباه للعروض.</small>
@@ -187,30 +187,39 @@
     }
 
     <!-- TAB 2: Branding & Media & Colors -->
+    <!-- ========================================================= -->
+    <!-- TAB 2: BRANDING, VISUAL MEDIA & FULL UI CUSTOMIZATION 🎨✨ -->
+    <!-- ========================================================= -->
     @if (activeTab() === 'branding') {
       <div class="tab-content animate-fade-in">
-        <div class="row g-4">
-          <!-- Logo & Banners -->
-          <div class="col-12 col-lg-7">
-            <div class="settings-card glass-panel h-100">
-              <h3 class="card-title"><i class="bi bi-images text-primary me-2"></i> لوجو المطعم والبانرات الرئيسية</h3>
+        
+        <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-images text-primary me-2"></i> 1. شعار المؤسسة والبانرات الرئيسية والميديا
+            </h3>
+            <p class="section-desc">تحكم في الشعار الرسمي وبانرات الواجهة الرئيسية على أجهزة الكمبيوتر والموبايل.</p>
+          </div>
 
-              <!-- Restaurant Logo Section -->
-              <div class="media-upload-section">
-                <label class="form-label font-bold">لوجو المطعم (Logo):</label>
+          <div class="row g-4">
+            <!-- Restaurant Logo Section -->
+            <div class="col-12 col-lg-5">
+              <div class="p-3 border rounded-3 bg-light h-100">
+                <label class="form-label font-bold mb-2">شعار المؤسسة (Logo):</label>
                 <div class="logo-preview-row flex-center">
                   <div class="logo-box-preview">
                     @if (settings()!.logoUrl) {
                       <img [src]="settings()!.logoUrl | imageUrl:'category'" alt="Restaurant Logo" class="preview-logo-img" />
                     } @else {
                       <div class="empty-logo-box">
-                        <i class="bi bi-water text-primary fs-2"></i>
+                        <i class="bi bi-shop text-primary fs-2"></i>
                         <span>لا يوجد شعار مخصص</span>
                       </div>
                     }
                   </div>
 
-                  <div class="upload-controls-col">
+                  <div class="upload-controls-col flex-1">
                     <input
                       #logoFileInput
                       type="file"
@@ -222,7 +231,7 @@
                       <i class="bi bi-cloud-arrow-up-fill me-1"></i> رفع لوجو جديد
                     </button>
                     @if (settings()!.logoUrl) {
-                      <button type="button" class="btn-remove-link text-danger" (click)="removeLogo()">
+                      <button type="button" class="btn-remove-link text-danger mt-1" (click)="removeLogo()">
                         <i class="bi bi-trash me-1"></i> حذف اللوجو واستخدام الأيقونة
                       </button>
                     }
@@ -238,13 +247,14 @@
                   </div>
                 </div>
               </div>
+            </div>
 
-              <hr class="section-divider" />
-
-              <!-- Main Desktop Hero Banner Section -->
-              <div class="media-upload-section">
-                <label class="form-label font-bold">بانر الصفحة الرئيسية (Desktop Hero Banner):</label>
-                <div class="banner-preview-box">
+            <!-- Desktop & Mobile Hero Banners -->
+            <div class="col-12 col-lg-7">
+              <div class="p-3 border rounded-3 bg-light h-100">
+                <label class="form-label font-bold mb-2">بانر الواجهة الرئيسية (Desktop & Mobile):</label>
+                
+                <div class="banner-preview-box mb-2">
                   <img
                     [src]="(settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
                     alt="Main Hero Banner"
@@ -253,7 +263,7 @@
                   <div class="banner-overlay-tag">معاينة البانر النشط</div>
                 </div>
 
-                <div class="upload-controls-row flex-between mt-2">
+                <div class="upload-controls-row flex-between">
                   <input
                     #bannerFileInput
                     type="file"
@@ -262,14 +272,27 @@
                     style="display: none;"
                   />
                   <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
-                    <i class="bi bi-image-fill me-1"></i> تغيير صورة البانر
+                    <i class="bi bi-image-fill me-1"></i> تغيير صورة البانر (كمبيوتر)
                   </button>
+
+                  <input
+                    #bannerMobileFileInput
+                    type="file"
+                    accept="image/*"
+                    (change)="onBannerMobileUpload($event)"
+                    style="display: none;"
+                  />
+                  <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
+                    <i class="bi bi-phone-fill me-1"></i> تغيير صورة البانر (موبايل)
+                  </button>
+
                   @if (settings()!.heroBannerDesktopUrl) {
                     <button type="button" class="btn-remove-link text-danger" (click)="removeBannerDesktop()">
-                      <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة البانر الافتراضي
+                      <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
                     </button>
                   }
                 </div>
+
                 <div class="input-url-wrap mt-2">
                   <span class="url-label">رابط صورة البانر:</span>
                   <input
@@ -283,59 +306,585 @@
             </div>
           </div>
 
-          <!-- Color Palette -->
-          <div class="col-12 col-lg-5">
-            <div class="settings-card glass-panel h-100">
-              <h3 class="card-title"><i class="bi bi-palette-fill text-primary me-2"></i> الألوان والهوية البصرية</h3>
-              <p class="text-muted small mb-3">تُطبق الألوان فوريًا على أزرار وشاشات الموقع بالكامل فور الحفظ</p>
 
-              <div class="colors-grid">
-                <div class="color-item">
-                  <label for="colPrimary">اللون الأساسي (Primary)</label>
-                  <div class="color-picker-row flex-center">
-                    <input id="colPrimary" type="color" [(ngModel)]="settings()!.primaryColor" class="color-input" />
-                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.primaryColor" />
-                  </div>
+
+          
+
+        </div>
+
+        <!-- 2. BRAND PRESENTATION MODE IN NAVBAR -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-window text-primary me-2"></i> 2. الهيدر وطريقة عرض العلامة التجارية (Brand Mode)
+            </h3>
+            <p class="section-desc">حدد كيف يظهر اسم المتجر واللوجو في شريط الهيدر العلوي، والتحكم في ظهور عناصر الواجهة.</p>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold mb-2">طريقة عرض الهوية في الهيدر:</label>
+            <div class="brand-mode-selector">
+              @for (bm of brandModes; track bm.id) {
+                <div
+                  class="brand-mode-card"
+                  [class.active]="(settings()!.navbarBrandMode || 'both') === bm.id"
+                  (click)="settings()!.navbarBrandMode = bm.id"
+                >
+                  <div class="mode-icon"><i class="bi {{ bm.icon }}"></i></div>
+                  <strong class="d-block mt-2">{{ bm.label }}</strong>
+                  <small class="text-muted d-block mt-1">{{ bm.desc }}</small>
                 </div>
+              }
+            </div>
+          </div>
 
-                <div class="color-item">
-                  <label for="colSecondary">اللون الثانوي (Secondary)</label>
-                  <div class="color-picker-row flex-center">
-                    <input id="colSecondary" type="color" [(ngModel)]="settings()!.secondaryColor" class="color-input" />
-                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.secondaryColor" />
-                  </div>
+          <div class="form-row">
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showNavbarTagline" />
+              <span class="ms-2">إظهار الشعار التعريفي (Tagline) تحت اسم المتجر في الهيدر</span>
+            </label>
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showWhatsAppInNavbar" />
+              <span class="ms-2">إظهار زر تواصل واتساب في الهيدر العلوي</span>
+            </label>
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showPhoneInNavbar" />
+              <span class="ms-2">إظهار زر الاتصال الهاتفي في الهيدر العلوي</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- 3. EXTENDED COLOR STUDIO -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-palette2 text-primary me-2"></i> 3. استوديو الألوان الموسّع (Color Studio)
+            </h3>
+            <p class="section-desc">تحكم كامل في لوحة الألوان عبر الموقع بالكامل. التغييرات تُطبق فورياً في المتجر.</p>
+          </div>
+
+          <div class="color-studio-grid">
+            <!-- Group 1: Brand & Theme -->
+            <div class="color-group-box">
+              <h5 class="group-title"><i class="bi bi-brush-fill text-primary me-1"></i> ألوان الهوية الرئيسية</h5>
+              <div class="color-item-row">
+                <label>اللون الأساسي (Primary):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()" />
                 </div>
-
-                <div class="color-item">
-                  <label for="colAccent">لون التمييز والأزرار (Accent)</label>
-                  <div class="color-picker-row flex-center">
-                    <input id="colAccent" type="color" [(ngModel)]="settings()!.accentColor" class="color-input" />
-                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.accentColor" />
-                  </div>
+              </div>
+              <div class="color-item-row">
+                <label>اللون الثانوي (Secondary):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.secondaryColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.secondaryColor" (ngModelChange)="onColorChange()" />
                 </div>
+              </div>
+              <div class="color-item-row">
+                <label>لون التمييز والخصومات (Accent):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.accentColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.accentColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>لون خلفية الصفحة (Surface):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+            </div>
 
-                <div class="color-item">
-                  <label for="colSurface">لون الخلفية (Surface)</label>
-                  <div class="color-picker-row flex-center">
-                    <input id="colSurface" type="color" [(ngModel)]="settings()!.surfaceColor" class="color-input" />
-                    <input type="text" class="form-control hex-input" [(ngModel)]="settings()!.surfaceColor" />
-                  </div>
+            <!-- Group 2: Header & Footer -->
+            <div class="color-group-box">
+              <h5 class="group-title"><i class="bi bi-layout-text-window-reverse text-info me-1"></i> شريط الهيدر والفوتر</h5>
+              <div class="color-item-row">
+                <label>خلفية الهيدر (Navbar Bg):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.navbarBgColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.navbarBgColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>نصوص وروابط الهيدر:</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.navbarTextColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.navbarTextColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>خلفية الفوتر (Footer Bg):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.footerBgColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.footerBgColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>نصوص وروابط الفوتر:</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.footerTextColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.footerTextColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Group 3: Cards & Buttons -->
+            <div class="color-group-box">
+              <h5 class="group-title"><i class="bi bi-card-checklist text-success me-1"></i> البطاقات والأزرار والحدود</h5>
+              <div class="color-item-row">
+                <label>خلفية بطاقات المنتجات:</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>لون الحدود والفواصل (Border):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.borderColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.borderColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>خلفية الزر الرئيسي (Btn Primary):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.btnPrimaryBg" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.btnPrimaryBg" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>نص الزر الرئيسي:</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.btnPrimaryText" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.btnPrimaryText" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Group 4: Status Indicators -->
+            <div class="color-group-box">
+              <h5 class="group-title"><i class="bi bi-shield-fill-check text-warning me-1"></i> ألوان التنبيهات والحالات</h5>
+              <div class="color-item-row">
+                <label>لون النجاح والتأكيد (Success):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.successColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.successColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>لون التحذير (Warning):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.warningColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.warningColor" (ngModelChange)="onColorChange()" />
+                </div>
+              </div>
+              <div class="color-item-row">
+                <label>لون الخطأ والإلغاء (Error):</label>
+                <div class="color-picker-wrap">
+                  <input type="color" [(ngModel)]="settings()!.errorColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.errorColor" (ngModelChange)="onColorChange()" />
                 </div>
               </div>
             </div>
           </div>
+
+
+
+          
+
         </div>
 
-        <!-- Separate Save Button for Branding -->
+        <!-- 4. TYPOGRAPHY & SHAPES -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-fonts text-primary me-2"></i> 4. الخطوط وتناسق الأحجام والزوايا
+            </h3>
+            <p class="section-desc">تحكم في نوع الخط العربي، حجم الخط الأساسي، انحناءات البطاقات والأزرار والظلال.</p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="fontSelect"><i class="bi bi-type text-primary me-1"></i> نوع الخط الأساسي:</label>
+              <select id="fontSelect" class="form-control fw-bold" [(ngModel)]="settings()!.fontFamily" (ngModelChange)="onColorChange()">
+                @for (f of availableFonts; track f.id) {
+                  <option [value]="f.id">{{ f.name }}</option>
+                }
+              </select>
+              <div class="font-preview-box mt-2 p-2 border rounded bg-white text-center">
+                <small class="text-muted d-block mb-1">معاينة حية للخط المختار:</small>
+                <span [style.font-family]="settings()!.fontFamily || 'Cairo'" style="font-size: 1.05rem; font-weight: 700;">
+                  أهلاً بكم في المتجر - تسوق كافة المنتجات والطلبات بأعلى جودة 🛒
+                </span>
+              </div>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="shadowSelect"><i class="bi bi-shadows text-primary me-1"></i> نمط ظلال البطاقات والكروت:</label>
+              <select id="shadowSelect" class="form-control fw-bold" [(ngModel)]="settings()!.cardShadowStyle">
+                @for (s of cardShadowStyles; track s.id) {
+                  <option [value]="s.id">{{ s.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row mt-2">
+            <div class="form-group flex-1">
+              <label class="d-flex justify-content-between">
+                <span>انحناء زوايا البطاقات والكروت:</span>
+                <span class="badge bg-primary">{{ settings()!.borderRadius || '16px' }}</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="32"
+                step="2"
+                class="form-range"
+                [value]="parsePx(settings()!.borderRadius, 16)"
+                (input)="setRadius('borderRadius', +$any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="d-flex justify-content-between">
+                <span>انحناء زوايا الأزرار والحقول:</span>
+                <span class="badge bg-primary">{{ settings()!.buttonBorderRadius || '12px' }}</span>
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="32"
+                step="2"
+                class="form-range"
+                [value]="parsePx(settings()!.buttonBorderRadius, 12)"
+                (input)="setRadius('buttonBorderRadius', +$any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="d-flex justify-content-between">
+                <span>حجم خط النصوص الأساسي:</span>
+                <span class="badge bg-primary">{{ settings()!.fontSizeBase || 15 }}px</span>
+              </label>
+              <input
+                type="range"
+                min="13"
+                max="18"
+                step="1"
+                class="form-range"
+                [(ngModel)]="settings()!.fontSizeBase"
+                (ngModelChange)="onColorChange()"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. MULTI-LANGUAGE & LOCALIZATION -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-globe2 text-primary me-2"></i> 5. نظام اللغات والترجمة (Multi-Language Engine)
+            </h3>
+            <p class="section-desc">تحكم في نمط اللغات المدعومة بالمتجر، واللغة الافتراضية، وظهور زر التبديل وحقول الترجمة.</p>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-bold mb-2">نمط اللغات المدعومة في المتجر:</label>
+            <div class="brand-mode-selector">
+              @for (mode of languageModes; track mode.id) {
+                <div
+                  class="brand-mode-card"
+                  [class.active]="(settings()!.languageMode || 'both') === mode.id"
+                  (click)="settings()!.languageMode = mode.id; onColorChange()"
+                >
+                  <div class="mode-icon"><i class="bi {{ mode.icon }}"></i></div>
+                  <strong class="d-block mt-2">{{ mode.label }}</strong>
+                  <small class="text-muted d-block mt-1">{{ mode.desc }}</small>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="defaultLangSelect"><i class="bi bi-translate text-primary me-1"></i> اللغة الافتراضية للعملاء الجدد:</label>
+              <select id="defaultLangSelect" class="form-control fw-bold" [(ngModel)]="settings()!.defaultLanguage">
+                <option value="ar">اللغة العربية (RTL)</option>
+                <option value="en">English (LTR)</option>
+              </select>
+              <small class="text-muted">اللغة التي يبدأ بها المتجر عندما يفتحه العميل لأول مرة.</small>
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="form-label"><i class="bi bi-input-cursor-text text-primary me-1"></i> حقول الإدخال الإنجليزية في الكتالوج:</label>
+              <label class="checkbox-label flex-center p-2.5 border rounded bg-light mt-1">
+                <input type="checkbox" [(ngModel)]="settings()!.enableEnglish" />
+                <span class="fw-bold ms-2">إظهار حقول الأسماء والتفاصيل بالإنجليزية في إدارة الأصناف والمنتجات</span>
+              </label>
+              <small class="text-muted">حقول اختيارية. إذا تُركت فارغة في أي صنف، يظهر المحتوى العربي للعميل تلقائياً بدون انقطاع.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. ELEMENTS VISIBILITY & FLOATING ACTION BUTTON (FAB) -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-toggles text-primary me-2"></i> 6. التحكم في ظهور أقسام وعناصر الواجهة
+            </h3>
+            <p class="section-desc">تحكم في إظهار أو إخفاء عناصر الصفحة الرئيسية والمفضلة وزر الواتساب العائم على الشاشة.</p>
+          </div>
+
+          <div class="form-row mb-3">
+            <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showHeroBanner" />
+              <div class="ms-2">
+                <strong>إظهار بانر العروض الرئيسي في الواجهة</strong>
+                <small class="text-muted d-block">إخفاء البانر يرفع شريط البحث والتصنيفات للأعلى تلقائياً.</small>
+              </div>
+            </label>
+
+            <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow" />
+              <div class="ms-2">
+                <strong>إظهار شريط تصنيفات وأقسام المنتجات</strong>
+                <small class="text-muted d-block">عرض أيقونات الأقسام الأفقية في الصفحة الرئيسية.</small>
+              </div>
+            </label>
+          </div>
+
+          <div class="form-row mb-3">
+            <div class="feature-toggle-card flex-1 p-3 border rounded-3 bg-light">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <strong class="text-danger"><i class="bi bi-heart-fill me-1"></i> ميزة المفضلة (Wishlist)</strong>
+                <input type="checkbox" class="form-check-input fs-5" [(ngModel)]="settings()!.enableWishlist" />
+              </div>
+              <p class="small text-muted mb-0">عند التفعيل، يظهر زر القلب في تفاصيل الصنف ورابط المفضلة داخل القائمة الجانبية.</p>
+            </div>
+
+            <div class="feature-toggle-card flex-1 p-3 border rounded-3 bg-light">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <strong class="text-success"><i class="bi bi-whatsapp me-1"></i> زر واتساب العائم (FAB)</strong>
+                <input type="checkbox" class="form-check-input fs-5" [(ngModel)]="settings()!.showWhatsAppFab" />
+              </div>
+              <p class="small text-muted mb-2">زر دائري عائم أسفل الشاشة بنبضة تفاعلية لتسهيل التواصل الفوري.</p>
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <label class="small text-muted mb-0">موقع الزر:</label>
+                <select class="form-control form-control-sm w-auto" [(ngModel)]="settings()!.fabPosition" [disabled]="!settings()!.showWhatsAppFab">
+                  @for (pos of fabPositions; track pos.id) {
+                    <option [value]="pos.id">{{ pos.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Support Hotline Toggle -->
+          <div class="form-row mb-3">
+            <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showCustomerServiceBar" />
+              <div class="ms-2">
+                <strong><i class="bi bi-headset text-primary me-1"></i> إظهار كارت خدمة العملاء وطلبات المساعدة</strong>
+                <small class="text-muted d-block">إظهار كارت الاتصال وخدمة العملاء في أسفل الصفحة الرئيسية للمتجر.</small>
+              </div>
+            </label>
+          </div>
+
+          <!-- Product Details Display Mode -->
+          <div class="product-view-mode-card p-3 border rounded-3 bg-white mt-3 mb-2">
+            <div class="fw-bold text-dark mb-1">
+              <i class="bi bi-window-stack text-primary me-1"></i> طريقة فتح وعرض تفاصيل المنتج (Product Detail View Mode):
+            </div>
+            <p class="small text-muted mb-3">حدد كيف يتفاعل المتجر عند نقر العميل على أي منتج أو بطاقة صنف في المتجر والمفضلة:</p>
+            <div class="form-row">
+              <label class="radio-card flex-1 p-3 border rounded-3 cursor-pointer"
+                [class.border-primary]="(settings()?.productDetailViewMode || 'modal') === 'modal'"
+                [class.bg-light]="(settings()?.productDetailViewMode || 'modal') === 'modal'"
+                (click)="setProductDetailViewMode('modal')">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="fw-bold"><i class="bi bi-phone-flip text-primary me-1"></i> نافذة سريعة منبثقة (موديل Modal)</span>
+                  <input type="radio" name="productDetailViewModeRadio" value="modal"
+                    [checked]="(settings()?.productDetailViewMode || 'modal') === 'modal'"
+                    (change)="setProductDetailViewMode('modal')" />
+                </div>
+                <small class="text-muted d-block">تفتح تفاصيل الصنف فوراً بنافذة سفلية أنيقة وسريعة دون مغادرة الصفحة (المفضلة للموبايل وتصفح السوبرماركت السريع).</small>
+              </label>
+
+              <label class="radio-card flex-1 p-3 border rounded-3 cursor-pointer"
+                [class.border-primary]="settings()?.productDetailViewMode === 'page'"
+                [class.bg-light]="settings()?.productDetailViewMode === 'page'"
+                (click)="setProductDetailViewMode('page')">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="fw-bold"><i class="bi bi-file-earmark-richtext text-success me-1"></i> صفحة مخصصة مستقلة (صفحة كاملة Page)</span>
+                  <input type="radio" name="productDetailViewModeRadio" value="page"
+                    [checked]="settings()?.productDetailViewMode === 'page'"
+                    (change)="setProductDetailViewMode('page')" />
+                </div>
+                <small class="text-muted d-block">ينتقل العميل إلى صفحة كاملة خاصة بالصنف برابط مخصص (/product/:id) ومثالية لمشاركة المنتجات عبر السوشيال ميديا والسيو.</small>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. CHECKOUT PAGE CUSTOMIZATION -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-cart-check-fill text-primary me-2"></i> 7. تخصيص تجربة وخيارات إتمام الطلب (Checkout)
+            </h3>
+            <p class="section-desc">تحكم في خيارات التسليم المتاحة، جدولة المواعيد، طرق الدفع وبيانات المحافظ الإلكترونية.</p>
+          </div>
+
+          <div class="form-row mb-3">
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.checkoutEnableDelivery" />
+              <span class="ms-2 fw-bold">تفعيل خيار التوصيل للموقع (Delivery)</span>
+            </label>
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.checkoutEnablePickup" />
+              <span class="ms-2 fw-bold">تفعيل خيار الاستلام من الفرع / المستودع (Pickup)</span>
+            </label>
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.checkoutEnableScheduled" />
+              <span class="ms-2 fw-bold">تفعيل جدولة مواعيد التوصيل المستقبلية</span>
+            </label>
+          </div>
+
+          <!-- Pickup Options Details -->
+          @if (settings()!.checkoutEnablePickup) {
+            <div class="p-3 bg-light rounded-3 border mb-3">
+              <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-geo-alt-fill text-warning me-1"></i> بيانات فرع الاستلام (Pickup):</h6>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>اسم فرع الاستلام:</label>
+                  <input type="text" class="form-control" [(ngModel)]="settings()!.pickupLocationLabel" placeholder="مثال: الفرع الرئيسي - شارع النصر" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>ساعات عمل الاستلام:</label>
+                  <input type="text" class="form-control" [(ngModel)]="settings()!.pickupWorkingHours" placeholder="مثال: يومياً من 8 ص حتى 11 م" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>تعليمات وإرشادات الاستلام:</label>
+                  <input type="text" class="form-control" [(ngModel)]="settings()!.pickupInstructions" placeholder="مثال: يرجى إحضار رقم الطلب عند الاستلام" />
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Payment Options Toggles & Electronic Wallet Numbers -->
+          <div class="p-3 bg-light rounded-3 border mb-3">
+            <h6 class="fw-bold mb-2 text-dark"><i class="bi bi-credit-card-2-front-fill text-success me-1"></i> طرق الدفع المتاحة للعميل:</h6>
+            <div class="form-row">
+              <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-white">
+                <input type="checkbox" [(ngModel)]="settings()!.paymentEnableCOD" />
+                <span class="ms-2">الدفع نقداً عند الاستلام (COD)</span>
+              </label>
+              <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-white">
+                <input type="checkbox" [(ngModel)]="settings()!.paymentEnableWalletTransfer" />
+                <span class="ms-2">تحويل إلكتروني ومحافظ (فودافون كاش / إنستاباي)</span>
+              </label>
+            </div>
+
+            <!-- Electronic Wallet Accounts Inputs -->
+            <div class="mt-3 p-3 bg-white rounded-3 border">
+              <div class="fw-bold mb-2 text-primary small">
+                <i class="bi bi-wallet2 me-1"></i> أرقام وحسابات التحويل الإلكتروني والمحافظ (فودافون كاش / إنستاباي):
+              </div>
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label class="fw-bold small text-dark"><i class="bi bi-phone text-danger me-1"></i> رقم محفظة فودافون كاش:</label>
+                  <input type="text" class="form-control" [(ngModel)]="settings()!.vodafoneCashNumber" placeholder="مثال: 01012345678" dir="ltr" />
+                  <small class="text-muted d-block mt-1">يظهر للعميل لنسخ الرقم والتحويل عليه</small>
+                </div>
+                <div class="form-group flex-1">
+                  <label class="fw-bold small text-dark"><i class="bi bi-send-check text-primary me-1"></i> معرّف أو رقم إنستاباي (InstaPay):</label>
+                  <input type="text" class="form-control" [(ngModel)]="settings()!.instaPayAccount" placeholder="مثال: username@instapay أو 010xxxxxxxx" dir="ltr" />
+                  <small class="text-muted d-block mt-1">عنوان الدفع اللحظي IPA أو رقم الهاتف</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+
+          <!-- Checkout Page Custom Titles & Button -->
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>عنوان صفحة الـ Checkout:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.checkoutPageTitle" placeholder="إتمام الطلب" />
+            </div>
+            <div class="form-group flex-1">
+              <label>الوصف الفرعي لصفحة الـ Checkout:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.checkoutPageSubtitle" placeholder="أدخل بيانات التوصيل لتأكيد الطلب" />
+            </div>
+            <div class="form-group flex-1">
+              <label>نص زر تأكيد الطلب:</label>
+              <input type="text" class="form-control fw-bold" [(ngModel)]="settings()!.checkoutSubmitBtnText" placeholder="تأكيد الطلب" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. CUSTOM LABELS -->
+        <div class="settings-card glass-panel mb-4">
+          <div class="section-title-wrap mb-3">
+            <h3 class="section-title">
+              <i class="bi bi-tag-fill text-primary me-2"></i> 8. تخصيص المسميات والنصوص (Custom Labels)
+            </h3>
+            <p class="section-desc">تخصيص كامل لمسميات الأقسام والصفحات والأزرار لتناسب علامتك ونوع نشاطك التجاري.</p>
+          </div>
+
+          <div class="form-row mb-3">
+            <div class="form-group flex-1">
+              <label>مسمى المنتج (مفرد):</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelProduct" placeholder="منتج / صنف / وجبة" />
+            </div>
+            <div class="form-group flex-1">
+              <label>مسمى المنتجات (جمع):</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelProducts" placeholder="منتجات / أصناف / قائمة الطعام" />
+            </div>
+            <div class="form-group flex-1">
+              <label>مسمى القسم:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelCategory" placeholder="قسم / تصنيف" />
+            </div>
+            <div class="form-group flex-1">
+              <label>مسمى الأقسام (جمع):</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelCategories" placeholder="أقسام / تصنيفات" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>مسمى سلة المشتريات:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelCart" placeholder="السلة / حقيبة التسوق" />
+            </div>
+            <div class="form-group flex-1">
+              <label>مسمى قائمة المفضلة:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelWishlist" placeholder="المفضلة / قائمة الرغبات" />
+            </div>
+            <div class="form-group flex-1">
+              <label>مسمى التوصيل:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelDelivery" placeholder="توصيل للموقع" />
+            </div>
+            <div class="form-group flex-1">
+              <label>مسمى الاستلام من الفرع:</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.labelPickup" placeholder="استلام من المستودع / الفرع" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Unified Save Button for Branding & UI -->
         <div class="tab-save-footer mt-4 flex-between">
           <div class="save-hint text-muted small">
-            <i class="bi bi-info-circle me-1"></i> يتم تطبيق الشعار والألوان فوريًا على كافة صفحات المتجر.
+            <i class="bi bi-info-circle me-1"></i> يتم حفظ وتطبيق جميع إعدادات الهوية البصرية والواجهة والألوان واللغات فوراً في متجرك.
           </div>
           <button class="btn-primary" (click)="saveSettings('branding')" [disabled]="isSaving() || isUploading()">
             @if (isSaving()) {
               <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
             } @else {
-              <i class="bi bi-floppy2-fill me-1"></i> حفظ الهوية البصرية والميديا
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ كافة إعدادات الهوية البصرية والواجهة والتصميم 💾✨
             }
           </button>
         </div>
@@ -382,34 +931,34 @@
 
           <div class="form-row">
             <div class="form-group flex-1">
-              <label for="setMinOrd">الحد الأدنى لقيمة الطلب (ج.م) *</label>
+              <label for="setMinOrd">الحد الأدنى لقيمة الطلب ({{ settings()!.currencySymbol || 'ج.م' }}) *</label>
               <div class="input-with-unit">
                 <input id="setMinOrd" type="number" class="form-control" [(ngModel)]="settings()!.minimumOrderAmount" />
-                <span class="unit-text">ج.م</span>
+                <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
               </div>
-              <small class="text-muted">أقل قيمة طلب يُسمح للعميل بإرسالها للمطعم.</small>
+              <small class="text-muted">أقل قيمة طلب يُسمح للعميل بإرسالها للمتجر.</small>
             </div>
 
             <div class="form-group flex-1">
-              <label for="setDefFee">رسوم التوصيل الافتراضية (ج.م) *</label>
+              <label for="setDefFee">رسوم التوصيل والخدمة الافتراضية ({{ settings()!.currencySymbol || 'ج.م' }}) *</label>
               <div class="input-with-unit">
                 <input id="setDefFee" type="number" class="form-control" [(ngModel)]="settings()!.defaultDeliveryFee" />
-                <span class="unit-text">ج.م</span>
+                <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
               </div>
               <small class="text-muted">تُطبق للمناطق التي لم يُحدد لها رسوم خاصة.</small>
             </div>
           </div>
 
           <div class="form-group">
-            <label for="setDiscl">نص إخلاء مسؤولية الوزن التقديري للأسماك الطازجة:</label>
+            <label for="setDiscl">نص إقرار وضمان الجودة وسياسة المتجر:</label>
             <textarea
               id="setDiscl"
               class="form-control"
               rows="3"
-              placeholder="نظراً لطبيعة الأسماك الطازجة، يعتبر الوزن والسعر تقديريين..."
+              placeholder="جميع المنتجات أصلية وتخضع لأعلى معايير الجودة والسلامة والتغليف الصحي السليم مع إمكانية الفحص عند الاستلام..."
               [(ngModel)]="settings()!.estimatedWeightDisclaimer"
             ></textarea>
-            <small class="text-muted">يظهر هذا النص التوضيحي للعملاء في السلة وصفحة الدفع لتفادي أي خلاف بالوزن.</small>
+            <small class="text-muted">يظهر هذا النص التوضيحي للعملاء في السلة وصفحة الدفع لبيان ضمان الجودة.</small>
           </div>
         </div>
 
@@ -429,30 +978,32 @@
       </div>
     }
 
-    <!-- TAB 4: Restaurant Info & Contacts -->
+    <!-- TAB 4: Business Info & Contacts -->
     @if (activeTab() === 'info') {
       <div class="tab-content animate-fade-in">
         <div class="row g-4">
           <div class="col-12 col-lg-6">
             <div class="settings-card glass-panel h-100">
-              <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المطعم الأساسية</h3>
+              <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المؤسسة الأساسية</h3>
 
               <div class="form-group">
-                <label for="setRestName">اسم المطعم *</label>
+                <label for="setRestName">اسم المؤسسة / المتجر *</label>
                 <input id="setRestName" type="text" class="form-control" [(ngModel)]="settings()!.restaurantName" />
               </div>
 
               <div class="form-group">
                 <label for="setTagline">الشعار اللفظي (Tagline)</label>
-                <input id="setTagline" type="text" class="form-control" placeholder="مثال: طازة من البحر لسفرتك 🐟" [(ngModel)]="settings()!.tagline" />
+                <input id="setTagline" type="text" class="form-control" placeholder="مثال: منصة التجارة الشاملة - تسوق لكافة المجالات والأنشطة بأفضل الأسعار" [(ngModel)]="settings()!.tagline" />
               </div>
 
               <div class="form-group mb-0">
-                <label for="setDesc">وصف تعريفي للمطعم</label>
-                <textarea id="setDesc" class="form-control" rows="4" placeholder="أشهى المأكولات البحرية والأسماك الطازجة يومياً..." [(ngModel)]="settings()!.description"></textarea>
+                <label for="setDesc">وصف تعريفي للمؤسسة</label>
+                <textarea id="setDesc" class="form-control" rows="4" placeholder="منصة تجارة شاملة ومتكاملة تقدم أفضل المنتجات والماركات المتنوعة بتوصيل فوري لباب المنزل..." [(ngModel)]="settings()!.description"></textarea>
               </div>
             </div>
           </div>
+
+
 
           <div class="col-12 col-lg-6">
             <div class="settings-card glass-panel h-100">
@@ -461,11 +1012,11 @@
               <div class="form-row">
                 <div class="form-group flex-1">
                   <label for="setPhone">رقم الهاتف للاتصال *</label>
-                  <input id="setPhone" type="tel" class="form-control" [(ngModel)]="settings()!.phone" />
+                  <app-phone-input inputId="setPhone" [(ngModel)]="settings()!.phone"></app-phone-input>
                 </div>
                 <div class="form-group flex-1">
                   <label for="setWa">رقم واتساب للطلبات *</label>
-                  <input id="setWa" type="tel" class="form-control" [(ngModel)]="settings()!.whatsapp" />
+                  <app-phone-input inputId="setWa" [(ngModel)]="settings()!.whatsapp"></app-phone-input>
                 </div>
               </div>
 
@@ -479,17 +1030,238 @@
                   <input id="setAddr" type="text" class="form-control" [(ngModel)]="settings()!.address" />
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="form-row mb-0">
-                <div class="form-group flex-1 mb-0">
-                  <label for="setFb">رابط صفحة فيسبوك (اختياري)</label>
+
+
+          <!-- Social Media & Location Links Full Width Card -->
+          <div class="col-12 mt-2">
+            <div class="settings-card glass-panel">
+              <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom flex-wrap gap-2">
+                <div>
+                  <h3 class="card-title text-primary m-0 border-0 p-0">
+                    <i class="bi bi-share-fill me-2"></i> حسابات التواصل الاجتماعي وروابط المتجر الرسمية 🌐
+                  </h3>
+                  <p class="card-subtitle text-muted small mt-1 mb-0">روابط المنصات والحسابات الاجتماعية وموقع المتجر على خرائط جوجل</p>
+                </div>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5">
+                  <i class="bi bi-link-45deg me-1"></i> روابط المنصات
+                </span>
+              </div>
+
+              <div class="settings-form-grid">
+                <div class="form-group">
+                  <label for="setFb" class="form-label fw-bold"><i class="bi bi-facebook text-primary me-1"></i> فيسبوك (Facebook):</label>
                   <input id="setFb" type="url" class="form-control" placeholder="https://facebook.com/..." [(ngModel)]="settings()!.facebookUrl" />
                 </div>
-                <div class="form-group flex-1 mb-0">
-                  <label for="setInsta">رابط إنستغرام (اختياري)</label>
+                <div class="form-group">
+                  <label for="setInsta" class="form-label fw-bold"><i class="bi bi-instagram text-danger me-1"></i> إنستغرام (Instagram):</label>
                   <input id="setInsta" type="url" class="form-control" placeholder="https://instagram.com/..." [(ngModel)]="settings()!.instagramUrl" />
                 </div>
+                <div class="form-group">
+                  <label for="setTiktok" class="form-label fw-bold"><i class="bi bi-tiktok text-dark me-1"></i> تيك توك (TikTok):</label>
+                  <input id="setTiktok" type="url" class="form-control" placeholder="https://tiktok.com/@..." [(ngModel)]="settings()!.tikTokUrl" />
+                </div>
+                <div class="form-group">
+                  <label for="setYt" class="form-label fw-bold"><i class="bi bi-youtube text-danger me-1"></i> يوتيوب (YouTube):</label>
+                  <input id="setYt" type="url" class="form-control" placeholder="https://youtube.com/@..." [(ngModel)]="settings()!.youTubeUrl" />
+                </div>
+                <div class="form-group">
+                  <label for="setTw" class="form-label fw-bold"><i class="bi bi-twitter-x text-dark me-1"></i> منصة إكس / تويتر (X):</label>
+                  <input id="setTw" type="url" class="form-control" placeholder="https://x.com/..." [(ngModel)]="settings()!.twitterUrl" />
+                </div>
+                <div class="form-group">
+                  <label for="setSnap" class="form-label fw-bold"><i class="bi bi-snapchat text-warning me-1"></i> سناب شات (Snapchat):</label>
+                  <input id="setSnap" type="url" class="form-control" placeholder="https://snapchat.com/add/..." [(ngModel)]="settings()!.snapchatUrl" />
+                </div>
+                <div class="form-group col-span-full">
+                  <label for="setLoc" class="form-label fw-bold"><i class="bi bi-geo-alt-fill text-danger me-1"></i> رابط الموقع على خرائط جوجل (Google Maps Location):</label>
+                  <input id="setLoc" type="url" class="form-control" placeholder="https://maps.google.com/?q=..." [(ngModel)]="settings()!.locationUrl" />
+                </div>
               </div>
+            </div>
+          </div>
+
+
+
+          
+
+        </div>
+
+        <!-- Electronic Payment & Wallets (Vodafone Cash & InstaPay) -->
+        <div class="settings-card glass-panel mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h3 class="card-title text-primary m-0">
+                <i class="bi bi-wallet2 me-2"></i> طرق الدفع الإلكتروني والتحويل (فودافون كاش & إنستاباي) 💳
+              </h3>
+              <p class="card-subtitle text-muted small mt-1">عند إدخال أي رقم، سيظهر خيار التحويل الإلكتروني للعميل تلقائياً في صفحة إتمام الطلب مع تفاصيل التحويل</p>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+              <i class="bi bi-shield-check me-1"></i> بوابات المحافظ الإلكترونية
+            </span>
+          </div>
+
+          <div class="settings-form-grid">
+            <div class="form-group">
+              <label for="setVfCash" class="form-label fw-bold">
+                <i class="bi bi-phone-vibrate text-danger me-1"></i> رقم محفظة فودافون كاش (Vodafone Cash):
+              </label>
+              <input
+                id="setVfCash"
+                type="text"
+                class="form-control fw-bold"
+                placeholder="مثال: 010XXXXXXXX"
+                [(ngModel)]="settings()!.vodafoneCashNumber"
+              />
+              <small class="text-muted">الرقم المخصص لاستقبال تحويلات فودافون كاش من العملاء.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setInstaPay" class="form-label fw-bold">
+                <i class="bi bi-send-check-fill text-primary me-1"></i> حساب / معرف إنستاباي (InstaPay Account / IPA):
+              </label>
+              <input
+                id="setInstaPay"
+                type="text"
+                class="form-control fw-bold"
+                placeholder="مثال: username@instapay أو 01XXXXXXXXX"
+                [(ngModel)]="settings()!.instaPayAccount"
+              />
+              <small class="text-muted">عنوان الدفع اللحظي (IPA) أو رقم الهاتف المرتبط بإنستاباي.</small>
+            </div>
+          </div>
+
+          <div class="alert alert-info mt-3 mb-0 d-flex align-items-center">
+            <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+            <span class="small">
+              <strong>ملاحظة للمتجر:</strong> عند تفعيل التحويل، يُطلب من العميل إرفاق رقم المحفظة المحول منها أو اسم المحول في خانة الملاحظات لتسريع تأكيد الطلب.
+            </span>
+          </div>
+        </div>
+
+        <!-- Country, Localization & Currency Engine -->
+        <div class="settings-card glass-panel mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h3 class="card-title text-primary m-0">
+                <i class="bi bi-globe-americas me-2"></i> الدولة، العملة والنطاق الزمني للمتجر 🌍
+              </h3>
+              <p class="card-subtitle text-muted small mt-1">تحديد بلد المتجر، العملة الرسمية المعتمدة، كود الدولة للهواتف، والتوقيت المحلي</p>
+            </div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+              <i class="bi bi-cash-coin me-1"></i> محرك التدويل
+            </span>
+          </div>
+
+          <!-- Quick Country Selector Buttons -->
+          <div class="country-presets-bar mb-4 p-3 rounded border" style="background: rgba(255, 255, 255, 0.7);">
+            <label class="form-label fw-bold d-block mb-2">
+              <i class="bi bi-lightning-charge-fill text-warning me-1"></i> اختيار سريع لدولة المتجر (يضبط العملة، كود الهاتف والتوقيت تلقائياً):
+            </label>
+            <div class="d-flex flex-wrap gap-2">
+              @for (c of availableCountries; track c.code) {
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-primary]="settings()!.countryCode === c.code"
+                  [class.btn-outline-secondary]="settings()!.countryCode !== c.code"
+                  (click)="onCountrySelect(c.code)"
+                >
+                  <span class="me-1">{{ c.flag }}</span>
+                  <span>{{ c.name }}</span>
+                  <small class="ms-1 opacity-75">({{ c.currencySymbol }})</small>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="settings-form-grid">
+            <div class="form-group">
+              <label for="setCountryCode" class="form-label fw-bold"><i class="bi bi-flag-fill me-1 text-primary"></i> كود الدولة (Country Code):</label>
+              <input id="setCountryCode" type="text" class="form-control fw-bold" placeholder="EG" [(ngModel)]="settings()!.countryCode" />
+              <small class="text-muted">رمز الدولة القياسي (ISO)</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setPhoneCountryCode" class="form-label fw-bold"><i class="bi bi-telephone-plus-fill me-1 text-primary"></i> كود الهاتف الافتراضي:</label>
+              <input id="setPhoneCountryCode" type="text" class="form-control fw-bold" placeholder="+20" [(ngModel)]="settings()!.phoneCountryCode" />
+              <small class="text-muted">المفتاح الدولي لأرقام الهواتف</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setCurrSym" class="form-label fw-bold"><i class="bi bi-cash me-1 text-success"></i> رمز العملة المعروضة:</label>
+              <input id="setCurrSym" type="text" class="form-control fw-bold" placeholder="مثال: ج.م أو ر.س أو $" [(ngModel)]="settings()!.currencySymbol" />
+              <small class="text-muted">يظهر بجانب جميع الأسعار والفواتير</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setCurrCode" class="form-label fw-bold"><i class="bi bi-currency-exchange me-1 text-success"></i> كود العملة (ISO):</label>
+              <input id="setCurrCode" type="text" class="form-control fw-bold" placeholder="EGP" [(ngModel)]="settings()!.currencyCode" />
+              <small class="text-muted">كود العملة في بوابات الدفع</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setTimeZone" class="form-label fw-bold"><i class="bi bi-clock-history me-1 text-info"></i> النطاق الزمني (Timezone):</label>
+              <input id="setTimeZone" type="text" class="form-control" placeholder="Africa/Cairo" [(ngModel)]="settings()!.timeZone" />
+              <small class="text-muted">التوقيت المعتمد لتسجيل أوقات الطلبات وتقارير المبيعات</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setLocale" class="form-label fw-bold"><i class="bi bi-translate me-1 text-info"></i> اللغة والتهيئة (Locale):</label>
+              <input id="setLocale" type="text" class="form-control" placeholder="ar-EG" [(ngModel)]="settings()!.locale" />
+              <small class="text-muted">تنسيق الأرقام والتواريخ</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Multi-Domain & Business Activities Configuration Card -->
+        <div class="settings-card glass-panel mt-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h3 class="card-title text-primary m-0">
+                <i class="bi bi-briefcase-fill me-2"></i> إعدادات نوع النشاط والمجال التجاري والعملة
+              </h3>
+              <p class="card-subtitle text-muted small mt-1">تحديد نوع النشاط الأساسي للمتجر، تفعيل التعدد في الأنشطة، والعملة المعتمدة</p>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+              <i class="bi bi-gear-fill me-1"></i> إعدادات الأنشطة
+            </span>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setDefaultDom"><i class="bi bi-shop me-1 text-primary"></i> النشاط والمجال الافتراضي للمنصة:</label>
+              <select id="setDefaultDom" class="form-control fw-bold" [(ngModel)]="settings()!.defaultDomain">
+                @for (dom of businessDomains; track dom.id) {
+                  <option [value]="dom.id">{{ dom.label }}</option>
+                }
+              </select>
+              <small class="text-muted">المجال الأساسي الذي تظهر به شاشات المتجر والمنتجات بشكل افتراضي.</small>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="setCurrSym"><i class="bi bi-cash me-1 text-success"></i> رمز العملة المعروضة (Currency Symbol):</label>
+              <input id="setCurrSym" type="text" class="form-control fw-bold" placeholder="مثال: ج.م أو ر.س أو $" [(ngModel)]="settings()!.currencySymbol" />
+              <small class="text-muted">الرمز الذي يظهر بجانب جميع أسعار المنتجات والفواتير وسلة الشراء.</small>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setDomLabel"><i class="bi bi-card-text me-1 text-primary"></i> تسمية تبويب وتصنيف الأنشطة:</label>
+              <input id="setDomLabel" type="text" class="form-control" placeholder="مثال: أقسام وتصنيفات المتجر" [(ngModel)]="settings()!.businessDomainLabel" />
+              <small class="text-muted">النص الذي يظهر كعنوان لتصفح الأقسام والمجالات في الواجهة.</small>
+            </div>
+
+            <div class="form-group flex-1">
+              <label class="form-label"><i class="bi bi-grid-3x3-gap-fill me-1 text-primary"></i> المنصة متعددة الأنشطة والمجالات:</label>
+              <label class="checkbox-label flex-center mt-2 p-2 border rounded bg-light">
+                <input type="checkbox" [(ngModel)]="settings()!.isMultiDomain" />
+                <span class="fw-bold ms-2">تفعيل متجر متعدد الأنشطة (سوبرماركت، مطعم، صيدلية، قطع غيار...)</span>
+              </label>
+              <small class="text-muted">عند التفعيل، يمكن للمتجر استضافة أقسام من مجالات مختلفة في نفس الوقت.</small>
             </div>
           </div>
         </div>
@@ -503,7 +1275,7 @@
             @if (isSaving()) {
               <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
             } @else {
-              <i class="bi bi-floppy2-fill me-1"></i> حفظ بيانات المطعم والاتصال
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ بيانات المؤسسة والاتصال
             }
           </button>
         </div>

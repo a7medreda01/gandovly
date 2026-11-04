@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { WhatsAppGatewaySettings } from '../../../core/models/models';
+import { PhoneInputComponent } from '../../../shared/components/phone-input/phone-input.component';
 
 @Component({
   selector: 'app-admin-notifications',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PhoneInputComponent],
   templateUrl: './admin-notifications.component.html',
   styleUrls: ['./admin-notifications.component.scss']
 })
@@ -25,7 +26,7 @@ export class AdminNotificationsComponent implements OnInit {
   };
 
   testPhone = '';
-  testMessage = 'مرحباً بكم من أسماك جندوفلي! هذه رسالة تجريبية لتأكيد نجاح ربط بوابة WhatsApp الذاتية.';
+  testMessage = 'مرحباً بكم! هذه رسالة تجريبية لتأكيد نجاح ربط بوابة WhatsApp الذاتية للمتجر.';
 
   loading = signal(false);
   saving = signal(false);

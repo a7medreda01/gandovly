@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminService } from '../../../core/services/admin.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import { SalesReport, WeightVarianceReport } from '../../../core/models/models';
 
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
@@ -14,6 +15,11 @@ import { LoadingStateComponent } from '../../../shared/components/loading-state/
 })
 export class AdminReportsComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
 
   activeTab: 'sales' | 'variance' = 'sales';
   salesReport = signal<SalesReport | null>(null);

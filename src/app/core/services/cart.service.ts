@@ -58,7 +58,8 @@ export class CartService {
     modifiers: ModifierOption[] = [],
     customWeightGrams?: number,
     specialInstructions?: string,
-    orderMode?: 'pieces' | 'weight'
+    orderMode?: 'pieces' | 'weight',
+    pipeMeters?: number
   ) {
     let estimatedWeight: number | undefined;
     let lineTotal = 0;
@@ -108,6 +109,7 @@ export class CartService {
       orderMode: resolvedOrderMode,
       selectedPrepOption: prepOption,
       selectedModifiers: modifiers,
+      pipeMeters,
       specialInstructions,
       estimatedWeightGrams: estimatedWeight,
       estimatedUnitPrice,
@@ -211,7 +213,7 @@ export class CartService {
     const item = this.items().find(i => i.id === itemId);
     if (!item) return;
 
-    // الزيادة أو النقصان بمقدار الوزن التقريبي للسمكة الواحدة
+    // الزيادة أو النقصان بمقدار الوزن التقريبي للوحدة الواحدة
     const fishUnitWeight = (item.product.averageUnitWeightGrams && item.product.averageUnitWeightGrams > 0)
       ? item.product.averageUnitWeightGrams
       : 250;

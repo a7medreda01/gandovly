@@ -1984,3 +1984,42 @@
   }
 }
 
+.cashier-notification-box {
+  background: rgba(10, 61, 98, 0.04);
+  border: 1.5px solid rgba(10, 61, 98, 0.2) !important;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(10, 61, 98, 0.35) !important;
+    background: rgba(10, 61, 98, 0.06);
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+
+    .col-md-8 {
+      flex: 1 1 240px;
+    }
+    .col-md-4 {
+      flex: 0 1 140px;
+    }
+  }
+
+  .form-control-custom {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.92rem;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+
+    &:focus {
+      border-color: var(--primary-color, #0a3d62);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(10, 61, 98, 0.12);
+    }
+  }
+}
+

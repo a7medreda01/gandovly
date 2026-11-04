@@ -1,4 +1,4 @@
-<header class="main-header">
+<header class="main-header" [style.background]="settingsService.settings().navbarBgColor || 'var(--navbar-bg)'" [style.color]="settingsService.settings().navbarTextColor || 'var(--navbar-text)'">
   @if (settingsService.settings().activePromotionBanner) {
   <div class="top-promo-banner flex-center">
     <i class="bi bi-stars me-1 text-warning"></i>
@@ -8,21 +8,55 @@
   }
 
   <div class="container flex-between header-wrapper">
-    <!-- Brand Info -->
-    <a routerLink="/" class="brand-logo flex-center" (click)="closeMobileMenu()">
-      @if (settingsService.settings().logoUrl) {
-      <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
-        [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img" />
-      } @else {
-      <div class="logo-icon">
-        <i class="bi bi-water"></i>
-      </div>
-      }
-      <div class="brand-texts">
-        <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
-        <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
-      </div>
-    </a>
+    <!-- Brand Info & Mobile Toggle (Right Side in RTL) -->
+    <div class="header-brand-group flex-center">
+      <!-- Mobile Hamburger Toggle (First on Right in RTL) -->
+      <button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="القائمة">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <!-- Brand Info -->
+      <a routerLink="/" class="brand-logo flex-center" (click)="closeMobileMenu()">
+        @if (settingsService.settings().navbarBrandMode === 'logo_only' && settingsService.settings().logoUrl) {
+          <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+            [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img logo-only-mode" />
+        } @else if (settingsService.settings().navbarBrandMode === 'name_only') {
+          <div class="brand-texts name-only-mode">
+            <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+              <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+            }
+          </div>
+        } @else if (settingsService.settings().navbarBrandMode === 'icon_name') {
+          <div class="logo-icon">
+            <i class="bi bi-shop"></i>
+          </div>
+          <div class="brand-texts">
+            <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+              <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+            }
+          </div>
+        } @else {
+          @if (settingsService.settings().logoUrl) {
+            <div class="logo-circle-badge">
+              <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+                [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img" />
+            </div>
+          } @else {
+            <div class="logo-icon">
+              <i class="bi bi-shop"></i>
+            </div>
+          }
+          <div class="brand-texts">
+            <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+              <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+            }
+          </div>
+        }
+      </a>
+    </div>
 
     <!-- Desktop Navigation -->
     <nav class="desktop-nav">
@@ -30,12 +64,12 @@
         <i class="bi bi-house-door me-1"></i> الرئيسية
       </a>
       <a routerLink="/menu" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-grid me-1"></i> قائمة الطعام
+        <i class="bi bi-grid me-1"></i> كافة المنتجات
       </a>
 
       @if (isKitchenAllowed) {
       <a routerLink="/kitchen" class="nav-badge-link">
-        <span class="badge badge-weight"><i class="bi bi-fire me-1"></i> المطبخ</span>
+        <span class="badge badge-weight"><i class="bi bi-box-seam me-1"></i> صالة التجهيز</span>
       </a>
       }
       @if (isAdminAllowed) {
@@ -45,16 +79,30 @@
       }
     </nav>
 
-    <!-- Header Actions -->
+    <!-- Header Actions (Left Side in RTL) -->
     <div class="header-actions flex-center">
       <!-- WhatsApp CTA -->
-      @if (settingsService.settings().whatsapp) {
+      @if (settingsService.settings().showWhatsAppInNavbar && settingsService.settings().whatsapp) {
       <a [href]="'https://wa.me/' + settingsService.settings().whatsapp" target="_blank"
         class="btn-whatsapp flex-center" title="تواصل عبر واتساب">
         <i class="bi bi-whatsapp"></i>
         <span class="btn-text">واتساب</span>
       </a>
       }
+
+      <!-- Phone CTA -->
+      @if (settingsService.settings().showPhoneInNavbar && settingsService.settings().phone) {
+      <a [href]="'tel:' + settingsService.settings().phone"
+        class="btn-whatsapp flex-center" title="اتصال هاتفي">
+        <i class="bi bi-telephone-fill"></i>
+        <span class="btn-text">اتصال</span>
+      </a>
+      }
+
+      <!-- Account Button -->
+      <a routerLink="/account" class="account-btn flex-center" title="حسابي">
+        <i class="bi bi-person"></i>
+      </a>
 
       <!-- Cart Button -->
       <button 
@@ -68,7 +116,7 @@
         aria-label="سلة الطلبات"
       >
         <div class="cart-icon-wrapper">
-          <i class="bi bi-bag-check-fill cart-icon"></i>
+          <i class="bi bi-cart3 cart-icon"></i>
           @if (cartService.totalItemsCount() > 0) {
             <span class="cart-badge">{{ cartService.totalItemsCount() }}</span>
           }
@@ -78,32 +126,54 @@
           <span class="cart-count-pill">{{ cartService.totalItemsCount() }}</span>
         }
       </button>
-
-      <!-- Account Button -->
-      <a routerLink="/account" class="account-btn flex-center" title="حسابي">
-        <i class="bi bi-person-circle"></i>
-      </a>
-
-      <!-- Mobile Hamburger -->
-      <button class="mobile-toggle-btn" (click)="toggleMobileMenu()" aria-label="القائمة">
-        <i class="bi bi-list"></i>
-      </button>
     </div>
   </div>
 
-  <!-- Mobile Drawer Menu -->
+  <!-- Mobile Drawer Menu (Toolbar الجانبي - خلفية فاتحة ثابتة مستقلة) -->
   @if (isMobileMenuOpen) {
   <div class="mobile-menu-overlay" (click)="closeMobileMenu()">
     <div class="mobile-menu-content" (click)="$event.stopPropagation()">
       <div class="mobile-menu-header flex-between">
         <div class="drawer-brand flex-center gap-2">
-          <i class="bi bi-water text-primary fs-4"></i>
-          <span class="drawer-restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+          @if (settingsService.settings().logoUrl) {
+            <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'" [alt]="settingsService.settings().restaurantName" class="drawer-logo-img" />
+          } @else {
+            <div class="drawer-logo-icon">
+              <i class="bi bi-shop"></i>
+            </div>
+          }
+          <div class="drawer-titles">
+            <span class="drawer-restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+            @if (settingsService.settings().tagline) {
+              <span class="drawer-tagline">{{ settingsService.settings().tagline }}</span>
+            }
+          </div>
         </div>
-        <button class="drawer-close-btn" (click)="closeMobileMenu()">
+        <button class="drawer-close-btn" (click)="closeMobileMenu()" aria-label="إغلاق">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
+
+      <!-- Language Switcher in Side Toolbar Only -->
+      @if (languageService.canSwitchLanguage()) {
+        <div class="drawer-lang-strip">
+          <div class="drawer-lang-card flex-between">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-globe2 text-primary fs-5"></i>
+              <span class="drawer-lang-title">لغة العرض / Language</span>
+            </div>
+            <button
+              type="button"
+              class="btn-drawer-lang"
+              (click)="languageService.toggleLanguage()"
+              [title]="languageService.currentLang() === 'ar' ? 'Switch to English' : 'التحويل للعربية'"
+            >
+              <span>{{ languageService.currentLang() === 'ar' ? 'English' : 'عربي' }}</span>
+              <i class="bi bi-arrow-left-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+      }
 
       <div class="mobile-links-container">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
@@ -118,17 +188,33 @@
         <a routerLink="/menu" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
           <div class="link-left">
             <div class="link-icon-box icon-menu"><i class="bi bi-grid"></i></div>
-            <span class="link-title">قائمة الطعام والعروض</span>
+            <span class="link-title">{{ settingsService.settings().labelProducts || 'كتالوج وتصنيفات المنتجات' }}</span>
           </div>
           <i class="bi bi-chevron-left link-arrow"></i>
         </a>
+
+        <!-- Wishlist Link in Side Toolbar Only -->
+        @if (settingsService.settings().enableWishlist) {
+          <a routerLink="/wishlist" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item wishlist-drawer-item">
+            <div class="link-left">
+              <div class="link-icon-box icon-wishlist"><i class="bi bi-heart-fill"></i></div>
+              <span class="link-title">{{ settingsService.settings().labelWishlist || 'قائمة المفضلة' }}</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              @if (wishlistService.count() > 0) {
+                <span class="wishlist-counter-pill">{{ wishlistService.count() }}</span>
+              }
+              <i class="bi bi-chevron-left link-arrow"></i>
+            </div>
+          </a>
+        }
 
         <div class="drawer-divider"></div>
 
         <a routerLink="/account" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
           <div class="link-left">
             <div class="link-icon-box icon-account"><i class="bi bi-person"></i></div>
-            <span class="link-title">حسابي وطلباتي</span>
+            <span class="link-title">{{ settingsService.settings().labelOrders || 'حسابي وطلباتي' }}</span>
           </div>
           <i class="bi bi-chevron-left link-arrow"></i>
         </a>
@@ -138,8 +224,8 @@
 
         <a routerLink="/kitchen" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link-item">
           <div class="link-left">
-            <div class="link-icon-box icon-kitchen"><i class="bi bi-fire"></i></div>
-            <span class="link-title">شاشة المطبخ والأوزان</span>
+            <div class="link-icon-box icon-kitchen"><i class="bi bi-gear-wide-connected"></i></div>
+            <span class="link-title">شاشة المستودع والعمليات</span>
           </div>
           <i class="bi bi-chevron-left link-arrow"></i>
         </a>

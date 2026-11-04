@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="grad-tea-coffee" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#854D0E" />
+      <stop offset="100%" stop-color="#713F12" />
+    </linearGradient>
+    <filter id="shadow-tea-coffee" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#713F12" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="104" height="104" rx="28" fill="url(#grad-tea-coffee)" filter="url(#shadow-tea-coffee)" />
+  <circle cx="60" cy="60" r="36" fill="#ffffff" fill-opacity="0.22"/>
+  <text x="60" y="72" font-size="42" text-anchor="middle" dominant-baseline="central">☕</text>
+</svg>

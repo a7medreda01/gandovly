@@ -1,8 +1,8 @@
 <div class="catalog-page">
   <div class="page-title-row flex-between">
     <div>
-      <h1 class="page-heading"><i class="bi bi-grid-fill text-primary me-2"></i> إدارة قائمة الطعام والأسماك</h1>
-      <p class="page-sub">إدارة أسعار الكيلو، متوسط أوزان الأسماك، التوفر الفوري، وطرق الطهي والإضافات</p>
+      <h1 class="page-heading"><i class="bi bi-grid-fill text-primary me-2"></i> إدارة كتالوج المنتجات والأقسام</h1>
+      <p class="page-sub">إدارة أسعار وتفاصيل المنتجات، الأقسام، والمواصفات وخيارات الطلب والتوصيل</p>
     </div>
     <div class="header-actions">
       @if (activeTab === 'products') {
@@ -15,6 +15,11 @@
           <i class="bi bi-folder-plus me-1"></i>
           <span>إضافة قسم جديد</span>
         </button>
+      } @else if (activeTab === 'modifiers') {
+        <button class="btn-primary" (click)="openNewModifierGroupModal()">
+          <i class="bi bi-plus-circle-fill me-1"></i>
+          <span>إضافة مجموعة خيارات جديدة</span>
+        </button>
       }
     </div>
   </div>
@@ -23,17 +28,22 @@
   <div class="catalog-tabs-bar">
     <button class="tab-nav-btn" [class.active]="activeTab === 'products'" (click)="activeTab = 'products'">
       <i class="bi bi-grid-3x3-gap-fill me-1"></i>
-      <span>الأصناف والوجبات</span>
+      <span>الأصناف والمنتجات</span>
       <span class="count-pill">{{ products().length }}</span>
     </button>
     <button class="tab-nav-btn" [class.active]="activeTab === 'categories'" (click)="activeTab = 'categories'">
       <i class="bi bi-folder-fill me-1"></i>
-      <span>أقسام المنيو</span>
+      <span>أقسام المتجر</span>
       <span class="count-pill">{{ categories().length }}</span>
     </button>
+    <button class="tab-nav-btn" [class.active]="activeTab === 'modifiers'" (click)="activeTab = 'modifiers'">
+      <i class="bi bi-sliders me-1 text-primary"></i>
+      <span>خيارات ومواصفات الأصناف</span>
+      <span class="count-pill">{{ modifierGroups().length }}</span>
+    </button>
     <button class="tab-nav-btn" [class.active]="activeTab === 'cooking-methods'" (click)="activeTab = 'cooking-methods'">
-      <i class="bi bi-fire me-1 text-danger"></i>
-      <span>طرق الطهي والتحضير</span>
+      <i class="bi bi-tools me-1 text-warning"></i>
+      <span>خيارات التجهيز والخدمات</span>
       <span class="count-pill">{{ prepGroups().length }}</span>
     </button>
   </div>
@@ -41,7 +51,7 @@
   @if (isLoading()) {
     <app-loading-state
       mode="cards"
-      title="جاري تحميل قائمة الأسماك والوجبات..."
+      title="جاري تحميل كتالوج المنتجات والخيارات..."
       subtitle="لحظات ويتم جلب كافة الأصناف والأسعار المحدثة"
       [count]="6"
     ></app-loading-state>
@@ -58,12 +68,12 @@
             <input
               type="text"
               class="search-input-field"
-              placeholder="ابحث باسم الصنف، الكود، أو التفاصيل..."
+              placeholder="ابحث بالاسم، الماركة، الباركود، الكود..."
               [ngModel]="productSearch()"
-              (ngModelChange)="productSearch.set($event)"
+              (ngModelChange)="onProductSearchChange($event)"
             />
             @if (productSearch()) {
-              <button type="button" class="btn-clear-search" (click)="productSearch.set('')" title="مسح">
+              <button type="button" class="btn-clear-search" (click)="onProductSearchChange('')" title="مسح">
                 <i class="bi bi-x-circle-fill"></i>
               </button>
             }
@@ -74,9 +84,9 @@
             <select
               class="category-select-field"
               [ngModel]="categoryFilter()"
-              (ngModelChange)="categoryFilter.set($event)"
+              (ngModelChange)="onCategoryFilterChange($event)"
             >
-              <option [ngValue]="null">كل الأقسام</option>
+              <option [ngValue]="null">كل الأقسام ({{ categories().length }})</option>
               @for (c of categories(); track c.id) {
                 <option [ngValue]="c.id">{{ c.nameAr }}</option>
               }
@@ -86,7 +96,10 @@
 
         <!-- Count Badge -->
         <div class="search-count-badge">
-          {{ filteredProducts().length }} من أصل {{ products().length }} صنف
+          @if (isLoadingProducts()) {
+            <span class="spinner-border spinner-border-sm me-1 text-primary"></span>
+          }
+          عرض {{ products().length }} من أصل {{ totalProductsCount() }} صنف
         </div>
       </div>
 
@@ -97,8 +110,8 @@
               <th style="width: 25%;">الصنف</th>
               <th style="width: 15%;">القسم</th>
               <th style="width: 14%;">نوع التسعير</th>
-              <th style="width: 14%;">سعر الكيلو / الوحدة</th>
-              <th style="width: 12%;">متوسط وزن السمكة</th>
+              <th style="width: 14%;">السعر</th>
+              <th style="width: 12%;">السعة / المواصفات</th>
               <th style="width: 10%;">حالة التوفر</th>
               <th style="width: 10%; text-align: center;">الإجراءات</th>
             </tr>
@@ -117,7 +130,7 @@
                       <span class="prod-name-ar">{{ prod.nameAr }}</span>
                       <div class="d-flex align-items-center gap-2 mt-1">
                         @if (prod.nameEn) { <small class="text-muted">{{ prod.nameEn }}</small> }
-                        <span class="prep-pill" title="مدة التجهيز والطهي المتوقعة">
+                        <span class="prep-pill" title="مدة التجهيز والتوريد المتوقعة">
                           <i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes || 25 }} دقيقة
                         </span>
                       </div>
@@ -129,21 +142,21 @@
                 </td>
                 <td>
                   @if (prod.pricingType === 'ByWeight') {
-                    <span class="pricing-pill weight"><i class="bi bi-speedometer2 me-1"></i> بالوزن</span>
+                    <span class="pricing-pill weight"><i class="bi bi-speedometer2 me-1"></i> بالوزن / القياس</span>
                   } @else {
-                    <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> طبق ثابت</span>
+                    <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> سعر الوحدة</span>
                   }
                 </td>
                 <td>
                   @if (prod.pricingType === 'ByWeight') {
-                    <strong class="price-text">{{ prod.pricePerKg || prod.pricePerUnit }} ج.م <span class="unit-text">/ كجم</span></strong>
+                    <strong class="price-text">{{ prod.pricePerKg || prod.pricePerUnit }} {{ currencySymbol }} <span class="unit-text">/ كجم</span></strong>
                   } @else {
-                    <strong class="price-text">{{ prod.pricePerUnit }} ج.م</strong>
+                    <strong class="price-text">{{ prod.pricePerUnit }} {{ currencySymbol }}</strong>
                   }
                 </td>
                 <td>
                   @if (prod.averageUnitWeightGrams) {
-                    <span class="weight-text">{{ prod.averageUnitWeightGrams }} جم</span>
+                    <span class="weight-text">{{ prod.averageUnitWeightGrams }} لتر / مم</span>
                   } @else {
                     <span class="text-muted">-</span>
                   }
@@ -216,9 +229,9 @@
               <div class="price-info">
                 <span class="price-label">{{ prod.pricingType === 'ByWeight' ? 'سعر الكيلو' : 'سعر الوحدة' }}</span>
                 @if (prod.pricingType === 'ByWeight') {
-                  <strong class="price-text">{{ prod.pricePerKg || prod.pricePerUnit }} ج.م <span class="unit-text">/ كجم</span></strong>
+                  <strong class="price-text">{{ prod.pricePerKg || prod.pricePerUnit }} {{ currencySymbol }} <span class="unit-text">/ كجم</span></strong>
                 } @else {
-                  <strong class="price-text">{{ prod.pricePerUnit }} ج.م</strong>
+                  <strong class="price-text">{{ prod.pricePerUnit }} {{ currencySymbol }}</strong>
                 }
                 @if (prod.averageUnitWeightGrams) {
                   <small class="text-muted">متوسط الوزن: {{ prod.averageUnitWeightGrams }} جم</small>
@@ -238,6 +251,55 @@
           </div>
         }
       </div>
+
+      <!-- Server-Side Pagination Bar for Products -->
+      @if (totalPages() > 1 || totalProductsCount() > 20) {
+        <div class="admin-pagination-bar flex-between flex-wrap gap-2 mt-3 pt-3 border-top">
+          <div class="pagination-info text-muted small">
+            عرض الصفحة <strong>{{ pageIndex() }}</strong> من أصل <strong>{{ totalPages() }}</strong> (إجمالي {{ totalProductsCount() }} صنف)
+          </div>
+
+          <div class="pagination-controls d-flex align-items-center gap-1">
+            <button
+              type="button"
+              class="btn-page-nav"
+              [disabled]="pageIndex() <= 1 || isLoadingProducts()"
+              (click)="goToPage(pageIndex() - 1)"
+              title="الصفحة السابقة"
+            >
+              <i class="bi bi-chevron-right"></i>
+              <span>السابق</span>
+            </button>
+
+            <span class="current-page-badge">{{ pageIndex() }} / {{ totalPages() }}</span>
+
+            <button
+              type="button"
+              class="btn-page-nav"
+              [disabled]="pageIndex() >= totalPages() || isLoadingProducts()"
+              (click)="goToPage(pageIndex() + 1)"
+              title="الصفحة التالية"
+            >
+              <span>التالي</span>
+              <i class="bi bi-chevron-left"></i>
+            </button>
+          </div>
+
+          <div class="pagination-page-size d-flex align-items-center gap-1 small text-muted">
+            <span>عدد العناصر:</span>
+            <select
+              class="page-size-select"
+              [ngModel]="pageSize()"
+              (ngModelChange)="onPageSizeChange($event)"
+            >
+              <option [value]="15">15</option>
+              <option [value]="20">20</option>
+              <option [value]="35">35</option>
+              <option [value]="50">50</option>
+            </select>
+          </div>
+        </div>
+      }
     </div>
   } @else if (activeTab === 'categories') {
     <!-- Tab 2: Categories List Table & Mobile Cards -->
@@ -385,8 +447,135 @@
         }
       </div>
     </div>
+  } @else if (activeTab === 'modifiers') {
+    <!-- Tab 3: Modifiers & Specifications Groups Management -->
+    <div class="modifiers-management-section">
+      <div class="row g-4">
+        @for (grp of modifierGroups(); track grp.id) {
+          <div class="col-12 col-xl-6">
+            <div class="catalog-card glass-panel h-100">
+              <div class="card-header-flex flex-between mb-3 pb-2 border-bottom">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <h3 class="group-title mb-0">
+                      <i class="bi bi-sliders text-primary me-1"></i>
+                      {{ grp.nameAr }}
+                    </h3>
+                    <span class="badge" [class.badge-prep]="grp.isRequired" [class.badge-weight]="!grp.isRequired">
+                      {{ grp.isRequired ? 'إلزامي *' : 'اختياري' }}
+                    </span>
+                    <span class="badge bg-light text-dark">
+                      {{ grp.maxSelection === 1 ? 'اختيار أحادي (قائمة منسدلة)' : 'متعدد (اختيار حتى ' + grp.maxSelection + ')' }}
+                    </span>
+                  </div>
+                  <small class="text-muted d-block">
+                    @if (grp.nameEn) { <span>{{ grp.nameEn }} • </span> }
+                    <span>عدد الخيارات المتاحة: ({{ grp.options.length }})</span>
+                  </small>
+                </div>
+                <div class="group-header-actions d-flex align-items-center gap-2">
+                  <button class="btn-primary btn-sm" (click)="openNewModifierOptionModal(grp)" title="إضافة خيار لهذه المجموعة">
+                    <i class="bi bi-plus-lg me-1"></i>
+                    <span>إضافة خيار</span>
+                  </button>
+                  <button class="btn-icon edit" (click)="openEditModifierGroupModal(grp)" title="تعديل خصائص المجموعة">
+                    <i class="bi bi-gear-fill"></i>
+                  </button>
+                  <button class="btn-icon del" (click)="deleteModifierGroup(grp)" title="حذف المجموعة">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Options List Table -->
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 45%;">الخيار / الملحق</th>
+                      <th style="width: 25%;">التكلفة الإضافية</th>
+                      <th style="width: 15%; text-align: center;">الحالة</th>
+                      <th style="width: 15%; text-align: center;">الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (opt of grp.options; track opt.id) {
+                      <tr>
+                        <td>
+                          <strong class="opt-name-ar">{{ opt.nameAr }}</strong>
+                          @if (opt.nameEn) { <small class="text-muted d-block">{{ opt.nameEn }}</small> }
+                        </td>
+                        <td>
+                          <span class="cost-badge" [class.free]="opt.price === 0">
+                            {{ opt.price === 0 ? 'مشمول (0 ' + currencySymbol + ')' : '+' + opt.price + ' ' + currencySymbol }}
+                          </span>
+                        </td>
+                        <td style="text-align: center;">
+                          <span class="status-pill" [class.active]="opt.isAvailable" [class.inactive]="!opt.isAvailable">
+                            {{ opt.isAvailable ? 'متاح' : 'معطل' }}
+                          </span>
+                        </td>
+                        <td style="text-align: center;">
+                          <div class="action-btn-row">
+                            <button class="btn-icon edit" (click)="openEditModifierOptionModal(opt)" title="تعديل">
+                              <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <button class="btn-icon del" (click)="deleteModifierOption(opt)" title="حذف">
+                              <i class="bi bi-trash3-fill"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                    @if (!grp.options || grp.options.length === 0) {
+                      <tr>
+                        <td colspan="4" class="text-center text-muted py-3">
+                          لا توجد خيارات مضافة بعد. انقر على «إضافة خيار» لإضافة أول خيار.
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Options Mobile Cards -->
+              <div class="mobile-catalog-list">
+                @for (opt of grp.options; track opt.id) {
+                  <div class="mobile-product-card">
+                    <div class="mobile-card-top">
+                      <div class="mobile-card-name">
+                        <strong class="prod-name-ar">{{ opt.nameAr }}</strong>
+                        @if (opt.nameEn) { <small class="prod-name-en">{{ opt.nameEn }}</small> }
+                      </div>
+                      <div class="mobile-card-actions">
+                        <button class="btn-icon edit" (click)="openEditModifierOptionModal(opt)" title="تعديل">
+                          <i class="bi bi-pencil-square"></i>
+                        </button>
+                        <button class="btn-icon del" (click)="deleteModifierOption(opt)" title="حذف">
+                          <i class="bi bi-trash3-fill"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="mobile-card-footer">
+                      <span class="cost-badge" [class.free]="opt.price === 0">
+                        {{ opt.price === 0 ? 'مشمول (0 ' + currencySymbol + ')' : '+' + opt.price + ' ' + currencySymbol }}
+                      </span>
+
+                      <span class="status-pill" [class.active]="opt.isAvailable" [class.inactive]="!opt.isAvailable">
+                        {{ opt.isAvailable ? 'متاح' : 'معطل' }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
   } @else if (activeTab === 'cooking-methods') {
-    <!-- Tab 3: Cooking Methods Management -->
+    <!-- Tab 4: Installation & Preparation Services Management -->
     <div class="cooking-methods-section">
       <div class="row g-4">
         @for (grp of prepGroups(); track grp.id) {
@@ -395,16 +584,16 @@
               <div class="card-header-flex flex-between mb-3 pb-2 border-bottom">
                 <div>
                   <h3 class="group-title mb-1">
-                    <i class="bi bi-fire text-danger me-2"></i>
+                    <i class="bi bi-tools text-warning me-2"></i>
                     {{ grp.nameAr }}
                   </h3>
                   <small class="text-muted d-block">
-                    {{ grp.description || 'طرق الطهي والتحضير المتاحة للعملاء' }} ({{ grp.options.length }} طرق)
+                    {{ grp.description || 'خيارات التجهيز والخدمات المتاحة للعملاء' }} ({{ grp.options.length }} خيارات)
                   </small>
                 </div>
                 <button class="btn-primary btn-sm" (click)="openNewPrepOptionModal(grp)">
                   <i class="bi bi-plus-lg me-1"></i>
-                  <span>إضافة طريقة طهي</span>
+                  <span>إضافة خدمة جديدة</span>
                 </button>
               </div>
 
@@ -413,7 +602,7 @@
                 <table class="admin-table">
                   <thead>
                     <tr>
-                      <th style="width: 40%;">طريقة الطهي</th>
+                      <th style="width: 40%;">الخدمة / المواصفة</th>
                       <th style="width: 25%;">التكلفة الإضافية</th>
                       <th style="width: 15%; text-align: center;">الحالة</th>
                       <th style="width: 20%; text-align: center;">الإجراءات</th>
@@ -428,7 +617,7 @@
                         </td>
                         <td>
                           <span class="cost-badge" [class.free]="opt.price === 0">
-                            {{ opt.price === 0 ? 'مجاناً (0 ج.م)' : '+' + opt.price + ' ج.م' }}
+                            {{ opt.price === 0 ? 'شاملة بالطلب (0 ' + currencySymbol + ')' : '+' + opt.price + ' ' + currencySymbol }}
                           </span>
                         </td>
                         <td style="text-align: center;">
@@ -473,7 +662,7 @@
 
                     <div class="mobile-card-footer">
                       <span class="cost-badge" [class.free]="opt.price === 0">
-                        {{ opt.price === 0 ? 'مجاناً (0 ج.م)' : '+' + opt.price + ' ج.م' }}
+                        {{ opt.price === 0 ? 'شاملة بالطلب (0 ' + currencySymbol + ')' : '+' + opt.price + ' ' + currencySymbol }}
                       </span>
 
                       <span class="status-pill" [class.active]="opt.isAvailable" [class.inactive]="!opt.isAvailable">
@@ -496,7 +685,7 @@
     <div class="modal-backdrop animate-fade-in" (click)="showProductModal.set(false)">
       <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
         <div class="modal-header flex-between">
-          <h3 class="title">{{ isEditingProduct() ? 'تعديل الصنف' : 'إضافة صنف جديد للمنيو' }}</h3>
+          <h3 class="title">{{ isEditingProduct() ? 'تعديل الصنف' : 'إضافة صنف جديد للمتجر' }}</h3>
           <button class="btn-close-modal" (click)="showProductModal.set(false)"><i class="bi bi-x-lg"></i></button>
         </div>
 
@@ -510,7 +699,7 @@
                   <span class="badge bg-secondary ms-1">{{ productImages.length }} صور</span>
                 </label>
                 <p class="gallery-sub-text mb-0">
-                  الصورة الأولى بالوسام الذهبي <span class="badge-cover-mini"><i class="bi bi-star-fill text-warning"></i> الغلاف</span> هي التي تظهر للزبائن في المنيو. يمكنك إضافة عدة صور وترتيبهم بسهولة.
+                  الصورة الأولى بالوسام الذهبي <span class="badge-cover-mini"><i class="bi bi-star-fill text-warning"></i> الغلاف</span> هي التي تظهر للعملاء في المتجر. يمكنك إضافة عدة صور وترتيبهم بسهولة.
                   <span class="badge bg-success-subtle text-success border border-success-subtle ms-2"><i class="bi bi-lightning-charge-fill me-1"></i> ضغط تلقائي فائق السرعة WebP بأعلى دقة</span>
                 </p>
               </div>
@@ -552,7 +741,7 @@
 
                     <!-- Cover or Index Badge -->
                     @if ($index === 0) {
-                      <span class="badge-cover" title="صورة الغلاف الرئيسية في المنيو">
+                      <span class="badge-cover" title="صورة الغلاف الرئيسية في المتجر">
                         <i class="bi bi-star-fill me-1"></i> الغلاف الرئيسي
                       </span>
                     } @else {
@@ -633,111 +822,420 @@
             }
           </div>
 
+          <!-- Domain & Category & Pricing Type Section -->
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>القسم التابع له *</label>
-              <select class="form-control" [(ngModel)]="productForm.categoryId">
+              <label><i class="bi bi-grid-3x3-gap-fill text-primary me-1"></i> القسم التابع له *</label>
+              <select class="form-control" [ngModel]="productForm.categoryId" (ngModelChange)="onProductCategoryChange($event)">
                 @for (cat of categories(); track cat.id) {
-                  <option [value]="cat.id">{{ cat.nameAr }}</option>
+                  <option [value]="cat.id">{{ cat.nameAr }} ({{ cat.domain || 'Supermarket' }})</option>
                 }
               </select>
             </div>
             <div class="form-group flex-1">
-              <label>نوع التسعير *</label>
+              <label><i class="bi bi-briefcase-fill text-primary me-1"></i> نوع النشاط والمجال</label>
+              <select class="form-control" [(ngModel)]="productForm.domain">
+                @for (dom of businessDomains; track dom.id) {
+                  <option [value]="dom.id">{{ dom.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label><i class="bi bi-tag-fill text-primary me-1"></i> نوع التسعير *</label>
               <select class="form-control" [(ngModel)]="productForm.pricingType">
-                <option value="ByWeight">بيع بالوزن وسعر الكيلو (مثل الأسماك والجمبري)</option>
-                <option value="FixedPerUnit">سعر ثابت للطبق / الصينية / الشوربة</option>
+                <option value="FixedPerUnit">سعر محدد للقطعة / الوحدة</option>
+                <option value="ByWeight">بيع بالوزن (كجم / جرام) أو القياس</option>
               </select>
             </div>
           </div>
 
+          <!-- Names & Brand -->
           <div class="form-row">
             <div class="form-group flex-1">
               <label>اسم الصنف بالعربي *</label>
-              <input type="text" class="form-control" placeholder="مثال: سمك بلطي نيلي" [(ngModel)]="productForm.nameAr" />
+              <input type="text" class="form-control" placeholder="مثال: أرز بسمتي فاخر 1 كجم أو بطارية سيارة 70 أمبير" [(ngModel)]="productForm.nameAr" />
             </div>
+            @if (isEnglishEnabled()) {
+              <div class="form-group flex-1 animate-fade-in">
+                <label class="d-flex align-items-center justify-content-between">
+                  <span>الاسم بالإنجليزي <small class="text-muted">(اختياري)</small></span>
+                  <span class="badge bg-secondary-subtle text-secondary">EN</span>
+                </label>
+                <input type="text" dir="ltr" class="form-control" placeholder="e.g. Basmati Rice 1kg" [(ngModel)]="productForm.nameEn" />
+              </div>
+            }
             <div class="form-group flex-1">
-              <label>الاسم بالإنجليزي (اختياري)</label>
-              <input type="text" class="form-control" placeholder="Fresh Tilapia" [(ngModel)]="productForm.nameEn" />
+              <label><i class="bi bi-award-fill text-primary me-1"></i> الماركة / البراند</label>
+              <input type="text" class="form-control" placeholder="مثال: نستله، تويوتا، سامسونج..." [(ngModel)]="productForm.brand" />
             </div>
           </div>
 
-          <!-- Pricing & Weight Inputs -->
-          @if (productForm.pricingType === 'ByWeight') {
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label>سعر الكيلو (ج.م) *</label>
-                <input type="number" class="form-control" [(ngModel)]="productForm.pricePerKg" />
+          <!-- Pricing & Discounts & Stock & SKU Row -->
+          <div class="domain-specs-panel p-3 mb-3 bg-light rounded-3 border">
+            <h6 class="fw-bold mb-3 text-dark d-flex align-items-center">
+              <i class="bi bi-cash-stack text-success me-2 fs-5"></i> الأسعار، العروض والمخزون
+            </h6>
+
+            @if (productForm.pricingType === 'ByWeight') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>سعر الكيلو / الوحدة ({{ currencySymbol }}) *</label>
+                  <input type="number" class="form-control" [(ngModel)]="productForm.pricePerKg" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>السعر الأصلي قبل الخصم (اختياري)</label>
+                  <input type="number" class="form-control" [(ngModel)]="productForm.originalPrice" placeholder="اتركه فارغاً إن لم يكن هناك خصم" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>وزن الحبة التقديري بالجرام</label>
+                  <input type="number" step="50" class="form-control" [(ngModel)]="productForm.averageUnitWeightGrams" />
+                </div>
               </div>
-              <div class="form-group flex-1">
-                <label>متوسط وزن السمكة بالجرام (للحساب التقديري) *</label>
-                <input type="number" step="50" class="form-control" [(ngModel)]="productForm.averageUnitWeightGrams" />
-                <span class="hint-text">مثلاً: 500 جم للبلطي، 400 جم للبوري</span>
+
+              <div class="form-row">
+                <label class="checkbox-label flex-center flex-1">
+                  <input type="checkbox" [(ngModel)]="productForm.allowOrderByPieces" />
+                  <span>السماح للعميل بالطلب بعدد القطع / الوحدات</span>
+                </label>
+                <label class="checkbox-label flex-center flex-1">
+                  <input type="checkbox" [(ngModel)]="productForm.allowOrderByWeight" />
+                  <span>السماح للعميل بالطلب بالوزن (كجم / جرام)</span>
+                </label>
               </div>
-            </div>
+            } @else {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>سعر البيع الحالي ({{ currencySymbol }}) *</label>
+                  <input type="number" step="0.25" class="form-control fw-bold text-success fs-6" [(ngModel)]="productForm.pricePerUnit" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>السعر الأصلي قبل الخصم ({{ currencySymbol }})</label>
+                  <input type="number" step="0.25" class="form-control" [(ngModel)]="productForm.originalPrice" placeholder="مثال: 120 (لإظهار شارة الخصم)" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>الكمية المتوفرة في المخزون</label>
+                  <input type="number" class="form-control" [(ngModel)]="productForm.stockQuantity" placeholder="100" />
+                </div>
+              </div>
+            }
 
             <div class="form-row">
-              <label class="checkbox-label flex-center flex-1">
-                <input type="checkbox" [(ngModel)]="productForm.allowOrderByPieces" />
-                <span>السماح للعميل بالطلب بعدد السمكات</span>
-              </label>
-              <label class="checkbox-label flex-center flex-1">
-                <input type="checkbox" [(ngModel)]="productForm.allowOrderByWeight" />
-                <span>السماح للعميل بالطلب بالوزن المباشر بالجرام</span>
-              </label>
-            </div>
-
-            <div class="form-row">
               <div class="form-group flex-1">
-                <label><i class="bi bi-clock-history text-primary me-1"></i> مدة التجهيز والطهي (بالدقائق) *</label>
+                <label>رمز الكود / SKU</label>
+                <input type="text" class="form-control" placeholder="مثال: CRF-00123" [(ngModel)]="productForm.sku" />
+              </div>
+              <div class="form-group flex-1">
+                <label>الباركود الدولي Barcode</label>
+                <input type="text" class="form-control" placeholder="مثال: 6221000000001" [(ngModel)]="productForm.barcode" />
+              </div>
+              <div class="form-group flex-1">
+                <label>مدة التحضير / التوريد (بالدقائق)</label>
                 <div class="input-with-unit">
-                  <input type="number" min="1" step="5" class="form-control" [(ngModel)]="productForm.preparationTimeMinutes" placeholder="25" />
+                  <input type="number" min="0" step="5" class="form-control" [(ngModel)]="productForm.preparationTimeMinutes" placeholder="0" />
                   <span class="unit-text">دقيقة</span>
                 </div>
-                <span class="hint-text">الوقت التقديري المعتمد لتحضير وتجهيز هذا الصنف في المطبخ (يُحسب في وقت التوصيل)</span>
               </div>
             </div>
-          } @else {
-            <div class="form-row">
-              <div class="form-group flex-1">
-                <label>سعر الطبق / الوحدة (ج.م) *</label>
-                <input type="number" class="form-control" [(ngModel)]="productForm.pricePerUnit" />
-              </div>
-              <div class="form-group flex-1">
-                <label><i class="bi bi-clock-history text-primary me-1"></i> مدة التجهيز والطهي (بالدقائق) *</label>
-                <div class="input-with-unit">
-                  <input type="number" min="1" step="5" class="form-control" [(ngModel)]="productForm.preparationTimeMinutes" placeholder="25" />
-                  <span class="unit-text">دقيقة</span>
-                </div>
-                <span class="hint-text">الوقت التقديري المتوقع لتحضير هذا الطبق في المطبخ</span>
-              </div>
-            </div>
-          }
-
-          <div class="form-group">
-            <label>وصف الصنف ومكوناته</label>
-            <textarea class="form-control" rows="2" [(ngModel)]="productForm.description"></textarea>
           </div>
 
-          <!-- Groups Assignment -->
-          <div class="form-group">
-            <label>طرق الطهي والتحضير المتاحة لهذا الصنف:</label>
-            <div class="tags-group">
-              @for (grp of prepGroups(); track grp.id) {
-                <button
-                  type="button"
-                  class="tag-select-btn"
-                  [class.selected]="productForm.preparationOptionGroupIds.includes(grp.id)"
-                  (click)="togglePrepGroup(grp.id)"
-                >
-                  {{ grp.nameAr }} ({{ grp.options.length }} طرق)
+          <!-- Domain-Specific Specifications Dynamic Panel -->
+          <div class="domain-specs-panel p-3 mb-3 bg-light rounded-3 border">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold text-dark mb-0 d-flex align-items-center">
+                <i class="bi bi-sliders2-vertical text-primary me-2 fs-5"></i>
+                إعدادات ومواصفات المجال ({{ productForm.domain }})
+              </h6>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                حقول مهيأة لمجال {{ productForm.domain }}
+              </span>
+            </div>
+
+            <!-- Supermarket Fields -->
+            @if (productForm.domain === 'Supermarket') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>حجم العبوة / الوزن</label>
+                  <input type="text" class="form-control" placeholder="مثال: 1 كجم، 500 مل، 12 قطعة" [(ngModel)]="productForm.unitSize" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>بلد المنشأ</label>
+                  <input type="text" class="form-control" placeholder="مثال: مصر، السعودية، البرازيل..." [(ngModel)]="productForm.originCountry" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>طريقة التخزين والحفظ</label>
+                  <select class="form-control" [(ngModel)]="productForm.storageType">
+                    <option value="">غير محدد</option>
+                    <option value="جاف بدرجة حرارة الغرفة">جاف بدرجة حرارة الغرفة</option>
+                    <option value="مبرد بالثلاجة (2-5 م)">مبرد بالثلاجة (2-5 م)</option>
+                    <option value="مجمد بالفريزر (-18 م)">مجمد بالفريزر (-18 م)</option>
+                  </select>
+                </div>
+              </div>
+            }
+
+            <!-- Pharmacy Fields -->
+            @if (productForm.domain === 'Pharmacy') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>المادة الفعالة (Active Ingredient)</label>
+                  <input type="text" class="form-control" placeholder="مثال: باراسيتامول 500 مجم" [(ngModel)]="productForm.activeIngredient" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>الشكل الدوائي (Dosage Form)</label>
+                  <input type="text" class="form-control" placeholder="أقراص، كبسولات، شراب، مرهم..." [(ngModel)]="productForm.dosageForm" />
+                </div>
+                <div class="form-group flex-1">
+                  <label class="form-label">الوصفة الطبية</label>
+                  <label class="checkbox-label flex-center mt-2">
+                    <input type="checkbox" [(ngModel)]="productForm.requiresPrescription" />
+                    <span>يلزم وجود وصفة طبية (روشتة)</span>
+                  </label>
+                </div>
+              </div>
+            }
+
+            <!-- AutoParts Fields -->
+            @if (productForm.domain === 'AutoParts') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>رقم القطعة الأصلي (OEM Part Number)</label>
+                  <input type="text" class="form-control" placeholder="مثال: 04465-02220" [(ngModel)]="productForm.oemNumber" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>السيارات والموديلات المتوافقة</label>
+                  <input type="text" class="form-control" placeholder="مثال: تويوتا كورولا 2018-2023" [(ngModel)]="productForm.compatibleVehicles" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>حالة القطعة</label>
+                  <select class="form-control" [(ngModel)]="productForm.partCondition">
+                    <option value="جديد أصلي (OEM)">جديد أصلي (OEM)</option>
+                    <option value="بديل أصلي معتمد">بديل أصلي معتمد</option>
+                    <option value="تجاري درجة أولى">تجاري درجة أولى</option>
+                    <option value="مجدد مضمون">مجدد مضمون</option>
+                  </select>
+                </div>
+              </div>
+            }
+
+            <!-- Electronics Fields -->
+            @if (productForm.domain === 'Electronics') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>فترة الضمان المعتمد</label>
+                  <input type="text" class="form-control" placeholder="مثال: سنتان ضمان محلي، سنة ضمان دولي" [(ngModel)]="productForm.warrantyYears" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>القدرة الكهربائية والجهد</label>
+                  <input type="text" class="form-control" placeholder="مثال: 2200 واط - 220 فولت" [(ngModel)]="productForm.powerVoltage" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>بلد الصنع</label>
+                  <input type="text" class="form-control" placeholder="مثال: كوريا، ألمانيا، ماليزيا..." [(ngModel)]="productForm.originCountry" />
+                </div>
+              </div>
+            }
+
+            <!-- Restaurant / Food Fields -->
+            @if (productForm.domain === 'Restaurant') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>الحجم / الحصة</label>
+                  <input type="text" class="form-control" placeholder="مثال: فردي، مزدوج، عائلي (4 أفراد)" [(ngModel)]="productForm.unitSize" />
+                </div>
+                <div class="form-group flex-2">
+                  <label>ملاحظات الحساسية والمكونات</label>
+                  <input type="text" class="form-control" placeholder="مثال: يحتوي على مكسرات، غلوتين، مشتقات حليب..." [(ngModel)]="productForm.allergyNotice" />
+                </div>
+              </div>
+            }
+
+            <!-- GeneralRetail / Services Fields -->
+            @if (productForm.domain === 'GeneralRetail') {
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>المقاس / السعة</label>
+                  <input type="text" class="form-control" placeholder="مثال: XL، 100 لتر، طقم 6 قطع" [(ngModel)]="productForm.unitSize" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>بلد المنشأ</label>
+                  <input type="text" class="form-control" placeholder="مثال: محلي، مستورد" [(ngModel)]="productForm.originCountry" />
+                </div>
+              </div>
+            }
+
+            <!-- Custom Additional Specifications Table -->
+            <div class="mt-3 pt-2 border-top">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0 small fw-bold text-muted">
+                  <i class="bi bi-plus-square text-primary me-1"></i> مواصفات وخصائص إضافية مخصصة للصنف:
+                </label>
+                <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2" (click)="addCustomSpec()">
+                  <i class="bi bi-plus-lg me-1"></i> إضافة خاصية
                 </button>
+              </div>
+
+              @if (productForm.customSpecs.length > 0) {
+                <div class="custom-specs-list">
+                  @for (spec of productForm.customSpecs; track $index) {
+                    <div class="form-row align-items-center mb-2">
+                      <div class="flex-1">
+                        <input type="text" class="form-control form-control-sm" placeholder="اسم الخاصية (مثلاً: اللون، الخامة، النكهة...)" [(ngModel)]="spec.key" />
+                      </div>
+                      <div class="flex-1">
+                        <input type="text" class="form-control form-control-sm" placeholder="القيمة (مثلاً: أسود ملكي، ستانلس ستيل...)" [(ngModel)]="spec.value" />
+                      </div>
+                      <button type="button" class="btn btn-sm btn-outline-danger px-2" (click)="removeCustomSpec($index)" title="حذف الخاصية">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
               }
             </div>
           </div>
 
           <div class="form-group">
-            <label>مجموعات الإضافات والمقبلات:</label>
+            <label>وصف الصنف والتفاصيل التسويقية بالعربي</label>
+            <textarea class="form-control" rows="2" [(ngModel)]="productForm.description" placeholder="اكتب وصفاً جذاباً للصنف ومواصفاته الفنية..."></textarea>
+          </div>
+
+          @if (isEnglishEnabled()) {
+            <div class="form-group animate-fade-in">
+              <label class="d-flex align-items-center justify-content-between">
+                <span>وصف وتفاصيل الصنف بالإنجليزي <small class="text-muted">(اختياري - يظهر العربي لو تركته فارغاً)</small></span>
+                <span class="badge bg-secondary-subtle text-secondary">EN</span>
+              </label>
+              <textarea dir="ltr" class="form-control" rows="2" [(ngModel)]="productForm.descriptionEn" placeholder="Product marketing description & specs in English (Optional)..."></textarea>
+            </div>
+          }
+
+          <!-- Modifiers & Options Section with INLINE QUICK-ADD -->
+          <div class="domain-specs-panel p-3 mb-3 bg-light rounded-3 border">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <h6 class="fw-bold text-dark mb-0 d-flex align-items-center">
+                  <i class="bi bi-list-check text-primary me-2 fs-5"></i> مجموعات الخيارات والإضافات التابعة للصنف
+                </h6>
+                <small class="text-muted">اختر المجموعات المرتبطة أو أضف خيارات وإضافات جديدة فوراً</small>
+              </div>
+              <button type="button" class="btn btn-sm btn-success" (click)="toggleQuickModifierPanel()">
+                <i class="bi" [class.bi-plus-circle]="!showQuickModifierPanel()" [class.bi-dash-circle]="showQuickModifierPanel()"></i>
+                {{ showQuickModifierPanel() ? 'إغلاق الإضافة السريعة' : '➕ إضافة خيارات أو إضافات للصنف' }}
+              </button>
+            </div>
+
+            <!-- Inline Quick Add Form Panel -->
+            @if (showQuickModifierPanel()) {
+              <div class="quick-add-modifier-card p-3 mb-3 border rounded-3 bg-white shadow-sm animate-fade-in">
+                <div class="quick-add-tabs mb-3 d-flex gap-2">
+                  <button type="button" class="btn btn-sm" [class.btn-primary]="quickModifierMode === 'new_group'" [class.btn-outline-secondary]="quickModifierMode !== 'new_group'" (click)="quickModifierMode = 'new_group'">
+                    <i class="bi bi-folder-plus me-1"></i> إنشاء مجموعة خيارات جديدة وإضافات لها
+                  </button>
+                  <button type="button" class="btn btn-sm" [class.btn-primary]="quickModifierMode === 'add_to_existing'" [class.btn-outline-secondary]="quickModifierMode !== 'add_to_existing'" (click)="quickModifierMode = 'add_to_existing'">
+                    <i class="bi bi-node-plus me-1"></i> إضافة خيار لمجموعة موجودة
+                  </button>
+                </div>
+
+                <!-- Mode 1: Create New Group + Options -->
+                @if (quickModifierMode === 'new_group') {
+                  <div class="new-group-box">
+                    <div class="row g-2 mb-3 align-items-end">
+                      <div class="col-12 col-md-5">
+                        <label class="form-label small fw-bold text-dark">اسم مجموعة الخيارات *</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="مثال: الحجم / المقاس، الإضافات، اللون..." [(ngModel)]="quickGroupNameAr" />
+                      </div>
+                      <div class="col-7 col-md-4">
+                        <label class="form-label small fw-bold text-dark">طريقة الاختيار</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="quickGroupType">
+                          <option value="single">اختيار واحد فقط (Radio)</option>
+                          <option value="multiple">اختيارات متعددة (Checkbox)</option>
+                        </select>
+                      </div>
+                      <div class="col-5 col-md-3">
+                        <label class="form-label small fw-bold text-dark d-block">نوع الاختيار</label>
+                        <label class="form-check-card d-flex align-items-center gap-2 p-1.5 px-2 rounded-2 border bg-light cursor-pointer">
+                          <input type="checkbox" class="form-check-input mt-0" [(ngModel)]="quickGroupIsRequired" />
+                          <span class="small fw-semibold text-dark">إلزامي بالطلب</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Dynamic options rows for this new group -->
+                    <label class="form-label small fw-bold text-dark mt-2 mb-2">الخيارات والإضافات داخل هذه المجموعة:</label>
+                    <div class="options-builder-list d-flex flex-column gap-2">
+                      @for (opt of quickGroupOptions; track $index) {
+                        <div class="option-builder-row d-flex align-items-center gap-2">
+                          <div class="flex-grow-1 min-w-0">
+                            <input type="text" class="form-control form-control-sm" placeholder="اسم الخيار (مثال: حجم كبير، إضافة جبنة، ضمان سنتين...)" [(ngModel)]="opt.nameAr" />
+                          </div>
+                          <div class="option-price-box" style="width: 140px; flex-shrink: 0;">
+                            <div class="input-group input-group-sm">
+                              <input type="number" step="0.5" class="form-control" placeholder="0 (مجاني)" [(ngModel)]="opt.price" />
+                              <span class="input-group-text bg-light text-muted small">{{ currencySymbol }}</span>
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-sm btn-outline-danger btn-delete-row flex-shrink-0" (click)="removeQuickOptionRow($index)" [disabled]="quickGroupOptions.length <= 1" title="حذف الخيار">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top flex-wrap gap-2">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="addQuickOptionRow()">
+                        <i class="bi bi-plus-lg me-1"></i> إضافة خيار آخر
+                      </button>
+                      <button type="button" class="btn btn-sm btn-success px-3" (click)="saveQuickModifierGroup()" [disabled]="isSavingQuickModifier()">
+                        @if (isSavingQuickModifier()) {
+                          <span class="spinner-border spinner-border-sm me-1"></span> جاري الحفظ...
+                        } @else {
+                          <i class="bi bi-check2-circle me-1"></i> حفظ وربط المجموعة بالصنف فوراً
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                <!-- Mode 2: Add Option to Existing Group -->
+                @if (quickModifierMode === 'add_to_existing') {
+                  <div class="existing-group-box">
+                    <div class="row g-2 mb-2">
+                      <div class="col-12 col-md-5">
+                        <label class="form-label small fw-bold text-dark">اختر المجموعة *</label>
+                        <select class="form-select form-select-sm" [(ngModel)]="quickSelectedGroupId">
+                          @for (grp of modifierGroups(); track grp.id) {
+                            <option [value]="grp.id">{{ grp.nameAr }} ({{ grp.options.length }} خيارات حالياً)</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-12 col-md-4">
+                        <label class="form-label small fw-bold text-dark">اسم الخيار أو الإضافة الجديدة *</label>
+                        <input type="text" class="form-control form-control-sm" placeholder="مثال: زيادة صوص، لون أبيض..." [(ngModel)]="quickExistingOptionNameAr" />
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <label class="form-label small fw-bold text-dark">السعر الإضافي</label>
+                        <div class="input-group input-group-sm">
+                          <input type="number" step="0.5" class="form-control" placeholder="0" [(ngModel)]="quickExistingOptionPrice" />
+                          <span class="input-group-text bg-light text-muted small">{{ currencySymbol }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-2">
+                      <button type="button" class="btn btn-sm btn-success px-3" (click)="saveQuickOptionToExisting()" [disabled]="isSavingQuickModifier()">
+                        @if (isSavingQuickModifier()) {
+                          <span class="spinner-border spinner-border-sm me-1"></span> جاري الإضافة...
+                        } @else {
+                          <i class="bi bi-plus-lg me-1"></i> إضافة الخيار للمجموعة وربطها بالصنف
+                        }
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Existing Attached Modifier Groups Checkboxes -->
             <div class="tags-group">
               @for (mgrp of modifierGroups(); track mgrp.id) {
                 <button
@@ -745,12 +1243,38 @@
                   class="tag-select-btn"
                   [class.selected]="productForm.modifierGroupIds.includes(mgrp.id)"
                   (click)="toggleModifierGroup(mgrp.id)"
+                  [title]="'انقر للربط أو الفصل'"
                 >
-                  {{ mgrp.nameAr }} ({{ mgrp.options.length }} إضافات)
+                  <i class="bi" [class.bi-check-circle-fill]="productForm.modifierGroupIds.includes(mgrp.id)" [class.bi-circle]="!productForm.modifierGroupIds.includes(mgrp.id)"></i>
+                  {{ mgrp.nameAr }}
+                  <span class="badge bg-secondary-subtle text-secondary ms-1">({{ mgrp.options.length }} خيارات)</span>
                 </button>
+              }
+              @if (modifierGroups().length === 0) {
+                <p class="text-muted small mb-0">لا توجد مجموعات خيارات بعد. انقر على "➕ إضافة خيارات أو إضافات للصنف" أعلاه لإنشاء أول مجموعة.</p>
               }
             </div>
           </div>
+
+          <!-- Preparation Options Groups Assignment -->
+          @if (prepGroups().length > 0) {
+            <div class="form-group mb-3">
+              <label class="fw-bold"><i class="bi bi-gear-fill text-primary me-1"></i> خيارات التجهيز والخدمات الإلزامية:</label>
+              <div class="tags-group">
+                @for (grp of prepGroups(); track grp.id) {
+                  <button
+                    type="button"
+                    class="tag-select-btn"
+                    [class.selected]="productForm.preparationOptionGroupIds.includes(grp.id)"
+                    (click)="togglePrepGroup(grp.id)"
+                  >
+                    <i class="bi" [class.bi-check-circle-fill]="productForm.preparationOptionGroupIds.includes(grp.id)" [class.bi-circle]="!productForm.preparationOptionGroupIds.includes(grp.id)"></i>
+                    {{ grp.nameAr }} ({{ grp.options.length }} خدمات)
+                  </button>
+                }
+              </div>
+            </div>
+          }
         </div>
 
         <div class="modal-footer flex-between">
@@ -766,7 +1290,7 @@
     <div class="modal-backdrop animate-fade-in" (click)="showCategoryModal.set(false)">
       <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
         <div class="modal-header flex-between">
-          <h3 class="title">{{ isEditingCategory() ? 'تعديل بيانات القسم' : 'إضافة قسم جديد للمنيو' }}</h3>
+          <h3 class="title">{{ isEditingCategory() ? 'تعديل بيانات القسم' : 'إضافة قسم جديد للمتجر' }}</h3>
           <button class="btn-close-modal" (click)="showCategoryModal.set(false)"><i class="bi bi-x-lg"></i></button>
         </div>
 
@@ -797,7 +1321,7 @@
                   <i class="bi bi-cloud-arrow-up-fill upload-icon"></i>
                   <div class="upload-text">
                     <strong>انقر لاختيار أو رفع صورة جديدة للقسم</strong>
-                    <small class="text-muted d-block mt-1">تظهر في الشاشة الرئيسية وأقسام المنيو</small>
+                    <small class="text-muted d-block mt-1">تظهر في الشاشة الرئيسية وأقسام المتجر</small>
                   </div>
                 </div>
               }
@@ -814,22 +1338,52 @@
           <div class="form-row">
             <div class="form-group flex-1">
               <label>اسم القسم بالعربي *</label>
-              <input type="text" class="form-control" placeholder="مثال: عروض الوجبات" [(ngModel)]="categoryForm.nameAr" />
+              <input type="text" class="form-control" placeholder="مثال: ألبان وأجبان أو قطع غيار أو هواتف" [(ngModel)]="categoryForm.nameAr" />
             </div>
-            <div class="form-group flex-1">
-              <label>الاسم بالإنجليزي (اختياري)</label>
-              <input type="text" class="form-control" placeholder="e.g. Special Offers" [(ngModel)]="categoryForm.nameEn" />
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label>وصف تعريفي للقسم (اختياري)</label>
-            <textarea class="form-control" rows="2" placeholder="وصف يظهر تحت عنوان القسم في المتجر..." [(ngModel)]="categoryForm.description"></textarea>
+            @if (isEnglishEnabled()) {
+              <div class="form-group flex-1 animate-fade-in">
+                <label class="d-flex align-items-center justify-content-between">
+                  <span>الاسم بالإنجليزي <small class="text-muted">(اختياري)</small></span>
+                  <span class="badge bg-secondary-subtle text-secondary">EN</span>
+                </label>
+                <input type="text" dir="ltr" class="form-control" placeholder="e.g. Dairy & Eggs" [(ngModel)]="categoryForm.nameEn" />
+              </div>
+            }
           </div>
 
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>ترتيب الظهور في المنيو</label>
+              <label><i class="bi bi-briefcase-fill text-primary me-1"></i> نوع النشاط والمجال التابع له هذا القسم *</label>
+              <select class="form-control fw-bold" [(ngModel)]="categoryForm.domain">
+                @for (dom of businessDomains; track dom.id) {
+                  <option [value]="dom.id">{{ dom.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label><i class="bi bi-star-fill text-warning me-1"></i> اسم أيقونة البوتستراب (اختياري)</label>
+              <input type="text" class="form-control" placeholder="مثال: bi-basket2 أو bi-cup-hot" [(ngModel)]="categoryForm.iconName" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>وصف تعريفي للقسم بالعربي (اختياري)</label>
+            <textarea class="form-control" rows="2" placeholder="وصف يظهر تحت عنوان القسم في المتجر..." [(ngModel)]="categoryForm.description"></textarea>
+          </div>
+
+          @if (isEnglishEnabled()) {
+            <div class="form-group animate-fade-in">
+              <label class="d-flex align-items-center justify-content-between">
+                <span>وصف القسم بالإنجليزي <small class="text-muted">(اختياري)</small></span>
+                <span class="badge bg-secondary-subtle text-secondary">EN</span>
+              </label>
+              <textarea dir="ltr" class="form-control" rows="2" placeholder="Category marketing description in English..." [(ngModel)]="categoryForm.descriptionEn"></textarea>
+            </div>
+          }
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>ترتيب الظهور في المتجر</label>
               <input type="number" class="form-control" [(ngModel)]="categoryForm.displayOrder" />
             </div>
             <div class="form-group flex-1">
@@ -850,30 +1404,135 @@
     </div>
   }
 
+  <!-- Modifier Group Form Modal -->
+  @if (showModifierGroupModal()) {
+    <div class="modal-backdrop animate-fade-in" (click)="showModifierGroupModal.set(false)">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header flex-between">
+          <h3 class="title">{{ isEditingModifierGroup() ? 'تعديل مجموعة الخيارات والمواصفات' : 'إضافة مجموعة خيارات جديدة' }}</h3>
+          <button class="btn-close-modal" (click)="showModifierGroupModal.set(false)"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>اسم المجموعة بالعربي *</label>
+              <input type="text" class="form-control" placeholder="مثال: الحجم، اللون، الوزن، نوع التغليف..." [(ngModel)]="modifierGroupForm.nameAr" />
+            </div>
+            <div class="form-group flex-1">
+              <label>الاسم بالإنجليزي (اختياري)</label>
+              <input type="text" class="form-control" placeholder="e.g. Size, Color, Packaging" [(ngModel)]="modifierGroupForm.nameEn" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>أقل عدد اختيارات (Min Selection)</label>
+              <input type="number" min="0" class="form-control" [(ngModel)]="modifierGroupForm.minSelection" />
+              <span class="hint-text">1 إذا كان إلزامي، 0 إذا كان اختياري</span>
+            </div>
+            <div class="form-group flex-1">
+              <label>أقصى عدد اختيارات (Max Selection)</label>
+              <input type="number" min="1" class="form-control" [(ngModel)]="modifierGroupForm.maxSelection" />
+              <span class="hint-text">1 للقوائم المنسدلة الأحادية، أو أكثر للاختيارات المتعددة</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>ترتيب الظهور</label>
+              <input type="number" class="form-control" [(ngModel)]="modifierGroupForm.displayOrder" />
+            </div>
+            <div class="form-group flex-1 d-flex align-items-center mt-3">
+              <label class="checkbox-label flex-center">
+                <input type="checkbox" [(ngModel)]="modifierGroupForm.isRequired" />
+                <span class="fw-bold">تحديد كمجموعة إلزامية على العميل *</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-between">
+          <button class="btn-outline" (click)="showModifierGroupModal.set(false)">إلغاء</button>
+          <button class="btn-primary" (click)="saveModifierGroup()"><i class="bi bi-check2-circle me-1"></i> حفظ المجموعة</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Modifier Option Form Modal -->
+  @if (showModifierOptionModal()) {
+    <div class="modal-backdrop animate-fade-in" (click)="showModifierOptionModal.set(false)">
+      <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
+        <div class="modal-header flex-between">
+          <h3 class="title">{{ isEditingModifierOption() ? 'تعديل خيار / ملحق' : 'إضافة خيار أو ملحق جديد' }}</h3>
+          <button class="btn-close-modal" (click)="showModifierOptionModal.set(false)"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>اسم الخيار أو الإضافة بالعربي *</label>
+              <input type="text" class="form-control" placeholder="مثال: حجم كبير 1 لتر، لون أسود، تغليف كرتوني..." [(ngModel)]="modifierOptionForm.nameAr" />
+            </div>
+            <div class="form-group flex-1">
+              <label>الاسم بالإنجليزي (اختياري)</label>
+              <input type="text" class="form-control" placeholder="e.g. Large 1L, Black" [(ngModel)]="modifierOptionForm.nameEn" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>التكلفة الإضافية ({{ currencySymbol }}) *</label>
+              <input type="number" class="form-control" placeholder="0 إذا كان مجاني أو مشمول" [(ngModel)]="modifierOptionForm.price" />
+              <span class="hint-text">اكتب 0 إذا كان الخيار مجاناً أو بدون تكلفة إضافية</span>
+            </div>
+            <div class="form-group flex-1">
+              <label>ترتيب الظهور</label>
+              <input type="number" class="form-control" [(ngModel)]="modifierOptionForm.displayOrder" />
+            </div>
+          </div>
+
+          <div class="form-group mt-2">
+            <label class="checkbox-label flex-center">
+              <input type="checkbox" [(ngModel)]="modifierOptionForm.isAvailable" />
+              <span>متاح للاختيار حالياً (غير معطل)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer flex-between">
+          <button class="btn-outline" (click)="showModifierOptionModal.set(false)">إلغاء</button>
+          <button class="btn-primary" (click)="saveModifierOption()"><i class="bi bi-check2-circle me-1"></i> حفظ الخيار</button>
+        </div>
+      </div>
+    </div>
+  }
+
   <!-- Preparation Option Modal -->
   @if (showPrepOptionModal()) {
     <div class="modal-backdrop animate-fade-in" (click)="showPrepOptionModal.set(false)">
       <div class="modal-dialog glass-panel" (click)="$event.stopPropagation()">
         <div class="modal-header flex-between">
-          <h3 class="title">{{ isEditingPrepOption() ? 'تعديل طريقة الطهي' : 'إضافة طريقة طهي جديدة' }}</h3>
+          <h3 class="title">{{ isEditingPrepOption() ? 'تعديل الخدمة أو الخيار' : 'إضافة خيار جديد' }}</h3>
           <button class="btn-close-modal" (click)="showPrepOptionModal.set(false)"><i class="bi bi-x-lg"></i></button>
         </div>
 
         <div class="modal-body">
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>اسم طريقة الطهي بالعربي *</label>
-              <input type="text" class="form-control" placeholder="مثال: مقلي زيت وليمون، مشوي ردة..." [(ngModel)]="prepOptionForm.nameAr" />
+              <label>اسم الخيار أو الإضافة بالعربي *</label>
+              <input type="text" class="form-control" placeholder="مثال: تغليف هدايا، تقطيع وتنظيف، ضمان ممتد..." [(ngModel)]="prepOptionForm.nameAr" />
             </div>
             <div class="form-group flex-1">
               <label>الاسم بالإنجليزي (اختياري)</label>
-              <input type="text" class="form-control" placeholder="e.g. Fried Oil & Lemon" [(ngModel)]="prepOptionForm.nameEn" />
+              <input type="text" class="form-control" placeholder="e.g. Turnkey Installation & Certification" [(ngModel)]="prepOptionForm.nameEn" />
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>سعر التجهيز الإضافي (ج.م) *</label>
+              <label>سعر الخدمة الإضافي ({{ currencySymbol }}) *</label>
               <input type="number" class="form-control" placeholder="0 إذا كانت مجانية" [(ngModel)]="prepOptionForm.price" />
               <span class="hint-text">اكتب 0 إذا كانت الخدمة مجانية أو مشمولة بسعر الصنف</span>
             </div>
@@ -893,7 +1552,7 @@
 
         <div class="modal-footer flex-between">
           <button class="btn-outline" (click)="showPrepOptionModal.set(false)">إلغاء</button>
-          <button class="btn-primary" (click)="savePrepOption()"><i class="bi bi-check2-circle me-1"></i> حفظ طريقة الطهي</button>
+          <button class="btn-primary" (click)="savePrepOption()"><i class="bi bi-check2-circle me-1"></i> حفظ الخدمة</button>
         </div>
       </div>
     </div>

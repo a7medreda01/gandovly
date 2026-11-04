@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { SettingsService } from '../../../core/services/settings.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { DeliveryZone } from '../../../core/models/models';
 
@@ -17,6 +18,11 @@ import { LoadingStateComponent } from '../../../shared/components/loading-state/
 export class AdminDeliveryZonesComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
+  readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
 
   zones = signal<DeliveryZone[]>([]);
   isLoading = signal<boolean>(false);
@@ -40,7 +46,7 @@ export class AdminDeliveryZonesComponent implements OnInit {
   zoneForm = {
     id: 0,
     name: '',
-    city: 'الجيزة',
+    city: 'الرياض',
     parentZoneId: null as number | null,
     level: 'Sub' as 'Macro' | 'Sub' | 'Micro',
     neighborhoodKeywords: '',
@@ -68,7 +74,7 @@ export class AdminDeliveryZonesComponent implements OnInit {
     this.zoneForm = {
       id: 0,
       name: '',
-      city: 'الجيزة',
+      city: 'الرياض',
       parentZoneId: null,
       level: 'Micro',
       neighborhoodKeywords: '',

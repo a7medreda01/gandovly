@@ -17,6 +17,10 @@ import { Order } from '../../core/models/models';
 export class OrderTrackingComponent implements OnInit {
   private readonly orderService = inject(OrderService);
   readonly settingsService = inject(SettingsService);
+
+  get currencySymbol(): string {
+    return this.settingsService.settings().currencySymbol || 'ج.م';
+  }
   private readonly route = inject(ActivatedRoute);
 
   searchTokenInput: string = '';

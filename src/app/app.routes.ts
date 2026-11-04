@@ -22,6 +22,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent)
       },
       {
+        path: 'wishlist',
+        loadComponent: () => import('./features/storefront/wishlist/wishlist.component').then(m => m.WishlistComponent)
+      },
+      {
+        path: 'product/:id',
+        loadComponent: () => import('./features/storefront/product-page/product-page.component').then(m => m.ProductPageComponent)
+      },
+      {
         path: 'track',
         redirectTo: 'account',
         pathMatch: 'full'

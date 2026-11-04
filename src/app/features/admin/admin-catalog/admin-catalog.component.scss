@@ -1,4 +1,69 @@
-.catalog-page {
+.admin-pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0.5rem 0.5rem;
+  border-top: 1px solid var(--divider, #e2e8f0);
+  margin-top: 1rem;
+
+  .pagination-info {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    .btn-page-nav {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0.35rem 0.75rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #1e293b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.2s ease;
+
+      &:hover:not(:disabled) {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .current-page-badge {
+      background: #eef9f2;
+      color: #198754;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #c8e6c9;
+    }
+  }
+
+  .page-size-select {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.82rem;
+    background: #ffffff;
+    cursor: pointer;
+    color: #1e293b;
+  }
+}
+
+:host {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -447,7 +512,68 @@
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
-  .flex-1 { flex: 1; }
+  align-items: flex-start;
+
+  .flex-1 { flex: 1 1 0; min-width: 0; }
+  .flex-2 { flex: 2 1 0; min-width: 0; }
+  .flex-3 { flex: 3 1 0; min-width: 0; }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .flex-1, .flex-2, .flex-3 {
+      width: 100%;
+      flex: 1 1 auto;
+    }
+  }
+}
+
+.form-check-card {
+  user-select: none;
+  transition: all 0.2s ease;
+  min-height: 34px;
+
+  &:hover {
+    background: #e2e8f0 !important;
+  }
+}
+
+.option-builder-row {
+  background: #f8fafc;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  }
+
+  .btn-delete-row {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 576px) {
+    flex-wrap: wrap;
+
+    .option-price-box {
+      width: 100% !important;
+      order: 2;
+    }
+
+    .btn-delete-row {
+      order: 3;
+    }
+  }
 }
 
 .input-with-unit {
@@ -522,7 +648,8 @@
   }
 }
 
-/* Cooking Methods Management */
+/* Modifiers & Specifications Management */
+.modifiers-management-section,
 .cooking-methods-section {
   .group-title {
     font-size: 1.15rem;
@@ -1120,7 +1247,7 @@
 
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 900px) {
-  .catalog-page {
+  :host {
     padding: 0.75rem 0.5rem;
     gap: 1.25rem;
     width: 100%;
@@ -1332,4 +1459,57 @@
     }
   }
 }
+
+/* ============================================================ */
+/* Domain Specifications & Inline Quick Add Modifiers Styles     */
+/* ============================================================ */
+.domain-specs-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+  }
+
+  .form-row {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.quick-add-modifier-card {
+  background: #ffffff;
+  border: 1.5px dashed #10b981;
+  border-radius: 12px;
+  animation: fadeInDown 0.25s ease-out;
+
+  .quick-add-tabs {
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 0.65rem;
+  }
+
+  .form-label {
+    color: #334155;
+  }
+}
+
+.custom-specs-list {
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 

@@ -6,7 +6,7 @@
       <span>المتابعة اللحظية للطلب</span>
     </div>
     <h1 class="page-title">تتبع حالة طلبك</h1>
-    <p class="page-subtitle">أدخل رمز التتبع أو راجع تقدم إعداد وطهي وتوصيل وجبتك البحرية</p>
+    <p class="page-subtitle">أدخل رمز التتبع لمتابعة مراحل تجهيز وتوصيل طلبك لحظة بلحظة</p>
   </div>
 
   <!-- Search Card -->
@@ -55,8 +55,8 @@
               <i class="bi bi-receipt me-1"></i> طلب رقم: #{{ order()!.orderNumber }}
             </span>
             <span class="badge-order-type">
-              <i class="bi" [class.bi-bicycle]="order()!.orderType === 'Delivery'" [class.bi-shop]="order()!.orderType === 'Pickup'"></i>
-              {{ order()!.orderType === 'Delivery' ? 'توصيل للعنوان' : 'استلام من المطعم' }}
+              <i class="bi" [class.bi-truck]="order()!.orderType === 'Delivery'" [class.bi-building]="order()!.orderType === 'Pickup'"></i>
+              {{ order()!.orderType === 'Delivery' ? 'توصيل وتوريد للموقع' : 'استلام من المستودع' }}
             </span>
           </div>
           <div class="order-timestamp">
@@ -151,16 +151,16 @@
                   <td>
                     @if (line.actualWeightGrams) {
                       <span class="actual-weight-pill">
-                        <i class="bi bi-check-circle-fill me-1"></i> {{ line.actualWeightGrams }} جرام
+                        <i class="bi bi-check-circle-fill me-1"></i> {{ line.actualWeightGrams }} جم / وحدة
                       </span>
                     } @else {
                       <span class="pending-weight-pill">
-                        <i class="bi bi-hourglass-split me-1"></i> قيد الوزن
+                        <i class="bi bi-hourglass-split me-1"></i> قيد التجهيز
                       </span>
                     }
                   </td>
                   <td>
-                    <strong class="price-txt">{{ (line.finalLineTotal || line.estimatedLineTotal) }} ج.م</strong>
+                    <strong class="price-txt">{{ (line.finalLineTotal || line.estimatedLineTotal) }} {{ currencySymbol }}</strong>
                   </td>
                 </tr>
               }
@@ -174,7 +174,7 @@
             <div class="mobile-item-card">
               <div class="m-item-head flex-between">
                 <span class="m-item-title">{{ line.productNameAr }}</span>
-                <span class="m-item-price">{{ (line.finalLineTotal || line.estimatedLineTotal) }} ج.م</span>
+                <span class="m-item-price">{{ (line.finalLineTotal || line.estimatedLineTotal) }} {{ currencySymbol }}</span>
               </div>
 
               <div class="m-item-meta">
@@ -195,11 +195,11 @@
                   <span class="text-muted fs-small">تقديري: {{ line.estimatedWeightGrams || '-' }} جرام</span>
                   @if (line.actualWeightGrams) {
                     <span class="actual-weight-pill">
-                      <i class="bi bi-check-circle-fill me-1"></i> فعلي: {{ line.actualWeightGrams }} جرام
+                      <i class="bi bi-check-circle-fill me-1"></i> فعلي: {{ line.actualWeightGrams }} جم / وحدة
                     </span>
                   } @else {
                     <span class="pending-weight-pill">
-                      <i class="bi bi-hourglass-split me-1"></i> قيد الوزن بالمطبخ
+                      <i class="bi bi-hourglass-split me-1"></i> قيد المراجعة بالمستودع
                     </span>
                   }
                 </div>
@@ -215,7 +215,7 @@
           <div class="pay-icon-circle"><i class="bi bi-wallet2"></i></div>
           <div class="pay-info">
             <span class="pay-lbl">طريقة السداد:</span>
-            <span class="pay-val">الدفع عند الاستلام (كاش / بطاقة)</span>
+            <span class="pay-val">الدفع عند الاستلام (كاش / بطاقة / تحويل)</span>
           </div>
         </div>
 
@@ -223,23 +223,23 @@
           @if (hasWeightedItems()) {
             <div class="amt-row flex-between">
               <span class="amt-lbl">الإجمالي التقديري:</span>
-              <span class="amt-val">{{ order()!.estimatedTotal }} ج.م</span>
+              <span class="amt-val">{{ order()!.estimatedTotal }} {{ currencySymbol }}</span>
             </div>
             @if (order()!.finalTotal) {
               <div class="amt-row flex-between final-row">
                 <span class="amt-lbl-main">الإجمالي النهائي الفعلي:</span>
-                <span class="amt-val-main">{{ order()!.finalTotal }} ج.م</span>
+                <span class="amt-val-main">{{ order()!.finalTotal }} {{ currencySymbol }}</span>
               </div>
             } @else {
               <div class="amt-row flex-between pending-row">
                 <span class="amt-lbl">الإجمالي النهائي:</span>
-                <span class="pending-note"><i class="bi bi-info-circle me-1"></i> يُعتمد بعد الوزن الفعلي في المطبخ</span>
+                <span class="pending-note"><i class="bi bi-info-circle me-1"></i> يُعتمد بعد مراجعة المستودع وتأكيد التوريد</span>
               </div>
             }
           } @else {
             <div class="amt-row flex-between final-row">
               <span class="amt-lbl-main">إجمالي الطلب:</span>
-              <span class="amt-val-main">{{ order()!.finalTotal || order()!.estimatedTotal }} ج.م</span>
+              <span class="amt-val-main">{{ order()!.finalTotal || order()!.estimatedTotal }} {{ currencySymbol }}</span>
             </div>
           }
         </div>

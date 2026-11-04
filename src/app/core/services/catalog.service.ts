@@ -1,8 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
 import { ApiService } from './api.service';
-import { MenuCategory, Product } from '../models/models';
-import { tap, catchError, of } from 'rxjs';
+import { MenuCategory, Product, PagedResult } from '../models/models';
+import { tap, catchError, of, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -14,12 +13,42 @@ export class CatalogService {
   isLoading = signal<boolean>(false);
   selectedCategoryId = signal<number | null>(null);
 
-  /** Always fetches fresh data from API — no in-memory caching.
-   *  A cache-busting `_t` param ensures CDN/browser cache is bypassed after admin updates. */
+  /** Loads all active categories */
+  loadCategories(): Observable<MenuCategory[]> {
+    return this.api.get<MenuCategory[]>('storefront/categories').pipe(
+      tap(cats => {
+        if (cats && cats.length > 0) {
+          this.categories.set(cats);
+        }
+      }),
+      catchError(err => {
+        console.error('Error loading categories', err);
+        return of(this.categories());
+      })
+    );
+  }
+
+  /** Server-side paged products with search and category filtering */
+  getProducts(params?: {
+    categoryId?: number | null;
+    search?: string;
+    page?: number;
+    pageSize?: number;
+    sortBy?: string;
+  }): Observable<PagedResult<Product>> {
+    const p: Record<string, any> = {};
+    if (params?.categoryId) p['categoryId'] = params.categoryId;
+    if (params?.search && params.search.trim()) p['search'] = params.search.trim();
+    if (params?.page) p['page'] = params.page;
+    if (params?.pageSize) p['pageSize'] = params.pageSize;
+    if (params?.sortBy) p['sortBy'] = params.sortBy;
+
+    return this.api.get<PagedResult<Product>>('storefront/products', p);
+  }
+
+  /** Fetches full menu (backward compatibility) */
   loadMenu() {
     this.isLoading.set(true);
-    // Cache-busting: round to nearest 5-minute window so CDN can still cache for short periods
-    // but users will see updates within 5 minutes of an admin change.
     const bust = Math.floor(Date.now() / (5 * 60 * 1000));
     return this.api.get<MenuCategory[]>(`storefront/menu`, { _t: bust }).pipe(
       tap(cats => {
@@ -39,7 +68,6 @@ export class CatalogService {
     );
   }
 
-  /** Invalidates the in-memory cache so the next navigation triggers a fresh fetch. */
   invalidateMenu() {
     this.categories.set([]);
     this.selectedCategoryId.set(null);
