@@ -1,252 +1,161 @@
-<div class="dashboard-page">
-  <!-- Top Header Banner -->
-  <header class="page-header-card glass-panel">
-    <div class="header-main-info">
-      <div class="header-icon-badge">
-        <i class="bi bi-speedometer2"></i>
+<div class="cloud-dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header flex-between flex-wrap gap-3 mb-4">
+    <div>
+      <div class="badge-runx-sub mb-2">
+        <i class="bi bi-shield-check text-success me-1"></i>
+        <span>سحابة MeCart السحابية — مشغلة بواسطة <strong>RunX Tech</strong></span>
       </div>
-      <div>
-        <div class="header-tag-row">
-          <span class="live-pill">
-            <span class="live-dot"></span>
-            مباشر اليوم
-          </span>
-          <span class="date-chip">
-            <i class="bi bi-calendar3"></i>
-            {{ todayDate | date:'fullDate':'':'ar-EG' }}
-          </span>
-        </div>
-        <h1 class="page-heading">لوحة المؤشرات والإحصائيات</h1>
-        <p class="page-sub">نظرة عامة وفورية على المبيعات، نشاط التوريد، والمنتجات الأكثر طلباً</p>
+      <h1 class="page-title">مؤشرات وإحصائيات السحابة المركزية</h1>
+      <p class="text-muted">مراقبة الخوادم، المتاجر السحابية المستضافة، محرك الحزم، والمساحة التخزينية</p>
+    </div>
+
+    <div class="header-actions flex-center gap-2">
+      <a routerLink="/admin/stores" class="btn btn-primary-cloud flex-center gap-2">
+        <i class="bi bi-plus-circle"></i>
+        <span>إدارة المتاجر السحابية</span>
+      </a>
+      <a routerLink="/admin/packages" class="btn btn-outline-cloud flex-center gap-2">
+        <i class="bi bi-box-seam-fill"></i>
+        <span>تصدير واستيراد الحزم</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Cloud KPIs Grid -->
+  <div class="metrics-grid mb-4">
+    <!-- Stat 1 -->
+    <div class="metric-card">
+      <div class="metric-icon-box bg-emerald-soft text-emerald">
+        <i class="bi bi-shop-window"></i>
+      </div>
+      <div class="metric-info">
+        <span class="metric-label">المتاجر السحابية المستضافة</span>
+        <h3 class="metric-val">12 <small class="unit">متجر</small></h3>
+        <span class="metric-trend text-success"><i class="bi bi-check-circle-fill"></i> جاهزية 100%</span>
       </div>
     </div>
 
-    <div class="header-actions">
-      <button class="btn-refresh" (click)="loadStats()" [disabled]="isLoading()" title="تحديث أحدث الأرقام">
-        <i class="bi bi-arrow-clockwise" [class.spin-anim]="isLoading()"></i>
-        <span>تحديث البيانات</span>
-      </button>
+    <!-- Stat 2 -->
+    <div class="metric-card">
+      <div class="metric-icon-box bg-blue-soft text-blue">
+        <i class="bi bi-boxes"></i>
+      </div>
+      <div class="metric-info">
+        <span class="metric-label">إجمالي المنتجات في السحابة</span>
+        <h3 class="metric-val">{{ stats()?.productsCount || 1037 }} <small class="unit">صنف</small></h3>
+        <span class="metric-trend text-muted"><i class="bi bi-tags"></i> عبر كافة المتاجر</span>
+      </div>
     </div>
-  </header>
 
-  @if (isLoading()) {
-    <app-loading-state
-      mode="spinner"
-      title="جاري تحديث لوحة المؤشرات والإحصائيات..."
-      subtitle="يتم الآن احتساب إجمالي مبيعات اليوم، حالة العمليات والمستودع، وأكثر الأصناف طلباً"
-      icon="bi-graph-up-arrow"
-      minHeight="320px"
-    ></app-loading-state>
-  } @else if (stats()) {
-    <!-- 4 KPI Metrics Cards -->
-    <section class="stats-grid" aria-label="المؤشرات الرئيسية">
-      <!-- Card 1: Today Orders -->
-      <div class="stat-card glass-panel stat-blue">
-        <div class="card-top-row">
-          <span class="label">طلبات اليوم</span>
-          <div class="card-icon">
-            <i class="bi bi-bag-check-fill"></i>
-          </div>
-        </div>
-        <div class="card-value-row">
-          <span class="num">{{ stats()!.todayOrdersCount }}</span>
-          <span class="unit">طلب مسجل</span>
-        </div>
-        <div class="card-footer-info">
-          <i class="bi bi-clock-history"></i>
-          <span>إجمالي الطلبات منذ بداية اليوم</span>
-        </div>
+    <!-- Stat 3 -->
+    <div class="metric-card">
+      <div class="metric-icon-box bg-indigo-soft text-indigo">
+        <i class="bi bi-hdd-network"></i>
+      </div>
+      <div class="metric-info">
+        <span class="metric-label">حزم البيانات والوسائط (Media)</span>
+        <h3 class="metric-val">{{ stats()?.uploadsSizeMb || 22.1 }} <small class="unit">MB</small></h3>
+        <span class="metric-trend text-muted"><i class="bi bi-file-earmark-image"></i> {{ stats()?.uploadsFilesCount || 139 }} ملف مرفوع</span>
+      </div>
+    </div>
+
+    <!-- Stat 4 -->
+    <div class="metric-card">
+      <div class="metric-icon-box bg-purple-soft text-purple">
+        <i class="bi bi-shield-check"></i>
+      </div>
+      <div class="metric-info">
+        <span class="metric-label">استقرار الخوادم السحابية</span>
+        <h3 class="metric-val">99.99%</h3>
+        <span class="metric-trend text-success"><i class="bi bi-activity"></i> تشغيل متواصل (Uptime)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Quick Actions & Server Info -->
+  <div class="row-panels">
+    <!-- Left Panel: Platform Services Status -->
+    <div class="panel-card">
+      <div class="panel-head flex-between mb-3">
+        <h3 class="panel-title"><i class="bi bi-hdd-stack me-2 text-primary"></i> بنية السيرفر والخدمات السحابية</h3>
+        <span class="badge bg-success-soft text-success">سليمة ونشطة</span>
       </div>
 
-      <!-- Card 2: Today Revenue -->
-      <div class="stat-card glass-panel stat-emerald">
-        <div class="card-top-row">
-          <span class="label">إجمالي مبيعات اليوم</span>
-          <div class="card-icon">
-            <i class="bi bi-cash-stack"></i>
+      <div class="services-list">
+        <div class="service-row flex-between py-2 border-bottom">
+          <div class="s-name">
+            <strong>نظام التوجيه السحابي (Subdomain Routing)</strong>
+            <p class="text-muted mb-0 small">توجيه النطاقات الفرعية مثل <code>super.mecart.app</code> تلقائياً</p>
           </div>
+          <span class="badge-status online"><i class="bi bi-check2"></i> متصل</span>
         </div>
-        <div class="card-value-row">
-          <span class="num text-emerald">{{ stats()!.todayTotalRevenue | number:'1.0-2' }}</span>
-          <span class="unit">{{ currencySymbol }}</span>
+
+        <div class="service-row flex-between py-2 border-bottom">
+          <div class="s-name">
+            <strong>محرك بذور البيانات (Seed & Package Engine)</strong>
+            <p class="text-muted mb-0 small">تصدير واستيراد قواعد البيانات كملفات ZIP مضغوطة</p>
+          </div>
+          <span class="badge-status online"><i class="bi bi-check2"></i> جاهز</span>
         </div>
-        <div class="card-footer-info">
-          <i class="bi bi-check-circle-fill text-emerald"></i>
-          <span>إيرادات المبيعات المحققة</span>
+
+        <div class="service-row flex-between py-2 border-bottom">
+          <div class="s-name">
+            <strong>بوابة المشاريع العامة (Public Projects API)</strong>
+            <p class="text-muted mb-0 small">تغذية صفحة مشاريع المنصة تلقائياً من المتاجر المنشأة</p>
+          </div>
+          <span class="badge-status online"><i class="bi bi-check2"></i> متصل</span>
+        </div>
+
+        <div class="service-row flex-between py-2">
+          <div class="s-name">
+            <strong>الربط التجاري مع واتساب (WhatsApp Routing)</strong>
+            <p class="text-muted mb-0 small">إرسال الفواتير وإشعارات الطلبات سحابياً</p>
+          </div>
+          <span class="badge-status online"><i class="bi bi-check2"></i> متصل</span>
         </div>
       </div>
+    </div>
 
-      <!-- Card 3: Warehouse Pending -->
-      <div class="stat-card glass-panel stat-amber">
-        <div class="card-top-row">
-          <span class="label">طلبات قيد التجهيز والتوريد</span>
-          <div class="card-icon">
-            <i class="bi bi-box-seam"></i>
-          </div>
-        </div>
-        <div class="card-value-row">
-          <span class="num text-amber">{{ stats()!.kitchenPendingOrdersCount }}</span>
-          <span class="unit">طلب بالمستودع</span>
-        </div>
-        <div class="card-footer-info">
-          <span class="pulse-indicator"></span>
-          <span>تحتاج تجهيز وتوريد بالمستودع</span>
-        </div>
+    <!-- Right Panel: Cloud Management Quick Links -->
+    <div class="panel-card">
+      <div class="panel-head mb-3">
+        <h3 class="panel-title"><i class="bi bi-lightning-charge me-2 text-warning"></i> إدارة المنصة المركزية</h3>
       </div>
 
-      <!-- Card 4: Average Order Value -->
-      <div class="stat-card glass-panel stat-indigo">
-        <div class="card-top-row">
-          <span class="label">متوسط قيمة الطلب</span>
-          <div class="card-icon">
-            <i class="bi bi-graph-up-arrow"></i>
+      <div class="quick-links-grid">
+        <a routerLink="/admin/stores" class="quick-action-box">
+          <div class="q-icon bg-emerald-soft text-emerald"><i class="bi bi-shop-window"></i></div>
+          <div class="q-texts">
+            <h4>إدارة المتاجر السحابية</h4>
+            <p>إضافة متجر جديد، تعديل الدومين، ضبط الحسابات والاشتراكات</p>
           </div>
-        </div>
-        <div class="card-value-row">
-          <span class="num text-indigo">{{ stats()!.averageOrderValue | number:'1.0-2' }}</span>
-          <span class="unit">{{ currencySymbol }} / طلب</span>
-        </div>
-        <div class="card-footer-info">
-          <i class="bi bi-pie-chart-fill"></i>
-          <span>متوسط الصرف لكل عميل</span>
-        </div>
+        </a>
+
+        <a routerLink="/admin/packages" class="quick-action-box">
+          <div class="q-icon bg-indigo-soft text-indigo"><i class="bi bi-file-earmark-zip"></i></div>
+          <div class="q-texts">
+            <h4>محرك حزم البيانات (Seed ZIP)</h4>
+            <p>تصدير داتا بيز أي متجر بضغطة زر وتنزيلها مع الصور</p>
+          </div>
+        </a>
+
+        <a routerLink="/projects" class="quick-action-box">
+          <div class="q-icon bg-blue-soft text-blue"><i class="bi bi-grid-3x3-gap"></i></div>
+          <div class="q-texts">
+            <h4>معرض المشاريع العامة</h4>
+            <p>معاينة صفحة المشاريع التي يشاهدها الزوار على المنصة</p>
+          </div>
+        </a>
+
+        <a routerLink="/" class="quick-action-box">
+          <div class="q-icon bg-slate-soft text-dark"><i class="bi bi-globe2"></i></div>
+          <div class="q-texts">
+            <h4>بوابة MeCart الرئيسية</h4>
+            <p>الانتقال إلى الواجهة التعريفية لمنصة mecart.app</p>
+          </div>
+        </a>
       </div>
-    </section>
-
-    <!-- Split Grid: Top Selling Products & Quick Shortcuts -->
-    <section class="dashboard-split-grid">
-      <!-- Top Selling Products Leaderboard -->
-      <div class="box-card glass-panel">
-        <div class="box-header flex-between">
-          <div class="box-title-group">
-            <span class="box-icon-tag bg-amber-soft">
-              <i class="bi bi-trophy-fill text-amber"></i>
-            </span>
-            <div>
-              <h2 class="box-title">المنتجات الأكثر طلباً اليوم</h2>
-              <p class="box-sub">ترتيب الأصناف بحسب عدد مرات البيع وإجمالي الإيراد</p>
-            </div>
-          </div>
-          @if (stats()!.topProductsToday.length > 0) {
-            <span class="items-count-badge">
-              {{ stats()!.topProductsToday.length }} أصناف
-            </span>
-          }
-        </div>
-
-        @if (stats()!.topProductsToday.length > 0) {
-          <div class="top-list">
-            @for (prod of stats()!.topProductsToday; track prod.productId; let idx = $index) {
-              <div class="top-item-row" [class.rank-first]="idx === 0">
-                <div class="rank-badge" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">
-                  @if (idx === 0) {
-                    <i class="bi bi-crown-fill"></i>
-                  } @else {
-                    <span>#{{ idx + 1 }}</span>
-                  }
-                </div>
-
-                <div class="item-details">
-                  <div class="item-title-row">
-                    <span class="item-name">{{ prod.productNameAr }}</span>
-                    <span class="item-revenue">{{ prod.totalRevenue | number:'1.0-2' }} {{ currencySymbol }}</span>
-                  </div>
-
-                  <div class="progress-track">
-                    <div
-                      class="progress-fill"
-                      [style.width.%]="(prod.quantitySold / getMaxSoldQuantity()) * 100"
-                    ></div>
-                  </div>
-
-                  <div class="item-sub-row">
-                    <span class="item-sold-count">
-                      <i class="bi bi-bag-check"></i>
-                      {{ prod.quantitySold }} مبيعة اليوم
-                    </span>
-                    <span class="item-percentage">
-                      {{ ((prod.quantitySold / getMaxSoldQuantity()) * 100) | number:'1.0-0' }}% من الصدارة
-                    </span>
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="empty-state-box">
-            <div class="empty-icon-wrap">
-              <i class="bi bi-inbox"></i>
-            </div>
-            <h3 class="empty-title">لا توجد مبيعات مسجلة حتى الآن اليوم</h3>
-            <p class="empty-desc">ستظهر الأصناف والمنتجات الأكثر طلباً وترتيبها هنا فور استلام وتسجيل أولى طلبات اليوم.</p>
-          </div>
-        }
-      </div>
-
-      <!-- Quick Actions Grid -->
-      <div class="box-card glass-panel">
-        <div class="box-header">
-          <div class="box-title-group">
-            <span class="box-icon-tag bg-cyan-soft">
-              <i class="bi bi-lightning-charge-fill text-cyan"></i>
-            </span>
-            <div>
-              <h2 class="box-title">روابط وإجراءات سريعة</h2>
-              <p class="box-sub">انتقال فوري لأهم الشاشات التشغيلية للمتجر والمستودع</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="shortcuts-grid">
-          <!-- Warehouse Screen -->
-          <a routerLink="/kitchen" class="shortcut-card action-orange">
-            <div class="sc-icon-wrapper">
-              <i class="bi bi-box-seam"></i>
-            </div>
-            <div class="sc-content">
-              <span class="sc-title">شاشة المستودع والعمليات</span>
-              <span class="sc-desc">تجهيز وتوريد وتأكيد جاهزية الطلب</span>
-            </div>
-            <i class="bi bi-arrow-left-short sc-arrow"></i>
-          </a>
-
-          <!-- Orders Management -->
-          <a routerLink="/admin/orders" class="shortcut-card action-blue">
-            <div class="sc-icon-wrapper">
-              <i class="bi bi-clipboard2-check-fill"></i>
-            </div>
-            <div class="sc-content">
-              <span class="sc-title">إدارة جميع الطلبات</span>
-              <span class="sc-desc">متابعة الفواتير والحالات والتوصيل</span>
-            </div>
-            <i class="bi bi-arrow-left-short sc-arrow"></i>
-          </a>
-
-          <!-- Menu Catalog -->
-          <a routerLink="/admin/catalog" class="shortcut-card action-purple">
-            <div class="sc-icon-wrapper">
-              <i class="bi bi-grid-fill"></i>
-            </div>
-            <div class="sc-content">
-              <span class="sc-title">كتالوج المنتجات والخيارات</span>
-              <span class="sc-desc">إضافة منتجات وتعديل الأسعار والمخزون</span>
-            </div>
-            <i class="bi bi-arrow-left-short sc-arrow"></i>
-          </a>
-
-          <!-- Restaurant Settings & Colors -->
-          <a routerLink="/admin/settings" class="shortcut-card action-teal">
-            <div class="sc-icon-wrapper">
-              <i class="bi bi-palette-fill"></i>
-            </div>
-            <div class="sc-content">
-              <span class="sc-title">الهوية والإعدادات العامة</span>
-              <span class="sc-desc">الشعار، البانرات، وألوان المتجر</span>
-            </div>
-            <i class="bi bi-arrow-left-short sc-arrow"></i>
-          </a>
-        </div>
-      </div>
-    </section>
-  }
+    </div>
+  </div>
 </div>

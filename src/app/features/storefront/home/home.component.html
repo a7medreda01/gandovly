@@ -1,42 +1,4 @@
 <div class="home-container">
-  <!-- 0. Mecart Platform Bar & Multi-Domain Switcher -->
-  <section class="mecart-platform-bar container pt-3 pb-2">
-    <div class="card p-3 border-0 shadow-sm" style="border-radius: 16px; background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border: 1px solid #E2E8F0 !important;">
-      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
-        <div class="d-flex align-items-center gap-2">
-          <span class="badge" style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; font-size: 0.85rem; padding: 6px 12px; border-radius: 8px;">
-            <i class="bi bi-cart4 me-1"></i> MeCart Platform
-          </span>
-          <span class="fw-bold small text-dark d-none d-sm-inline">منصة التجارة السحابية والتسوق الذكي متعددة الأنشطة</span>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-          <a routerLink="/admin/stores" class="btn btn-sm btn-outline-success fw-bold px-3 py-1" style="border-radius: 8px; font-size: 0.8rem;">
-            <i class="bi bi-plus-circle me-1"></i> أنشئ متجرك على mecart.app
-          </a>
-          <span class="text-muted small d-none d-md-inline" style="font-size: 0.75rem;">Powered by <strong style="color: #0F172A;">RunX Tech</strong></span>
-        </div>
-      </div>
-
-      <!-- Domains Pills Row -->
-      <div class="d-flex align-items-center gap-2 overflow-auto py-1" style="scrollbar-width: none;">
-        @for (dom of businessDomains; track dom.label) {
-          <button
-            type="button"
-            class="btn btn-sm px-3 py-1.5 fw-bold d-flex align-items-center gap-1.5 text-nowrap"
-            [style.background]="selectedBusinessDomain() === dom.id ? dom.color : '#FFFFFF'"
-            [style.color]="selectedBusinessDomain() === dom.id ? '#FFFFFF' : '#334155'"
-            [style.border]="selectedBusinessDomain() === dom.id ? 'none' : '1px solid #E2E8F0'"
-            style="border-radius: 20px; transition: all 0.2s; font-size: 0.85rem;"
-            (click)="selectDomain(dom.id)"
-          >
-            <i class="bi {{ dom.icon }}"></i>
-            <span>{{ dom.label }}</span>
-          </button>
-        }
-      </div>
-    </div>
-  </section>
-
   <!-- 1. Hero Promo Banner (Full Width on Mobile) -->
   @if (settingsService.settings().showHeroBanner) {
   <section class="hero-banner-section">

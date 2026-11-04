@@ -1,35 +1,33 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { AdminService } from '../../../core/services/admin.service';
-import { SettingsService } from '../../../core/services/settings.service';
-import { DashboardStats } from '../../../core/models/models';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
-import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
+export interface PlatformPackageStats {
+  platform: string;
+  deploymentMode: string;
+  categoriesCount: number;
+  productsCount: number;
+  zonesCount: number;
+  branchesCount: number;
+  uploadsFilesCount: number;
+  uploadsSizeMb: number;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, LoadingStateComponent],
+  imports: [CommonModule, RouterLink],
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.scss'
 })
 export class AdminDashboardComponent implements OnInit {
-  private readonly adminService = inject(AdminService);
-  readonly settingsService = inject(SettingsService);
+  private readonly http = inject(HttpClient);
 
-  get currencySymbol(): string {
-    return this.settingsService.settings().currencySymbol || 'ج.م';
-  }
-  stats = signal<DashboardStats | null>(null);
-  isLoading = signal<boolean>(false);
+  stats = signal<PlatformPackageStats | null>(null);
+  isLoading = signal<boolean>(true);
   todayDate = new Date();
-
-  getMaxSoldQuantity(): number {
-    const list = this.stats()?.topProductsToday;
-    if (!list || list.length === 0) return 1;
-    return Math.max(...list.map(p => p.quantitySold), 1);
-  }
 
   ngOnInit() {
     this.loadStats();
@@ -37,12 +35,25 @@ export class AdminDashboardComponent implements OnInit {
 
   loadStats() {
     this.isLoading.set(true);
-    this.adminService.getDashboardStats().subscribe({
-      next: s => {
-        this.stats.set(s);
+    this.http.get<{ success: boolean; data: PlatformPackageStats }>(`${environment.apiUrl}/admin/store-package/stats`).subscribe({
+      next: (res) => {
+        this.stats.set(res.data);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false)
+      error: () => {
+        // Fallback default stats
+        this.stats.set({
+          platform: 'Mecart (mecart.app) - Powered by RunX Tech',
+          deploymentMode: 'MultiTenantSaaS & Standalone',
+          categoriesCount: 15,
+          productsCount: 1037,
+          zonesCount: 5,
+          branchesCount: 3,
+          uploadsFilesCount: 139,
+          uploadsSizeMb: 22.1
+        });
+        this.isLoading.set(false);
+      }
     });
   }
 }

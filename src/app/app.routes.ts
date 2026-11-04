@@ -3,23 +3,41 @@ import { StorefrontLayoutComponent } from './layout/storefront-layout/storefront
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { adminGuard } from './core/guards/admin.guard';
 
+/**
+ * Checks if the current visitor is on a Tenant Subdomain
+ * e.g. super.mecart.app, or testing via ?tenant=super
+ */
+export function isTenantSubdomain(): boolean {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname.toLowerCase();
+  const search = window.location.search.toLowerCase();
+
+  // Test / preview parameter
+  if (search.includes('tenant=') || search.includes('store=')) {
+    return true;
+  }
+
+  // Subdomain: super.mecart.app or backend direct URL
+  if (host.startsWith('super.') || host.includes('supermarket1.runasp.net')) {
+    return true;
+  }
+
+  // Any tenant subdomain on mecart.app (e.g. albaraka.mecart.app, etc.) except www and apex
+  if (host.endsWith('mecart.app')) {
+    const sub = host.replace('.mecart.app', '');
+    if (sub !== 'www' && sub !== '' && sub !== 'mecart') {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export const routes: Routes = [
-  // 1. Mecart Flagship SaaS Platform Portal (mecart.app Homepage)
+  // 1. If visitor is on a Tenant Subdomain (e.g. super.mecart.app), load the Storefront directly at root
   {
     path: '',
-    pathMatch: 'full',
-    loadComponent: () => import('./features/landing/mecart-landing/mecart-landing.component').then(m => m.MecartLandingComponent)
-  },
-
-  // 2. Dedicated Projects Showcase Page with Pagination (/projects)
-  {
-    path: 'projects',
-    loadComponent: () => import('./features/landing/mecart-projects/mecart-projects.component').then(m => m.MecartProjectsComponent)
-  },
-
-  // 3. Live Storefront Demo / Tenant Store (/store)
-  {
-    path: 'store',
+    canMatch: [() => isTenantSubdomain()],
     component: StorefrontLayoutComponent,
     children: [
       {
@@ -29,8 +47,47 @@ export const routes: Routes = [
       {
         path: 'menu',
         loadComponent: () => import('./features/storefront/menu/menu.component').then(m => m.MenuComponent)
+      },
+      {
+        path: 'checkout',
+        loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent)
+      },
+      {
+        path: 'wishlist',
+        loadComponent: () => import('./features/storefront/wishlist/wishlist.component').then(m => m.WishlistComponent)
+      },
+      {
+        path: 'product/:id',
+        loadComponent: () => import('./features/storefront/product-page/product-page.component').then(m => m.ProductPageComponent)
+      },
+      {
+        path: 'track',
+        redirectTo: 'account',
+        pathMatch: 'full'
+      },
+      {
+        path: 'track/:token',
+        loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent)
+      },
+      {
+        path: 'account',
+        loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent)
       }
     ]
+  },
+
+  // 2. Main Platform Root for mecart.app & www.mecart.app (Mecart SaaS Platform Portal)
+  {
+    path: '',
+    pathMatch: 'full',
+    canMatch: [() => !isTenantSubdomain()],
+    loadComponent: () => import('./features/landing/mecart-landing/mecart-landing.component').then(m => m.MecartLandingComponent)
+  },
+
+  // 3. Dedicated Projects Showcase Page with Pagination (/projects)
+  {
+    path: 'projects',
+    loadComponent: () => import('./features/landing/mecart-projects/mecart-projects.component').then(m => m.MecartProjectsComponent)
   },
 
   // 4. Customer Storefront Direct Routes
@@ -70,20 +127,13 @@ export const routes: Routes = [
     ]
   },
 
-  // Redirect /kitchen to /admin/kitchen inside Admin layout
-  {
-    path: 'kitchen',
-    redirectTo: 'admin/kitchen',
-    pathMatch: 'full'
-  },
-
   // Admin Login (Standalone)
   {
     path: 'admin/login',
     loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
   },
 
-  // MeCart Cloud Platform Admin Panel (Protected by adminGuard)
+  // 5. MeCart Cloud Platform Admin (ONLY Stores, Packages, Cloud Dashboard)
   {
     path: 'admin',
     component: AdminLayoutComponent,
@@ -105,38 +155,6 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => import('./features/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
-      },
-      {
-        path: 'orders',
-        loadComponent: () => import('./features/admin/admin-orders/admin-orders.component').then(m => m.AdminOrdersComponent)
-      },
-      {
-        path: 'kitchen',
-        loadComponent: () => import('./features/kitchen/kitchen.component').then(m => m.KitchenComponent)
-      },
-      {
-        path: 'catalog',
-        loadComponent: () => import('./features/admin/admin-catalog/admin-catalog.component').then(m => m.AdminCatalogComponent)
-      },
-      {
-        path: 'delivery-zones',
-        loadComponent: () => import('./features/admin/admin-delivery-zones/admin-delivery-zones.component').then(m => m.AdminDeliveryZonesComponent)
-      },
-      {
-        path: 'settings',
-        loadComponent: () => import('./features/admin/admin-settings/admin-settings.component').then(m => m.AdminSettingsComponent)
-      },
-      {
-        path: 'reports',
-        loadComponent: () => import('./features/admin/admin-reports/admin-reports.component').then(m => m.AdminReportsComponent)
-      },
-      {
-        path: 'analytics',
-        loadComponent: () => import('./features/admin/admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent)
-      },
-      {
-        path: 'whatsapp',
-        loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent)
       }
     ]
   },
