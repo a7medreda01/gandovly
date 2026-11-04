@@ -4,15 +4,34 @@ import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.compone
 import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
-  // Storefront Layout (Customer Only)
+  // 1. Mecart Flagship SaaS Platform Portal (mecart.app Homepage)
   {
     path: '',
+    pathMatch: 'full',
+    loadComponent: () => import('./features/landing/mecart-landing/mecart-landing.component').then(m => m.MecartLandingComponent)
+  },
+
+  // 2. Live Storefront Demo / Tenant Store (/store)
+  {
+    path: 'store',
     component: StorefrontLayoutComponent,
     children: [
       {
         path: '',
         loadComponent: () => import('./features/storefront/home/home.component').then(m => m.HomeComponent)
       },
+      {
+        path: 'menu',
+        loadComponent: () => import('./features/storefront/menu/menu.component').then(m => m.MenuComponent)
+      }
+    ]
+  },
+
+  // 3. Customer Storefront Direct Routes (Menu, Checkout, Tracking, etc.)
+  {
+    path: '',
+    component: StorefrontLayoutComponent,
+    children: [
       {
         path: 'menu',
         loadComponent: () => import('./features/storefront/menu/menu.component').then(m => m.MenuComponent)
@@ -116,7 +135,7 @@ export const routes: Routes = [
     ]
   },
 
-  // Wildcard
+  // Wildcard -> Homepage
   {
     path: '**',
     redirectTo: ''
