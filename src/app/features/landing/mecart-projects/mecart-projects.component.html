@@ -1,0 +1,212 @@
+<!-- Navbar (Light Theme) -->
+<header class="mecart-nav">
+  <div class="nav-container">
+    <div class="nav-brand-group">
+      <a routerLink="/" class="mecart-logo-link">
+        <img src="/public/runx-logo.png" alt="RunX" style="display:none" />
+        <div class="mecart-brand-badge">
+          <span class="brand-icon"><i class="bi bi-cart3"></i></span>
+          <div class="brand-names">
+            <span class="brand-main">MeCart<small>.app</small></span>
+            <span class="brand-desc">Cloud Hosting</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="brand-divider"></div>
+
+      <a href="https://runxtech.com" target="_blank" rel="noopener" class="runx-badge">
+        <img src="/assets/images/runx-logo.png" alt="RunX" class="runx-logo-img" (error)="$any($event.target).src = '/runx-logo.png'" />
+        <span class="runx-text">أحد مشاريع <strong>RunX</strong></span>
+      </a>
+    </div>
+
+    <nav class="nav-links">
+      <a routerLink="/">الرئيسية</a>
+      <a routerLink="/" fragment="services">خدماتنا</a>
+      <a routerLink="/projects" class="active">مشاريعنا</a>
+      <a routerLink="/store">ديمو السوبر ماركت</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a [href]="whatsappUrl" target="_blank" rel="noopener" class="btn btn-order-service">
+        <i class="bi bi-whatsapp"></i>
+        <span>طلب خدمة</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- Projects Hero Header -->
+<section class="projects-hero">
+  <div class="hero-container">
+    <div class="hero-badge">
+      <img src="/assets/images/runx-logo.png" alt="RunX" class="pill-runx-icon" (error)="$any($event.target).src = '/runx-logo.png'" />
+      <span>معرض متاجر سحابة MeCart — إحدى مشاريع <strong>RunX Tech</strong></span>
+    </div>
+
+    <h1 class="page-title">مشاريعنا والمتاجر المستضافة</h1>
+    <p class="page-subtitle">
+      استكشف نماذج ومتاجر حقيقية تعمل على استضافة MeCart السحابية بمختلف الأنشطة التجارية مع إمكانية المعاينة الحية وطلب متجر مخصص لنشاطك
+    </p>
+
+    <!-- Domain Filters -->
+    <div class="domain-filters-row">
+      @for (d of domains; track d.id) {
+      <button class="filter-pill" [class.active]="selectedDomain() === d.id" (click)="filterByDomain(d.id)">
+        {{ d.label }}
+      </button>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Projects Grid Section -->
+<section class="projects-grid-section">
+  <div class="section-container">
+    @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner-border text-success" role="status"></div>
+      <p>جاري تحميل المشاريع من السيرفر السحابي...</p>
+    </div>
+    } @else {
+    <div class="projects-cards-grid">
+      @for (p of projects(); track p.id) {
+      <div class="project-card">
+        <div class="card-thumb-wrap">
+          @if (p.thumbnail) {
+          <img [src]="p.thumbnail" [alt]="p.name" class="card-img" loading="lazy" (error)="$any($event.target).style.display = 'none'" />
+          }
+          <div class="thumb-domain-tag">
+            <span class="live-pulse"></span>
+            <span>{{ p.domainLabel }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="store-meta">
+            <span class="products-pill"><i class="bi bi-box-seam"></i> {{ p.productsCount }}+ صنف</span>
+            <span class="status-pill"><i class="bi bi-check-circle-fill"></i> نشط لايف</span>
+          </div>
+
+          <h3 class="store-name">{{ p.name }}</h3>
+
+          <div class="store-link-row">
+            <i class="bi bi-link-45deg text-success"></i>
+            <span class="store-url-text">{{ p.subdomain }}.mecart.app</span>
+          </div>
+
+          <div class="card-action-buttons">
+            <a [routerLink]="p.relativeUrl || ['/store']" class="btn btn-live-preview">
+              <i class="bi bi-eye-fill"></i>
+              <span>معاينة لايف</span>
+            </a>
+
+            <a [href]="getSimilarWhatsAppUrl(p)" target="_blank" rel="noopener" class="btn btn-order-similar">
+              <i class="bi bi-whatsapp"></i>
+              <span>طلب متجر مماثل</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Pagination Controls -->
+    @if (totalPages() > 1) {
+    <div class="pagination-bar">
+      <button class="page-btn nav-btn" [disabled]="currentPage() === 1" (click)="loadProjects(currentPage() - 1)">
+        <i class="bi bi-chevron-right"></i> السابق
+      </button>
+
+      <div class="page-numbers">
+        @for (page of getPagesArray(); track page) {
+        <button class="page-btn" [class.active]="currentPage() === page" (click)="loadProjects(page)">
+          {{ page }}
+        </button>
+        }
+      </div>
+
+      <button class="page-btn nav-btn" [disabled]="currentPage() === totalPages()" (click)="loadProjects(currentPage() + 1)">
+        التالي <i class="bi bi-chevron-left"></i>
+      </button>
+    </div>
+    }
+    }
+  </div>
+</section>
+
+<!-- Bottom CTA Banner -->
+<section class="request-service-banner">
+  <div class="section-container">
+    <div class="cta-inner-card">
+      <div class="cta-text">
+        <h2>هل تريد إطلاق متجر إلكتروني خاص بنشاطك؟</h2>
+        <p>تواصل مع فريق مهندسي RunX Tech الآن لتجهيز واستضافة متجرك السحابي بكامل منتجاتك ومناطق التوصيل</p>
+      </div>
+      <a [href]="whatsappUrl" target="_blank" rel="noopener" class="btn btn-cta-whatsapp">
+        <i class="bi bi-whatsapp"></i>
+        <span>طلب خدمة عبر واتساب (+201080225502)</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="mecart-footer">
+  <div class="footer-container">
+    <div class="footer-top-grid">
+      <div class="footer-brand-col">
+        <div class="mecart-brand-badge footer-badge">
+          <span class="brand-icon"><i class="bi bi-cart3"></i></span>
+          <div class="brand-names">
+            <span class="brand-main">MeCart<small>.app</small></span>
+            <span class="brand-desc">Cloud Hosting</span>
+          </div>
+        </div>
+        <p class="f-bio">
+          استضافة سحابية متقدمة للمتاجر الإلكترونية المتخصصة بكافة الأنشطة التجارية.
+        </p>
+
+        <div class="runx-official-card">
+          <img src="/assets/images/runx-logo.png" alt="RunX" class="runx-card-img" (error)="$any($event.target).src = '/runx-logo.png'" />
+          <div class="runx-card-texts">
+            <span class="runx-card-title">إحدى منصات <strong>RunX Tech</strong></span>
+            <span class="runx-card-desc">للحلول البرمجية الذكية والبنى التحتية السحابية</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 class="col-title">روابط سريعة</h4>
+        <ul>
+          <li><a routerLink="/">الرئيسية</a></li>
+          <li><a routerLink="/projects">مشاريعنا السحابية</a></li>
+          <li><a routerLink="/store">ديمو متجر السوبر ماركت</a></li>
+          <li><a [href]="whatsappUrl" target="_blank" rel="noopener">طلب خدمة جديدة</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-col">
+        <h4 class="col-title">التواصل والدعم</h4>
+        <ul>
+          <li><a href="https://runxtech.com" target="_blank" rel="noopener">موقع شركة RunX Tech</a></li>
+          <li><a [href]="whatsappUrl" target="_blank" rel="noopener">واتساب المبيعات: +201080225502</a></li>
+          <li><a href="mailto:support@runxtech.com">support&#64;runxtech.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom-row">
+      <div class="copyright-text">
+        &copy; 2026 <strong>MeCart.app</strong> &bull; جميع الحقوق محفوظة &bull; إحدى مشاريع <strong>RunX Tech</strong>
+      </div>
+      <div class="footer-links-mini">
+        <a routerLink="/">الرئيسية</a> &bull;
+        <a routerLink="/projects">المشاريع</a> &bull;
+        <a routerLink="/store">ديمو المتجر</a>
+      </div>
+    </div>
+  </div>
+</footer>
+

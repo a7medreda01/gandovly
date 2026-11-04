@@ -4,20 +4,16 @@
   <div class="admin-sidebar-backdrop" (click)="closeSidebar()"></div>
   }
 
-  <!-- Sidebar (ثابت ولا يتحرك مع السكرول) -->
+  <!-- Sidebar: MeCart Cloud Platform Admin -->
   <aside class="admin-sidebar" [class.open]="isSidebarOpen">
     <div class="sidebar-header flex-between">
       <div class="header-brand-wrap flex-center gap-2">
-        @if (settingsService.settings().logoUrl) {
-          <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'" [alt]="settingsService.settings().restaurantName" class="admin-logo-img" />
-        } @else {
-          <div class="admin-logo-fallback flex-center">
-            <i class="bi bi-shield-lock-fill"></i>
-          </div>
-        }
+        <div class="mecart-cloud-logo flex-center">
+          <i class="bi bi-cloud-check-fill"></i>
+        </div>
         <div class="header-titles">
-          <h2 class="admin-store-name">{{ settingsService.settings().restaurantName || 'لوحة الإدارة' }}</h2>
-          <span class="portal-tag"><i class="bi bi-patch-check-fill me-1"></i> لوحة التحكم المركزية</span>
+          <h2 class="admin-store-name">MeCart Cloud</h2>
+          <span class="portal-tag"><i class="bi bi-shield-check me-1"></i> إدارة المنصة السحابية &bull; RunX</span>
         </div>
       </div>
       <!-- Close button on mobile -->
@@ -27,40 +23,33 @@
     </div>
 
     <nav class="sidebar-nav">
-      <div class="nav-group-title">العمليات والطلبات</div>
-
-      <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box"><i class="bi bi-speedometer2"></i></div>
-        <span>لوحة المؤشرات</span>
-      </a>
-
-      <a routerLink="/admin/orders" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box"><i class="bi bi-receipt"></i></div>
-        <span>إدارة الطلبات</span>
-      </a>
-
-      <a routerLink="/admin/kitchen" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box icon-kitchen"><i class="bi bi-box-seam"></i></div>
-        <span>شاشة المستودع والعمليات</span>
-      </a>
-
-      <div class="nav-group-title mt-2" style="color: #10B981;">منظومة Mecart السحابية 🚀</div>
+      <div class="nav-group-title">منظومة MeCart السحابية</div>
 
       <a routerLink="/admin/stores" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box" style="background: rgba(16, 185, 129, 0.15); color: #10B981;"><i class="bi bi-shop-window"></i></div>
+        <div class="nav-icon-box icon-stores"><i class="bi bi-shop-window"></i></div>
         <span>المتاجر السحابية والعملاء</span>
       </a>
 
       <a routerLink="/admin/packages" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box" style="background: rgba(99, 102, 241, 0.15); color: #6366F1;"><i class="bi bi-box-seam-fill"></i></div>
-        <span>حزم البيانات والنسخ (Seed)</span>
+        <div class="nav-icon-box icon-packages"><i class="bi bi-box-seam-fill"></i></div>
+        <span>حزم البيانات والنسخ (Seed Engine)</span>
       </a>
 
-      <div class="nav-group-title mt-2">المتجر والمنتجات</div>
+      <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <div class="nav-icon-box"><i class="bi bi-speedometer2"></i></div>
+        <span>مؤشرات السحابة والخوادم</span>
+      </a>
+
+      <div class="nav-group-title mt-3">إدارة العمليات الخاصة بالمتاجر</div>
 
       <a routerLink="/admin/catalog" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
         <div class="nav-icon-box"><i class="bi bi-grid"></i></div>
-        <span>كتالوج المنتجات والخيارات</span>
+        <span>كتالوج المنتجات والأصناف</span>
+      </a>
+
+      <a routerLink="/admin/orders" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <div class="nav-icon-box"><i class="bi bi-receipt"></i></div>
+        <span>إدارة الطلبات والمبيعات</span>
       </a>
 
       <a routerLink="/admin/delivery-zones" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
@@ -68,34 +57,22 @@
         <span>مناطق ورسوم التوصيل</span>
       </a>
 
-      <a routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box icon-settings"><i class="bi bi-palette"></i></div>
-        <span>الهوية والإعدادات العامة</span>
-      </a>
-
-      <div class="nav-group-title mt-2">التقارير والتواصل</div>
-
-      <a routerLink="/admin/reports" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box"><i class="bi bi-graph-up-arrow"></i></div>
-        <span>التقارير والمبيعات</span>
-      </a>
-
-      <a routerLink="/admin/analytics" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box icon-analytics"><i class="bi bi-activity"></i></div>
-        <span>تحليلات وزيارات المتجر</span>
-      </a>
-
       <a routerLink="/admin/whatsapp" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
         <div class="nav-icon-box icon-whatsapp"><i class="bi bi-whatsapp"></i></div>
-        <span>بوابة وإشعارات الواتساب</span>
+        <span>بوابات وإشعارات واتساب</span>
+      </a>
+
+      <a routerLink="/admin/settings" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+        <div class="nav-icon-box icon-settings"><i class="bi bi-sliders"></i></div>
+        <span>إعدادات السحابة العامة</span>
       </a>
     </nav>
 
     <div class="sidebar-footer">
-      <a routerLink="/" class="btn-storefront flex-center gap-2" title="الذهاب للمتجر">
-        <i class="bi bi-shop"></i>
-        <span>زيارة المتجر</span>
-        <i class="bi bi-box-arrow-up-left ms-auto fs-6 opacity-75"></i>
+      <a routerLink="/" class="btn-storefront flex-center gap-2" title="الذهاب لبوابة المنصة">
+        <i class="bi bi-globe2"></i>
+        <span>بوابة MeCart الرئيسية</span>
+        <i class="bi bi-arrow-left ms-auto fs-6 opacity-75"></i>
       </a>
       <button class="btn-logout flex-center gap-2" (click)="logout()" title="تسجيل الخروج">
         <i class="bi bi-box-arrow-right"></i>
@@ -111,7 +88,7 @@
         <button class="btn-mobile-nav-toggle d-md-none" (click)="toggleSidebar()" aria-label="فتح القائمة">
           <i class="bi bi-list fs-3"></i>
         </button>
-        <span class="topbar-portal-name">لوحة الإدارة المركزية</span>
+        <span class="topbar-portal-name">منظومة MeCart السحابية — إحدى مشاريع RunX Tech</span>
         <span class="topbar-date d-none d-lg-inline text-muted ms-2">
           <i class="bi bi-calendar3 me-1"></i> {{ todayDate | date:'d MMMM yyyy' }}
         </span>
@@ -122,9 +99,9 @@
           <div class="admin-avatar-circle flex-center">
             <i class="bi bi-person-fill"></i>
           </div>
-          <span class="user-name">{{ authService.currentAdmin()?.fullName || 'المدير العام' }}</span>
+          <span class="user-name">{{ authService.currentAdmin()?.fullName || 'مدير المنصة العام' }}</span>
         </div>
-        <a routerLink="/" class="btn-store-link" title="معاينة المتجر">
+        <a routerLink="/" class="btn-store-link" title="معاينة المنصة">
           <i class="bi bi-box-arrow-up-right"></i>
         </a>
       </div>

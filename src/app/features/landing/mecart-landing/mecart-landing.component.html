@@ -1,58 +1,49 @@
-<!-- Top SaaS Header (Light Theme) -->
+<!-- Top SaaS Navbar (Light Theme, Clean & Direct) -->
 <header class="mecart-nav">
   <div class="nav-container">
     <!-- Brand Logos: MeCart + RunX Tech -->
     <div class="nav-brand-group">
-      <a routerLink="/" class="mecart-logo-link">
-        <img src="/assets/images/mecart-logo.svg" alt="MeCart.app" class="mecart-logo-img" />
+      <a routerLink="/" class="mecart-brand-link">
+        <div class="mecart-brand-badge">
+          <span class="brand-icon"><i class="bi bi-cart3"></i></span>
+          <div class="brand-names">
+            <span class="brand-main">MeCart<small>.app</small></span>
+            <span class="brand-desc">Cloud Hosting</span>
+          </div>
+        </div>
       </a>
 
       <div class="brand-divider"></div>
 
       <a href="https://runxtech.com" target="_blank" rel="noopener" class="runx-badge" title="إحدى مشاريع RunX Tech">
-        <img src="/assets/images/runx-logo.png" alt="RunX Tech" class="runx-logo-img" />
+        <img [src]="runxLogo" alt="RunX Tech" class="runx-logo-img" />
         <span class="runx-text">أحد مشاريع <strong>RunX</strong></span>
       </a>
     </div>
 
     <!-- Navigation Links -->
     <nav class="nav-links">
-      <a href="#cloud-features">مميزات الاستضافة</a>
-      <a href="#domains">الأنشطة المدعومة</a>
-      <a href="#demo">الديمو الحي</a>
-      <a href="#seed-engine">محرك نقل البيانات</a>
-      <a href="#pricing">باقات الاستضافة</a>
+      <a href="#services">خدماتنا</a>
+      <a routerLink="/projects">مشاريعنا</a>
+      <a href="#about-cloud">عن الاستضافة</a>
     </nav>
 
-    <!-- Nav Action Buttons -->
+    <!-- Nav Action Button (Purely Order Service via WhatsApp) -->
     <div class="nav-actions">
-      <a routerLink="/store" class="btn btn-demo" title="معاينة السوبر ماركت الحي">
-        <i class="bi bi-basket2"></i>
-        <span>ديمو حي (1037 منتج)</span>
-      </a>
-      <a routerLink="/admin" class="btn btn-admin">
-        <i class="bi bi-shield-lock"></i>
-        <span>لوحة التحكم</span>
-      </a>
-      <a routerLink="/admin/stores" class="btn btn-cta">
-        <i class="bi bi-cloud-plus-fill"></i>
-        <span>إنشاء متجر سحابي</span>
+      <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="btn btn-order-service">
+        <i class="bi bi-whatsapp"></i>
+        <span>طلب خدمة</span>
       </a>
     </div>
   </div>
 </header>
 
-<!-- Hero Section (Light, Airy, Cloud Focused) -->
+<!-- Hero Section (Light, Simple, Direct) -->
 <section class="mecart-hero">
-  <div class="hero-bg-shapes">
-    <div class="shape shape-1"></div>
-    <div class="shape shape-2"></div>
-  </div>
-
   <div class="hero-container">
-    <!-- Endorsement Pill -->
+    <!-- RunX Endorsement Pill -->
     <div class="hero-pill">
-      <img src="/assets/images/runx-logo.png" alt="RunX" class="pill-runx-icon" />
+      <img [src]="runxLogo" alt="RunX" class="pill-runx-icon" />
       <span>استضافة سحابية مدارة بالكامل للمتاجر الإلكترونية — من <strong>RunX Tech</strong></span>
     </div>
 
@@ -63,373 +54,164 @@
     </h1>
 
     <p class="hero-subtitle">
-      منصة <strong>MeCart</strong> السحابية تمنحك بنية استضافة متطورة لإطلاق وإدارة متاجرك بنطاقك المخصص، مع نسخ احتياطي فوري، نقل قواعد البيانات والحزم بضغطة زر، ودعم متكامل للسوبر ماركت، المطاعم، الصيدليات، والمتاجر المتخصصة.
+      منظومة سحابية متكاملة تقدمها شركة <strong>RunX Tech</strong> لاستضافة وإدارة متاجرك الإلكترونية بنطاقك المخصص وسرعة فائقة، مع دعم كامل للنسخ الاحتياطي، وإشعارات واتساب، ومناطق التوصيل لمختلف الأنشطة التجارية.
     </p>
 
-    <!-- CTAs -->
+    <!-- CTAs: Pure Service Request & View Projects -->
     <div class="hero-cta-group">
-      <a routerLink="/admin/stores" class="btn btn-hero-primary">
-        <i class="bi bi-cloud-arrow-up-fill"></i>
-        <span>ابدأ استضافة متجرك مجاناً</span>
+      <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="btn btn-hero-whatsapp">
+        <i class="bi bi-whatsapp"></i>
+        <span>طلب خدمة عبر واتساب (+201080225502)</span>
       </a>
-      <a routerLink="/store" class="btn btn-hero-demo">
-        <i class="bi bi-eye-fill"></i>
-        <span>معاينة متجر السوبر ماركت الحي (1037 صنف)</span>
-      </a>
-      <a routerLink="/admin" class="btn btn-hero-outline">
-        <i class="bi bi-gear-wide-connected"></i>
-        <span>لوحة تحكم المنصة</span>
+      <a routerLink="/projects" class="btn btn-hero-projects">
+        <i class="bi bi-grid-3x3-gap-fill"></i>
+        <span>تصفح مشاريعنا السحابية</span>
       </a>
     </div>
 
-    <!-- Cloud Metric Counters -->
+    <!-- Clean Stats Strip -->
     <div class="hero-stats-strip">
       <div class="stat-box">
         <div class="stat-value">99.99%</div>
-        <div class="stat-caption">جاهزية واستقرار السيرفرات السحابية</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat-box">
-        <div class="stat-value">1,037+</div>
-        <div class="stat-caption">صنف حقيقي جاهز للتحميل والتغذية فوراً</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat-box">
-        <div class="stat-value">1-Click</div>
-        <div class="stat-caption">تصدير ونقل قاعدة البيانات وحزمة الوسائط</div>
+        <div class="stat-caption">استقرار السيرفرات السحابية</div>
       </div>
       <div class="stat-sep"></div>
       <div class="stat-box">
         <div class="stat-value">&lt; 0.8 ثانية</div>
         <div class="stat-caption">سرعة تحميل الصفحات وتصفح المنتجات</div>
       </div>
+      <div class="stat-sep"></div>
+      <div class="stat-box">
+        <div class="stat-value">1-Click</div>
+        <div class="stat-caption">محرك نقل وتصدير قواعد البيانات (Seed)</div>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-box">
+        <div class="stat-value">100%</div>
+        <div class="stat-caption">دعم النطاقات المخصصة وSSL مجاني</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Cloud Hosting Core Features -->
-<section id="cloud-features" class="cloud-features-section">
+<!-- Services Section (خدماتنا) -->
+<section id="services" class="services-section">
   <div class="section-container">
     <div class="section-heading">
-      <span class="section-badge">بنية تحتية موثوقة</span>
-      <h2 class="section-title">لماذا تختار استضافة MeCart السحابية؟</h2>
-      <p class="section-lead">نحن نتولى الخوادم، الحماية، التحديثات، والنسخ الاحتياطي بالكامل لتتفرغ لتنمية تجارتك ومبيعاتك</p>
+      <span class="section-badge">خدمات RunX السحابية</span>
+      <h2 class="section-title">خدماتنا</h2>
+      <p class="section-lead">نوفر لك حزمة متكاملة من الخدمات التقنية السحابية لتشغيل وتوسيع متاجرك الإلكترونية بأعلى موثوقية</p>
     </div>
 
-    <div class="features-grid">
-      <!-- Feature 1 -->
-      <div class="feature-card">
-        <div class="feature-icon cloud-icon">
-          <i class="bi bi-cloud-check-fill"></i>
+    <div class="services-grid">
+      @for (s of services; track s.id) {
+      <div class="service-card">
+        <div class="service-icon-box">
+          <i class="bi" [class]="s.icon"></i>
         </div>
-        <h3 class="feature-title">استضافة سحابية مدارة بالكامل</h3>
-        <p class="feature-desc">خوادم عالية الأداء مع CDN عالمي لتوزيع المحتوى وتسريع تحميل الصور والمنتجات لأقصى درجة.</p>
-      </div>
+        <h3 class="service-title">{{ s.title }}</h3>
+        <p class="service-desc">{{ s.description }}</p>
 
-      <!-- Feature 2 -->
-      <div class="feature-card">
-        <div class="feature-icon domain-icon">
-          <i class="bi bi-globe2"></i>
-        </div>
-        <h3 class="feature-title">دومين مخصص ونطاقات فرعية</h3>
-        <p class="feature-desc">استخدم نطاقاً فرعياً فورياً <code>yourstore.mecart.app</code> أو اربط دومينك الخاص <code>yourbrand.com</code> مع شهادة SSL مجانية.</p>
-      </div>
+        <ul class="service-features-list">
+          @for (f of s.features; track f) {
+          <li><i class="bi bi-check2 text-success"></i> {{ f }}</li>
+          }
+        </ul>
 
-      <!-- Feature 3 -->
-      <div class="feature-card">
-        <div class="feature-icon backup-icon">
-          <i class="bi bi-file-earmark-zip-fill"></i>
-        </div>
-        <h3 class="feature-title">محرك الحزم ونقل البيانات (Seed Engine)</h3>
-        <p class="feature-desc">صدّر متجرك بالكامل بضغطة زر كملف ZIP يحوي قاعدة البيانات والصور، وانقله لأي متجر أو سيرفر بثوانٍ.</p>
+        <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="service-order-link">
+          <span>طلب هذه الخدمة</span>
+          <i class="bi bi-arrow-left"></i>
+        </a>
       </div>
-
-      <!-- Feature 4 -->
-      <div class="feature-card">
-        <div class="feature-icon whatsapp-icon">
-          <i class="bi bi-whatsapp"></i>
-        </div>
-        <h3 class="feature-title">ربط واتساب السحابي المتعدد</h3>
-        <p class="feature-desc">إرسال تلقائي لفواتير الطلبات، تحديثات الشحن، ورسائل ترويجية للعملاء عبر قنوات واتساب سحابية مستقرة.</p>
-      </div>
-
-      <!-- Feature 5 -->
-      <div class="feature-card">
-        <div class="feature-icon delivery-icon">
-          <i class="bi bi-geo-alt-fill"></i>
-        </div>
-        <h3 class="feature-title">حساب تكاليف التوصيل الجغرافي</h3>
-        <p class="feature-desc">تحديد أحياء ومناطق التوصيل وحساب الرسوم تلقائياً مع توجيه الطلبات لمندوبي الشحن بكفاءة.</p>
-      </div>
-
-      <!-- Feature 6 -->
-      <div class="feature-card">
-        <div class="feature-icon enterprise-icon">
-          <i class="bi bi-server"></i>
-        </div>
-        <h3 class="feature-title">خيار السيرفر المستقل للشركات</h3>
-        <p class="feature-desc">إمكانية استخراج المتجر كسيستم مستقل واستضافة خاصة بك على سيرفر معزول بدعم مباشر من مهندسي RunX Tech.</p>
-      </div>
+      }
     </div>
   </div>
 </section>
 
-<!-- Live Demo Spotlight (Clean Light Card) -->
-<section id="demo" class="demo-section">
+<!-- Projects Section (مشاريعنا - أحدث 10 مشاريع حية تلقائياً) -->
+<section id="projects" class="projects-section">
   <div class="section-container">
-    <div class="demo-showcase-card">
-      <div class="demo-content">
-        <div class="demo-badge">
-          <span class="live-indicator"></span>
-          <span>ديمو السوبر ماركت الحي متاح للتجربة الآن</span>
+    <div class="section-heading">
+      <span class="section-badge">مشاريع حية</span>
+      <h2 class="section-title">أحدث مشاريعنا</h2>
+      <p class="section-lead">نماذج لمواقع ومتاجر إلكترونية حقيقية تم استضافتها وإطلاقها عبر سحابة MeCart</p>
+    </div>
+
+    @if (isLoadingProjects()) {
+    <div class="loading-box">
+      <div class="spinner-border text-success" role="status"></div>
+      <p>جاري تحميل أحدث المشاريع من السيرفر...</p>
+    </div>
+    } @else {
+    <div class="projects-grid">
+      @for (p of latestProjects(); track p.id) {
+      <div class="project-card">
+        <div class="project-card-header">
+          <div class="project-icon">
+            <i class="bi bi-shop"></i>
+          </div>
+          <div class="project-info">
+            <h3 class="project-title">{{ p.name }}</h3>
+            <span class="project-domain-tag">{{ p.domainLabel }}</span>
+          </div>
         </div>
-        <h2 class="demo-title">متجر السوبر ماركت والمنتجات الغذائية</h2>
-        <p class="demo-desc">
-          قم بتجربة متجر حي يعمل حالياً على سحابة Mecart: يحتوي على أكثر من <strong>1,000 صنف غذائي حقيقي</strong>، 15 قسماً، نظام تسعير بالوزن (كجم/جرام) والقطعة، وحساب دقيق لمناطق التوصيل.
+
+        <div class="project-link-row">
+          <i class="bi bi-link-45deg text-success"></i>
+          <span class="project-url">{{ p.subdomain }}.mecart.app</span>
+        </div>
+
+        <div class="project-meta-row">
+          <span class="meta-item"><i class="bi bi-box-seam"></i> {{ p.productsCount }}+ صنف</span>
+          <span class="meta-status"><i class="bi bi-patch-check-fill"></i> متاح لايف</span>
+        </div>
+
+        <div class="project-actions">
+          <a [href]="p.url" target="_blank" rel="noopener" class="btn btn-preview">
+            <i class="bi bi-eye-fill"></i>
+            <span>معاينة لايف</span>
+          </a>
+          <a [href]="getProjectWhatsAppUrl(p)" target="_blank" rel="noopener" class="btn btn-order-similar">
+            <i class="bi bi-whatsapp"></i>
+            <span>طلب متجر مماثل</span>
+          </a>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Link to all projects page -->
+    <div class="view-all-projects-box">
+      <a routerLink="/projects" class="btn btn-view-all">
+        <span>استعراض كافة المشاريع والصفحات</span>
+        <i class="bi bi-arrow-left"></i>
+      </a>
+    </div>
+    }
+  </div>
+</section>
+
+<!-- About Cloud Hosting -->
+<section id="about-cloud" class="about-cloud-section">
+  <div class="section-container">
+    <div class="about-cloud-card">
+      <div class="about-texts">
+        <span class="about-badge">بنية استضافة RunX</span>
+        <h2>لماذا يعتمد أصحاب الأعمال على سحابة MeCart؟</h2>
+        <p>
+          نوفر بنية تحتية مدارة بالكامل ومصممة خصيصاً للتجارة الإلكترونية مع تفعيل فوري لشهادات الأمان، وتوزيع الأحمال، ونقل البيانات بضغطة زر دون الحاجة لتوظيف مهندسي سيرفرات.
         </p>
-
-        <div class="demo-stats-row">
-          <div class="dstat">
-            <span class="dnum">1,037</span>
-            <span class="dlbl">منتج غذائي</span>
-          </div>
-          <div class="dstat">
-            <span class="dnum">15</span>
-            <span class="dlbl">قسماً رئيسياً</span>
-          </div>
-          <div class="dstat">
-            <span class="dnum">5</span>
-            <span class="dlbl">مناطق توصيل</span>
-          </div>
-          <div class="dstat">
-            <span class="dnum">100%</span>
-            <span class="dlbl">جاهز للطلب</span>
-          </div>
-        </div>
-
-        <div class="demo-actions">
-          <a routerLink="/store" class="btn btn-demo-visit">
-            <i class="bi bi-basket2-fill"></i>
-            <span>تصفح متجر السوبر ماركت الحي 🛒</span>
-          </a>
-          <a routerLink="/admin/packages" class="btn btn-demo-seed">
-            <i class="bi bi-download"></i>
-            <span>تنزيل حزمة البيانات Seed ZIP</span>
-          </a>
+        <div class="about-points">
+          <div class="point-item"><i class="bi bi-shield-check text-success"></i> سيرفرات عالية الحماية والأمان</div>
+          <div class="point-item"><i class="bi bi-lightning-charge-fill text-warning"></i> سرعة تصفح فائقة لعملائك</div>
+          <div class="point-item"><i class="bi bi-headset text-primary"></i> دعم فني مباشر من مهندسي RunX Tech</div>
         </div>
       </div>
-
-      <div class="demo-preview-visual">
-        <div class="browser-frame">
-          <div class="frame-bar">
-            <div class="browser-dots">
-              <span class="bdot r"></span>
-              <span class="bdot y"></span>
-              <span class="bdot g"></span>
-            </div>
-            <div class="browser-url">https://super.mecart.app</div>
-          </div>
-          <div class="frame-body">
-            <div class="store-mini-card">
-              <div class="mini-brand">
-                <i class="bi bi-cart4 text-success"></i>
-                <span>كارفور والبركة سوبر ماركت</span>
-              </div>
-              <div class="mini-banner">
-                <span class="discount-pill">خصم 20%</span>
-                <h4>عروض وتوفير يومي</h4>
-                <p>أكثر من 1000 صنف غذائي طازج</p>
-              </div>
-              <div class="mini-categories">
-                <div class="mcat">أجبان وألبان</div>
-                <div class="mcat">لحوم ودواجن</div>
-                <div class="mcat">خضار وفواكه</div>
-                <div class="mcat">معلبات ومؤن</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Supported Business Domains -->
-<section id="domains" class="domains-section">
-  <div class="section-container">
-    <div class="section-heading">
-      <span class="section-badge">تنوع تجاري</span>
-      <h2 class="section-title">قوالب سحابية جاهزة لكافة الأنشطة</h2>
-      <p class="section-lead">نظام استضافة متكيف يدعم الخصائص التشغيلية لكل قطاع تجاري</p>
-    </div>
-
-    <div class="domain-tabs-row">
-      @for (d of domains; track d.id) {
-      <button class="domain-pill-btn" [class.active]="selectedDomainId() === d.id" (click)="selectDomain(d.id)">
-        <i class="bi" [class]="d.icon"></i>
-        <span>{{ d.nameAr }}</span>
-        @if (d.isLive) {
-        <span class="pill-live-dot" title="ديمو مباشر"></span>
-        }
-      </button>
-      }
-    </div>
-
-    <div class="domains-cards-row">
-      @for (d of domains; track d.id) {
-      <div class="domain-simple-card" [class.highlighted]="selectedDomainId() === d.id" [class.is-live]="d.isLive">
-        <div class="card-top">
-          <div class="domain-icon-circle">
-            <i class="bi" [class]="d.icon"></i>
-          </div>
-          <div class="domain-info">
-            <h3 class="domain-name">{{ d.nameAr }}</h3>
-            <span class="domain-badge-tag" [class.live-tag]="d.isLive">{{ d.badge }}</span>
-          </div>
-        </div>
-
-        <p class="domain-description">{{ d.description }}</p>
-
-        <ul class="domain-bullet-points">
-          @for (f of d.features; track f) {
-          <li><i class="bi bi-check-lg text-success"></i> {{ f }}</li>
-          }
-        </ul>
-
-        <div class="domain-action-box">
-          @if (d.isLive && d.demoRoute) {
-          <a [routerLink]="d.demoRoute" class="btn btn-domain-demo">
-            <i class="bi bi-box-arrow-up-right"></i>
-            <span>معاينة المتجر الحي</span>
-          </a>
-          } @else {
-          <a routerLink="/admin/stores" [queryParams]="{domain: d.id}" class="btn btn-domain-create">
-            <i class="bi bi-plus-lg"></i>
-            <span>إنشاء متجر في هذا المجال</span>
-          </a>
-          }
-        </div>
-      </div>
-      }
-    </div>
-  </div>
-</section>
-
-<!-- Fast Store Launcher (Interactive Simulator) -->
-<section class="launcher-section">
-  <div class="section-container">
-    <div class="launcher-card">
-      <div class="launcher-header">
-        <span class="launcher-tag">استضافة سحابية فورية</span>
-        <h2>أطلق متجرك السحابي في خطوات بسيطة</h2>
-        <p>حدد اسم المتجر ونشاطك التجاري لإنشائه فوراً والبدء في رفع المنتجات</p>
-      </div>
-
-      <div class="launcher-form">
-        <div class="form-grid">
-          <div class="input-block">
-            <label>اسم المتجر أو العلامة التجارية</label>
-            <input type="text" [ngModel]="storeName()" (ngModelChange)="updateSubdomainFromName($event)" placeholder="مثال: أسواق الصفوة" class="form-input" />
-          </div>
-
-          <div class="input-block">
-            <label>النشاط التجاري</label>
-            <select [ngModel]="selectedIndustry()" (ngModelChange)="selectedIndustry.set($event)" class="form-input">
-              <option value="Supermarket">سوبر ماركت وبقالة</option>
-              <option value="Restaurant">مطعم وكافيه</option>
-              <option value="Pharmacy">صيدلية ومستحضرات</option>
-              <option value="AutoParts">قطع غيار ومعدات</option>
-              <option value="Electronics">إلكترونيات وأجهزة</option>
-              <option value="GeneralRetail">تجارة عامة وأزياء</option>
-            </select>
-          </div>
-
-          <div class="input-block">
-            <label>رابط الاستضافة السحابية</label>
-            <div class="domain-input-wrap">
-              <span class="d-proto">https://</span>
-              <input type="text" [ngModel]="storeSubdomain()" (ngModelChange)="storeSubdomain.set($event)" placeholder="mystore" class="d-slug" />
-              <span class="d-ext">.mecart.app</span>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn btn-submit-launcher" (click)="launchStore()">
-          <i class="bi bi-rocket-takeoff-fill"></i>
-          <span>إنشاء المتجر في لوحة التحكم</span>
-        </button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Pricing Plans (Light & Clear) -->
-<section id="pricing" class="pricing-section">
-  <div class="section-container">
-    <div class="section-heading">
-      <span class="section-badge">خطط مرنة</span>
-      <h2 class="section-title">باقات استضافة تناسب كافة الأحجام</h2>
-      <p class="section-lead">بدون عمولات على المبيعات، مع ضمان أمان وتشغيل سحابي متواصل</p>
-    </div>
-
-    <div class="pricing-cards-grid">
-      <!-- Starter -->
-      <div class="price-card">
-        <div class="price-head">
-          <h3 class="plan-title">البداية (Starter)</h3>
-          <p class="plan-sub">للمشاريع والمتاجر الناشئة</p>
-          <div class="plan-cost">
-            <span class="cost-num">مجاناً</span>
-            <span class="cost-per">/ للتجربة الأولى</span>
-          </div>
-        </div>
-        <ul class="plan-specs">
-          <li><i class="bi bi-check-circle-fill text-success"></i> نطاق فرعي <code>store.mecart.app</code></li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> حتى 200 منتج</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> إدارة الطلبات ومناطق التوصيل</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> طلبات واتساب سريعة</li>
-        </ul>
-        <a routerLink="/admin/stores" class="btn btn-plan-btn">ابدأ مجاناً</a>
-      </div>
-
-      <!-- Pro (Featured) -->
-      <div class="price-card popular">
-        <div class="popular-ribbon">الأكثر اختياراً</div>
-        <div class="price-head">
-          <h3 class="plan-title">المحترف (Cloud Pro)</h3>
-          <p class="plan-sub">للسوبر ماركت والمطاعم والأنشطة النشطة</p>
-          <div class="plan-cost">
-            <span class="cost-num">$29</span>
-            <span class="cost-per">/ شهرياً</span>
-          </div>
-        </div>
-        <ul class="plan-specs">
-          <li><i class="bi bi-check-circle-fill text-success"></i> ربط دومين خاص (Custom Domain)</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> منتجات غير محدودة (1000+ منتج)</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> محرك استيراد وتصدير الحزم (Seed Packages)</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> ربط واتساب السحابي متعدد الحسابات</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> نسخ احتياطي سحابي يومي</li>
-        </ul>
-        <a routerLink="/admin/stores" class="btn btn-plan-btn btn-popular">أطلق متجرك الآن</a>
-      </div>
-
-      <!-- Enterprise -->
-      <div class="price-card">
-        <div class="price-head">
-          <h3 class="plan-title">المؤسسات (Enterprise)</h3>
-          <p class="plan-sub">للشركات وسلاسل الفروع الكبرى</p>
-          <div class="plan-cost">
-            <span class="cost-num">مخصص</span>
-            <span class="cost-per">/ استضافة خاصة</span>
-          </div>
-        </div>
-        <ul class="plan-specs">
-          <li><i class="bi bi-check-circle-fill text-success"></i> سيرفر مستقل VPS معزول بالكامل</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> قاعدة بيانات معزولة 100%</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> تطويرات وبرمجيات حصرية مخصصة</li>
-          <li><i class="bi bi-check-circle-fill text-success"></i> دعم فني مباشر من مهندسي RunX Tech</li>
-        </ul>
-        <a routerLink="/admin/stores" class="btn btn-plan-btn">تواصل مع فريق RunX Tech</a>
+      <div class="about-cta-box">
+        <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="btn btn-about-whatsapp">
+          <i class="bi bi-whatsapp"></i>
+          <span>طلب استضافة متجر الآن</span>
+        </a>
       </div>
     </div>
   </div>
@@ -439,18 +221,22 @@
 <footer class="mecart-footer">
   <div class="footer-container">
     <div class="footer-top-grid">
-      <!-- Brand & RunX Column -->
+      <!-- Brand Column -->
       <div class="footer-brand-col">
-        <a routerLink="/" class="footer-logo">
-          <img src="/assets/images/mecart-logo.svg" alt="MeCart.app" class="f-logo-img" />
-        </a>
+        <div class="mecart-brand-badge footer-badge">
+          <span class="brand-icon"><i class="bi bi-cart3"></i></span>
+          <div class="brand-names">
+            <span class="brand-main">MeCart<small>.app</small></span>
+            <span class="brand-desc">Cloud Hosting</span>
+          </div>
+        </div>
         <p class="f-bio">
-          منظومة الاستضافة السحابية المتقدمة لإنشاء وإدارة المتاجر الإلكترونية المتخصصة بكافة الأنشطة التجارية.
+          استضافة سحابية متطورة للمتاجر الإلكترونية المتخصصة بكافة الأنشطة التجارية.
         </p>
 
         <!-- Official RunX Tech Endorsement Card -->
         <div class="runx-official-card">
-          <img src="/assets/images/runx-logo.png" alt="RunX Tech" class="runx-card-img" />
+          <img [src]="runxLogo" alt="RunX Tech" class="runx-card-img" />
           <div class="runx-card-texts">
             <span class="runx-card-title">إحدى منصات <strong>RunX Tech</strong></span>
             <span class="runx-card-desc">للحلول البرمجية الذكية والبنى التحتية السحابية</span>
@@ -460,32 +246,21 @@
 
       <!-- Links Column 1 -->
       <div class="footer-links-col">
-        <h4 class="col-title">المنصة والاستضافة</h4>
+        <h4 class="col-title">أقسام الموقع</h4>
         <ul>
-          <li><a routerLink="/store">ديمو متجر السوبر ماركت</a></li>
-          <li><a routerLink="/admin">لوحة تحكم المشرفين</a></li>
-          <li><a routerLink="/admin/stores">إدارة وإنشاء المتاجر</a></li>
-          <li><a routerLink="/admin/packages">مركز استيراد وتصدير الحزم</a></li>
+          <li><a href="#services">خدماتنا</a></li>
+          <li><a routerLink="/projects">مشاريعنا السحابية</a></li>
+          <li><a href="#about-cloud">عن الاستضافة السحابية</a></li>
+          <li><a [href]="whatsappOrderUrl" target="_blank" rel="noopener">طلب خدمة جديدة</a></li>
         </ul>
       </div>
 
       <!-- Links Column 2 -->
       <div class="footer-links-col">
-        <h4 class="col-title">الأنشطة التجارية</h4>
-        <ul>
-          <li><a routerLink="/store">سوبر ماركت وبقالة (نشط لايف)</a></li>
-          <li><a href="#domains">مطاعم وكافيهات</a></li>
-          <li><a href="#domains">صيدليات ومستلزمات طبية</a></li>
-          <li><a href="#domains">قطع غيار ومعدات</a></li>
-        </ul>
-      </div>
-
-      <!-- Links Column 3 -->
-      <div class="footer-links-col">
-        <h4 class="col-title">الدعم والتواصل</h4>
+        <h4 class="col-title">التواصل والمبيعات</h4>
         <ul>
           <li><a href="https://runxtech.com" target="_blank" rel="noopener">موقع شركة RunX Tech</a></li>
-          <li><a routerLink="/admin/whatsapp">ربط واتساب التجاري</a></li>
+          <li><a [href]="whatsappOrderUrl" target="_blank" rel="noopener">واتساب: +201080225502</a></li>
           <li><a href="mailto:support@runxtech.com">support&#64;runxtech.com</a></li>
         </ul>
       </div>
@@ -493,12 +268,12 @@
 
     <div class="footer-bottom-row">
       <div class="copyright-text">
-        &copy; 2026 <strong>MeCart.app</strong> &bull; جميع الحقوق محفوظة &bull; تم التطوير والاستضافة بواسطة <strong>RunX Tech</strong>
+        &copy; 2026 <strong>MeCart.app</strong> &bull; جميع الحقوق محفوظة &bull; إحدى مشاريع <strong>RunX Tech</strong>
       </div>
       <div class="footer-links-mini">
-        <a routerLink="/store">معاينة المتجر</a> &bull;
-        <a routerLink="/admin">لوحة الإدارة</a> &bull;
-        <a routerLink="/admin/packages">Seed Engine</a>
+        <a routerLink="/">الرئيسية</a> &bull;
+        <a routerLink="/projects">مشاريعنا</a> &bull;
+        <a [href]="whatsappOrderUrl" target="_blank" rel="noopener">طلب خدمة</a>
       </div>
     </div>
   </div>

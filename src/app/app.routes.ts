@@ -11,7 +11,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/landing/mecart-landing/mecart-landing.component').then(m => m.MecartLandingComponent)
   },
 
-  // 2. Live Storefront Demo / Tenant Store (/store)
+  // 2. Dedicated Projects Showcase Page with Pagination (/projects)
+  {
+    path: 'projects',
+    loadComponent: () => import('./features/landing/mecart-projects/mecart-projects.component').then(m => m.MecartProjectsComponent)
+  },
+
+  // 3. Live Storefront Demo / Tenant Store (/store)
   {
     path: 'store',
     component: StorefrontLayoutComponent,
@@ -27,7 +33,7 @@ export const routes: Routes = [
     ]
   },
 
-  // 3. Customer Storefront Direct Routes (Menu, Checkout, Tracking, etc.)
+  // 4. Customer Storefront Direct Routes
   {
     path: '',
     component: StorefrontLayoutComponent,
@@ -77,7 +83,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
   },
 
-  // Admin Panel Layout (Protected by adminGuard)
+  // MeCart Cloud Platform Admin Panel (Protected by adminGuard)
   {
     path: 'admin',
     component: AdminLayoutComponent,
@@ -86,7 +92,15 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard'
+        redirectTo: 'stores'
+      },
+      {
+        path: 'stores',
+        loadComponent: () => import('./features/admin/admin-stores/admin-stores.component').then(m => m.AdminStoresComponent)
+      },
+      {
+        path: 'packages',
+        loadComponent: () => import('./features/admin/admin-packages/admin-packages.component').then(m => m.AdminPackagesComponent)
       },
       {
         path: 'dashboard',
@@ -111,14 +125,6 @@ export const routes: Routes = [
       {
         path: 'settings',
         loadComponent: () => import('./features/admin/admin-settings/admin-settings.component').then(m => m.AdminSettingsComponent)
-      },
-      {
-        path: 'stores',
-        loadComponent: () => import('./features/admin/admin-stores/admin-stores.component').then(m => m.AdminStoresComponent)
-      },
-      {
-        path: 'packages',
-        loadComponent: () => import('./features/admin/admin-packages/admin-packages.component').then(m => m.AdminPackagesComponent)
       },
       {
         path: 'reports',

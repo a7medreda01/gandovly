@@ -1,132 +1,98 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { ProjectsService, ProjectItem } from '../../../core/services/projects.service';
+import { RUNX_LOGO_BASE64 } from '../../../core/constants/runx-logo.base64';
 
-export interface BusinessDomainItem {
+export interface ServiceItem {
   id: string;
-  nameAr: string;
-  nameEn: string;
+  title: string;
   icon: string;
-  badge: string;
   description: string;
-  isLive: boolean;
-  demoRoute?: string;
-  productCount: string;
   features: string[];
 }
 
 @Component({
   selector: 'app-mecart-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './mecart-landing.component.html',
   styleUrls: ['./mecart-landing.component.scss']
 })
-export class MecartLandingComponent {
-  selectedDomainId = signal<string>('supermarket');
+export class MecartLandingComponent implements OnInit {
+  private readonly projectsService = inject(ProjectsService);
 
-  // Quick store launcher form
-  storeName = signal<string>('');
-  storeSubdomain = signal<string>('');
-  selectedIndustry = signal<string>('Supermarket');
+  readonly runxLogo = RUNX_LOGO_BASE64;
+  readonly whatsappOrderUrl = 'https://wa.me/201080225502?text=' + encodeURIComponent('مرحباً فريق RunX، أرغب في طلب خدمة استضافة متجر سحابي على منصة MeCart');
 
-  domains: BusinessDomainItem[] = [
+  latestProjects = signal<ProjectItem[]>([]);
+  isLoadingProjects = signal<boolean>(true);
+
+  services: ServiceItem[] = [
     {
-      id: 'supermarket',
-      nameAr: 'سوبر ماركت وبقالة',
-      nameEn: 'Supermarket & Grocery',
-      icon: 'bi-basket2-fill',
-      badge: 'ديمو حي متكامل (Live Now)',
-      description: 'منظومة غذائية متكاملة تدعم التسعير بالوزن (كجم/جرام) والقطعة، عروض وتخفيضات، وتصنيف الأقسام السريعة.',
-      isLive: true,
-      demoRoute: '/store',
-      productCount: '1,037+ منتج',
-      features: ['تسعير بالوزن والقطعة', 'توصيل أحياء فوري', 'تصنيفات عريضة وبحث لحظي']
+      id: 'hosting',
+      title: 'استضافة سحابية مدارة بالكامل',
+      icon: 'bi-cloud-check-fill',
+      description: 'خوادم سحابية فائقة السرعة مع شبكة CDN لتوزيع المحتوى وحماية متقدمة ومعدل استقرار 99.99%.',
+      features: ['سرعة تصفح أقل من ثانية', 'استقرار وجاهزية 99.99%', 'حماية SSL تلقائية']
     },
     {
-      id: 'restaurant',
-      nameAr: 'مطاعم ومأكولات',
-      nameEn: 'Restaurants & Cafes',
-      icon: 'bi-cup-hot-fill',
-      badge: 'قالب تفاعلي',
-      description: 'منيو إلكتروني مع إضافات الوجبات، اختيارات الأحجام، شاشة تحضير للمطبخ، وطلب سريع عبر واتساب.',
-      isLive: false,
-      productCount: 'جاهز للتخصيص',
-      features: ['تخصيص الوجبات والإضافات', 'شاشة عرض المطبخ KDS', 'حجز طاولات وطلب سفري']
+      id: 'domain',
+      title: 'نطاقات مخصصة ونطاقات فرعية',
+      icon: 'bi-globe2',
+      description: 'احصل على نطاق فرعي فوري yourstore.mecart.app أو اربط دومينك المستقل الخاص yourbrand.com بسهولة.',
+      features: ['ربط دومينك الخاص مجاناً', 'نطاق فرعي سحابي فوري', 'شهادة أمان مشفرة']
     },
     {
-      id: 'pharmacy',
-      nameAr: 'صيدلية وعناية',
-      nameEn: 'Pharmacy & Wellness',
-      icon: 'bi-heart-pulse-fill',
-      badge: 'قالب طبي',
-      description: 'إدارة المستلزمات الطبية، العناية الشخصية، البحث بالاسم العلمي، ورفع الروشتات الطبية إلكترونياً.',
-      isLive: false,
-      productCount: 'جاهز للتخصيص',
-      features: ['رفع الوصفات الطبية', 'تصنيف مستحضرات وأدوية', 'توصيل مبرد وسريع']
+      id: 'seed-engine',
+      title: 'محرك نقل البيانات (Seed Engine)',
+      icon: 'bi-file-earmark-zip-fill',
+      description: 'إمكانية تصدير ونسخ ونقل كامل بيانات المتجر والصور بضغطة زر واحدة دون أي تعقيد تقني.',
+      features: ['نسخ احتياطي فوري', 'تصدير كامل المنتجات والصور', 'نقل سلس بين السيرفرات']
     },
     {
-      id: 'autoparts',
-      nameAr: 'قطع غيار ومعدات',
-      nameEn: 'Auto & Spare Parts',
-      icon: 'bi-gear-wide-connected',
-      badge: 'قالب صناعي',
-      description: 'كتالوج قطع الغيار بالأرقام الأصلية (OEM)، توافق الموديلات والماركات، ومتابعة المخزون بدقة.',
-      isLive: false,
-      productCount: 'جاهز للتخصيص',
-      features: ['بحث برقم القطعة OEM', 'فلترة حسب ماركة السيارة', 'شحن طرود وأوزان ثقيلة']
+      id: 'whatsapp',
+      title: 'ربط واتساب التجاري السحابي',
+      icon: 'bi-whatsapp',
+      description: 'إرسال فواتير الطلبات، تحديثات الشحن، وتأكيد المبيعات تلقائياً للعملاء عبر واتساب من رقمك التجاري.',
+      features: ['إرسال فواتير الطلب آلياً', 'تتبع حالة الشحن', 'تأكيد مباشر مع العميل']
     },
     {
-      id: 'electronics',
-      nameAr: 'إلكترونيات وأجهزة',
-      nameEn: 'Electronics & Mobiles',
-      icon: 'bi-laptop-fill',
-      badge: 'قالب تكنولوجي',
-      description: 'عرض مواصفات الأجهزة الذكية، فترات الضمان، الألوان ومساحات التخزين، والمقارنة الفورية.',
-      isLive: false,
-      productCount: 'جاهز للتخصيص',
-      features: ['إدارة خيارات السعة واللون', 'بيانات الضمان والسيريال', 'بوابات دفع إلكتروني']
+      id: 'delivery',
+      title: 'حساب مناطق ورسوم التوصيل',
+      icon: 'bi-geo-alt-fill',
+      description: 'تسعير تلقائي للشحن حسب المنطقة أو المدينة، مع توجيه الطلبات للمناديب ومتابعة حالات التجهيز.',
+      features: ['تسعير حسب الأحياء والمدن', 'تخصيص أوقات التوصيل', 'توجيه لمندوب الشحن']
     },
     {
-      id: 'retail',
-      nameAr: 'أزياء وتجارة عامة',
-      nameEn: 'Fashion & General Retail',
-      icon: 'bi-bag-check-fill',
-      badge: 'قالب عام',
-      description: 'متجر ملابس وأحذية وإكسسوارات مع دليل المقاسات واختيارات الألوان وسرعة إتمام الطلب.',
-      isLive: false,
-      productCount: 'جاهز للتخصيص',
-      features: ['جدول مقاسات ذكي', 'ألوان وصور متعددة', 'إشعار واتساب تلقائي']
+      id: 'multi-industry',
+      title: 'تهيئة وتخصيص لكافة الأنشطة',
+      icon: 'bi-shop',
+      description: 'أنظمة معدة خصيصاً للسوبر ماركت، المطاعم، الصيدليات، قطع الغيار، الأجهزة، والأزياء والتجارة العامة.',
+      features: ['تسعير بالوزن أو بالقطعة', 'منيو مطاعم وشاشات مطبخ', 'فلاتر دقيقة للأجهزة وقطع الغيار']
     }
   ];
 
-  constructor(private router: Router) {}
-
-  selectDomain(id: string) {
-    this.selectedDomainId.set(id);
+  ngOnInit(): void {
+    this.loadLatestProjects();
   }
 
-  updateSubdomainFromName(name: string) {
-    this.storeName.set(name);
-    // Convert Arabic/English text to a clean slug
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[\s_]+/g, '-')
-      .replace(/[^\w-]/g, '');
-    this.storeSubdomain.set(slug || 'mystore');
-  }
-
-  launchStore() {
-    // Navigate to admin stores page with pre-filled state/query
-    this.router.navigate(['/admin/stores'], {
-      queryParams: {
-        name: this.storeName() || undefined,
-        domain: this.storeSubdomain() || undefined,
-        industry: this.selectedIndustry()
+  loadLatestProjects(): void {
+    this.isLoadingProjects.set(true);
+    // Fetch latest 10 projects for homepage
+    this.projectsService.getProjects(1, 10).subscribe({
+      next: (res) => {
+        this.latestProjects.set(res.items);
+        this.isLoadingProjects.set(false);
+      },
+      error: () => {
+        this.isLoadingProjects.set(false);
       }
     });
   }
-}
 
+  getProjectWhatsAppUrl(project: ProjectItem): string {
+    const text = `مرحباً فريق RunX، أود طلب خدمة استضافة متجر مماثل لـ (${project.name}) في مجال (${project.domainLabel})`;
+    return `https://wa.me/201080225502?text=${encodeURIComponent(text)}`;
+  }
+}
