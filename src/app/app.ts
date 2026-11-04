@@ -15,7 +15,7 @@ import { ApiService } from './core/services/api.service';
   styleUrls: ['./app.scss']
 })
 export class App implements OnInit, OnDestroy {
-  title = 'MeCart | مي كارت - متجر السوبرماركت والتسوق السريع';
+  title = 'MeCart | مي كارت — منصة التجارة والتسوق السحابي الذكي (mecart.app)';
   private modalObserver?: MutationObserver;
   private routerSub?: Subscription;
 

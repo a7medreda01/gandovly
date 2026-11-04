@@ -361,5 +361,26 @@ export class AdminService {
     return this.http.post<{ success: boolean; data: string; message: string }>(`${this.api.baseUrl}/admin/media/upload`, formData)
       .pipe(map((res: { success: boolean; data: string; message: string }) => res.data));
   }
+
+  // Mecart Store Package Engine (Seed & Export/Import)
+  getPackageStats(): Observable<any> {
+    return this.api.get<any>('admin/store-package/stats');
+  }
+
+  exportStorePackage(): Observable<Blob> {
+    return this.http.get(`${this.api.baseUrl}/admin/store-package/export`, {
+      responseType: 'blob'
+    });
+  }
+
+  importStorePackage(file: File, cleanFirst = false): Observable<any> {
+    const formData = new FormData();
+    formData.append('packageFile', file);
+    return this.http.post<any>(`${this.api.baseUrl}/admin/store-package/import?cleanFirst=${cleanFirst}`, formData);
+  }
+
+  reseedSampleData(): Observable<boolean> {
+    return this.api.post<boolean>('admin/settings/reset-and-reseed', {});
+  }
 }
 

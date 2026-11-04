@@ -1,7 +1,14 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "outputDirectory": "dist/TngProject/browser",
+  "version": 2,
   "rewrites": [
+    {
+      "source": "/api/v1/:match*",
+      "destination": "https://supermarket1.runasp.net/api/v1/:match*"
+    },
+    {
+      "source": "/uploads/:match*",
+      "destination": "https://supermarket1.runasp.net/uploads/:match*"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

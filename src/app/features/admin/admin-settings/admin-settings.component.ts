@@ -22,11 +22,18 @@ export class AdminSettingsComponent implements OnInit {
   readonly settingsService = inject(SettingsService);
   private readonly toast = inject(NotificationService);
 
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info'>('discounts');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages'>('discounts');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
   isUploading = signal<boolean>(false);
+
+  // Mecart Store Package & Seeding State
+  packageStats = signal<any>(null);
+  isExporting = signal<boolean>(false);
+  isImporting = signal<boolean>(false);
+  cleanBeforeImport = signal<boolean>(false);
+  isReseeding = signal<boolean>(false);
 
   brandModes = [
     { id: 'both', label: 'لوجو + الاسم والشعار', icon: 'bi-window-dock', desc: 'يعرض اللوجو واسم المتجر والـ Tagline معاً' },
@@ -137,6 +144,7 @@ export class AdminSettingsComponent implements OnInit {
 
   ngOnInit() {
     this.loadSettings();
+    this.loadPackageStats();
   }
 
   loadSettings() {
@@ -288,5 +296,112 @@ export class AdminSettingsComponent implements OnInit {
       this.saveSettings('branding', true);
       this.toast.info('تم استعادة البانر الافتراضي وحفظ التعديل في قاعدة البيانات.');
     }
+  }
+
+  // Mecart Package Engine Methods
+  loadPackageStats(): void {
+    this.adminService.getPackageStats().subscribe({
+      next: res => {
+        if (res && res.data) {
+          this.packageStats.set(res.data);
+        }
+      },
+      error: () => {
+        // Silently handle if not ready
+      }
+    });
+  }
+
+  onExportPackage(): void {
+    if (this.isExporting()) return;
+    this.isExporting.set(true);
+    this.toast.info('جاري تجهيز وتحزيم ملفات المتجر والوسائط... يرجى الانتظار');
+
+    this.adminService.exportStorePackage().subscribe({
+      next: (blob: Blob) => {
+        this.isExporting.set(false);
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `mecart_store_package_${new Date().toISOString().slice(0, 10)}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        this.toast.success('تم تنزيل حزمة المتجر بنجاح! احتفظ بها كنسخة احتياطية أو قالب للزرع.');
+      },
+      error: err => {
+        this.isExporting.set(false);
+        this.toast.error('حدث خطأ أثناء تصدير حزمة المتجر.');
+        console.error(err);
+      }
+    });
+  }
+
+  onImportPackage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      this.toast.error('يرجى اختيار ملف مضغوط بصيغة ZIP (.zip).');
+      return;
+    }
+
+    const clean = this.cleanBeforeImport();
+    const confirmMsg = clean
+      ? 'تحذير: لقد اخترت استبدال البيانات بالكامل! سيتم حذف الأصناف الحالية وتطبيق الحزمة الجديدة. هل تريد المتابعة؟'
+      : 'سيتم استيراد الحزمة ودمج الأقسام والمنتجات الجديدة. هل تريد المتابعة؟';
+
+    if (!confirm(confirmMsg)) {
+      input.value = '';
+      return;
+    }
+
+    this.isImporting.set(true);
+    this.toast.info('جاري رفع واستيراد حزمة المتجر وتوزيع الصور في قاعدة البيانات...');
+
+    this.adminService.importStorePackage(file, clean).subscribe({
+      next: res => {
+        this.isImporting.set(false);
+        input.value = '';
+        if (res && res.success) {
+          this.toast.success(res.message || 'تم استيراد حزمة المتجر بنجاح!');
+          this.loadSettings();
+          this.loadPackageStats();
+        } else {
+          this.toast.error(res?.message || 'فشل استيراد الحزمة.');
+        }
+      },
+      error: err => {
+        this.isImporting.set(false);
+        input.value = '';
+        this.toast.error('حدث خطأ أثناء استيراد الحزمة: ' + (err?.error?.message || err.message));
+        console.error(err);
+      }
+    });
+  }
+
+  onResetAndReseed(): void {
+    if (!confirm('هل أنت متأكد من رغبتك في إعادة تهيئة بيانات المتجر إلى القالب الافتراضي النظيف؟')) {
+      return;
+    }
+
+    this.isReseeding.set(true);
+    this.toast.info('جاري إعادة تهيئة وحقن البيانات النظيفة للمتجر...');
+
+    this.adminService.reseedSampleData().subscribe({
+      next: () => {
+        this.isReseeding.set(false);
+        this.toast.success('تمت إعادة تهيئة البيانات الافتراضية بنجاح!');
+        this.loadSettings();
+        this.loadPackageStats();
+      },
+      error: err => {
+        this.isReseeding.set(false);
+        this.toast.error('فشلت عملية إعادة التهيئة.');
+        console.error(err);
+      }
+    });
   }
 }
