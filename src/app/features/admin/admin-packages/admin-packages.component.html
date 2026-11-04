@@ -1,0 +1,253 @@
+<div class="admin-packages-page">
+  <!-- Top Banner Header -->
+  <div class="page-title-row d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="page-heading mb-0">حزم البيانات والنسخ الاحتياطي (Seed Engine) 📦🚀</h1>
+        <span class="badge" style="background: linear-gradient(135deg, #6366F1, #4F46E5); color: #fff; font-size: 0.8rem; padding: 6px 12px; border-radius: 8px;">
+          Mecart Core Engine
+        </span>
+      </div>
+      <p class="page-sub text-muted mt-1 mb-0">تصدير بيانات المتجر وصوره بالكامل كحزمة ZIP، أو زراعة وتثبيت قوالب جديدة في ثوانٍ</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <button class="btn btn-outline-primary fw-bold px-3 py-2" style="border-radius: 10px;" (click)="toggleGuide()">
+        <i class="bi bi-book-half me-1"></i> دليل إرشادات الزراعة (SEED_GUIDE)
+      </button>
+      <a routerLink="/admin/stores" class="btn btn-outline-success fw-bold px-3 py-2" style="border-radius: 10px;">
+        <i class="bi bi-shop-window me-1"></i> المتاجر والعملاء
+      </a>
+    </div>
+  </div>
+
+  <!-- Live Statistics Cards -->
+  @if (packageStats()) {
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">إجمالي المنتجات</div>
+              <div class="fw-bold fs-3 mt-1" style="color: #0F172A;">{{ packageStats().productsCount }}</div>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              <i class="bi bi-bag-check-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">أقسام المتجر</div>
+              <div class="fw-bold fs-3 mt-1" style="color: #2563EB;">{{ packageStats().categoriesCount }}</div>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              <i class="bi bi-grid-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">مناطق التوصيل والفروع</div>
+              <div class="fw-bold fs-3 mt-1" style="color: #F59E0B;">{{ packageStats().zonesCount }} مناطق ({{ packageStats().branchesCount }} فروع)</div>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #FFFBEB; color: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              <i class="bi bi-geo-alt-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+          <div class="d-flex align-items-center justify-content-between">
+            <div>
+              <div class="text-muted small">الوسائط المرفوعة</div>
+              <div class="fw-bold fs-3 mt-1" style="color: #DB2777;">{{ packageStats().uploadsFilesCount }} ملف ({{ packageStats().uploadsSizeMb }} MB)</div>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #FDF2F8; color: #DB2777; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              <i class="bi bi-images"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dual Action Workspace: Export & Import -->
+  <div class="row g-4 mb-4">
+    <!-- Action 1: Export Store ZIP -->
+    <div class="col-12 col-lg-6">
+      <div class="card p-4 h-100 border-0 shadow-sm" style="border-radius: 16px; background: #fff;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+            <i class="bi bi-cloud-arrow-down-fill"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0" style="color: #0F172A;">تصدير حزمة المتجر (Export Store ZIP)</h4>
+            <small class="text-muted">تفريغ كافة الجداول والوسائط في أرشيف ذاتي التشغيل</small>
+          </div>
+        </div>
+
+        <p class="text-muted small mb-4">
+          يقوم المحرك بقراءة إعدادات المتجر الحالية، الفروع، مناطق التوصيل، الأقسام، وكافة المنتجات وصورها، وتغليفها داخل ملف <code>.zip</code> منظم يحتوي على <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>.
+        </p>
+
+        <ul class="list-unstyled small text-muted mb-4">
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> تفريغ كامل للمنتجات والأقسام والأسعار بصيغة JSON نظيفة</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> تجميع كافة الصور ومجلد <code>uploads/</code> بجودتها الأصلية</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> جاهز للاستخدام كنسخة احتياطية (Backup) أو كقالب لعميل آخر</li>
+        </ul>
+
+        <div class="mt-auto">
+          <button
+            class="btn w-100 py-3 fw-bold shadow-sm"
+            style="background: #10B981; color: #fff; border-radius: 12px; font-size: 1.05rem;"
+            (click)="onExportPackage()"
+            [disabled]="isExporting()"
+          >
+            @if (isExporting()) {
+              <i class="bi bi-hourglass-split me-2 animate-spin"></i> جاري تحزيم ملفات المتجر والوسائط...
+            } @else {
+              <i class="bi bi-download me-2"></i> تنزيل حزمة المتجر الكاملة (.ZIP)
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action 2: Import & Seed Package -->
+    <div class="col-12 col-lg-6">
+      <div class="card p-4 h-100 border-0 shadow-sm" style="border-radius: 16px; background: #fff;">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.6rem;">
+            <i class="bi bi-cloud-arrow-up-fill"></i>
+          </div>
+          <div>
+            <h4 class="fw-bold mb-0" style="color: #0F172A;">استيراد وزرع حزمة متجر (Import & Seed)</h4>
+            <small class="text-muted">رفع وتثبيت بيانات وصور قالب متجر جديد</small>
+          </div>
+        </div>
+
+        <p class="text-muted small mb-3">
+          ارفع ملف حزمة المتجر بصيغة <code>.zip</code> لزراعة الأصناف والأقسام وتوزيع الصور آلياً على الخادم داخل معالجة بنكية سريعة وآمنة.
+        </p>
+
+        <!-- Clean Checkbox -->
+        <div class="form-check p-3 mb-3 border rounded" style="background: #FFFBEB; border-color: #FDE68A !important;">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="chkCleanFirstPage"
+            [checked]="cleanBeforeImport()"
+            (change)="cleanBeforeImport.set(!cleanBeforeImport())"
+          />
+          <label class="form-check-label fw-bold text-dark ms-2" for="chkCleanFirstPage">
+            <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+            استبدال البيانات بالكامل (Clean & Replace)
+          </label>
+          <div class="text-muted small mt-1">حذف الأقسام والمنتجات السابقة واستبدالها بحزمة المتجر الجديدة بالكامل.</div>
+        </div>
+
+        <!-- Upload File Button -->
+        <div class="mt-auto">
+          <label
+            class="btn w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center cursor-pointer"
+            style="background: #2563EB; color: #fff; border-radius: 12px; font-size: 1.05rem;"
+            [class.disabled]="isImporting()"
+          >
+            @if (isImporting()) {
+              <i class="bi bi-hourglass-split me-2 animate-spin"></i> جاري استيراد الحزمة وتطبيقها...
+            } @else {
+              <i class="bi bi-file-earmark-zip me-2"></i> اختر ملف الحزمة (.ZIP) وابدأ الزرع
+            }
+            <input
+              type="file"
+              accept=".zip"
+              class="d-none"
+              (change)="onImportPackage($event)"
+              [disabled]="isImporting()"
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Reseed Default Bar -->
+  <div class="card p-4 border-0 shadow-sm" style="border-radius: 16px; background: #F8FAFC; border: 1px dashed #CBD5E1 !important;">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h5 class="fw-bold mb-1 text-danger"><i class="bi bi-arrow-counterclockwise me-1"></i> إعادة التهيئة إلى قالب التجزئة النظيف الافتراضي</h5>
+        <p class="text-muted small mb-0">يعيد تهيئة قاعدة البيانات وضخ بيانات قالب السوبرماركت الافتراضي في حالة الرغبة في البدء من الصفر.</p>
+      </div>
+      <div>
+        <button
+          type="button"
+          class="btn btn-outline-danger fw-bold px-4 py-2"
+          style="border-radius: 10px;"
+          (click)="onResetAndReseed()"
+          [disabled]="isReseeding()"
+        >
+          @if (isReseeding()) {
+            <i class="bi bi-hourglass-split me-1"></i> جاري التهيئة...
+          } @else {
+            <i class="bi bi-radioactive me-1"></i> إعادة التهيئة السريعة
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: SEED_GUIDE Viewer -->
+@if (showGuideModal()) {
+  <div class="modal-backdrop-custom flex-center" (click)="toggleGuide()">
+    <div class="modal-box-custom p-4 shadow-lg animate-fade-in" style="max-width: 850px;" (click)="$event.stopPropagation()">
+      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+        <h4 class="fw-bold mb-0 text-primary"><i class="bi bi-book-half me-2"></i> دليل إرشادات زرع وتجهيز الحزم (SEED_GUIDE.md)</h4>
+        <button class="btn-close" (click)="toggleGuide()"></button>
+      </div>
+
+      <div class="guide-content p-3 bg-light rounded" style="max-height: 60vh; overflow-y: auto; font-size: 0.95rem; line-height: 1.8;">
+        <h5 class="fw-bold text-dark">1. الهيكل المعتمد لحزمة المتجر (Package Structure)</h5>
+        <pre class="bg-dark text-light p-3 rounded font-monospace small" dir="ltr">my_store_package.zip
+├── manifest.json       # معلومات القالب، رقم الإصدار، نوع النشاط
+├── settings.json       # إعدادات المتجر والهوية والحسابات
+├── categories.json     # قائمة الأقسام والتصنيفات
+├── products.json       # قائمة المنتجات والأسعار والمواصفات
+├── delivery_zones.json # مناطق ورسوم التوصيل
+└── uploads/            # مجلد الصور المنظم (branding, categories, products)</pre>
+
+        <h5 class="fw-bold text-dark mt-4">2. أنواع الأنشطة المدعومة (Business Domains)</h5>
+        <ul>
+          <li><strong>Supermarket:</strong> سوبر ماركت، بقالة، تجزئة طازجة ومجمدة (دعم البيع بالقطعة أو الكيلو).</li>
+          <li><strong>Restaurant:</strong> مطاعم، كافيهات، وجبات سريعة، صوصات وإضافات.</li>
+          <li><strong>Pharmacy:</strong> صيدليات، مستحضرات تجميل، أدوية ومستلزمات طبية.</li>
+          <li><strong>AutoParts:</strong> قطع غيار سيارات، موديلات، ورقم OEM.</li>
+          <li><strong>Electronics:</strong> أجهزة منزلية وإلكترونيات وهواتف وضمان.</li>
+          <li><strong>GeneralRetail:</strong> محلات ملابس وأزياء ومقاسات وألوان.</li>
+        </ul>
+
+        <h5 class="fw-bold text-dark mt-4">3. التثبيت المستقل (Standalone Installation)</h5>
+        <p class="text-muted">
+          إذا رغبت في استخراج هذا القالب وتركيبه كـ <strong>موقع مستقل بالكامل لعميل خاص</strong> على سيرفره المنفصل، يتم تصدير الحزمة وضبط المتغير في <code>appsettings.json</code>:
+          <code>"DeploymentMode": "StandaloneInstance"</code>.
+        </p>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <button class="btn btn-primary px-4" (click)="toggleGuide()">حسناً، فهمت</button>
+      </div>
+    </div>
+  </div>
+}
+

@@ -1,0 +1,373 @@
+<div class="admin-stores-page">
+  <!-- Top Banner Header -->
+  <div class="page-title-row d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2">
+        <h1 class="page-heading mb-0">المتاجر السحابية والعملاء 🏪☁️</h1>
+        <span class="badge" style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; font-size: 0.8rem; padding: 6px 12px; border-radius: 8px;">
+          Mecart Engine (mecart.app)
+        </span>
+      </div>
+      <p class="page-sub text-muted mt-1 mb-0">تأسيس المتاجر الجديدة، ربط الدومينات المخصصة، وإدارة اشتراكات العملاء وقوالب الـ Seed</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+      <a routerLink="/admin/packages" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 10px;">
+        <i class="bi bi-box-seam me-1"></i> حزم البيانات والبذور
+      </a>
+      <button class="btn btn-success fw-bold px-4 py-2 shadow-sm" style="border-radius: 10px; background: #10B981; border: none;" (click)="openCreateModal()">
+        <i class="bi bi-plus-circle-fill me-1"></i> إنشاء متجر جديد لعميل
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Statistics Metrics -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small">إجمالي المتاجر السحابية</div>
+            <div class="fw-bold fs-3 mt-1" style="color: #0F172A;">{{ totalStores() }}</div>
+          </div>
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="bi bi-shop-window"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small">المتاجر النشطة الآن</div>
+            <div class="fw-bold fs-3 mt-1" style="color: #10B981;">{{ activeStores() }}</div>
+          </div>
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small">دومينات مخصصة (Custom)</div>
+            <div class="fw-bold fs-3 mt-1" style="color: #6366F1;">{{ customDomainsCount() }}</div>
+          </div>
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #EEF2FF; color: #6366F1; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="bi bi-globe2"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-lg-3">
+      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-muted small">المنتجات المفعلة بالمنظومة</div>
+            <div class="fw-bold fs-3 mt-1" style="color: #F59E0B;">{{ totalProductsAcrossStores() }}</div>
+          </div>
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: #FFFBEB; color: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i class="bi bi-box-seam"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filtering Bar -->
+  <div class="card p-3 border-0 shadow-sm mb-4" style="border-radius: 14px; background: #fff;">
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input
+            type="text"
+            class="form-control border-start-0"
+            placeholder="بحث باسم المتجر، النطاق الفرعي، أو هاتف العميل..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4">
+        <select class="form-select" [ngModel]="selectedDomainFilter()" (ngModelChange)="selectedDomainFilter.set($event)">
+          <option value="all">كافة الأنشطة التجارية (All Domains)</option>
+          <option value="Supermarket">سوبر ماركت وتجزئة شاملة</option>
+          <option value="Restaurant">مطاعم وكافيهات ومأكولات</option>
+          <option value="Pharmacy">صيدليات ومستحضرات تجميل</option>
+          <option value="AutoParts">قطع غيار سيارات ومستلزمات</option>
+          <option value="Electronics">أجهزة وإلكترونيات وهواتف</option>
+          <option value="GeneralRetail">محلات أزياء ومتاجر عامة</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <select class="form-select" [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event)">
+          <option value="all">كافة الحالات (الكل)</option>
+          <option value="Active">نشط ومفعل (Active)</option>
+          <option value="Suspended">موقوف مؤقتاً (Suspended)</option>
+          <option value="Pending">قيد التجهيز (Pending)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stores Table Grid -->
+  <div class="card border-0 shadow-sm" style="border-radius: 16px; background: #fff; overflow: hidden;">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" style="direction: rtl;">
+        <thead class="bg-light text-muted small border-bottom">
+          <tr>
+            <th class="py-3 px-4">المتجر والنشاط</th>
+            <th class="py-3">الروابط والنطاقات</th>
+            <th class="py-3">الباقة والحالة</th>
+            <th class="py-3">المنتجات</th>
+            <th class="py-3">بيانات المالك</th>
+            <th class="py-3 px-4 text-center">العمليات والتحكم</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (store of filteredStores(); track store.id) {
+            <tr>
+              <!-- Store Name & Business Domain -->
+              <td class="py-3 px-4">
+                <div class="d-flex align-items-center gap-3">
+                  <div style="width: 44px; height: 44px; border-radius: 10px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+                    @if (store.businessDomain === 'Supermarket') { <i class="bi bi-basket2-fill text-success"></i> }
+                    @else if (store.businessDomain === 'Restaurant') { <i class="bi bi-egg-fried text-warning"></i> }
+                    @else if (store.businessDomain === 'Pharmacy') { <i class="bi bi-capsule text-primary"></i> }
+                    @else if (store.businessDomain === 'AutoParts') { <i class="bi bi-gear-wide-connected text-purple"></i> }
+                    @else if (store.businessDomain === 'Electronics') { <i class="bi bi-laptop text-danger"></i> }
+                    @else { <i class="bi bi-shop text-indigo"></i> }
+                  </div>
+                  <div>
+                    <div class="fw-bold" style="color: #0F172A;">{{ store.name }}</div>
+                    <span class="badge {{ getDomainBadgeClass(store.businessDomain) }} mt-1">
+                      {{ getDomainLabel(store.businessDomain) }}
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Subdomain & Custom Domain -->
+              <td class="py-3">
+                <div class="d-flex flex-column gap-1">
+                  <a href="https://{{ store.subdomain }}.mecart.app" target="_blank" class="fw-bold text-decoration-none" style="color: #2563EB;">
+                    <i class="bi bi-link-45deg"></i> {{ store.subdomain }}.mecart.app
+                  </a>
+                  @if (store.customDomain) {
+                    <span class="small text-muted">
+                      <i class="bi bi-globe me-1 text-success"></i> {{ store.customDomain }}
+                    </span>
+                  }
+                </div>
+              </td>
+
+              <!-- Plan & Status -->
+              <td class="py-3">
+                <div class="d-flex flex-column gap-1">
+                  <span class="badge bg-light text-dark border align-self-start">{{ store.plan }} Plan</span>
+                  @if (store.status === 'Active') {
+                    <span class="badge bg-success align-self-start"><i class="bi bi-check-circle me-1"></i> نشط</span>
+                  } @else {
+                    <span class="badge bg-danger align-self-start"><i class="bi bi-pause-circle me-1"></i> موقوف</span>
+                  }
+                </div>
+              </td>
+
+              <!-- Products Count -->
+              <td class="py-3">
+                <span class="fw-bold text-dark">{{ store.productsCount }}</span>
+                <span class="text-muted small ms-1">صنف</span>
+              </td>
+
+              <!-- Owner Info -->
+              <td class="py-3">
+                <div class="small">
+                  <div class="text-dark font-monospace">{{ store.ownerPhone }}</div>
+                  <div class="text-muted">{{ store.ownerEmail }}</div>
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="py-3 px-4 text-center">
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                  <!-- Toggle Status -->
+                  <button
+                    class="btn btn-sm"
+                    [class.btn-outline-warning]="store.status === 'Active'"
+                    [class.btn-outline-success]="store.status !== 'Active'"
+                    (click)="toggleStoreStatus(store)"
+                    [title]="store.status === 'Active' ? 'إيقاف المتجر مؤقتاً' : 'تنشيط المتجر'"
+                  >
+                    <i class="bi" [class.bi-pause-fill]="store.status === 'Active'" [class.bi-play-fill]="store.status !== 'Active'"></i>
+                  </button>
+
+                  <!-- Export ZIP -->
+                  <button class="btn btn-sm btn-outline-primary" (click)="exportStoreZip(store)" title="تنزيل حزمة المتجر ZIP">
+                    <i class="bi bi-download"></i>
+                  </button>
+
+                  <!-- Open Storefront -->
+                  <a routerLink="/" class="btn btn-sm btn-outline-secondary" title="معاينة المتجر">
+                    <i class="bi bi-box-arrow-up-left"></i>
+                  </a>
+
+                  <!-- Delete -->
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteStore(store)" title="حذف المتجر">
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-5 text-muted">
+                <i class="bi bi-shop fs-1 d-block mb-2 opacity-50"></i>
+                لا توجد متاجر تطابق خيارات البحث الحالية.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Create New Store -->
+@if (isModalOpen()) {
+  <div class="modal-backdrop-custom flex-center" (click)="closeCreateModal()">
+    <div class="modal-box-custom p-4 shadow-lg animate-fade-in" (click)="$event.stopPropagation()">
+      <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div class="d-flex align-items-center gap-2">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+            <i class="bi bi-plus-lg"></i>
+          </div>
+          <h4 class="fw-bold mb-0">تأسيس متجر سحابي جديد (New Store)</h4>
+        </div>
+        <button class="btn-close" (click)="closeCreateModal()" aria-label="إغلاق"></button>
+      </div>
+
+      <form (ngSubmit)="onSubmitNewStore()">
+        <div class="row g-3">
+          <!-- Store Name -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">اسم المتجر / العلامة التجارية *</label>
+            <input
+              type="text"
+              class="form-control py-2"
+              placeholder="مثال: سوبر ماركت النخبة"
+              [(ngModel)]="newStore.name"
+              name="storeName"
+              (blur)="autoSlug()"
+              required
+            />
+          </div>
+
+          <!-- Subdomain -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">النطاق الفرعي (Subdomain) *</label>
+            <div class="input-group" dir="ltr">
+              <input
+                type="text"
+                class="form-control py-2"
+                placeholder="elnokhba"
+                [(ngModel)]="newStore.subdomain"
+                name="subdomain"
+                required
+              />
+              <span class="input-group-text bg-light fw-bold text-muted">.mecart.app</span>
+            </div>
+            <small class="text-muted d-block mt-1">سيعمل فوراً دون أي إعداد يدوي بفضل الـ Wildcard DNS.</small>
+          </div>
+
+          <!-- Business Domain -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">النشاط التجاري (Business Domain) *</label>
+            <select class="form-select py-2" [(ngModel)]="newStore.businessDomain" name="businessDomain">
+              @for (domain of businessDomainList; track domain.id) {
+                <option [value]="domain.id">{{ domain.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Seed Template -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">حزمة البذور المبدئية (Initial Seed) *</label>
+            <select class="form-select py-2" [(ngModel)]="newStore.seedTemplate" name="seedTemplate">
+              <option value="supermarket-carrefour">قالب السوبر ماركت الشامل وكارفور (1037 صنف + صور)</option>
+              <option value="restaurant-pack">قالب المطاعم والمأكولات البحرية (وجبات وصوصات)</option>
+              <option value="blank">متجر فارغ نظيف (إدخال يدوي لاحقاً)</option>
+            </select>
+          </div>
+
+          <!-- Custom Domain (Optional) -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">الدومين المخصص للعميل (اختياري)</label>
+            <input
+              type="text"
+              class="form-control py-2"
+              placeholder="مثال: elnokhba-market.com"
+              [(ngModel)]="newStore.customDomain"
+              name="customDomain"
+            />
+            <small class="text-muted">العميل يوجه CNAME فقط إلى <code>domains.mecart.app</code>.</small>
+          </div>
+
+          <!-- Subscription Plan -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">باقة الاشتراك *</label>
+            <select class="form-select py-2" [(ngModel)]="newStore.plan" name="plan">
+              @for (p of plansList; track p.id) {
+                <option [value]="p.id">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Owner Phone -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">رقم واتساب العميل (مدير المتجر) *</label>
+            <input
+              type="text"
+              class="form-control py-2 font-monospace"
+              placeholder="+201148472670"
+              [(ngModel)]="newStore.ownerPhone"
+              name="ownerPhone"
+            />
+          </div>
+
+          <!-- Owner Email -->
+          <div class="col-12 col-md-6">
+            <label class="form-label fw-bold small">البريد الإلكتروني للعميل *</label>
+            <input
+              type="email"
+              class="form-control py-2 font-monospace"
+              placeholder="client@domain.com"
+              [(ngModel)]="newStore.ownerEmail"
+              name="ownerEmail"
+            />
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+          <button type="button" class="btn btn-light px-4 py-2" (click)="closeCreateModal()" [disabled]="isCreating()">إلغاء</button>
+          <button type="submit" class="btn btn-success fw-bold px-4 py-2" style="background: #10B981; border: none;" [disabled]="isCreating()">
+            @if (isCreating()) {
+              <i class="bi bi-hourglass-split me-1 animate-spin"></i> جاري التأسيس والزرع...
+            } @else {
+              <i class="bi bi-check-lg me-1"></i> تأسيس المتجر وتفعيله فوراً
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
