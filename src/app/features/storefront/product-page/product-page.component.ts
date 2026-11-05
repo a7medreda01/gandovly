@@ -12,12 +12,13 @@ import { WishlistService } from '../../../core/services/wishlist.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
+import { StoreDialogDirective } from '../../../shared/directives/store-dialog.directive';
 import { ProductDetailModalComponent } from '../../../shared/components/product-detail-modal/product-detail-modal.component';
 
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent],
+  imports: [CommonModule, FormsModule, RouterModule, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent, StoreDialogDirective],
   templateUrl: './product-page.component.html',
   styleUrl: './product-page.component.scss'
 })
@@ -43,6 +44,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
 
   // Gallery
   activeImageIndex = 0;
+  showImageViewer = signal(false);
 
   // Weighed items
   orderMode: 'pieces' | 'weight' = 'pieces';
@@ -129,9 +131,10 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onTouchEnd() {
+  onTouchEnd(event?: TouchEvent) {
     const deltaX = this.touchCurrentX - this.touchStartX;
     if (Math.abs(deltaX) > 35 && this.galleryImages.length > 1) {
+      if (event?.cancelable) event.preventDefault();
       if (deltaX < -35) {
         this.nextImage();
       } else {
@@ -232,6 +235,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     this.productRequest?.unsubscribe(); this.relatedRequest?.unsubscribe();
     this.product.set(null); this.relatedProducts.set([]);
     this.isLoading.set(true);
+    this.showImageViewer.set(false);
     this.activeImageIndex = 0;
     this.piecesCount = 1;
     this.productRequest = this.catalogService.getProductById(id).subscribe({

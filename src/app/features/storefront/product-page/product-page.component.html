@@ -122,13 +122,15 @@
             class="hero-image-wrap"
             (touchstart)="onTouchStart($event)"
             (touchmove)="onTouchMove($event)"
-            (touchend)="onTouchEnd()"
+            (touchend)="onTouchEnd($event)"
           >
+            <button type="button" class="image-open-btn" aria-label="تكبير الصورة" (click)="showImageViewer.set(true)">
             <img
               [src]="currentImageUrl | imageUrl:'product':(product()!.updatedAt || product()!.id)"
               [alt]="product()!.nameAr"
               class="hero-img"
             />
+            </button>
 
             <!-- Badges -->
             <div class="badges-overlay">
@@ -402,3 +404,19 @@
   }
 </div>
 
+
+@if (showImageViewer() && product()) {
+  <div class="image-viewer-backdrop" (click)="showImageViewer.set(false)">
+    <section class="image-viewer" appStoreDialog aria-label="صور المنتج" (dialogDismiss)="showImageViewer.set(false)" (click)="$event.stopPropagation()" (keydown.arrowleft)="nextImage(); $event.preventDefault()" (keydown.arrowright)="prevImage(); $event.preventDefault()">
+      <header class="image-viewer-header"><span>{{ languageService.getLocalizedName(product()!) }}</span><button type="button" aria-label="إغلاق الصور" (click)="showImageViewer.set(false)"><i class="bi bi-x-lg" aria-hidden="true"></i></button></header>
+      <div class="image-viewer-stage">
+        <img [src]="currentImageUrl | imageUrl:'product':(product()!.updatedAt || product()!.id)" [alt]="languageService.getLocalizedName(product()!)" />
+        @if (galleryImages.length > 1) {
+          <button type="button" class="viewer-prev" aria-label="الصورة السابقة" (click)="prevImage()"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+          <button type="button" class="viewer-next" aria-label="الصورة التالية" (click)="nextImage()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+        }
+      </div>
+      <p class="image-viewer-count" aria-live="polite">{{ activeImageIndex + 1 }} / {{ galleryImages.length }}</p>
+    </section>
+  </div>
+}
