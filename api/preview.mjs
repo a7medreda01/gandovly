@@ -11,6 +11,15 @@ export async function preview(request, fetcher = fetch) {
   if (!/^[a-z0-9.-]+(?::\d+)?$/.test(host)) return {status:400,html:'Invalid host'};
   const origin = 'https://' + host;
   const query = new URL(request.url, origin).searchParams;
+  // The platform apex has its own identity; never fall back to tenant 1.
+  if (['mecart.app','www.mecart.app'].includes(host) && !query.get('tenant')) {
+    const title = 'MeCart — إنشاء وإدارة المتاجر الإلكترونية';
+    const description = 'أنشئ متجرك الإلكتروني بهويتك الخاصة، وأدر المنتجات والطلبات والعملاء من مكان واحد.';
+    const url = 'https://mecart.app/';
+    const image = 'https://mecart.app/mecart-share.png';
+    const tags = {'og:type':'website','og:title':title,'og:site_name':'MeCart','og:description':description,'og:url':url,'og:locale':'ar_EG','og:image':image,'og:image:width':'1200','og:image:height':'630','og:image:alt':'MeCart — منصة المتاجر الإلكترونية'};
+    return {status:200,html:'<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>'+escape(title)+'</title><meta name="description" content="'+escape(description)+'"><link rel="canonical" href="'+url+'">'+Object.entries(tags).map(([k,v])=>'<meta property="'+k+'" content="'+escape(v)+'">').join('')+'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+escape(title)+'"><meta name="twitter:description" content="'+escape(description)+'"><meta name="twitter:image" content="'+image+'"></head><body><h1>'+escape(title)+'</h1><p>'+escape(description)+'</p></body></html>'};
+  }
   const pathId = query.get('id');
   const productId = pathId || query.get('product');
   if (productId && !/^[1-9]\d*$/.test(productId)) return {status:404,html:'Product not found'};
