@@ -67,12 +67,13 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/app-shell.html"
     }
   ],
   "functions": {
     "api/preview.mjs": {
       "maxDuration": 30
     }
-  }
+  },
+  "buildCommand": "npm run build"
 }
