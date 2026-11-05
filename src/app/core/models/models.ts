@@ -90,6 +90,7 @@ export interface StorefrontSettings {
 
   // Extended Colors
   navbarBgColor?: string;
+  heroTextColor?: string;
   navbarTextColor?: string;
   footerBgColor?: string;
   footerTextColor?: string;

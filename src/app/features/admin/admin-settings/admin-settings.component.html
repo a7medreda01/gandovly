@@ -253,6 +253,7 @@
               </div>
             </div>
 
+            <div class="form-group"><label for="heroTextColor">لون نص البانر الرئيسي (العنوان والوصف)</label><input id="heroTextColor" type="color" [ngModel]="settings()!.heroTextColor || '#FFFFFF'" (ngModelChange)="settings()!.heroTextColor=$event" /><p class="text-muted">اختر لونًا واضحًا فوق صورة البانر، ثم احفظ الإعدادات.</p></div>
             <!-- Desktop & Mobile Hero Banners -->
             <div class="col-12 col-lg-7">
               <div class="p-3 border rounded-3 bg-light h-100">

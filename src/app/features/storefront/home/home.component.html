@@ -2,7 +2,7 @@
   <!-- 1. Hero Promo Banner (Full Width on Mobile) -->
   @if (settingsService.settings().showHeroBanner) {
   <section class="hero-banner-section">
-    <div class="luxury-hero-card">
+    <div class="luxury-hero-card" [style.--hero-text-color]="settingsService.settings().heroTextColor || '#FFFFFF'">
       <img
         [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl) | imageUrl:'banner'"
         [alt]="settingsService.settings().restaurantName || 'منصة التجارة الشاملة'" class="hero-bg-img"

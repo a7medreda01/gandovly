@@ -932,3 +932,5 @@
 .categories-row-section .categories-scroll .category-item .category-icon-box .category-img { display: block; width: 100%; height: 100%; padding: 0; object-fit: cover; border-radius: inherit; filter: none; }
 .categories-visual-section .cat-compact-card .cat-icon-round { border-radius: var(--radius-card,18px); overflow: hidden; }
 .categories-visual-section .cat-compact-card .cat-icon-round .cat-grid-thumb { width: 100%; height: 100%; padding: 0; object-fit: cover; border-radius: inherit; }
+
+.luxury-hero-card .hero-title, .luxury-hero-card .hero-title .gold-text, .luxury-hero-card .hero-subtitle { color: var(--hero-text-color, #fff); }
