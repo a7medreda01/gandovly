@@ -25,8 +25,7 @@ export class AdminLayoutComponent {
     { path: 'delivery-zones', icon: 'geo-alt', label: 'مناطق التوصيل' },
     { path: 'reports', icon: 'bar-chart', label: 'التقارير' },
     { path: 'analytics', icon: 'graph-up', label: 'الزيارات والتحليلات' },
-    { path: 'notifications', icon: 'bell', label: 'الإشعارات' },
-    { path: 'whatsapp', icon: 'whatsapp', label: 'واتساب' },
+    { path: 'notifications', icon: 'bell', label: 'الإشعارات وواتساب' },
     { path: 'settings', icon: 'sliders', label: 'إعدادات المتجر' }
   ];
   get pageTitle(): string {

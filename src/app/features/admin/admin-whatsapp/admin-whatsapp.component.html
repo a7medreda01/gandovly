@@ -3,10 +3,10 @@
   <div class="page-top-header">
     <div class="header-text">
       <h1 class="page-title">
-        <i class="bi bi-whatsapp text-success me-2"></i> إعدادات وإشعارات الواتساب التشغيلية
+        <i class="bi bi-whatsapp text-success me-2"></i> الإشعارات وواتساب
       </h1>
       <p class="page-subtitle">
-        ربط البوابة بالواتساب، إشعار المدير فور ورود الطلبات الجديدة، وإرسال تنبيهات حالة وتتبع الطلبات للعملاء
+        اربط أرقام الإرسال، اختر رقم الإشعارات، ثم حدّد رسائل الطلبات والمتابعة.
       </p>
     </div>
 
@@ -20,21 +20,19 @@
 
   <!-- Navigation Tabs -->
   <div class="wa-nav-tabs">
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
-      <i class="bi bi-qr-code-scan"></i>
-      <span>الإشعارات</span>
-      <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
-    </button>
-
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'accounts'" (click)="setTab('accounts')">
+<button class="nav-tab-btn" [class.active]="activeTab() === 'accounts'" (click)="setTab('accounts')">
       <i class="bi bi-phone-fill"></i>
-      <span>أرقام واتساب ({{ accounts().length }})</span>
+      <span>أرقام الإرسال ({{ accounts().length }})</span>
       <span class="status-indicator-dot" [class.connected]="hasConnectedAccount()"></span>
     </button>
-
-    <button class="nav-tab-btn" [class.active]="activeTab() === 'post_delivery'" (click)="setTab('post_delivery')">
+<button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
+      <i class="bi bi-qr-code-scan"></i>
+      <span>إشعارات الطلبات</span>
+      <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
+    </button>
+<button class="nav-tab-btn" [class.active]="activeTab() === 'post_delivery'" (click)="setTab('post_delivery')">
       <i class="bi bi-clock-history"></i>
-      <span>رسائل ما بعد الاستلام والتقييم (24 ساعة)</span>
+      <span>رسائل المتابعة</span>
       @if (postDeliverySettings().isEnabled) {
         <span class="status-indicator-dot connected" title="الميزة مفعلة"></span>
       }
@@ -692,14 +690,14 @@
       <div class="admin-wa-grid">
         <section class="wa-card glass-panel">
           <h3 class="card-title">رقم إشعارات المتجر</h3>
-          <p class="text-muted">اربط الأرقام من تبويب «أرقام واتساب»، ثم اختر الرقم الذي يرسل إشعارات الطلبات والعملاء.</p>
+          <p class="text-muted">هذا الرقم يرسل إشعارات الطلبات والعملاء. لتغييره، انتقل إلى أرقام الإرسال.</p>
           @for (account of accounts(); track account.sessionId) {
-            <div class="notification-account-choice">
+            @if(account.isDefaultNotifications) {<div class="notification-account-choice">
               <div><strong>{{ account.displayName }}</strong><span dir="ltr">{{ account.phoneNumber || 'لم يُربط رقم بعد' }}</span><small>{{ account.connectionStatus === 'connected' ? 'متصل' : 'غير متصل' }}</small></div>
-              <button type="button" class="btn-outline-custom" (click)="setDefaultAccount(account)" [disabled]="account.isDefaultNotifications || account.connectionStatus !== 'connected'">{{ account.isDefaultNotifications ? 'رقم الإشعارات الحالي' : 'استخدام للإشعارات' }}</button>
-            </div>
+
+            </div>}
           }
-          <button type="button" class="btn-outline-custom" (click)="setTab('accounts')">إدارة وربط الأرقام</button>
+          <button type="button" class="btn-outline-custom" (click)="setTab('accounts')">إدارة أرقام الإرسال</button>
         </section>
 
         <!-- Column 2: Gateway Configuration & Test Send -->
@@ -777,9 +775,10 @@
                 <span>إشعار تأكيد وقبول الطلب</span>
               </label>
 
+              <label class="trigger-checkbox"><input type="checkbox" [(ngModel)]="gatewaySettings().sendOnKitchenWeighed" /><span>إشعار تجهيز الطلب</span></label>
               <label class="trigger-checkbox">
                 <input type="checkbox" [(ngModel)]="gatewaySettings().sendOnOutForDelivery" />
-                <span>إشعار خروج الطلب للتوصيل مع المندوب</span>
+                <span>إشعار التوصيل أو الجاهزية للاستلام</span>
               </label>
 
               <label class="trigger-checkbox">

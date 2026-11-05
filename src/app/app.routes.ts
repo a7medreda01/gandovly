@@ -148,8 +148,8 @@ export const routes: Routes = [
       { path: 'delivery-zones', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-delivery-zones/admin-delivery-zones.component').then(m => m.AdminDeliveryZonesComponent) },
       { path: 'reports', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-reports/admin-reports.component').then(m => m.AdminReportsComponent) },
       { path: 'analytics', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent) },
-      { path: 'notifications', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-notifications/admin-notifications.component').then(m => m.AdminNotificationsComponent) },
-      { path: 'whatsapp', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent) },
+      { path: 'notifications', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent) },
+      { path: 'whatsapp', redirectTo: 'notifications', pathMatch: 'full' },
       {
         path: '',
         pathMatch: 'full',

@@ -1513,3 +1513,30 @@
 }
 
 
+/* Compact editors with stable action placement on small screens. */
+.custom-specs-list .custom-spec-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) 44px; gap: 10px; align-items: center; margin-bottom: 12px; }
+.custom-specs-list .custom-spec-row > div { min-width: 0; }
+.custom-specs-list input, .option-builder-row input { min-width: 0; width: 100%; min-height: 44px; box-sizing: border-box; }
+.custom-specs-list .custom-spec-row > button, .option-builder-row .btn-delete-row { width: 44px; min-width: 44px; height: 44px; padding: 0; display: grid; place-items: center; }
+.option-builder-row { display: grid !important; grid-template-columns: minmax(0,1fr) 140px 44px; gap: 10px !important; padding: 12px; }
+.option-builder-row > div { min-width: 0; }
+.option-builder-row .input-group { display: flex; min-width: 0; }
+.option-builder-row .input-group input { flex: 1; width: 0; border-radius: 10px; }
+.option-builder-row .input-group-text { flex-shrink: 0; display: flex; align-items: center; padding-inline: 10px; }
+.specs-toolbar { flex-wrap: wrap; gap: 10px; }
+.specs-toolbar button, .options-builder-actions button { min-height: 44px; white-space: normal; line-height: 1.5; }
+@media(max-width:600px) {
+  .custom-specs-list { padding: 10px; }
+  .custom-specs-list .custom-spec-row { grid-template-columns: minmax(0,1fr) 44px; padding: 10px; border: 1px solid #e2e8f0; border-radius: 12px; gap: 8px; }
+  .custom-spec-row .spec-key { grid-column: 1; grid-row: 1; }
+  .custom-spec-row .spec-value { grid-column: 1 / -1; grid-row: 2; }
+  .custom-specs-list .custom-spec-row > button { grid-column: 2; grid-row: 1; }
+  .option-builder-row { grid-template-columns: minmax(0,1fr) 44px; gap: 8px !important; }
+  .option-builder-row > div:first-child { grid-column: 1 / -1; grid-row: 1; }
+  .option-builder-row .option-price-box { width: auto !important; grid-column: 1; grid-row: 2; order: initial; }
+  .option-builder-row .btn-delete-row { grid-column: 2; grid-row: 2; order: initial; }
+  .options-builder-actions { display: grid !important; grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .options-builder-actions button { width: 100%; padding: 10px 12px; }
+}
+.custom-specs-list textarea { width: 100%; min-width: 0; min-height: 72px; resize: vertical; line-height: 1.6; box-sizing: border-box; }
+@media(max-width:600px) { .custom-specs-list input, .custom-specs-list textarea, .option-builder-row input { font-size: 16px; } }

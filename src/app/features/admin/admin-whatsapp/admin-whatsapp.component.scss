@@ -2028,3 +2028,22 @@
 .notification-account-choice span { overflow-wrap: anywhere; }
 .notification-account-choice button { min-height: 44px; }
 @media(max-width:600px) { .notification-account-choice { align-items: stretch; flex-direction: column; } }
+.admin-wa-page, .admin-wa-page * { box-sizing: border-box; }
+.admin-wa-page .wa-nav-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-wa-page .wa-nav-tabs .nav-tab-btn { min-width: 0; flex: 1 1 160px; white-space: normal; min-height: 46px; line-height: 1.5; }
+.admin-wa-page .admin-wa-grid, .admin-wa-page .account-connect-grid { min-width: 0; }
+@media(max-width:767px) {
+  .admin-wa-page .page-top-header { flex-direction: column; align-items: stretch; gap: 14px; }
+  .admin-wa-page .page-title { font-size: 1.35rem; line-height: 1.6; }
+  .admin-wa-page .header-actions, .admin-wa-page .btn-refresh { width: 100%; }
+  .admin-wa-page .admin-wa-grid, .admin-wa-page .account-connect-grid { grid-template-columns: minmax(0,1fr); gap: 16px; }
+  .admin-wa-page .wa-card { min-width: 0; padding: 16px; }
+  .admin-wa-page .pairing-form { flex-wrap: wrap; }
+  .admin-wa-page .pairing-form input { min-width: 0; flex: 1 1 180px; }
+  .admin-wa-page .modal-card { width: calc(100vw - 24px); max-width: 100%; max-height: calc(100dvh - 24px); overflow-y: auto; }
+}
+.admin-wa-page .account-card-footer { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-wa-page .account-card-footer button { min-width: 44px; min-height: 44px; }
+.admin-wa-page .account-card-footer .btn-set-default, .admin-wa-page .account-card-footer .btn-connect-account { flex: 1 1 160px; white-space: normal; }
+.admin-wa-page .detail-row { flex-wrap: wrap; gap: 8px; }
+.admin-wa-page .detail-val { min-width: 0; overflow-wrap: anywhere; }
