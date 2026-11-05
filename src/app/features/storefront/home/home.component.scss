@@ -921,3 +921,7 @@
   .hotline-card-section .hotline-card .hotline-texts .hotline-title-row { justify-content: flex-start; }
   .hotline-card-section .hotline-card .btn-call-action { width: 100%; justify-content: center; }
 }
+/* Let the configured banner remain visible while keeping its text readable. */
+.luxury-hero-card .hero-content-overlay { background: linear-gradient(270deg, rgba(16,43,70,.48), rgba(16,43,70,.18) 55%, rgba(16,43,70,.03)); }
+.luxury-hero-card .hero-title, .luxury-hero-card .hero-subtitle { text-shadow: 0 1px 4px rgba(0,0,0,.55); }
+@media(max-width:767px) { .luxury-hero-card .hero-content-overlay { background: linear-gradient(270deg, rgba(16,43,70,.52), rgba(16,43,70,.22) 65%, rgba(16,43,70,.06)); } }

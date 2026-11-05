@@ -574,7 +574,10 @@ export class ProductDetailModalComponent implements OnInit {
 
     if (typeof window === 'undefined') return;
 
-    const shareUrl = `${window.location.origin}/menu?product=${this.product.id}`;
+    const productUrl = new URL('/product/' + this.product.id, window.location.origin);
+    const tenant = new URLSearchParams(window.location.search).get('tenant');
+    if (tenant) productUrl.searchParams.set('tenant', tenant);
+    const shareUrl = productUrl.href;
     const storeName = this.settingsService.settings().restaurantName || 'منصة التجارة';
     const shareTitle = `${this.product.nameAr} - ${storeName}`;
     const shareText = `شاهد تفاصيل ومواصفات (${this.product.nameAr}) من ${storeName} 🛒`;
