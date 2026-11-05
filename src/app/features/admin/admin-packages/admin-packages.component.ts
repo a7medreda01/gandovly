@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -27,7 +28,10 @@ export class AdminPackagesComponent implements OnInit {
   cleanBeforeImport = signal<boolean>(false);
   showGuideModal = signal<boolean>(false);
 
+  private readonly route = inject(ActivatedRoute);
   ngOnInit(): void {
+    const id = this.route.snapshot.queryParamMap.get('store');
+    if (id && /^\d+$/.test(id)) this.selectedTenantId = id;
     this.api.get<any[]>('admin/tenants').subscribe({ next: stores => this.stores.set(stores) });
     this.loadStats();
   }

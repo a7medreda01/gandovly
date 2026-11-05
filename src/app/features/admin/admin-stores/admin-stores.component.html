@@ -39,7 +39,7 @@
                     @else { <i class="bi bi-shop text-indigo"></i> }
                   </div>
                   <div>
-                    <div class="fw-bold" style="color: #0F172A;">{{ store.name }}</div>
+                    <a class="fw-bold" style="color:#0F172A" [routerLink]="['/admin/stores',store.id]">{{store.name}}</a>
                     <span class="badge {{ getDomainBadgeClass(store.businessDomain) }} mt-1">
                       {{ getDomainLabel(store.businessDomain) }}
                     </span>

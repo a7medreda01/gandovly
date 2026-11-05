@@ -17,8 +17,11 @@ export class AdminSupportComponent implements OnInit {
     // Remove the single-use code from browser history before exchanging it.
     this.router.navigate([], { relativeTo: this.route, fragment: undefined, replaceUrl: true, queryParamsHandling: 'preserve' });
     if (!code) { this.error.set('رابط الدعم غير صالح. افتح جلسة جديدة من لوحة المنصة.'); return; }
+    const section = this.route.snapshot.queryParamMap.get('section') || 'orders';
+    const allowed = ['settings','catalog','orders','delivery-zones','reports','analytics','notifications'];
+    const destination = allowed.includes(section) ? section : 'orders';
     this.auth.startSupportSession(code).subscribe({
-      next: () => this.router.navigate(['/admin/orders'], { replaceUrl: true, queryParamsHandling: 'preserve' }),
+      next: () => this.router.navigate(['/admin/' + destination], { replaceUrl: true, queryParamsHandling: 'preserve' }),
       error: () => this.error.set('الرابط مستخدم بالفعل أو انتهت صلاحيته. أنشئ رابط دعم جديدًا من لوحة المنصة.')
     });
   }

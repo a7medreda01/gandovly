@@ -1,0 +1,330 @@
+# دليل تجهيز حزمة بيانات متجر — الإصدار 1.0.0
+
+هذا الملف مواصفة تنفيذية لشخص أو AI. المطلوب ZIP قابل للاستيراد من مساحة القوالب والبيانات إلى متجر فارغ، وليس SQL أو نسخة قاعدة بيانات. لا ترفع بيانات عملاء أو طلبات أو كلمات مرور أو مفاتيح API أو جلسات واتساب.
+
+## 1. المعلومات المطلوبة قبل البدء
+اجمع اسم المتجر، نوع النشاط، اللغة، العملة، الهوية والألوان والشعار، وصف المتجر، التواصل الحقيقي، سياسة التسعير والتوصيل والفروع. اطلب المصدر المصرح به للمنتجات والصور، الأسعار والخصومات والمخزون والخيارات. لا تخترع بيانات ناقصة. لا تستخدم اسم المنصة في هوية المتجر. جهز تقريرًا بالنواقص ومصدر كل منتج.
+الأنشطة المقبولة: Supermarket, Restaurant, Pharmacy, AutoParts, Electronics, GeneralRetail. استخدم GeneralRetail للأثاث والملابس والأنشطة العامة. أسماء الأنشطة حساسة لقيم enum، لا تترجمها داخل JSON.
+
+## 2. بنية ZIP
+يجب أن تكون الملفات التالية في جذر الأرشيف مباشرة، بدون مجلد أب:
+manifest.json
+settings.json
+categories.json
+products.json
+delivery_zones.json
+branches.json (اختياري)
+modifier_groups.json (اختياري)
+preparation_groups.json (اختياري)
+uploads/branding/...
+uploads/categories/...
+uploads/products/...
+
+ملفات القوائم مصفوفات JSON، ويمكن [] للقوائم الفارغة. settings وmanifest كائنات JSON. استخدم UTF-8 وJSON صالحًا دون تعليقات أو فاصلة زائدة. manifest.version يجب أن يساوي "1.0.0". مثال:
+{"templateId":"store-package-v1","version":"1.0.0","businessDomain":"GeneralRetail","counts":{"categories":1,"products":1}}
+counts معلومات توثيقية، ولا تغني عن العد الفعلي.
+
+## 3. الصور والهوية
+نزّل الصور المسموح باستخدامها داخل uploads. JSON يشير إلى /uploads/products/chair-01.webp بينما اسم الملف داخل ZIP هو uploads/products/chair-01.webp. لا تستخدم مسار Windows أو file:// أو tenantId قديم. كل صورة محلية مشار إليها يجب أن توجد في الأرشيف. الصيغ المقبولة png,jpg,jpeg,webp,gif,ico,avif. SVG غير مقبول في الحزمة. لا تستخدم ../ أو backslash أو مسارات مطلقة أو أسماء مكررة. النظام ينسخ الصور لمجلد مستقل للمتجر ويعيد كتابة الروابط تلقائيًا.
+للجودة: صور منتجات مربعة 1000–1600px مع المنتج بوضوح وبدون هوامش مبالغ فيها، أقسام 600px تقريبًا، بانر سطح مكتب عريض وموبايل رأسي مناسب، شعار شفاف إن توفر. هذه مقاسات مقترحة وليست قيودًا تقنية. حسّن الحجم مع الحفاظ على التفاصيل. لا تربط صورًا محمية تتطلب تسجيل دخول. الروابط الخارجية أقل ضمانًا من الصور المحلية.
+
+## 4. settings.json
+الأفضل تصدير حزمة مرجعية من متجر مضبوط واستخدام settings.json منها، ثم مراجعة كل بيانات الهوية والتواصل والصور. الاستيراد يكتب إعدادات الحزمة وليس دمجًا جزئيًا؛ الحقول المحذوفة قد تعود لقيم النظام الافتراضية. راجع جميع الحقول في الملحق أدناه، خصوصًا الدفع والتوصيل والإشعارات. لا تنقل أرقام متجر آخر. مثال أساسي (استبدل البيانات والصور بأصول موجودة فعليًا):
+{"restaurantName":"متجر الأثاث","defaultDomain":"GeneralRetail","businessDomainLabel":"أثاث","tagline":"أثاث يناسب مساحتك","description":"تشكيلة أثاث منزلي وخارجي","logoUrl":"/uploads/branding/logo.png","heroBannerDesktopUrl":"/uploads/branding/desktop.jpg","heroBannerMobileUrl":"/uploads/branding/mobile.jpg","faviconUrl":"/uploads/branding/favicon.ico","primaryColor":"#153e5c","secondaryColor":"#128577","accentColor":"#f4a254","phone":"","whatsApp":"","address":"","city":""}
+
+## 5. الأقسام categories.json
+[{"id":1,"nameAr":"كراسي الحدائق","nameEn":"Garden chairs","domain":"GeneralRetail","imageUrl":"/uploads/categories/chairs.webp","displayOrder":1,"isActive":true}]
+كل id موجب وفريد داخل قائمة الكيان. الترتيب displayOrder تصاعدي. لا تنشئ قسم جميع الأصناف؛ الواجهة تنشئه. الاسم العربي واضح ومختصر.
+
+## 6. المنتجات products.json
+[{"id":10,"categoryId":1,"nameAr":"كرسي حديقة","nameEn":"Garden chair","description":"وصف حقيقي للخامة والمقاس والاستخدام","descriptionEn":"Material, dimensions and usage","domain":"GeneralRetail","pricingType":"FixedPerUnit","pricePerUnit":1200,"originalPrice":1500,"allowOrderByPieces":true,"allowOrderByWeight":false,"stockQuantity":null,"isAvailable":true,"sku":"CHAIR-001","brand":"","imageUrl":"/uploads/products/chair-01.webp","images":[{"id":101,"imageUrl":"/uploads/products/chair-01.webp","isPrimary":true,"displayOrder":0},{"id":102,"imageUrl":"/uploads/products/chair-02.webp","isPrimary":false,"displayOrder":1}],"displayOrder":1,"specificationsJson":"{\"الخامة\":\"خشب\",\"المقاس\":\"80 × 70 سم\"}","modifierGroups":[{"modifierGroupId":60}],"preparationGroups":[]}]
+categoryId يطابق قسمًا موجودًا. النظام يعيد توليد IDs وربط العلاقات داخل المتجر، فلا تعتمد على أرقام قاعدة البيانات. لا تضع tenantId أو navigation objects. الصور المتعددة مرتبة ولها صورة أساسية واحدة. originalPrice سعر قبل الخصم ويجب أن يزيد عن السعر الحالي؛ احذفه إن لم يوجد خصم. stockQuantity=null يعني غير محدد؛ لا تخترع مخزونًا. الأسعار أرقام عشرية بدون عملة أو فواصل آلاف. specificationsJson نص يحتوي JSON صالحًا، وليس كائنًا مباشرًا.
+للبيع بالوزن: pricingType="ByWeight"، pricePerKg قيمة الكيلو، allowOrderByWeight=true، وaverageUnitWeightGrams عند إتاحة الطلب بالقطع. استخدم وحدات صحيحة ولا تسمّ سعر الكيلو سعر القطعة.
+الأحجام/الألوان: إذا كان لكل بديل SKU ومخزون وصور مستقلة فأنشئ منتجًا مستقلًا. إذا كانت إضافة بسعر على المنتج فاستخدم modifier_groups؛ لا تخترع ملف variants غير مدعوم.
+
+## 7. الخيارات والإضافات modifier_groups.json
+[{"id":60,"nameAr":"إضافات","nameEn":"Extras","isRequired":false,"minSelection":0,"maxSelection":2,"displayOrder":0,"options":[{"id":61,"nameAr":"وسادة إضافية","nameEn":"Extra cushion","price":150,"isAvailable":true,"displayOrder":0}]}]
+اربط المجموعة بالمنتج عبر modifierGroups:[{"modifierGroupId":60}]. السعر هنا إضافة إلى سعر المنتج. minSelection لا يتجاوز maxSelection أو عدد الخيارات المتاحة. للمجموعة الإجبارية اجعل isRequired=true وحدًا أدنى مناسبًا. لا تضع خيارات مكررة أو مراجع غير موجودة.
+
+## 8. مجموعات التجهيز preparation_groups.json
+[{"id":80,"nameAr":"التجهيز","nameEn":"Preparation","description":"اختر التجهيز","isRequired":true,"maxSelection":1,"displayOrder":0,"options":[{"id":81,"nameAr":"عادي","nameEn":"Standard","pricingType":"AddOn","price":0,"isAvailable":true,"displayOrder":0},{"id":82,"nameAr":"مع التركيب","nameEn":"With assembly","pricingType":"AddOn","price":100,"isAvailable":true,"displayOrder":1}]}]
+ربط المنتج: preparationGroups:[{"preparationOptionGroupId":80}]. AddOn إضافة للسعر؛ FinalPrice سعر نهائي وليس إضافة. لا تستخدم FinalPrice دون مراجعة حساب إجمالي السلة فعليًا. لا تخلط أسماء مفاتيح ربط التجهيز والإضافات.
+
+## 9. التوصيل والفروع
+مثال delivery_zones.json:
+[{"id":1,"name":"المدينة","city":"القاهرة","level":"Macro","parentZoneId":null,"deliveryFee":40,"minimumOrder":100,"estimatedDeliveryTimeMinutes":60,"isActive":true,"displayOrder":0},{"id":2,"name":"الحي","city":"القاهرة","level":"Sub","parentZoneId":1,"deliveryFee":30,"minimumOrder":100,"estimatedDeliveryTimeMinutes":45,"isActive":true,"displayOrder":1}]
+المستويات Macro ثم Sub ثم Micro عند الحاجة. المراجع يجب أن توجد بدون دورات أو ربط المنطقة بنفسها. لا تضف مناطق وهمية. استخدم [] إذا لم تتوفر بيانات حقيقية، واضبط سياسة التوصيل لاحقًا.
+مثال branches.json:
+[{"id":1,"name":"الفرع الرئيسي","phone":"","address":"عنوان حقيقي","isActive":true,"workingHoursText":"مواعيد العمل الفعلية"}]
+
+## 10. حدود الأرشيف والأمان
+حد رفع ZIP عبر API هو 100MB، وإجمالي المحتوى المفكوك 250MB، وعدد المداخل 10000. قد تفرض الاستضافة حدًا أقل. لا تضغط مجلد node_modules أو قواعد بيانات أو أسرار. الاستيراد إلى متجر فارغ فقط (بدون منتجات أو أقسام)، وليس أداة تحديث أو دمج لمتجر عامل. يحدث داخل معاملة مع إعادة فحص فراغ المتجر. لا تفترض أن إعدادات الهوية ستبقى كما كانت قبل الاستيراد.
+
+## 11. خطوات التسليم والاختبار
+1. سلّم ZIP وREADME يذكر المصادر، النشاط، اللغة، العملة، الأعداد والحقول الناقصة وحقوق الصور.
+2. فك الأرشيف في مجلد تجريبي وافحص كل JSON وكل مرجع وصورة قبل الرفع. تأكد أن الملفات في الجذر.
+3. أنشئ متجر اختبار فارغًا بالنشاط الصحيح بدون قالب مزروع؛ اختره صراحة في القوالب والبيانات.
+4. استورد وانتظر النجاح. قارن أعداد الأقسام والمنتجات والصور والخيارات بالمصدر.
+5. افتح الرئيسية والأقسام والبحث وصفحة منتج متعدد الصور على الموبايل وسطح المكتب. اختبر الأسعار قبل/بعد الخصم والخيارات الإجبارية والحد الأقصى.
+6. أضف للسلة واختبر الكمية/الوزن وحساب الإضافات/التجهيز والتوصيل، بدون إرسال طلب حقيقي أو رسالة إلا بإذن.
+7. راجع الهوية والتواصل والدفع والتوصيل من إعدادات المتجر؛ صدّر الحزمة واختبر إعادة الاستيراد في متجر اختبار فارغ آخر عند الحاجة.
+8. لا ترفع حزمة فاشلة جزئيًا للمتجر الفعلي. سجل الأخطاء والنواقص بدقة.
+
+## 12. نص جاهز لإرساله لأي AI
+جهّز حزمة ZIP وفق هذا الدليل من البيانات والمصادر التي أعطيك إياها. افحص الصيغة الفعلية ولا تخترع حقولًا أو أسعارًا أو مخزونًا. نزّل الصور المسموح بها داخل uploads واربطها بمسارات /uploads/. أنشئ الأقسام والمنتجات والهوية والخيارات والإضافات والتجهيز والتوصيل والفروع المتاحة. استخدم IDs محلية وروابط صحيحة دون tenantId أو بيانات حساسة. تحقق من كل JSON والملفات والحدود وأعطني تقرير تحقق وأعدادًا ومصادر ونواقص. لا تنفذ الاستيراد على متجر فعلي دون تحديده صراحة.
+
+## 13. مرجع أسماء الحقول الفعلية
+القوائم التالية مأخوذة من كائنات النظام عند إصدار الدليل. القيم الافتراضية والحدود الموجودة في خصائص C# مرجع للمطور؛ ملفات JSON تستخدم camelCase، والـenum نص بالقيم المذكورة. لا تنقل Id/TenantId/ConcurrencyVersion أو خصائص العلاقات الملاحية إلى settings. استخرج حزمة مرجعية للحصول على إعدادات تصميم متوافقة بدل تخمين القيم.
+
+### RestaurantSettings
+```csharp
+    public int Id { get; set; }
+    public BusinessDomain DefaultDomain { get; set; } = BusinessDomain.Supermarket;
+    public bool IsMultiDomain { get; set; } = false;
+    public string? BusinessDomainLabel { get; set; } = "سوبر ماركت";
+    public string RestaurantName { get; set; } = "سوبر ماركت المدينة";
+    public string Tagline { get; set; } = "تسوق أفضل المنتجات بأعلى جودة وأفضل الأسعار يومياً";
+    public string Description { get; set; } = "منصة تسوق متكاملة تضمن لك أفضل المنتجات الغذائية والاستهلاكية مع التوصيل السريع.";
+    public string LogoUrl { get; set; } = "/uploads/branding/logo.png";
+    public string HeroBannerDesktopUrl { get; set; } = "/uploads/branding/hero-desktop.jpg";
+    public string HeroBannerMobileUrl { get; set; } = "/uploads/branding/hero-mobile.jpg";
+    public string FaviconUrl { get; set; } = "/uploads/branding/favicon.ico";
+    public string PrimaryColor { get; set; } = "#0a3d62"; // كحلي بحري عميق
+    public string SecondaryColor { get; set; } = "#00a8cc"; // تركواز بحري
+    public string AccentColor { get; set; } = "#e67e22"; // مرجاني دافئ
+    public string SurfaceColor { get; set; } = "#f8fafd"; // عاجي بحري ناعم
+    public string Phone { get; set; } = "+201000000000";
+    public string WhatsApp { get; set; } = "+201000000000";
+    public string Address { get; set; } = "شارع البحر، المحافظة";
+    public string City { get; set; } = "القاهرة";
+    public string? FacebookUrl { get; set; }
+    public string? InstagramUrl { get; set; }
+    public string? TikTokUrl { get; set; }
+    public string? YouTubeUrl { get; set; }
+    public string? TwitterUrl { get; set; }
+    public string? SnapchatUrl { get; set; }
+    public string? LocationUrl { get; set; }
+    public string FontFamily { get; set; } = "Cairo";
+    public string CountryCode { get; set; } = "EG";
+    public string PhoneCountryCode { get; set; } = "+20";
+    public string CurrencyCode { get; set; } = "EGP";
+    public string CurrencySymbol { get; set; } = "ج.م";
+    public string TimeZone { get; set; } = "Africa/Cairo";
+    public string Locale { get; set; } = "ar-EG";
+    public bool IsOrdersOpen { get; set; } = true;
+    public string? PauseMessage { get; set; }
+    public decimal MinimumOrderAmount { get; set; } = 50m;
+    public decimal DefaultDeliveryFee { get; set; } = 25m;
+    public bool IsFreeDeliveryEnabled { get; set; } = false;
+    public decimal? FreeDeliveryMinOrderAmount { get; set; } = 300m;
+    public bool IsTieredDiscountEnabled { get; set; } = false;
+    public decimal? TieredDiscountThresholdAmount { get; set; } = 500m;
+    public decimal? TieredDiscountPercentage { get; set; } = 10m; // 10%
+    public bool IsFlatDiscountEnabled { get; set; } = false;
+    public decimal? FlatDiscountPercentage { get; set; } = 5m; // 5%
+    public string? ActivePromotionBanner { get; set; }
+    public string EstimatedWeightDisclaimer { get; set; } = "الوزن والسعر تقديريان، ويتم تحديدهما نهائياً بعد الوزن الفعلي في المطبخ وقد يختلفان قليلاً.";
+    public string? TermsAndPrivacyText { get; set; }
+    public string? VodafoneCashNumber { get; set; }
+    public string? InstaPayAccount { get; set; }
+    public bool SendOnOrderPlaced { get; set; } = true;
+    public bool SendOnOrderConfirmed { get; set; } = true;
+    public bool SendOnKitchenWeighed { get; set; } = true;
+    public bool SendOnOutForDelivery { get; set; } = true;
+    public bool SendOnOrderCompleted { get; set; } = true;
+    public bool SendOnOrderCancelled { get; set; } = true;
+    public bool NotifyCashierOnNewOrder { get; set; } = true;
+    public string CashierWhatsAppNumber { get; set; } = "01000000000";
+    public int CashierNotificationDelaySeconds { get; set; } = 3;
+    public string DefaultNotificationSessionId { get; set; } = "default";
+    public bool IsPostDeliveryFollowUpEnabled { get; set; } = true;
+    public int PostDeliveryFollowUpDelayHours { get; set; } = 24;
+    public string PostDeliveryFollowUpMessageTemplate { get; set; } = "أهلاً بك يا {اسم_العميل} 🔥، نسعد بخدمتك وتسوقك معنا لطلبك #{رقم_الطلب}. نأمل أن تكون راضياً تماماً عن جودة المنتجات والتوصيل! لأي استفسار أو اقتراح، نحن دائماً في خدمتك.";
+    [MaxLength(20)] public string NavbarBgColor { get; set; } = "#FFFFFF";
+    [MaxLength(20)] public string NavbarTextColor { get; set; } = "#12263F";
+    [MaxLength(20)] public string FooterBgColor { get; set; } = "#12263F";
+    [MaxLength(20)] public string FooterTextColor { get; set; } = "#FFFFFF";
+    [MaxLength(20)] public string CardBgColor { get; set; } = "#FFFFFF";
+    [MaxLength(20)] public string BorderColor { get; set; } = "#E1E6EE";
+    [MaxLength(20)] public string BtnPrimaryBg { get; set; } = "#12263F";
+    [MaxLength(20)] public string BtnPrimaryText { get; set; } = "#FFFFFF";
+    [MaxLength(20)] public string BtnAccentBg { get; set; } = "#F4A261";
+    [MaxLength(20)] public string BtnAccentText { get; set; } = "#FFFFFF";
+    [MaxLength(20)] public string SuccessColor { get; set; } = "#00875A";
+    [MaxLength(20)] public string ErrorColor { get; set; } = "#DC2626";
+    [MaxLength(20)] public string WarningColor { get; set; } = "#D97706";
+    [MaxLength(20)] public string BorderRadius { get; set; } = "16px";
+    [MaxLength(20)] public string ButtonBorderRadius { get; set; } = "12px";
+    [MaxLength(20)] public string NavbarBorderRadius { get; set; } = "0px";
+    [MaxLength(20)] public string BottomNavBorderRadius { get; set; } = "28px";
+    [MaxLength(20)] public string ProductCardBorderRadius { get; set; } = "18px";
+    [MaxLength(20)] public string SearchBorderRadius { get; set; } = "999px";
+    [MaxLength(20)] public string CardShadowStyle { get; set; } = "soft"; // soft | medium | strong | none
+    public int FontSizeBase { get; set; } = 15;
+    [MaxLength(20)] public string NavbarBrandMode { get; set; } = "both"; // logo_only | name_only | both | icon_name
+    public bool ShowNavbarTagline { get; set; } = true;
+    public bool ShowWhatsAppInNavbar { get; set; } = true;
+    public bool ShowPhoneInNavbar { get; set; } = false;
+    public bool ShowSearchBar { get; set; } = true;
+    public bool ShowCartBadge { get; set; } = true;
+    public bool ShowWhatsAppFab { get; set; } = true;
+    [MaxLength(20)] public string FabPosition { get; set; } = "bottom-right"; // bottom-right | bottom-left
+    public bool EnableWishlist { get; set; } = true;
+    public bool ShowWishlistInMobileNav { get; set; } = true;
+    public bool ShowWishlistInSidebar { get; set; } = true;
+    public bool ShowHeroBanner { get; set; } = true;
+    public bool ShowCategoriesRow { get; set; } = true;
+    public bool ShowCategoriesGrid { get; set; } = true;
+    public bool ShowPromotionStrip { get; set; } = true;
+    public bool ShowCustomerServiceBar { get; set; } = true;
+    public bool ShowSocialMediaInFooter { get; set; } = true;
+    public bool ShowLocationInFooter { get; set; } = true;
+    public bool ShowWhatsAppInMobileNav { get; set; } = true;
+    public bool ShowCallInMobileNav { get; set; } = false;
+    [MaxLength(20)] public string ProductDetailViewMode { get; set; } = "modal"; // modal | page
+    public bool CheckoutEnableDelivery { get; set; } = true;
+    public bool CheckoutEnablePickup { get; set; } = true;
+    public bool CheckoutEnableScheduled { get; set; } = true;
+    [MaxLength(100)] public string PickupLocationLabel { get; set; } = "المستودع الرئيسي";
+    [MaxLength(300)] public string PickupLocationAddress { get; set; } = "";
+    [MaxLength(100)] public string PickupWorkingHours { get; set; } = "من 8:00 ص حتى 11:00 م";
+    [MaxLength(200)] public string PickupInstructions { get; set; } = "يرجى إحضار رقم الطلب عند الاستلام";
+    public bool PaymentEnableCOD { get; set; } = true;
+    public bool PaymentEnableWalletTransfer { get; set; } = true;
+    public bool PaymentEnableOnlineCard { get; set; } = false;
+    [MaxLength(50)] public string PaymentGatewayProvider { get; set; } = "";
+    [MaxLength(200)] public string PaymentGatewayPublicKey { get; set; } = "";
+    [MaxLength(60)] public string CheckoutPageTitle { get; set; } = "إتمام الطلب";
+    [MaxLength(100)] public string CheckoutPageSubtitle { get; set; } = "أدخل بيانات التوصيل لتأكيد الطلب";
+    [MaxLength(50)] public string CheckoutSubmitBtnText { get; set; } = "تأكيد الطلب";
+    [MaxLength(100)] public string CheckoutSuccessMessage { get; set; } = "تم استلام طلبك بنجاح! ✅";
+    [MaxLength(30)] public string LabelOrder { get; set; } = "طلب";
+    [MaxLength(30)] public string LabelOrders { get; set; } = "طلباتي";
+    [MaxLength(30)] public string LabelProduct { get; set; } = "صنف";
+    [MaxLength(30)] public string LabelProducts { get; set; } = "أصناف";
+    [MaxLength(30)] public string LabelCategory { get; set; } = "قسم";
+    [MaxLength(30)] public string LabelCategories { get; set; } = "أقسام";
+    [MaxLength(30)] public string LabelCart { get; set; } = "السلة";
+    [MaxLength(30)] public string LabelDelivery { get; set; } = "التوصيل";
+    [MaxLength(30)] public string LabelPickup { get; set; } = "استلام من الفرع";
+    [MaxLength(30)] public string LabelWishlist { get; set; } = "المفضلة";
+    [MaxLength(20)] public string LanguageMode { get; set; } = "both"; // ar_only | en_only | both
+    [MaxLength(10)] public string DefaultLanguage { get; set; } = "ar"; // ar | en
+    public bool EnableEnglish { get; set; } = true;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public string? UpdatedBy { get; set; }
+```
+
+### Product
+```csharp
+    public int Id { get; set; }
+    public int CategoryId { get; set; }
+    public string NameAr { get; set; } = string.Empty;
+    public string? NameEn { get; set; }
+    public string? Description { get; set; }
+    public string? DescriptionEn { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? SecondaryImageUrl { get; set; }
+    public string? Brand { get; set; }
+    public string? Sku { get; set; }
+    public string? Barcode { get; set; }
+    public PricingType PricingType { get; set; } = PricingType.FixedPerUnit;
+    public decimal PricePerUnit { get; set; } = 0m;
+    public decimal? OriginalPrice { get; set; }
+    public decimal? PricePerKg { get; set; }
+    public int? AverageUnitWeightGrams { get; set; }
+    public bool AllowOrderByPieces { get; set; } = true;
+    public bool AllowOrderByWeight { get; set; } = false;
+    public int PreparationTimeMinutes { get; set; } = 0;
+    public string? AllergyNotice { get; set; }
+    public string? SpecificationsJson { get; set; }
+    public int DisplayOrder { get; set; } = 0;
+    public bool IsAvailable { get; set; } = true;
+    public int? StockQuantity { get; set; }
+```
+
+### MenuCategory
+```csharp
+    public int Id { get; set; }
+    public string NameAr { get; set; } = string.Empty;
+    public string? NameEn { get; set; }
+    public string? Description { get; set; }
+    public string? DescriptionEn { get; set; }
+    public string? ImageUrl { get; set; }
+    public string? IconName { get; set; }
+    public BusinessDomain Domain { get; set; } = BusinessDomain.Supermarket;
+    public int DisplayOrder { get; set; } = 0;
+    public bool IsActive { get; set; } = true;
+```
+
+### ModifierGroup
+```csharp
+    public int Id { get; set; }
+    public string NameAr { get; set; } = string.Empty;
+    public string? NameEn { get; set; }
+    public bool IsRequired { get; set; } = false;
+    public int MinSelection { get; set; } = 0;
+    public int MaxSelection { get; set; } = 5;
+    public int DisplayOrder { get; set; } = 0;
+```
+
+### ModifierOption
+```csharp
+    public int Id { get; set; }
+    public int GroupId { get; set; }
+    public string NameAr { get; set; } = string.Empty;
+    public string? NameEn { get; set; }
+    public decimal Price { get; set; } = 0m;
+    public bool IsAvailable { get; set; } = true;
+    public int DisplayOrder { get; set; } = 0;
+```
+
+### PreparationOptionGroup
+```csharp
+    public int Id { get; set; }
+    public string NameAr { get; set; } = "طريقة الطهي والتحضير";
+    public string? NameEn { get; set; }
+    public string? Description { get; set; }
+    public bool IsRequired { get; set; } = true;
+    public int MaxSelection { get; set; } = 1;
+    public int DisplayOrder { get; set; } = 0;
+```
+
+### PreparationOption
+```csharp
+    public int Id { get; set; }
+    public int GroupId { get; set; }
+    public string NameAr { get; set; } = string.Empty;
+    public string? NameEn { get; set; }
+    public string? Description { get; set; }
+    public PreparationPricingType PricingType { get; set; } = PreparationPricingType.AddOn;
+    public decimal Price { get; set; } = 0m;
+    public bool IsAvailable { get; set; } = true;
+    public int DisplayOrder { get; set; } = 0;
+```
+
+### DeliveryZone
+```csharp
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string City { get; set; } = "الجيزة";
+    public int? ParentZoneId { get; set; }
+    public DeliveryZone? ParentZone { get; set; }
+    public ZoneLevel Level { get; set; } = ZoneLevel.Sub;
+    public string NeighborhoodKeywords { get; set; } = string.Empty;
+    public decimal DeliveryFee { get; set; } = 25m;
+    public decimal MinimumOrder { get; set; } = 50m;
+    public int EstimatedDeliveryTimeMinutes { get; set; } = 45;
+    public bool IsActive { get; set; } = true;
+    public int DisplayOrder { get; set; } = 0;
+```
+
+### Branch
+```csharp
+    public int Id { get; set; }
+    public string Name { get; set; } = "الفرع الرئيسي";
+    public string Phone { get; set; } = "+201000000000";
+    public string Address { get; set; } = "الفرع الرئيسي - شارع النصر";
+    public bool IsActive { get; set; } = true;
+    public string WorkingHoursText { get; set; } = "يومياً من 11:00 صباحاً حتى 01:00 بعد منتصف الليل";
+```

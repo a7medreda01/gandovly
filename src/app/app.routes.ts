@@ -156,6 +156,11 @@ export const routes: Routes = [
         redirectTo: 'stores'
       },
       {
+        path: 'stores/:id',
+        canActivate: [platformGuard],
+        loadComponent: () => import('./features/admin/admin-stores/admin-store-detail.component').then(m => m.AdminStoreDetailComponent)
+      },
+      {
         path: 'stores',
         canActivate: [platformGuard],
         loadComponent: () => import('./features/admin/admin-stores/admin-stores.component').then(m => m.AdminStoresComponent)
