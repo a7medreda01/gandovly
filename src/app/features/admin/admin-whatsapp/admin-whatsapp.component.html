@@ -11,7 +11,7 @@
     </div>
 
     <div class="header-actions">
-      <button class="btn-refresh" (click)="refreshStatusAndQr()" [disabled]="isLoading()">
+      <button class="btn-refresh" (click)="loadAccounts()" [disabled]="isLoading()">
         <i class="bi bi-arrow-clockwise" [class.spin]="isLoading()"></i>
         <span>تحديث حالة الاتصال</span>
       </button>
@@ -22,13 +22,13 @@
   <div class="wa-nav-tabs">
     <button class="nav-tab-btn" [class.active]="activeTab() === 'gateway'" (click)="setTab('gateway')">
       <i class="bi bi-qr-code-scan"></i>
-      <span>إعدادات البوابة والإشعارات التشغيلية</span>
+      <span>الإشعارات</span>
       <span class="status-indicator-dot" [class.connected]="connectionStatus() === 'connected'"></span>
     </button>
 
     <button class="nav-tab-btn" [class.active]="activeTab() === 'accounts'" (click)="setTab('accounts')">
       <i class="bi bi-phone-fill"></i>
-      <span>الأرقام والجلسات المتصلة ({{ accounts().length }})</span>
+      <span>أرقام واتساب ({{ accounts().length }})</span>
       <span class="status-indicator-dot" [class.connected]="hasConnectedAccount()"></span>
     </button>
 
@@ -567,6 +567,8 @@
           <i class="bi bi-arrow-clockwise spin"></i>
           <span>جاري فحص وحصر أرقام الواتساب المربوطة...</span>
         </div>
+      } @else if (accountsError()) {
+        <div class="empty-state-box" role="alert"><h4>تعذر تحميل أرقام واتساب</h4><p>حاول التحديث مرة أخرى. الأرقام المسجلة لم تُحذف.</p><button type="button" class="btn-outline-custom" (click)="loadAccounts()">إعادة المحاولة</button></div>
       } @else if (accounts().length === 0) {
         <div class="empty-state-box glass-panel">
           <i class="bi bi-phone text-muted"></i>
@@ -688,122 +690,17 @@
   @if (activeTab() === 'gateway') {
     <div class="tab-content-area">
       <div class="admin-wa-grid">
-        <!-- Column 1: Connection & QR Management -->
-        <div class="wa-card glass-panel">
-          <div class="card-header-row">
-            <h3 class="card-title">
-              <i class="bi bi-broadcast text-primary me-2"></i> حالة اتصال البوابة
-            </h3>
-
-            @switch (connectionStatus()) {
-              @case ('connected') {
-                <span class="status-pill status-connected">
-                  <span class="pulse-dot green"></span>
-                  <span>متصل ونشط ✅</span>
-                </span>
-              }
-              @case ('qr_ready') {
-                <span class="status-pill status-waiting">
-                  <span class="pulse-dot yellow"></span>
-                  <span>بانتظار مسح الـ QR</span>
-                </span>
-              }
-              @case ('connecting') {
-                <span class="status-pill status-connecting">
-                  <i class="bi bi-hourglass-split spin"></i>
-                  <span>جاري الاتصال...</span>
-                </span>
-              }
-              @case ('offline') {
-                <span class="status-pill status-offline">
-                  <span>خادم الواتساب متوقف ❌</span>
-                </span>
-              }
-              @default {
-                <span class="status-pill status-disconnected">
-                  <span>غير متصل</span>
-                </span>
-              }
-            }
-          </div>
-
-          <!-- Connected State View -->
-          @if (connectionStatus() === 'connected') {
-            <div class="connected-hero-box">
-              <div class="connected-icon-wrapper">
-                <i class="bi bi-check-circle-fill text-success"></i>
-              </div>
-              <h4 class="connected-headline">بوابة الواتساب متصلة بنجاح</h4>
-              <p class="connected-phone-display">
-                رقم الهاتف المتصل: <strong>{{ connectedPhone() || 'تم التحقق' }}</strong>
-              </p>
-
-              <div class="queue-status-bar">
-                <span>طابور الرسائل الحالية:</span>
-                <span class="badge bg-secondary">{{ queueLength() }} رسالة</span>
-              </div>
-
-              <div class="connected-actions">
-                <button class="btn-disconnect" (click)="logoutSession()" [disabled]="isLoading()">
-                  <i class="bi bi-box-arrow-right"></i>
-                  <span>قطع الاتصال وتسجيل الخروج</span>
-                </button>
-              </div>
+        <section class="wa-card glass-panel">
+          <h3 class="card-title">رقم إشعارات المتجر</h3>
+          <p class="text-muted">اربط الأرقام من تبويب «أرقام واتساب»، ثم اختر الرقم الذي يرسل إشعارات الطلبات والعملاء.</p>
+          @for (account of accounts(); track account.sessionId) {
+            <div class="notification-account-choice">
+              <div><strong>{{ account.displayName }}</strong><span dir="ltr">{{ account.phoneNumber || 'لم يُربط رقم بعد' }}</span><small>{{ account.connectionStatus === 'connected' ? 'متصل' : 'غير متصل' }}</small></div>
+              <button type="button" class="btn-outline-custom" (click)="setDefaultAccount(account)" [disabled]="account.isDefaultNotifications || account.connectionStatus !== 'connected'">{{ account.isDefaultNotifications ? 'رقم الإشعارات الحالي' : 'استخدام للإشعارات' }}</button>
             </div>
           }
-
-          <!-- QR Code State View -->
-          @if (connectionStatus() === 'qr_ready') {
-            <div class="qr-scan-box">
-              <p class="qr-instructions">
-                افتح تطبيق واتساب على هاتفك، اضغط على <strong>الأجهزة المرتبطة (Linked Devices)</strong>، ثم <strong>ربط جهاز</strong> ووجّه الكاميرا نحو الكود:
-              </p>
-
-              <div class="qr-image-container">
-                @if (qrDataUrl()) {
-                  <img [src]="qrDataUrl()" alt="WhatsApp QR Code" class="qr-code-img" />
-                } @else {
-                  <div class="qr-loading">
-                    <i class="bi bi-arrow-clockwise spin"></i>
-                    <span>جاري توليد كود الـ QR...</span>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Pairing Code Alternative -->
-          <div class="pairing-code-section">
-            <h5 class="pairing-title">
-              <i class="bi bi-key-fill text-accent me-1"></i> الربط عبر كود الاقتران (بدون كاميرا)
-            </h5>
-            <div class="pairing-form">
-              <input
-                type="text"
-                class="form-control-custom"
-                [(ngModel)]="pairPhone"
-                placeholder="أدخل رقم الهاتف مثل 01010415774"
-                dir="ltr"
-              />
-              <button class="btn-request-code" (click)="requestPairingCode()" [disabled]="isRequestingPairCode()">
-                @if (isRequestingPairCode()) {
-                  <i class="bi bi-arrow-clockwise spin"></i>
-                } @else {
-                  <i class="bi bi-send"></i>
-                }
-                <span>طلب الكود</span>
-              </button>
-            </div>
-
-            @if (pairingCode()) {
-              <div class="pairing-result-box">
-                <span class="pairing-label">كود الاقتران الخاص بك:</span>
-                <strong class="pairing-digits" dir="ltr">{{ pairingCode() }}</strong>
-                <small class="text-muted d-block mt-1">أدخل هذا الكود في إشعار الواتساب على هاتفك لتأكيد الربط.</small>
-              </div>
-            }
-          </div>
-        </div>
+          <button type="button" class="btn-outline-custom" (click)="setTab('accounts')">إدارة وربط الأرقام</button>
+        </section>
 
         <!-- Column 2: Gateway Configuration & Test Send -->
         <div class="wa-card glass-panel">
@@ -1469,7 +1366,7 @@
       <div class="modal-card modal-lg glass-panel" (click)="$event.stopPropagation()">
         <div class="modal-header-custom">
           <h4>
-            <i class="bi bi-qr-code-scan text-primary me-2"></i> ربط الحساب: {{ acc.displayName }} (ID: {{ acc.sessionId }})
+            <i class="bi bi-qr-code-scan text-primary me-2"></i> ربط الرقم: {{ acc.displayName }}
           </h4>
           <button class="btn-close-modal" (click)="closeConnectAccountModal()">
             <i class="bi bi-x-lg"></i>

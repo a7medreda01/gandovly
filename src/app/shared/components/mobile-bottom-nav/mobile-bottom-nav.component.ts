@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, HostListener } from '@angular/core';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs/operators';
@@ -9,7 +9,7 @@ import { SettingsService } from '../../../core/services/settings.service';
   selector: 'app-mobile-bottom-nav', standalone: true, imports: [RouterModule],
   template: `
     @if (!focusedPage()) {
-      <nav class="store-bottom-nav" aria-label="التنقل في المتجر">
+      <nav class="store-bottom-nav" [class.compact]="compact()" aria-label="التنقل في المتجر">
         <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{exact: true}"><i class="bi bi-house-door" aria-hidden="true"></i><span>الرئيسية</span></a>
         <a routerLink="/menu" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-grid" aria-hidden="true"></i><span>{{ settings.settings().labelProducts || 'المنتجات' }}</span></a>
         <button type="button" (click)="cart.toggleDrawer()" [attr.aria-label]="'السلة، ' + cart.totalItemsCount() + ' منتج'"><span class="cart-icon"><i class="bi bi-bag" aria-hidden="true"></i>@if(cart.totalItemsCount() && settings.settings().showCartBadge !== false) { <b>{{cart.totalItemsCount()}}</b> }</span><span>{{ settings.settings().labelCart || 'السلة' }}</span></button>
@@ -21,16 +21,30 @@ import { SettingsService } from '../../../core/services/settings.service';
     :host { display: none; }
     @media(max-width: 767px) {
       :host { display: block; }
-      .store-bottom-nav { position: fixed; z-index: 1040; inset-inline: 12px; bottom: max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-height: 58px; padding: 4px; border: 1px solid var(--border-color, #dfe5ec); border-radius: var(--radius-bottom-nav, 28px); background: var(--navbar-bg, #fff); color: var(--navbar-text, #586879); box-shadow: var(--shadow-card); }
-      a, button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 48px; min-width: 0; padding: 4px 2px; border: 0; background: none; border-radius: var(--radius-control, 12px); color: inherit; text-decoration: none; font-size: .8rem; font-weight: 600; line-height: 1.3; }
+      .store-bottom-nav { position: fixed; z-index: 1040; inset-inline: 12px; bottom: max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-height: 54px; padding: 3px; border: 1px solid var(--border-color, #dfe5ec); border-radius: var(--radius-bottom-nav, 28px); background: var(--navbar-bg, #fff); color: var(--navbar-text, #586879); box-shadow: var(--shadow-card); }
+      a, button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 46px; min-width: 0; padding: 3px 2px; border: 0; background: none; border-radius: var(--radius-control, 12px); color: inherit; text-decoration: none; font-size: .75rem; font-weight: 600; line-height: 1.3; }
+      .store-bottom-nav { transition: padding .18s ease, min-height .18s ease; }
+      .store-bottom-nav.compact { min-height: 48px; padding: 1px 3px; }
+      .store-bottom-nav.compact a, .store-bottom-nav.compact button { min-height: 44px; gap: 2px; }
+      .store-bottom-nav.compact i { font-size: 17px; }
+      @media(prefers-reduced-motion:reduce) { .store-bottom-nav { transition: none; } }
       a.active { background: color-mix(in srgb,var(--primary-color,#124b89) 12%,var(--navbar-bg,#fff)); color: var(--primary-color,#124b89); }
-      i { font-size: 21px; line-height: 1; }
+      i { font-size: 19px; line-height: 1; }
       .cart-icon { position: relative; }
       b { position: absolute; top: -8px; inset-inline-end: -13px; min-width: 18px; height: 18px; padding-inline: 4px; border-radius: 10px; background: #b91c32; color: #fff; font-size: 10px; line-height: 18px; border: 1px solid #fff; }
     }
   `]
 })
 export class MobileBottomNavComponent {
+  readonly compact = signal(false);
+  private lastScrollY = 0;
+  @HostListener('window:scroll') onScroll() {
+    const y = window.scrollY;
+    if (y < 32) this.compact.set(false);
+    else if (y > this.lastScrollY + 4) this.compact.set(true);
+    else if (y < this.lastScrollY - 4) this.compact.set(false);
+    this.lastScrollY = y;
+  }
   readonly cart = inject(CartService);
   readonly settings = inject(SettingsService);
   private readonly router = inject(Router);

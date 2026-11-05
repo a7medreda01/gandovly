@@ -506,3 +506,7 @@
 .menu-search-wrap .search-capsule { border-radius: var(--radius-control, 14px); }
 
 .menu-search-wrap .search-capsule { border-radius: var(--radius-search, 999px); box-shadow: var(--shadow-card); }
+.menu-results-header { margin-block: 10px 12px; padding-block: 0; }
+.menu-results-header .menu-active-title { font-size: 1.125rem; line-height: 1.5; margin-bottom: 2px; }
+.menu-results-header .results-count { font-size: .8rem; }
+@media(max-width:767px) { .menu-results-header { margin-block: 8px 10px; } .menu-results-header .menu-active-title { font-size: 1rem; } }

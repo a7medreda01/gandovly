@@ -22,7 +22,7 @@ export class AdminSettingsComponent implements OnInit {
   readonly settingsService = inject(SettingsService);
   private readonly toast = inject(NotificationService);
 
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages'>('discounts');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);

@@ -1983,3 +1983,4 @@
 .checkout-page .order-type-tabs .type-tab-btn .tab-icon { margin: 0; }
 .checkout-page .order-type-tabs .type-tab-btn .tab-text .title { font-size: .875rem; }
 @media(max-width: 380px) { .checkout-page .order-type-tabs .type-tab-btn { padding-inline: 8px; gap: 6px; } .checkout-page .order-type-tabs .type-tab-btn .tab-text .title { font-size: .8rem; } }
+.checkout-page select#zonePicker { min-height: 54px; height: auto; padding: 12px 14px; padding-inline-end: 38px; font-size: 16px; line-height: 1.65; text-overflow: ellipsis; }

@@ -2023,3 +2023,8 @@
   }
 }
 
+.notification-account-choice { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-block: 16px; border-bottom: 1px solid #e2e8f0; }
+.notification-account-choice > div { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.notification-account-choice span { overflow-wrap: anywhere; }
+.notification-account-choice button { min-height: 44px; }
+@media(max-width:600px) { .notification-account-choice { align-items: stretch; flex-direction: column; } }

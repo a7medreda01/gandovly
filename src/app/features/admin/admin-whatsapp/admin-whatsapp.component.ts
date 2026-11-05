@@ -37,12 +37,13 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   readonly formatEgyptDate = formatEgyptDate;
 
   // Active Tab - Operational notifications & Gateway by default
-  activeTab = signal<'gateway' | 'accounts' | 'campaigns' | 'post_delivery' | 'contacts'>('gateway');
+  activeTab = signal<'gateway' | 'accounts' | 'campaigns' | 'post_delivery' | 'contacts'>('accounts');
 
   // ------------------------------------------
   // MULTI-SESSION ACCOUNTS STATE
   // ------------------------------------------
   accounts = signal<WhatsAppAccount[]>([]);
+  accountsError = signal(false);
   isLoadingAccounts = signal<boolean>(false);
 
   // Add Account Modal
@@ -81,7 +82,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     notifyCashierOnNewOrder: true,
     cashierWhatsAppNumber: '01000000000',
     cashierNotificationDelaySeconds: 3,
-    defaultNotificationSessionId: 'sm_e4b8a21f'
+    defaultNotificationSessionId: 'default'
   });
   isSavingSettings = signal<boolean>(false);
 
@@ -92,7 +93,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
   // Test Message
   testPhone: string = '';
-  testSessionId: string = 'sm_e4b8a21f';
+  testSessionId: string = 'default';
   testMessage: string = 'تجربة إرسال رسالة من منصة المتجر الإلكتروني 🔥 - بوابة الواتساب الذاتية تعمل بنجاح!';
   isSendingTest = signal<boolean>(false);
 
@@ -166,10 +167,10 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   isSavingPostDelivery = signal<boolean>(false);
 
   private pollInterval: any = null;
+  private accountsRequestPending = false;
 
   ngOnInit() {
     this.loadAccounts();
-    this.refreshStatusAndQr();
     this.loadGatewaySettings();
     this.loadCampaigns();
     this.loadContactsStats();
@@ -178,7 +179,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     // Auto-poll status every 6 seconds while on page
     this.pollInterval = setInterval(() => {
       this.refreshStatusSilently();
-      if (this.activeTab() === 'accounts') {
+      if (this.activeTab() === 'accounts' || this.activeTab() === 'gateway' || this.selectedAccountForConnect()) {
         this.refreshAccountsSilently();
       }
       if (this.activeTab() === 'campaigns') {
@@ -213,12 +214,13 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   // MULTI-SESSION ACCOUNTS LOGIC
   // ------------------------------------------
   loadAccounts() {
+    this.accountsError.set(false);
     this.isLoadingAccounts.set(true);
     this.adminService.getWhatsAppAccounts().subscribe({
       next: (res: any) => {
         this.isLoadingAccounts.set(false);
         const list = res?.data || res || [];
-        this.accounts.set(list);
+        this.applyAccounts(list);
       },
       error: () => {
         this.isLoadingAccounts.set(false);
@@ -227,24 +229,34 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   refreshAccountsSilently() {
+    if (this.accountsRequestPending) return;
+    this.accountsRequestPending = true;
     this.adminService.getWhatsAppAccounts().subscribe({
       next: (res: any) => {
+        this.accountsRequestPending = false;
         const list = res?.data || res || [];
-        this.accounts.set(list);
+        this.applyAccounts(list);
 
-        // If connect modal open, refresh current account status
-        const current = this.selectedAccountForConnect();
-        if (current) {
-          const updated = list.find((a: WhatsAppAccount) => a.sessionId === current.sessionId);
-          if (updated) {
-            this.selectedAccountForConnect.set(updated);
-            if (updated.connectionStatus === 'connected' && current.connectionStatus !== 'connected') {
-              this.toast.success(`تم ربط رقم "${updated.displayName}" بنجاح! 🎉`);
-            }
-          }
-        }
-      }
+
+      },
+      error: () => { this.accountsRequestPending = false; }
     });
+  }
+
+  private applyAccounts(list: WhatsAppAccount[]) {
+    this.accounts.set(Array.isArray(list) ? list : []);
+    const main = this.accounts().find(a => a.isDefaultNotifications) || this.accounts()[0];
+    if (main) { this.connectionStatus.set(main.connectionStatus as any); this.connectedPhone.set(main.phoneNumber || null); }
+    const current = this.selectedAccountForConnect();
+    const updated = current && this.accounts().find(a => a.sessionId === current.sessionId);
+    if (updated) {
+      this.selectedAccountForConnect.set(updated);
+      if (updated.connectionStatus === 'connected') {
+        this.selectedAccountQrUrl.set(null);
+        this.accountPairingCode.set(null);
+        if (current.connectionStatus !== 'connected') this.toast.success('تم ربط الرقم بنجاح، ويمكن اختياره لإشعارات المتجر.');
+      } else if (updated.hasQr) this.refreshAccountQr(updated.sessionId);
+    }
   }
 
   hasConnectedAccount(): boolean {
@@ -304,6 +316,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     this.accountPairingCode.set(null);
     this.selectedAccountQrUrl.set(null);
     this.refreshAccountQr(account.sessionId);
+    this.refreshAccountsSilently();
   }
 
   closeConnectAccountModal() {
@@ -319,7 +332,9 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
       next: (res: any) => {
         this.isLoadingAccountQr.set(false);
         const data = res?.data || res;
-        this.selectedAccountQrUrl.set(data?.qrDataUrl || null);
+        if (this.selectedAccountForConnect()?.sessionId !== sessionId) return;
+        this.selectedAccountQrUrl.set(data?.status === 'connected' ? null : data?.qrDataUrl || null);
+        if (data?.status === 'connected') this.refreshAccountsSilently();
       },
       error: () => {
         this.isLoadingAccountQr.set(false);
@@ -447,7 +462,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     this.newCampaign = {
       title: 'عرض جديد - ' + new Date().toLocaleDateString('ar-SA'),
       messageTemplate: 'أهلاً بك يا {الاسم} 🔥\nعروض وتخفيضات كبرى على كافة المنتجات والبقالة وصلت! تسوق الآن واستمتع بتوصيل سريع لباب منزلك 🛒',
-      sessionId: defaultAcc?.sessionId || 'sm_e4b8a21f',
+      sessionId: defaultAcc?.sessionId || 'default',
       intervalMinutes: 5,
       dailyLimit: 50,
       excludePreviouslyMessaged: true
@@ -821,7 +836,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
   getMainSessionId(): string {
     const defaultAcc = this.accounts().find(a => a.isDefaultNotifications) || this.accounts()[0];
-    return defaultAcc?.sessionId || 'sm_e4b8a21f';
+    return defaultAcc?.sessionId || 'default';
   }
 
   refreshStatusAndQr() {

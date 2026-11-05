@@ -1,57 +1,52 @@
 <div class="settings-page">
   <div class="page-title-row flex-between">
     <div>
-      <h1 class="page-heading">إعدادات المتجر والهوية ⚙️</h1>
+      <h1 class="page-heading">إعدادات المتجر</h1>
       <p class="page-sub">إدارة العروض الترويجية، الخصومات، الهوية البصرية، سياسات العمل وبيانات التواصل</p>
     </div>
   </div>
 
   <!-- Settings Navigation Tabs -->
-  <div class="settings-tabs-bar">
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'discounts'"
-      (click)="activeTab.set('discounts')"
-    >
-      <i class="bi bi-tag-fill me-2"></i>
-      <span>العروض والخصومات والتوصيل 🎁</span>
-    </button>
-
-    <button
-      type="button"
-      class="tab-btn highlight-tab"
-      [class.active]="activeTab() === 'branding'"
-      (click)="activeTab.set('branding')"
-    >
-      <i class="bi bi-palette-fill me-2"></i>
-      <span>الهوية البصرية وتخصيص الواجهة والتصميم 🎨✨</span>
-    </button>
-
-    <button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'policies'"
-      (click)="activeTab.set('policies')"
-    >
-      <i class="bi bi-shield-check me-2"></i>
-      <span>سياسات العمل والطلب ⚖️</span>
-    </button>
-
-    <button
+  <div class="settings-tabs-bar" aria-label="أقسام إعدادات المتجر">
+<button
       type="button"
       class="tab-btn"
       [class.active]="activeTab() === 'info'"
       (click)="activeTab.set('info')"
     >
       <i class="bi bi-telephone-fill me-2"></i>
-      <span>بيانات المؤسسة والاتصال 📞</span>
+      <span>بيانات المتجر</span>
     </button>
-
-    <button
+<button
       type="button"
       class="tab-btn highlight-tab"
-      style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; font-weight: 700;"
+      [class.active]="activeTab() === 'branding'"
+      (click)="activeTab.set('branding')"
+    >
+      <i class="bi bi-palette-fill me-2"></i>
+      <span>تصميم المتجر</span>
+    </button>
+<button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'discounts'"
+      (click)="activeTab.set('discounts')"
+    >
+      <i class="bi bi-tag-fill me-2"></i>
+      <span>العروض والتوصيل</span>
+    </button>
+<button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'policies'"
+      (click)="activeTab.set('policies')"
+    >
+      <i class="bi bi-shield-check me-2"></i>
+      <span>الطلب والسياسات</span>
+    </button>
+<button
+      type="button"
+      class="tab-btn highlight-tab"
       [class.active]="activeTab() === 'packages'"
       (click)="activeTab.set('packages'); loadPackageStats();"
     >
@@ -205,11 +200,8 @@
       <div class="tab-content animate-fade-in">
         
         <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure" open><summary>1. شعار المؤسسة والبانرات الرئيسية والميديا</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-images text-primary me-2"></i> 1. شعار المؤسسة والبانرات الرئيسية والميديا
-            </h3>
             <p class="section-desc">تحكم في الشعار الرسمي وبانرات الواجهة الرئيسية على أجهزة الكمبيوتر والموبايل.</p>
           </div>
 
@@ -321,14 +313,11 @@
 
           
 
-        </div>
+        </details>
 
         <!-- 2. BRAND PRESENTATION MODE IN NAVBAR -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>2. الهيدر وطريقة عرض العلامة التجارية (Brand Mode)</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-window text-primary me-2"></i> 2. الهيدر وطريقة عرض العلامة التجارية (Brand Mode)
-            </h3>
             <p class="section-desc">حدد كيف يظهر اسم المتجر واللوجو في شريط الهيدر العلوي، والتحكم في ظهور عناصر الواجهة.</p>
           </div>
 
@@ -363,14 +352,11 @@
               <span class="ms-2">إظهار زر الاتصال الهاتفي في الهيدر العلوي</span>
             </label>
           </div>
-        </div>
+        </details>
 
         <!-- 3. EXTENDED COLOR STUDIO -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>3. استوديو الألوان الموسّع (Color Studio)</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-palette2 text-primary me-2"></i> 3. استوديو الألوان الموسّع (Color Studio)
-            </h3>
             <p class="section-desc">تحكم كامل في لوحة الألوان عبر الموقع بالكامل. التغييرات تُطبق فورياً في المتجر.</p>
           </div>
 
@@ -505,14 +491,11 @@
 
           
 
-        </div>
+        </details>
 
         <!-- 4. TYPOGRAPHY & SHAPES -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>4. الخطوط وتناسق الأحجام والزوايا</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-fonts text-primary me-2"></i> 4. الخطوط وتناسق الأحجام والزوايا
-            </h3>
             <p class="section-desc">تحكم في نوع الخط العربي، حجم الخط الأساسي، انحناءات البطاقات والأزرار والظلال.</p>
           </div>
 
@@ -591,10 +574,10 @@
               />
             </div>
           </div>
-        </div>
+        </details>
 
-        <div class="settings-card glass-panel mb-4">
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"><h3 class="mb-0 fs-5">حواف واجهة المتجر</h3><button type="button" class="btn btn-outline" (click)="restoreStorefrontShapes()">استعادة الشكل الافتراضي</button></div>
+        <details class="settings-card settings-disclosure"><summary>حواف واجهة المتجر</summary>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"><button type="button" class="btn btn-outline" (click)="restoreStorefrontShapes()">استعادة الشكل الافتراضي</button></div>
           <p class="text-muted mb-3">إعدادات مستقلة للشريطين وكارت المنتج والبحث. القيم بالبكسل؛ 999 تجعل البحث بشكل كبسولة. ألوانك وخطك وشعارك لا تتغير.</p>
           <div class="form-row">
             <div class="form-group flex-1"><label for="navbarRadius">حواف الشريط العلوي</label><input id="navbarRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.navbarBorderRadius, 0)" (input)="setRadius('navbarBorderRadius', +$any($event.target).value)" /></div>
@@ -602,14 +585,11 @@
             <div class="form-group flex-1"><label for="productCardRadius">حواف كارت المنتج</label><input id="productCardRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.productCardBorderRadius, 18)" (input)="setRadius('productCardBorderRadius', +$any($event.target).value)" /></div>
             <div class="form-group flex-1"><label for="searchRadius">حواف مربع البحث</label><input id="searchRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.searchBorderRadius, 999)" (input)="setRadius('searchBorderRadius', +$any($event.target).value)" /></div>
           </div>
-        </div>
+        </details>
 
         <!-- 5. MULTI-LANGUAGE & LOCALIZATION -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>5. نظام اللغات والترجمة (Multi-Language Engine)</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-globe2 text-primary me-2"></i> 5. نظام اللغات والترجمة (Multi-Language Engine)
-            </h3>
             <p class="section-desc">تحكم في نمط اللغات المدعومة بالمتجر، واللغة الافتراضية، وظهور زر التبديل وحقول الترجمة.</p>
           </div>
 
@@ -649,14 +629,11 @@
               <small class="text-muted">حقول اختيارية. إذا تُركت فارغة في أي صنف، يظهر المحتوى العربي للعميل تلقائياً بدون انقطاع.</small>
             </div>
           </div>
-        </div>
+        </details>
 
         <!-- 6. ELEMENTS VISIBILITY & FLOATING ACTION BUTTON (FAB) -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>6. التحكم في ظهور أقسام وعناصر الواجهة</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-toggles text-primary me-2"></i> 6. التحكم في ظهور أقسام وعناصر الواجهة
-            </h3>
             <p class="section-desc">تحكم في إظهار أو إخفاء عناصر الصفحة الرئيسية والمفضلة وزر الواتساب العائم على الشاشة.</p>
           </div>
 
@@ -749,14 +726,11 @@
               </label>
             </div>
           </div>
-        </div>
+        </details>
 
         <!-- 7. CHECKOUT PAGE CUSTOMIZATION -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>7. تخصيص تجربة وخيارات إتمام الطلب (Checkout)</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-cart-check-fill text-primary me-2"></i> 7. تخصيص تجربة وخيارات إتمام الطلب (Checkout)
-            </h3>
             <p class="section-desc">تحكم في خيارات التسليم المتاحة، جدولة المواعيد، طرق الدفع وبيانات المحافظ الإلكترونية.</p>
           </div>
 
@@ -847,14 +821,11 @@
               <input type="text" class="form-control fw-bold" [(ngModel)]="settings()!.checkoutSubmitBtnText" placeholder="تأكيد الطلب" />
             </div>
           </div>
-        </div>
+        </details>
 
         <!-- 8. CUSTOM LABELS -->
-        <div class="settings-card glass-panel mb-4">
+        <details class="settings-card settings-disclosure"><summary>8. تخصيص المسميات والنصوص (Custom Labels)</summary>
           <div class="section-title-wrap mb-3">
-            <h3 class="section-title">
-              <i class="bi bi-tag-fill text-primary me-2"></i> 8. تخصيص المسميات والنصوص (Custom Labels)
-            </h3>
             <p class="section-desc">تخصيص كامل لمسميات الأقسام والصفحات والأزرار لتناسب علامتك ونوع نشاطك التجاري.</p>
           </div>
 
@@ -895,18 +866,18 @@
               <input type="text" class="form-control" [(ngModel)]="settings()!.labelPickup" placeholder="استلام من المستودع / الفرع" />
             </div>
           </div>
-        </div>
+        </details>
 
         <!-- Unified Save Button for Branding & UI -->
         <div class="tab-save-footer mt-4 flex-between">
           <div class="save-hint text-muted small">
-            <i class="bi bi-info-circle me-1"></i> يتم حفظ وتطبيق جميع إعدادات الهوية البصرية والواجهة والألوان واللغات فوراً في متجرك.
+            <i class="bi bi-info-circle me-1"></i> عاين التغييرات، ثم اضغط حفظ لتطبيقها على المتجر.
           </div>
           <button class="btn-primary" (click)="saveSettings('branding')" [disabled]="isSaving() || isUploading()">
             @if (isSaving()) {
               <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
             } @else {
-              <i class="bi bi-floppy2-fill me-1"></i> حفظ كافة إعدادات الهوية البصرية والواجهة والتصميم 💾✨
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ تصميم المتجر
             }
           </button>
         </div>

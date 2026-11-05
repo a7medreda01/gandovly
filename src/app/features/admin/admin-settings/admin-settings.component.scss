@@ -663,3 +663,22 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
   }
 }
+/* Clear section navigation and progressive disclosure for long design settings. */
+.settings-page { gap: 20px; max-width: 1280px; margin-inline: auto; }
+.page-title-row .page-heading { font-size: 1.5rem; font-weight: 750; margin-bottom: 6px; }
+.page-title-row .page-sub { max-width: 65ch; font-size: .9rem; line-height: 1.8; }
+.settings-tabs-bar { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid var(--border-color,#dfe5ec); border-radius: 14px; background: #fff; }
+.settings-tabs-bar .tab-btn { flex: 1 1 150px; min-height: 44px; padding: 10px 14px; background: transparent; color: #475569; border: 1px solid transparent; border-radius: 10px; font-size: .9rem; box-shadow: none; white-space: normal; }
+.settings-tabs-bar .tab-btn.active { background: color-mix(in srgb,var(--primary-color,#124b89) 8%,white); color: var(--primary-color,#124b89); border-color: var(--primary-color,#124b89); }
+.settings-page .settings-card { padding: 22px; box-shadow: none; border: 1px solid var(--border-color,#dfe5ec); border-radius: 14px; gap: 18px; background: #fff; }
+.settings-page details.settings-disclosure { display: block; padding: 0; overflow: hidden; }
+.settings-disclosure > summary { padding: 18px 22px; font-size: 1rem; font-weight: 700; color: #17334d; cursor: pointer; line-height: 1.6; }
+.settings-disclosure[open] > summary { border-bottom: 1px solid #e7ebf0; margin-bottom: 18px; }
+.settings-disclosure > :not(summary) { margin-inline: 22px; }
+.settings-disclosure > :last-child { margin-bottom: 22px; }
+.settings-disclosure > summary:focus-visible { outline: 2px solid var(--primary-color); outline-offset: -3px; }
+.settings-page .section-title, .settings-page .card-title { font-size: 1.05rem; line-height: 1.7; }
+.settings-page input:not([type=checkbox]):not([type=radio]):not([type=color]), .settings-page select { min-height: 44px; }
+.settings-page .tab-save-footer { position: sticky; bottom: 12px; z-index: 5; padding: 16px; gap: 12px; flex-wrap: wrap; border: 1px solid #dfe5ec; border-radius: 12px; background: #fff; box-shadow: 0 4px 18px #12263f12; }
+.settings-page .tab-save-footer button { min-height: 44px; padding: 10px 18px; font-size: .95rem; }
+@media(max-width:767px) { .settings-tabs-bar .tab-btn { flex-basis: 42%; font-size: .82rem; } .settings-page .settings-card { padding: 16px; } .settings-page details.settings-disclosure { padding: 0; } .settings-disclosure > summary { padding: 16px; } .settings-disclosure > :not(summary) { margin-inline: 16px; } .settings-grid { grid-template-columns: minmax(0,1fr); } .settings-page .tab-save-footer button { width: 100%; } }
