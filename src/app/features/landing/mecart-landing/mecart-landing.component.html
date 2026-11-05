@@ -100,9 +100,12 @@
     <div class="section-heading">
       <span class="section-badge">خدمات RunX السحابية</span>
       <h2 class="section-title">خدماتنا</h2>
-      <p class="section-lead">نوفر لك حزمة متكاملة من الخدمات التقنية السحابية لتشغيل وتوسيع متاجرك الإلكترونية بأعلى موثوقية</p>
+      <p class="section-lead">نصمم ونجهّز متجرك الإلكتروني حسب نشاطك، مع إدارة المنتجات والطلبات والدفع والتوصيل من مكان واحد.</p>
     </div>
 
+    <div class="store-types" aria-label="أنواع المتاجر">
+      @for (type of storeTypes; track type.label) { <div class="store-type"><i [class]="'bi ' + type.icon" aria-hidden="true"></i><span>{{ type.label }}</span></div> }
+    </div>
     <div class="services-grid">
       @for (s of services; track s.id) {
       <div class="service-card">
@@ -146,6 +149,7 @@
     <div class="projects-grid">
       @for (p of latestProjects(); track p.id) {
       <div class="project-card">
+        <a class="project-preview-link" [href]="p.url" target="_blank" rel="noopener" [attr.aria-label]="'فتح معاينة ' + p.name"><app-project-preview [slug]="p.subdomain" [name]="p.name" /></a>
         <div class="project-card-header">
           <div class="project-icon">
             <i class="bi bi-shop"></i>
@@ -154,11 +158,6 @@
             <h3 class="project-title">{{ p.name }}</h3>
             <span class="project-domain-tag">{{ p.domainLabel }}</span>
           </div>
-        </div>
-
-        <div class="project-link-row">
-          <i class="bi bi-link-45deg text-success"></i>
-          <span class="project-url">{{ p.subdomain }}.mecart.app</span>
         </div>
 
         <div class="project-meta-row">

@@ -884,3 +884,9 @@
     }
   }
 }
+.project-preview-link { display: block; min-width: 0; margin-bottom: 20px; text-decoration: none; border-radius: 14px; }
+.project-preview-link:focus-visible { outline: 3px solid #10b981; outline-offset: 4px; }
+.store-types { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-block: 28px 36px; }
+.store-type { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid #dfe8ee; border-radius: 14px; background: #fff; color: #17334d; font-weight: 700; }
+.store-type i { display: grid; place-items: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 12px; background: #ecfdf5; color: #059669; font-size: 22px; }
+@media(max-width:767px) { .store-types { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; } .store-type { flex-direction: column; text-align: center; padding: 12px 8px; font-size: .85rem; } }

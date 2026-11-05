@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ProjectPreviewComponent } from '../../../shared/components/project-preview/project-preview.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProjectsService, ProjectItem } from '../../../core/services/projects.service';
@@ -15,7 +16,7 @@ export interface ServiceItem {
 @Component({
   selector: 'app-mecart-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ProjectPreviewComponent],
   templateUrl: './mecart-landing.component.html',
   styleUrls: ['./mecart-landing.component.scss']
 })
@@ -28,6 +29,11 @@ export class MecartLandingComponent implements OnInit {
   latestProjects = signal<ProjectItem[]>([]);
   isLoadingProjects = signal<boolean>(true);
 
+  storeTypes = [
+    {label:'سوبر ماركت وبقالة',icon:'bi-basket'}, {label:'صيدليات ومستحضرات',icon:'bi-capsule'},
+    {label:'مطاعم وكافيهات',icon:'bi-cup-hot'}, {label:'إلكترونيات وأجهزة',icon:'bi-laptop'},
+    {label:'قطع غيار ومستلزمات',icon:'bi-gear'}, {label:'أثاث ومحلات وتجارة عامة',icon:'bi-shop'}
+  ];
   services: ServiceItem[] = [
     {
       id: 'hosting',

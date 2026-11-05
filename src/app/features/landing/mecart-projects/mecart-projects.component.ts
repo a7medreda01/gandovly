@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { ProjectPreviewComponent } from '../../../shared/components/project-preview/project-preview.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ProjectsService, ProjectItem } from '../../../core/services/projects.service';
@@ -6,7 +7,7 @@ import { ProjectsService, ProjectItem } from '../../../core/services/projects.se
 @Component({
   selector: 'app-mecart-projects',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ProjectPreviewComponent],
   templateUrl: './mecart-projects.component.html',
   styleUrls: ['./mecart-projects.component.scss']
 })

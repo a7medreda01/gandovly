@@ -974,9 +974,24 @@
     <!-- TAB 4: Business Info & Contacts -->
     @if (activeTab() === 'info') {
       <div class="tab-content animate-fade-in">
+                <section class="settings-card domain-settings mb-4">
+          <h3 class="card-title">الدومين الخاص</h3>
+          @if (customDomain()) {<p>الدومين المسجل: <strong dir="ltr">{{customDomain()}}</strong></p>}
+          <p class="text-muted">اربط متجرك بدومين تملكه. تحقق من الملكية هنا، وأضف نفس الدومين إلى استضافة الواجهة مع DNS وHTTPS. حفظه هنا وحده لا يضبط الاستضافة.</p>
+          <div class="form-group"><label for="customStoreDomain">اسم الدومين</label><input id="customStoreDomain" class="form-control" dir="ltr" placeholder="shop.example.com" [(ngModel)]="domainInput" (ngModelChange)="domainChallenge.set(null)" /></div>
+          <button type="button" class="btn btn-primary" (click)="prepareDomain()" [disabled]="domainBusy() || !domainInput.trim()">{{domainBusy() ? 'جارٍ الفحص...' : 'إنشاء بيانات التحقق'}}</button>
+          @if(domainChallenge(); as challenge) {
+            <p>أضف سجل TXT التالي في إعدادات DNS للدومين، ثم اضغط التحقق:</p>
+            <label for="domainTxtName">اسم السجل</label><input id="domainTxtName" class="form-control" dir="ltr" readonly [value]="challenge.recordName" />
+            <label for="domainTxtValue">قيمة السجل</label><textarea id="domainTxtValue" class="form-control" dir="ltr" readonly rows="4" [value]="challenge.recordValue"></textarea>
+            <button type="button" class="btn btn-primary" (click)="verifyDomain()" [disabled]="domainBusy()">التحقق وربط الدومين</button>
+            <small class="text-muted">قد يستغرق انتشار سجل DNS بعض الوقت. الدومين الحالي يظل كما هو حتى نجاح التحقق.</small>
+          }
+        </section>
         <div class="row g-4">
           <div class="col-12 col-lg-6">
-            <div class="settings-card glass-panel h-100">
+
+        <div class="settings-card glass-panel h-100">
               <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المؤسسة الأساسية</h3>
 
               <div class="form-group">
@@ -999,7 +1014,7 @@
 
 
           <div class="col-12 col-lg-6">
-            <div class="settings-card glass-panel h-100">
+            <div class="settings-card glass-panel h-100 contact-settings-card">
               <h3 class="card-title"><i class="bi bi-telephone-fill text-primary me-2"></i> وسائل الاتصال والعنوان</h3>
 
               <div class="form-row">

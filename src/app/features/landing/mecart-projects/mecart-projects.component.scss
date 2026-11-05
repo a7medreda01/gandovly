@@ -665,3 +665,5 @@
   }
 }
 
+.project-preview-link { display: block; min-width: 0; padding: 14px 14px 0; text-decoration: none; }
+.project-preview-link:focus-visible { outline: 3px solid #10b981; outline-offset: 3px; }

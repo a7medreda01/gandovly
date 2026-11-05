@@ -73,7 +73,7 @@ export class App implements OnInit, OnDestroy {
       let lastRecordedTime = 0;
 
       const recordUrlVisit = (url: string) => {
-        if (!url || url.startsWith('/admin') || url.startsWith('/kitchen')) {
+        if (new URLSearchParams(window.location.search).get('showcase') === '1' || !url || url.startsWith('/admin') || url.startsWith('/kitchen')) {
           return;
         }
 

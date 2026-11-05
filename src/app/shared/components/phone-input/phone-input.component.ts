@@ -422,6 +422,7 @@ export const COUNTRIES_LIST: CountryInfo[] = [
   `,
   styles: [`
     :host {
+      min-width: 0;
       display: block;
       width: 100%;
       max-width: 100%;
@@ -539,6 +540,7 @@ export const COUNTRIES_LIST: CountryInfo[] = [
 
     /* Native Phone Number Input */
     .phone-native-input {
+      width: 0;
       flex: 1;
       height: 100%;
       min-width: 0;

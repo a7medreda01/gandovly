@@ -1,4 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
@@ -22,6 +24,21 @@ export class AdminSettingsComponent implements OnInit {
   readonly settingsService = inject(SettingsService);
   private readonly toast = inject(NotificationService);
 
+  private readonly domainHttp = inject(HttpClient);
+  customDomain = signal('');
+  domainInput = '';
+  domainChallenge = signal<{domain:string;token:string;recordName:string;recordValue:string}|null>(null);
+  domainBusy = signal(false);
+  loadDomain() { this.domainHttp.get<any>(environment.apiUrl+'/admin/settings/custom-domain').subscribe({next:r=>{this.customDomain.set(r.data.customDomain||'');this.domainInput=r.data.customDomain||'';}}); }
+  prepareDomain() {
+    this.domainBusy.set(true); this.domainChallenge.set(null);
+    this.domainHttp.post<any>(environment.apiUrl+'/admin/settings/custom-domain/challenge',{domain:this.domainInput}).subscribe({next:r=>{this.domainBusy.set(false);this.domainChallenge.set(r.data);this.domainInput=r.data.domain;},error:e=>{this.domainBusy.set(false);this.toast.error(e.error?.message||'تعذر إنشاء بيانات التحقق.');}});
+  }
+  verifyDomain() {
+    const challenge=this.domainChallenge(); if(!challenge)return;
+    this.domainBusy.set(true);
+    this.domainHttp.post<any>(environment.apiUrl+'/admin/settings/custom-domain/verify',challenge).subscribe({next:r=>{this.domainBusy.set(false);this.customDomain.set(r.data.customDomain);this.domainChallenge.set(null);this.toast.success(r.message);},error:e=>{this.domainBusy.set(false);this.toast.error(e.error?.message||'تعذر التحقق من الدومين.');}});
+  }
   activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
@@ -150,6 +167,7 @@ export class AdminSettingsComponent implements OnInit {
   ngOnInit() {
     this.loadSettings();
     this.loadPackageStats();
+    this.loadDomain();
   }
 
   loadSettings() {

@@ -73,16 +73,7 @@
     <div class="projects-cards-grid">
       @for (p of projects(); track p.id) {
       <div class="project-card">
-        <div class="card-thumb-wrap">
-          @if (p.thumbnail) {
-          <img [src]="p.thumbnail" [alt]="p.name" class="card-img" loading="lazy" (error)="$any($event.target).style.display = 'none'" />
-          }
-          <div class="thumb-domain-tag">
-            <span class="live-pulse"></span>
-            <span>{{ p.domainLabel }}</span>
-          </div>
-        </div>
-
+        <a class="project-preview-link" [href]="p.url" target="_blank" rel="noopener" [attr.aria-label]="'فتح معاينة ' + p.name"><app-project-preview [slug]="p.subdomain" [name]="p.name" /></a>
         <div class="card-body">
           <div class="store-meta">
             <span class="products-pill"><i class="bi bi-box-seam"></i> {{ p.productsCount }}+ صنف</span>
@@ -91,13 +82,8 @@
 
           <h3 class="store-name">{{ p.name }}</h3>
 
-          <div class="store-link-row">
-            <i class="bi bi-link-45deg text-success"></i>
-            <span class="store-url-text">{{ p.subdomain }}.mecart.app</span>
-          </div>
-
           <div class="card-action-buttons">
-            <a [routerLink]="p.relativeUrl || ['/store']" class="btn btn-live-preview">
+            <a [href]="p.url" target="_blank" rel="noopener" class="btn btn-live-preview">
               <i class="bi bi-eye-fill"></i>
               <span>معاينة لايف</span>
             </a>

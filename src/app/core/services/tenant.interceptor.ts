@@ -1,3 +1,6 @@
+import { inject } from '@angular/core';
+import { switchMap } from 'rxjs/operators';
+import { StoreDomainResolver } from './store-domain-resolver.service';
 import { adminSessionKey, customerSessionKey } from './tenant-session';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -16,5 +19,7 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
     const session = JSON.parse(stored || 'null');
     if (session?.token) headers['Authorization'] = `Bearer ${session.token}`;
   } catch { /* Invalid stored session is handled by the login flow. */ }
+  const customHost = !['localhost','127.0.0.1','mecart.app','www.mecart.app','supermarket1.runasp.net'].includes(host) && !host.endsWith('.mecart.app');
+  if (!slug && customHost) return inject(StoreDomainResolver).slug.pipe(switchMap(resolved => next(request.clone({setHeaders:{...headers,'X-Tenant-Slug':resolved}}))));
   return next(request.clone({ setHeaders: headers }));
 };

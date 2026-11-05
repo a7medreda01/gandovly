@@ -14,8 +14,11 @@ export async function preview(request, fetcher = fetch) {
   const pathId = query.get('id');
   const productId = pathId || query.get('product');
   if (productId && !/^[1-9]\d*$/.test(productId)) return {status:404,html:'Product not found'};
-  const slug = host.endsWith('.mecart.app') && host !== 'www.mecart.app' ? host.slice(0,-11) : query.get('tenant');
+  let slug = host.endsWith('.mecart.app') && host !== 'www.mecart.app' ? host.slice(0,-11) : query.get('tenant');
   if (slug && !/^[a-z0-9-]+$/.test(slug)) return {status:404,html:'Store not found'};
+  if (!slug && !['mecart.app','www.mecart.app'].includes(host)) {
+    try { const resolved=await fetcher(API+'/public/store-domain?host='+encodeURIComponent(host),{signal:AbortSignal.timeout(12000)}); if(!resolved.ok) return {status:404,html:'Store not found'}; slug=(await resolved.json()).data?.slug; if(!slug)return {status:404,html:'Store not found'}; } catch { return {status:503,html:'Preview unavailable'}; }
+  }
   // Custom-domain API requests pass through that domain's existing frontend proxy.
   const base = slug ? API : origin + '/api/v1';
   async function get(path) {

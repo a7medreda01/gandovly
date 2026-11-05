@@ -682,3 +682,13 @@
 .settings-page .tab-save-footer { position: sticky; bottom: 12px; z-index: 5; padding: 16px; gap: 12px; flex-wrap: wrap; border: 1px solid #dfe5ec; border-radius: 12px; background: #fff; box-shadow: 0 4px 18px #12263f12; }
 .settings-page .tab-save-footer button { min-height: 44px; padding: 10px 18px; font-size: .95rem; }
 @media(max-width:767px) { .settings-tabs-bar .tab-btn { flex-basis: 42%; font-size: .82rem; } .settings-page .settings-card { padding: 16px; } .settings-page details.settings-disclosure { padding: 0; } .settings-disclosure > summary { padding: 16px; } .settings-disclosure > :not(summary) { margin-inline: 16px; } .settings-grid { grid-template-columns: minmax(0,1fr); } .settings-page .tab-save-footer button { width: 100%; } }
+.settings-page .settings-card, .settings-page .settings-col, .settings-page .form-group { min-width: 0; }
+.settings-page .form-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.settings-page .form-row > .form-group { width: 100%; max-width: 100%; }
+.settings-page app-phone-input { display: block; min-width: 0; max-width: 100%; }
+@media(max-width:1199px) { .settings-page .form-row { grid-template-columns: minmax(0,1fr); } }
+.domain-settings { grid-column: 1 / -1; }
+.domain-settings input, .domain-settings textarea { width: 100%; min-width: 0; box-sizing: border-box; }
+.domain-settings button { align-self: flex-start; min-height: 44px; }
+.contact-settings-card { container-type: inline-size; container-name: contact-settings; }
+@container contact-settings (max-width:560px) { .settings-page .contact-settings-card .form-row { grid-template-columns: minmax(0,1fr); } }

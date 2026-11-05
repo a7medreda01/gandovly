@@ -45,7 +45,9 @@ export class ProjectsService {
     }
 
     return this.http.get<{ success: boolean; data: PaginatedProjectsResult }>(this.baseUrl, { params }).pipe(
-      map(res => res.data),
+      map(res => ({ ...res.data, items: res.data.items.map(project => ({ ...project,
+        domainLabel: ({Supermarket:'سوبر ماركت وبقالة',Restaurant:'مطاعم وكافيهات',Pharmacy:'صيدليات ومستحضرات',AutoParts:'قطع غيار ومستلزمات',Electronics:'إلكترونيات وأجهزة',GeneralRetail:'محلات وتجارة عامة'} as Record<string,string>)[project.businessDomain] || project.domainLabel
+      })) })),
       catchError(() => of({ items: [], pageNumber, pageSize, totalCount: 0, totalPages: 0 }))
     );
   }
