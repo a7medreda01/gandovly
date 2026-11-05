@@ -1374,6 +1374,9 @@
         </div>
 
         <div class="modal-body-custom">
+          @if (accountConnectionError()) {
+            <div class="alert alert-warning" role="alert">{{ accountConnectionError() }} <button type="button" class="btn-outline-custom" (click)="refreshAccountsSilently()">إعادة فحص الاتصال</button></div>
+          }
           <div class="account-connect-grid">
             <!-- QR Section -->
             <div class="connect-col-qr">
@@ -1457,7 +1460,7 @@
                   } @else if (acc.connectionStatus === 'qr_ready') {
                     <span class="badge bg-warning text-dark">بانتظار المسح ⏳</span>
                   } @else {
-                    <span class="badge bg-secondary">{{ acc.connectionStatus || 'غير متصل' }}</span>
+                    <span class="badge bg-secondary">{{ acc.connectionStatus === 'connecting' ? 'جارٍ تأكيد الربط مع واتساب' : acc.connectionStatus === 'offline' ? 'تعذر الوصول للبوابة' : 'غير متصل' }}</span>
                   }
                 </div>
                 @if (acc.phoneNumber) {

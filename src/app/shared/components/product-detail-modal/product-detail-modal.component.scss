@@ -1801,3 +1801,7 @@
 .luxury-modal .mode-btn { min-height: 54px; }
 
 .luxury-modal { border-radius: var(--radius-modal, 22px); background: var(--card-bg, #fff); color: var(--text-main); }
+/* Keep scrolling inside the sheet, including when reaching either edge. */
+.modal-backdrop { overscroll-behavior: none; }
+.luxury-modal { border-bottom-left-radius: 0; border-bottom-right-radius: 0; overscroll-behavior: none; }
+.luxury-modal .modal-body { min-height: 0; overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }

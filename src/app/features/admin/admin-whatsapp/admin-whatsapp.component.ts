@@ -168,6 +168,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
 
   private pollInterval: any = null;
   private accountsRequestPending = false;
+  accountConnectionError = signal<string | null>(null);
 
   ngOnInit() {
     this.loadAccounts();
@@ -234,12 +235,13 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
     this.adminService.getWhatsAppAccounts().subscribe({
       next: (res: any) => {
         this.accountsRequestPending = false;
+        this.accountConnectionError.set(null);
         const list = res?.data || res || [];
         this.applyAccounts(list);
 
 
       },
-      error: () => { this.accountsRequestPending = false; }
+      error: () => { this.accountsRequestPending = false; this.accountConnectionError.set('تعذر تحديث حالة الربط من الخادم. نجاح المسح على الهاتف لا يؤكد اكتمال الاتصال؛ أعد المحاولة بعد قليل.'); }
     });
   }
 
@@ -311,6 +313,7 @@ export class AdminWhatsAppComponent implements OnInit, OnDestroy {
   }
 
   openConnectAccountModal(account: WhatsAppAccount) {
+    this.accountConnectionError.set(null);
     this.selectedAccountForConnect.set(account);
     this.accountPairPhone = '';
     this.accountPairingCode.set(null);
