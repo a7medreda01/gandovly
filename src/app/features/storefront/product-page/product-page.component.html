@@ -6,14 +6,14 @@
         <i class="bi bi-arrow-right"></i>
         <span class="ms-1">رجوع</span>
       </button>
-      <nav aria-label="breadcrumb" class="d-none d-sm-block">
+      <nav aria-label="مسار التنقل" class="product-breadcrumb d-none d-sm-block">
         <ol class="breadcrumb mb-0">
           <li class="breadcrumb-item"><a routerLink="/">الرئيسية</a></li>
-          <li class="breadcrumb-item"><a routerLink="/menu">المنتجات</a></li>
+          <li class="breadcrumb-item"><a routerLink="/menu">الكتالوج</a></li>
           @if (product()?.categoryNameAr) {
             <li class="breadcrumb-item"><a [routerLink]="['/menu']" [queryParams]="{category: product()!.categoryId}">{{ product()!.categoryNameAr }}</a></li>
           }
-          <li class="breadcrumb-item active" aria-current="page">{{ languageService.getLocalizedName(product()!) || 'تفاصيل الصنف' }}</li>
+          <li class="breadcrumb-item active" aria-current="page" [title]="languageService.getLocalizedName(product()!) || 'التفاصيل'">{{ languageService.getLocalizedName(product()!) || 'التفاصيل' }}</li>
         </ol>
       </nav>
     </div>
@@ -37,7 +37,7 @@
         type="button"
         class="btn-action-pill btn-share-action"
         (click)="onShareProduct()"
-        title="مشاركة رابط الصنف"
+        title="مشاركة الرابط"
       >
         @if (isCopied()) {
           <i class="bi bi-check2 text-success"></i>
@@ -212,14 +212,14 @@
         <!-- Description Card -->
         @if (product()!.description) {
           <div class="detail-card glass-panel mb-3">
-            <h4 class="card-sec-title"><i class="bi bi-card-text text-primary me-2"></i> نبذة عن الصنف</h4>
+            <h4 class="card-sec-title"><i class="bi bi-card-text text-primary me-2"></i> نبذة</h4>
             <p class="product-desc-p mb-0">{{ product()!.description }}</p>
           </div>
         }
 
         <!-- Quantity & Weight Card -->
         <div class="detail-card glass-panel mb-3">
-          <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> تحديد الكمية والوزن</h4>
+          <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> الكمية</h4>
 
           @if (isWeighedProduct) {
             @if (product()!.allowOrderByPieces && product()!.allowOrderByWeight) {
@@ -246,7 +246,7 @@
             @if (orderMode === 'pieces') {
               <div class="stepper-unit-control">
                 <div class="stepper-header-row flex-between mb-2">
-                  <span class="stepper-title fw-bold text-dark">العدد المطلوب:</span>
+                  <span class="stepper-title fw-bold text-dark">العدد:</span>
                   <div class="stepper-box">
                     <button type="button" class="btn-step" (click)="changePieces(-1)" aria-label="تقليل الكمية" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
                     <span class="step-value">{{ piecesCount }} قطعة</span>
@@ -261,7 +261,7 @@
             } @else {
               <div class="stepper-unit-control">
                 <div class="stepper-header-row flex-between mb-2">
-                  <span class="stepper-title fw-bold text-dark">الوزن المباشر:</span>
+                  <span class="stepper-title fw-bold text-dark">الوزن:</span>
                   <div class="stepper-box">
                     <button type="button" class="btn-step" (click)="changeWeight(-250)" aria-label="تقليل الوزن" [disabled]="customWeightGrams <= 250"><i class="bi bi-dash-lg"></i></button>
                     <span class="step-value">{{ customWeightGrams >= 1000 ? (customWeightGrams / 1000) + ' كجم' : customWeightGrams + ' جم' }}</span>
@@ -281,7 +281,7 @@
           } @else {
             <div class="stepper-unit-control">
               <div class="stepper-header-row flex-between">
-                <span class="stepper-title fw-bold text-dark">الكمية المطلوبة:</span>
+                <span class="stepper-title fw-bold text-dark">العدد:</span>
                 <div class="stepper-box">
                   <button type="button" class="btn-step" (click)="changePieces(-1)" aria-label="تقليل الكمية" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
                   <span class="step-value">{{ piecesCount }}</span>
@@ -321,7 +321,7 @@
 
         <!-- Special Notes -->
         <div class="detail-card glass-panel mb-3">
-          <h4 class="card-sec-title"><i class="bi bi-chat-left-dots text-primary me-2"></i> ملاحظات خاصة بالطلب أو التجهيز</h4>
+          <h4 class="card-sec-title"><i class="bi bi-chat-left-dots text-primary me-2"></i> ملاحظات</h4>
           <textarea
             class="product-notes-textarea"
             rows="2"
@@ -333,7 +333,7 @@
         <!-- Specifications Table (if any) -->
         @if (parsedKeySpecs.length > 0) {
           <div class="detail-card glass-panel mb-3">
-            <h4 class="card-sec-title"><i class="bi bi-info-circle text-primary me-2"></i> المواصفات الفنية المعتمدة</h4>
+            <h4 class="card-sec-title"><i class="bi bi-info-circle text-primary me-2"></i> المواصفات</h4>
             <div class="specs-grid mt-2">
               @for (spec of parsedKeySpecs; track spec.label) {
                 <div class="spec-row flex-between py-2 border-bottom">
@@ -348,7 +348,7 @@
         <!-- Sticky Bottom CTA Purchase Bar -->
         <div class="page-purchase-bar glass-panel flex-between p-3">
           <div class="total-summary-col">
-            <span class="caption text-muted small d-block">الإجمالي الكلي:</span>
+            <span class="caption text-muted small d-block">الإجمالي:</span>
             <div class="amount-wrap d-flex align-items-baseline gap-1">
               <span class="amount-val fw-bold">{{ calculatedEstimatedTotal }}</span>
               <span class="amount-curr fw-bold small text-primary">{{ currencySymbol }}</span>
@@ -378,7 +378,7 @@
     @if (relatedProducts().length > 0) {
       <div class="related-products-section mt-4 pt-3 border-top">
         <div class="section-heading mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <h3 class="heading-title mb-0"><i class="bi bi-grid-fill text-primary me-2"></i> منتجات مشابهة قد تعجبك</h3>
+          <h3 class="heading-title mb-0"><i class="bi bi-grid-fill text-primary me-2"></i> قد يعجبك أيضًا</h3>
           <a [routerLink]="['/menu']" [queryParams]="{category: product()!.categoryId}" class="btn-view-all-link">عرض المزيد من هذا القسم ←</a>
         </div>
         <div class="related-grid">
