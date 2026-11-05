@@ -4,13 +4,13 @@
   <section class="hero-banner-section">
     <div class="luxury-hero-card">
       <img
-        [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
+        [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl) | imageUrl:'banner'"
         [alt]="settingsService.settings().restaurantName || 'منصة التجارة الشاملة'" class="hero-bg-img"
         fetchpriority="high" />
       <div class="hero-content-overlay">
         <div class="hero-texts">
           <h1 class="hero-title">
-            <span class="gold-text">عروض وتوفير يومي</span>
+            <span class="gold-text">{{ settingsService.settings().tagline || settingsService.settings().restaurantName }}</span>
           </h1>
           <p class="hero-subtitle">{{ settingsService.settings().description || 'تسوق كافة المنتجات والطلبات بأفضل جودة وأسرع توصيل لباب منزلك' }}</p>
           <a routerLink="/menu" class="btn-hero-cta">
