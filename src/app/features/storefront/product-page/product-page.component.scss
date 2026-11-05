@@ -757,3 +757,7 @@
 
 .product-page-grid .detail-card, .product-page-grid .gallery-main-card { border-radius: var(--radius-card, 18px); background: var(--card-bg, #fff); color: var(--text-main); box-shadow: var(--shadow-card); }
 .product-page-grid .page-purchase-bar { background: var(--card-bg, #fff); border-radius: var(--radius-card, 16px); }
+
+/* Purchase controls stay below the product data; mobile navigation remains visible. */
+.product-page-grid .page-purchase-bar { position: static; inset: auto; width: auto; z-index: auto; margin-top: 16px; padding: 16px; box-shadow: none; }
+@media(max-width:767px) { .product-page-container { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
