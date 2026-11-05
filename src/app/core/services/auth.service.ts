@@ -1,3 +1,4 @@
+import { adminSessionKey, customerSessionKey } from './tenant-session';
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { ApiService } from './api.service';
 import { AuthResponse, CustomerAddress, CustomerProfile } from '../models/models';
@@ -23,7 +24,7 @@ export class AuthService {
     if (typeof localStorage === 'undefined') return;
     
     try {
-      const storedCustomer = localStorage.getItem('gendofly_customer_session');
+      const storedCustomer = localStorage.getItem(customerSessionKey('gendofly_customer_session'));
       if (storedCustomer) {
         const parsed: AuthResponse = JSON.parse(storedCustomer);
         this.currentCustomer.set(parsed);
@@ -38,7 +39,7 @@ export class AuthService {
         }
       }
 
-      const storedAdmin = localStorage.getItem('gendofly_admin_session');
+      const storedAdmin = sessionStorage.getItem(adminSessionKey()) || localStorage.getItem(adminSessionKey());
       if (storedAdmin) {
         const adminUser: AuthResponse = JSON.parse(storedAdmin);
         this.currentAdmin.set(adminUser);
@@ -59,10 +60,10 @@ export class AuthService {
         if (res && res.success) {
           this.currentCustomer.set(res);
           if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('gendofly_customer_session', JSON.stringify(res));
-            localStorage.setItem('gendofly_customer_token', res.token);
+            localStorage.setItem(customerSessionKey('gendofly_customer_session'), JSON.stringify(res));
+            localStorage.setItem(customerSessionKey('gendofly_customer_token'), res.token);
             if (res.refreshToken) {
-              localStorage.setItem('gendofly_customer_refresh_token', res.refreshToken);
+              localStorage.setItem(customerSessionKey('gendofly_customer_refresh_token'), res.refreshToken);
             }
           }
         }
@@ -78,10 +79,10 @@ export class AuthService {
           const updated = { ...current, ...res };
           this.currentCustomer.set(updated);
           if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('gendofly_customer_session', JSON.stringify(updated));
-            localStorage.setItem('gendofly_customer_token', res.token);
+            localStorage.setItem(customerSessionKey('gendofly_customer_session'), JSON.stringify(updated));
+            localStorage.setItem(customerSessionKey('gendofly_customer_token'), res.token);
             if (res.refreshToken) {
-              localStorage.setItem('gendofly_customer_refresh_token', res.refreshToken);
+              localStorage.setItem(customerSessionKey('gendofly_customer_refresh_token'), res.refreshToken);
             }
           }
         }
@@ -93,10 +94,11 @@ export class AuthService {
     return this.api.post<AuthResponse>('auth/admin/login', { username, password }).pipe(
       tap(res => {
         if (res && res.success) {
+          sessionStorage.removeItem(adminSessionKey());
           this.currentAdmin.set(res);
           this.isAdminLoggedIn.set(true);
           if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('gendofly_admin_session', JSON.stringify(res));
+            localStorage.setItem(adminSessionKey(), JSON.stringify(res));
           }
         }
       })
@@ -106,17 +108,35 @@ export class AuthService {
   logoutCustomer() {
     this.currentCustomer.set(null);
     if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('gendofly_customer_session');
-      localStorage.removeItem('gendofly_customer_token');
-      localStorage.removeItem('gendofly_customer_refresh_token');
+      localStorage.removeItem(customerSessionKey('gendofly_customer_session'));
+      localStorage.removeItem(customerSessionKey('gendofly_customer_token'));
+      localStorage.removeItem(customerSessionKey('gendofly_customer_refresh_token'));
     }
   }
 
+  validateAdminSession() {
+    return this.api.get<Partial<AuthResponse>>('admin/session', { check: Date.now() }).pipe(tap(session => {
+      this.currentAdmin.update(current => current ? { ...current, ...session } : null);
+    }));
+  }
+
+  startSupportSession(code: string) {
+    return this.api.post<AuthResponse>('auth/admin/support-exchange', { code }).pipe(tap(session => {
+      this.currentAdmin.set(session);
+      this.isAdminLoggedIn.set(true);
+      sessionStorage.setItem(adminSessionKey(), JSON.stringify(session));
+    }));
+  }
+
+  revokeAdminSession() { return this.api.post<boolean>('admin/session/logout', {}); }
+
   logoutAdmin() {
+    const support = this.currentAdmin()?.isSupportSession;
+    if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(adminSessionKey());
     this.currentAdmin.set(null);
     this.isAdminLoggedIn.set(false);
     if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem('gendofly_admin_session');
+      if (!support) localStorage.removeItem(adminSessionKey());
     }
   }
 

@@ -1,14 +1,14 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ApiService } from '../../../core/services/api.service';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
 @Component({
   selector: 'app-admin-packages',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-packages.component.html',
   styleUrl: './admin-packages.component.scss'
 })
@@ -16,6 +16,9 @@ export class AdminPackagesComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
 
+  private readonly api = inject(ApiService);
+  stores = signal<any[]>([]);
+  selectedTenantId = '1';
   packageStats = signal<any>(null);
   isLoading = signal<boolean>(false);
   isExporting = signal<boolean>(false);
@@ -25,16 +28,16 @@ export class AdminPackagesComponent implements OnInit {
   showGuideModal = signal<boolean>(false);
 
   ngOnInit(): void {
+    this.api.get<any[]>('admin/tenants').subscribe({ next: stores => this.stores.set(stores) });
     this.loadStats();
   }
 
   loadStats(): void {
     this.isLoading.set(true);
-    this.adminService.getPackageStats().subscribe({
+    this.api.get<any>('admin/tenants/' + this.selectedTenantId + '/stats').subscribe({
       next: res => {
         this.isLoading.set(false);
-        if (res && res.data) {
-          this.packageStats.set(res.data);
+        if (res) { this.packageStats.set(res);
         }
       },
       error: () => {
@@ -48,7 +51,7 @@ export class AdminPackagesComponent implements OnInit {
     this.isExporting.set(true);
     this.toast.info('جاري تجهيز وتحزيم ملفات المتجر والوسائط الكاملة... يرجى الانتظار');
 
-    this.adminService.exportStorePackage().subscribe({
+    this.adminService.exportStorePackage(this.selectedTenantId).subscribe({
       next: (blob: Blob) => {
         this.isExporting.set(false);
         const url = window.URL.createObjectURL(blob);
@@ -82,7 +85,7 @@ export class AdminPackagesComponent implements OnInit {
     const clean = this.cleanBeforeImport();
     const confirmMsg = clean
       ? 'تحذير: لقد اخترت استبدال البيانات بالكامل! سيتم حذف الأصناف والأقسام السابقة وتطبيق الحزمة الجديدة. هل تريد المتابعة؟'
-      : 'سيتم استيراد الحزمة ودمج الأقسام والمنتجات الجديدة. هل تريد المتابعة؟';
+      : 'سيتم استيراد الحزمة إلى المتجر المحدد إذا كان فارغًا. هل تريد المتابعة؟';
 
     if (!confirm(confirmMsg)) {
       input.value = '';
@@ -92,7 +95,7 @@ export class AdminPackagesComponent implements OnInit {
     this.isImporting.set(true);
     this.toast.info('جاري رفع واستيراد حزمة المتجر وتوزيع الصور في قاعدة البيانات...');
 
-    this.adminService.importStorePackage(file, clean).subscribe({
+    this.adminService.importStorePackage(file, false, this.selectedTenantId).subscribe({
       next: res => {
         this.isImporting.set(false);
         input.value = '';

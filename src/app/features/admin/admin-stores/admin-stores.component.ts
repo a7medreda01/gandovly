@@ -2,6 +2,8 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ApiService } from '../../../core/services/api.service';
+import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
@@ -18,6 +20,7 @@ export interface StoreTenant {
   ownerEmail: string;
   createdAt: string;
   logoUrl?: string;
+  ownerAccess?: { username: string; password: string; loginPath: string };
 }
 
 @Component({
@@ -29,6 +32,11 @@ export interface StoreTenant {
 })
 export class AdminStoresComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly api = inject(ApiService);
+  private readonly http = inject(HttpClient);
+  supportLoginUrl = signal<string | null>(null);
+  createdOwnerAccess = signal<{ username: string; password: string; url: string } | null>(null);
+  loadError = signal<string>('');
   private readonly toast = inject(NotificationService);
 
   // Search & Filters
@@ -47,11 +55,13 @@ export class AdminStoresComponent implements OnInit {
     name: '',
     subdomain: '',
     customDomain: '',
-    businessDomain: 'Supermarket' as const,
+    businessDomain: 'Supermarket' as StoreTenant['businessDomain'],
     plan: 'Growth' as const,
     seedTemplate: 'supermarket-carrefour',
     ownerPhone: '',
     ownerEmail: '',
+    ownerUsername: 'owner',
+    ownerPassword: '',
     enableInstantSSL: true
   };
 
@@ -97,6 +107,11 @@ export class AdminStoresComponent implements OnInit {
     return list;
   });
 
+  page = signal(1);
+  readonly pageSize = 10;
+  totalPages = computed(() => Math.max(1, Math.ceil(this.filteredStores().length / this.pageSize)));
+  pagedStores = computed(() => this.filteredStores().slice((this.page() - 1) * this.pageSize, this.page() * this.pageSize));
+
   // Statistics
   totalStores = computed(() => this.stores().length);
   activeStores = computed(() => this.stores().filter(s => s.status === 'Active').length);
@@ -108,77 +123,12 @@ export class AdminStoresComponent implements OnInit {
   }
 
   loadStores(): void {
-    const saved = localStorage.getItem('mecart_tenants_registry');
-    if (saved) {
-      try {
-        this.stores.set(JSON.parse(saved));
-        return;
-      } catch { }
-    }
-
-    // Default Seed Stores in Platform Registry
-    const defaults: StoreTenant[] = [
-      {
-        id: 't-super-01',
-        name: 'كارفور مصر — سوبرماركت التوفير',
-        subdomain: 'super',
-        customDomain: 'supermarket1.runasp.net',
-        businessDomain: 'Supermarket',
-        plan: 'Pro',
-        status: 'Active',
-        productsCount: 1037,
-        ownerPhone: '+201148472670',
-        ownerEmail: 'carrefour@mecart.app',
-        createdAt: '2026-11-01',
-        logoUrl: '/assets/images/branding/logo.png'
-      },
-      {
-        id: 't-rest-02',
-        name: 'مطعم ومشويات الأصيل',
-        subdomain: 'alaseel',
-        customDomain: '',
-        businessDomain: 'Restaurant',
-        plan: 'Growth',
-        status: 'Active',
-        productsCount: 68,
-        ownerPhone: '+201000000001',
-        ownerEmail: 'alaseel@mecart.app',
-        createdAt: '2026-11-02'
-      },
-      {
-        id: 't-pharma-03',
-        name: 'صيدليات الشفاء والعناية',
-        subdomain: 'elshifaa',
-        customDomain: 'elshifaa-pharma.com',
-        businessDomain: 'Pharmacy',
-        plan: 'Enterprise',
-        status: 'Active',
-        productsCount: 412,
-        ownerPhone: '+201000000002',
-        ownerEmail: 'pharma@mecart.app',
-        createdAt: '2026-11-03'
-      },
-      {
-        id: 't-auto-04',
-        name: 'سبيد أوتو لقطع غيار السيارات',
-        subdomain: 'speedauto',
-        customDomain: '',
-        businessDomain: 'AutoParts',
-        plan: 'Growth',
-        status: 'Active',
-        productsCount: 185,
-        ownerPhone: '+201000000003',
-        ownerEmail: 'parts@mecart.app',
-        createdAt: '2026-11-04'
-      }
-    ];
-
-    this.stores.set(defaults);
-    this.saveStoresToStorage();
-  }
-
-  saveStoresToStorage(): void {
-    localStorage.setItem('mecart_tenants_registry', JSON.stringify(this.stores()));
+    this.isLoading.set(true);
+    this.loadError.set('');
+    this.api.get<StoreTenant[]>('admin/tenants').subscribe({
+      next: stores => { this.stores.set(stores); this.page.set(1); this.isLoading.set(false); },
+      error: () => { this.loadError.set('تعذر تحميل المتاجر. تحقق من الاتصال وسجل الدخول مجددًا.'); this.isLoading.set(false); }
+    });
   }
 
   openCreateModal(): void {
@@ -191,13 +141,15 @@ export class AdminStoresComponent implements OnInit {
       seedTemplate: 'supermarket-carrefour',
       ownerPhone: '',
       ownerEmail: '',
+    ownerUsername: 'owner',
+    ownerPassword: '',
       enableInstantSSL: true
     };
     this.isModalOpen.set(true);
   }
 
   closeCreateModal(): void {
-    this.isModalOpen.set(false);
+    if (!this.isCreating()) this.isModalOpen.set(false);
   }
 
   autoSlug(): void {
@@ -229,69 +181,70 @@ export class AdminStoresComponent implements OnInit {
     this.isCreating.set(true);
     this.toast.info(`جاري تأسيس متجر [${this.newStore.name}] وزراعة القالب الأولي...`);
 
-    setTimeout(() => {
-      const created: StoreTenant = {
-        id: 't-' + Date.now().toString(36),
-        name: this.newStore.name.trim(),
-        subdomain: cleanSubdomain,
-        customDomain: this.newStore.customDomain.trim() || undefined,
-        businessDomain: this.newStore.businessDomain,
-        plan: this.newStore.plan,
-        status: 'Active',
-        productsCount: this.newStore.seedTemplate === 'supermarket-carrefour' ? 1037 : 24,
-        ownerPhone: this.newStore.ownerPhone.trim() || '+201148472670',
-        ownerEmail: this.newStore.ownerEmail.trim() || `${cleanSubdomain}@mecart.app`,
-        createdAt: new Date().toISOString().slice(0, 10)
-      };
-
-      this.stores.update(list => [created, ...list]);
-      this.saveStoresToStorage();
-      this.isCreating.set(false);
-      this.closeCreateModal();
-
-      this.toast.success(`تم إنشاء المتجر وتفعيله بنجاح! الرابط: https://${created.subdomain}.mecart.app`);
-    }, 1000);
-  }
-
-  toggleStoreStatus(store: StoreTenant): void {
-    const newStatus = store.status === 'Active' ? 'Suspended' : 'Active';
-    const actionText = newStatus === 'Active' ? 'تنشيط' : 'إيقاف';
-
-    this.stores.update(list =>
-      list.map(s => s.id === store.id ? { ...s, status: newStatus } : s)
-    );
-    this.saveStoresToStorage();
-    this.toast.info(`تم ${actionText} متجر [${store.name}] بنجاح.`);
-  }
-
-  exportStoreZip(store: StoreTenant): void {
-    this.toast.info(`جاري تصدير حزمة متجر [${store.name}] الكاملة...`);
-    this.adminService.exportStorePackage().subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `mecart_${store.subdomain}_package.zip`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        this.toast.success(`تم تنزيل حزمة متجر [${store.name}] بنجاح!`);
+    this.api.post<StoreTenant>('admin/tenants', { ...this.newStore, subdomain: cleanSubdomain, ownerPassword: this.newStore.ownerPassword || null }).subscribe({
+      next: store => {
+        const { ownerAccess, ...publicStore } = store;
+        this.stores.update(list => [publicStore, ...list]);
+        this.page.set(1);
+        this.isCreating.set(false);
+        this.closeCreateModal();
+        if (store.ownerAccess) this.createdOwnerAccess.set({ ...store.ownerAccess, url: this.ownerLoginUrl(store) });
+        this.newStore.ownerPassword = '';
+        this.toast.success('تم إنشاء المتجر وزراعة ' + store.productsCount + ' منتج بنجاح.');
       },
-      error: () => {
-        this.toast.error('حدث خطأ أثناء تصدير حزمة المتجر.');
+      error: error => {
+        this.isCreating.set(false);
+        this.toast.error(error.error?.message || 'فشل إنشاء المتجر.');
       }
     });
   }
 
-  deleteStore(store: StoreTenant): void {
-    if (!confirm(`تحذير نهائي: هل أنت متأكد من حذف متجر [${store.name}]؟ سيتم حذف بيانات ونطاق المتجر نهائياً!`)) {
-      return;
-    }
+  toggleStoreStatus(store: StoreTenant): void {
+    const status = store.status === 'Active' ? 'Suspended' : 'Active';
+    this.api.patch<boolean>('admin/tenants/' + store.id + '/status', { status }).subscribe({
+      next: () => this.loadStores(),
+      error: () => this.toast.error('تعذر تغيير الحالة؛ المتجر الأساسي محمي.')
+    });
+  }
 
-    this.stores.update(list => list.filter(s => s.id !== store.id));
-    this.saveStoresToStorage();
-    this.toast.success(`تم حذف متجر [${store.name}] بنجاح.`);
+  exportStoreZip(store: StoreTenant): void {
+    this.http.get(this.api.baseUrl + '/admin/tenants/' + store.id + '/export', { responseType: 'blob' }).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = 'mecart_' + store.subdomain + '_package.zip';
+        anchor.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.toast.error('تعذر تصدير حزمة هذا المتجر.')
+    });
+  }
+
+  deleteStore(store: StoreTenant): void {
+    this.toast.info('يمكن إيقاف المتجر مع الاحتفاظ ببياناته من زر الحالة. الحذف النهائي غير متاح.');
+  }
+
+  openSupport(store: StoreTenant): void {
+    this.api.post<{loginPath: string}>('admin/tenants/' + store.id + '/support-access', {}).subscribe({
+      next: response => {
+        const url = new URL(response.loginPath, new URL(this.ownerLoginUrl(store)).origin);
+        this.supportLoginUrl.set(url.href);
+      },
+      error: () => this.toast.error('تعذر إنشاء جلسة الدعم. اختر متجرًا نشطًا.')
+    });
+  }
+
+  ownerLoginUrl(store: StoreTenant): string {
+    return ['127.0.0.1', 'localhost'].includes(window.location.hostname)
+      ? window.location.origin + '/admin/login?tenant=' + encodeURIComponent(store.subdomain)
+      : 'https://' + store.subdomain + '.mecart.app/admin/login';
+  }
+
+  storeUrl(store: StoreTenant): string {
+    return window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+      ? window.location.origin + '/?tenant=' + encodeURIComponent(store.subdomain)
+      : 'https://' + store.subdomain + '.mecart.app';
   }
 
   getDomainBadgeClass(domain: string): string {

@@ -15,7 +15,7 @@ import { ApiService } from './core/services/api.service';
   styleUrls: ['./app.scss']
 })
 export class App implements OnInit, OnDestroy {
-  title = 'MeCart | مي كارت — منصة التجارة والتسوق السحابي الذكي (mecart.app)';
+  title = 'المتجر';
   private modalObserver?: MutationObserver;
   private routerSub?: Subscription;
 
@@ -119,6 +119,7 @@ export class App implements OnInit, OnDestroy {
       this.routerSub = this.router.events
         .pipe(filter(event => event instanceof NavigationEnd))
         .subscribe((event: any) => {
+          this.settingsService.applyTheme(this.settingsService.settings());
           recordUrlVisit(event.urlAfterRedirects || event.url);
         });
     } catch {

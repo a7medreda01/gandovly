@@ -1,3 +1,5 @@
+import { isPlatformContext } from '../../../core/services/store-context';
+import { SettingsService } from '../../../core/services/settings.service';
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +15,8 @@ import { NotificationService } from '../../../core/services/notification.service
   styleUrl: './admin-login.component.scss'
 })
 export class AdminLoginComponent {
+  readonly platformLogin = isPlatformContext();
+  readonly settingsService = inject(SettingsService);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(NotificationService);
   private readonly router = inject(Router);
@@ -33,11 +37,11 @@ export class AdminLoginComponent {
     }
 
     this.isLoading.set(true);
-    this.authService.adminLogin(this.username.trim(), this.password.trim()).subscribe({
+    this.authService.adminLogin(this.username.trim(), this.password).subscribe({
       next: res => {
         this.isLoading.set(false);
         this.toast.success('تم تسجيل الدخول بنجاح إلى لوحة الإدارة.');
-        this.router.navigate(['/admin/dashboard']);
+        this.router.navigate([res.isPlatformAdmin ? '/admin/stores' : '/admin/orders']);
       },
       error: () => {
         this.isLoading.set(false);

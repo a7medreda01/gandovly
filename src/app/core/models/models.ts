@@ -457,6 +457,10 @@ export interface Order {
 
 // Auth
 export interface AuthResponse {
+  tenantId?: number;
+  isSupportSession?: boolean;
+  isPlatformAdmin?: boolean;
+  expiresAt?: string;
   success: boolean;
   token: string;
   refreshToken?: string;

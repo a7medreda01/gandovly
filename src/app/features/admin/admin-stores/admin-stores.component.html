@@ -1,124 +1,15 @@
 <div class="admin-stores-page">
-  <!-- Top Banner Header -->
-  <div class="page-title-row d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-    <div>
-      <div class="d-flex align-items-center gap-2">
-        <h1 class="page-heading mb-0">المتاجر السحابية والعملاء 🏪☁️</h1>
-        <span class="badge" style="background: linear-gradient(135deg, #10B981, #059669); color: #fff; font-size: 0.8rem; padding: 6px 12px; border-radius: 8px;">
-          Mecart Engine (mecart.app)
-        </span>
-      </div>
-      <p class="page-sub text-muted mt-1 mb-0">تأسيس المتاجر الجديدة، ربط الدومينات المخصصة، وإدارة اشتراكات العملاء وقوالب الـ Seed</p>
-    </div>
-
-    <div class="d-flex align-items-center gap-2">
-      <a routerLink="/admin/packages" class="btn btn-outline-secondary fw-bold px-3 py-2" style="border-radius: 10px;">
-        <i class="bi bi-box-seam me-1"></i> حزم البيانات والبذور
-      </a>
-      <button class="btn btn-success fw-bold px-4 py-2 shadow-sm" style="border-radius: 10px; background: #10B981; border: none;" (click)="openCreateModal()">
-        <i class="bi bi-plus-circle-fill me-1"></i> إنشاء متجر جديد لعميل
-      </button>
-    </div>
+  <div class="workspace-page-heading"><div><div class="page-eyebrow">مساحة العمل / المتاجر</div><h1>متاجرك، في مكان واحد<span class="heading-dot">.</span></h1><p>أنشئ متجرًا جديدًا، تابع بيانات عملائك، وانتقل إلى مساحة عمل أي متجر.</p></div><div class="page-heading-actions"><button class="quiet-button" (click)="loadStores()" [disabled]="isLoading()" aria-label="تحديث المتاجر"><i class="bi bi-arrow-clockwise"></i></button><button class="create-store-button" (click)="openCreateModal()"><i class="bi bi-plus-lg"></i> إنشاء متجر جديد</button></div></div>
+  @if (loadError()) { <div class="load-error" role="alert">{{ loadError() }} <button class="btn" (click)="loadStores()">إعادة المحاولة</button></div> }
+  <div class="store-metrics">
+    <div class="store-metric"><div class="metric-top"><span>إجمالي المتاجر</span><i class="bi bi-shop"></i></div><strong>{{ isLoading() ? '—' : totalStores() }}</strong><small>جميع متاجر مساحة العمل</small></div>
+    <div class="store-metric"><div class="metric-top"><span>المتاجر النشطة</span><i class="bi bi-check2-circle"></i></div><strong>{{ isLoading() ? '—' : activeStores() }}</strong><small><span class="status-dot"></span> مفعّلة لاستقبال العملاء</small></div>
+    <div class="store-metric"><div class="metric-top"><span>المنتجات</span><i class="bi bi-box-seam"></i></div><strong>{{ isLoading() ? '—' : (totalProductsAcrossStores() | number) }}</strong><small>إجمالي أصناف المتاجر</small></div>
+    <div class="store-metric"><div class="metric-top"><span>النطاقات المخصصة</span><i class="bi bi-globe2"></i></div><strong>{{ isLoading() ? '—' : customDomainsCount() }}</strong><small>نطاقات مرتبطة بمتاجرها</small></div>
   </div>
-
-  <!-- KPI Statistics Metrics -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-lg-3">
-      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <div class="text-muted small">إجمالي المتاجر السحابية</div>
-            <div class="fw-bold fs-3 mt-1" style="color: #0F172A;">{{ totalStores() }}</div>
-          </div>
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i class="bi bi-shop-window"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-6 col-lg-3">
-      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <div class="text-muted small">المتاجر النشطة الآن</div>
-            <div class="fw-bold fs-3 mt-1" style="color: #10B981;">{{ activeStores() }}</div>
-          </div>
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i class="bi bi-check-circle-fill"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-6 col-lg-3">
-      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <div class="text-muted small">دومينات مخصصة (Custom)</div>
-            <div class="fw-bold fs-3 mt-1" style="color: #6366F1;">{{ customDomainsCount() }}</div>
-          </div>
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #EEF2FF; color: #6366F1; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i class="bi bi-globe2"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-6 col-lg-3">
-      <div class="card p-3 border-0 shadow-sm" style="border-radius: 14px; background: #fff;">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <div class="text-muted small">المنتجات المفعلة بالمنظومة</div>
-            <div class="fw-bold fs-3 mt-1" style="color: #F59E0B;">{{ totalProductsAcrossStores() }}</div>
-          </div>
-          <div style="width: 48px; height: 48px; border-radius: 12px; background: #FFFBEB; color: #F59E0B; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i class="bi bi-box-seam"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Search and Filtering Bar -->
-  <div class="card p-3 border-0 shadow-sm mb-4" style="border-radius: 14px; background: #fff;">
-    <div class="row g-2 align-items-center">
-      <div class="col-12 col-md-5">
-        <div class="input-group">
-          <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
-          <input
-            type="text"
-            class="form-control border-start-0"
-            placeholder="بحث باسم المتجر، النطاق الفرعي، أو هاتف العميل..."
-            [ngModel]="searchQuery()"
-            (ngModelChange)="searchQuery.set($event)"
-          />
-        </div>
-      </div>
-
-      <div class="col-6 col-md-4">
-        <select class="form-select" [ngModel]="selectedDomainFilter()" (ngModelChange)="selectedDomainFilter.set($event)">
-          <option value="all">كافة الأنشطة التجارية (All Domains)</option>
-          <option value="Supermarket">سوبر ماركت وتجزئة شاملة</option>
-          <option value="Restaurant">مطاعم وكافيهات ومأكولات</option>
-          <option value="Pharmacy">صيدليات ومستحضرات تجميل</option>
-          <option value="AutoParts">قطع غيار سيارات ومستلزمات</option>
-          <option value="Electronics">أجهزة وإلكترونيات وهواتف</option>
-          <option value="GeneralRetail">محلات أزياء ومتاجر عامة</option>
-        </select>
-      </div>
-
-      <div class="col-6 col-md-3">
-        <select class="form-select" [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event)">
-          <option value="all">كافة الحالات (الكل)</option>
-          <option value="Active">نشط ومفعل (Active)</option>
-          <option value="Suspended">موقوف مؤقتاً (Suspended)</option>
-          <option value="Pending">قيد التجهيز (Pending)</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
+  <div class="registry-heading"><div><h2>سجل المتاجر <span>{{ totalStores() }}</span></h2><p>بيانات فعلية، ومساحة مستقلة لكل متجر.</p></div><a routerLink="/admin/packages"><i class="bi bi-box-seam"></i> إدارة القوالب والبيانات <i class="bi bi-arrow-up-left"></i></a></div>
+  <div class="registry-toolbar"><div class="store-search"><i class="bi bi-search"></i><input aria-label="البحث في المتاجر" placeholder="ابحث باسم المتجر، النطاق أو بيانات المالك..." [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); page.set(1)" /></div><select aria-label="تصفية حسب النشاط" [ngModel]="selectedDomainFilter()" (ngModelChange)="selectedDomainFilter.set($event); page.set(1)"><option value="all">جميع الأنشطة</option>@for (domain of businessDomainList; track domain.id) { <option [value]="domain.id">{{ domain.label }}</option> }</select><select aria-label="تصفية حسب الحالة" [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event); page.set(1)"><option value="all">جميع الحالات</option><option value="Active">نشط</option><option value="Suspended">موقوف</option></select></div>
+  @if (isLoading()) { <div class="registry-loading" role="status"><i class="bi bi-arrow-repeat"></i> جاري تحديث سجل المتاجر…</div> }
   <!-- Stores Table Grid -->
   <div class="card border-0 shadow-sm" style="border-radius: 16px; background: #fff; overflow: hidden;">
     <div class="table-responsive">
@@ -134,7 +25,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (store of filteredStores(); track store.id) {
+          @for (store of pagedStores(); track store.id) {
             <tr>
               <!-- Store Name & Business Domain -->
               <td class="py-3 px-4">
@@ -159,7 +50,7 @@
               <!-- Subdomain & Custom Domain -->
               <td class="py-3">
                 <div class="d-flex flex-column gap-1">
-                  <a href="https://{{ store.subdomain }}.mecart.app" target="_blank" class="fw-bold text-decoration-none" style="color: #2563EB;">
+                  <a [href]="storeUrl(store)" target="_blank" class="fw-bold text-decoration-none" style="color: #2563EB;">
                     <i class="bi bi-link-45deg"></i> {{ store.subdomain }}.mecart.app
                   </a>
                   @if (store.customDomain) {
@@ -210,20 +101,17 @@
                     <i class="bi" [class.bi-pause-fill]="store.status === 'Active'" [class.bi-play-fill]="store.status !== 'Active'"></i>
                   </button>
 
+                  <a [href]="ownerLoginUrl(store)" target="_blank" rel="noopener" class="btn btn-sm" title="دخول مالك المتجر"><i class="bi bi-person-lock"></i></a>
+                  @if (store.id !== '1') { <button class="btn btn-sm" (click)="openSupport(store)" title="دخول دعم مؤقت لمدة 15 دقيقة"><i class="bi bi-headset"></i></button> }
                   <!-- Export ZIP -->
                   <button class="btn btn-sm btn-outline-primary" (click)="exportStoreZip(store)" title="تنزيل حزمة المتجر ZIP">
                     <i class="bi bi-download"></i>
                   </button>
 
                   <!-- Open Storefront -->
-                  <a routerLink="/" class="btn btn-sm btn-outline-secondary" title="معاينة المتجر">
+                  <a [href]="storeUrl(store)" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="معاينة المتجر">
                     <i class="bi bi-box-arrow-up-left"></i>
                   </a>
-
-                  <!-- Delete -->
-                  <button class="btn btn-sm btn-outline-danger" (click)="deleteStore(store)" title="حذف المتجر">
-                    <i class="bi bi-trash3-fill"></i>
-                  </button>
                 </div>
               </td>
             </tr>
@@ -238,19 +126,20 @@
         </tbody>
       </table>
     </div>
+    <div class="registry-pagination"><span>{{ filteredStores().length }} متجر مطابق · الصفحة {{ page() }} من {{ totalPages() }}</span><div><button (click)="page.set(page() - 1)" [disabled]="page() <= 1" aria-label="الصفحة السابقة"><i class="bi bi-chevron-right"></i></button><span>{{ page() }}</span><button (click)="page.set(page() + 1)" [disabled]="page() >= totalPages()" aria-label="الصفحة التالية"><i class="bi bi-chevron-left"></i></button></div></div>
   </div>
 </div>
 
 <!-- Modal: Create New Store -->
 @if (isModalOpen()) {
   <div class="modal-backdrop-custom flex-center" (click)="closeCreateModal()">
-    <div class="modal-box-custom p-4 shadow-lg animate-fade-in" (click)="$event.stopPropagation()">
+    <div class="modal-box-custom p-4 shadow-lg animate-fade-in" role="dialog" aria-modal="true" aria-label="إنشاء متجر" (click)="$event.stopPropagation()">
       <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
         <div class="d-flex align-items-center gap-2">
           <div style="width: 38px; height: 38px; border-radius: 10px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
             <i class="bi bi-plus-lg"></i>
           </div>
-          <h4 class="fw-bold mb-0">تأسيس متجر سحابي جديد (New Store)</h4>
+          <h4 class="fw-bold mb-0">إنشاء متجر جديد</h4>
         </div>
         <button class="btn-close" (click)="closeCreateModal()" aria-label="إغلاق"></button>
       </div>
@@ -259,7 +148,7 @@
         <div class="row g-3">
           <!-- Store Name -->
           <div class="col-12 col-md-6">
-            <label class="form-label fw-bold small">اسم المتجر / العلامة التجارية *</label>
+            <label class="form-label fw-bold small">اسم المتجر *</label>
             <input
               type="text"
               class="form-control py-2"
@@ -273,7 +162,7 @@
 
           <!-- Subdomain -->
           <div class="col-12 col-md-6">
-            <label class="form-label fw-bold small">النطاق الفرعي (Subdomain) *</label>
+            <label class="form-label fw-bold small">عنوان المتجر *</label>
             <div class="input-group" dir="ltr">
               <input
                 type="text"
@@ -285,13 +174,13 @@
               />
               <span class="input-group-text bg-light fw-bold text-muted">.mecart.app</span>
             </div>
-            <small class="text-muted d-block mt-1">سيعمل فوراً دون أي إعداد يدوي بفضل الـ Wildcard DNS.</small>
+            <small class="text-muted d-block mt-1">يتطلب تفعيل النطاق إعداد Wildcard DNS وشهادة TLS على الخادم.</small>
           </div>
 
           <!-- Business Domain -->
           <div class="col-12 col-md-6">
-            <label class="form-label fw-bold small">النشاط التجاري (Business Domain) *</label>
-            <select class="form-select py-2" [(ngModel)]="newStore.businessDomain" name="businessDomain">
+            <label class="form-label fw-bold small">النشاط التجاري *</label>
+            <select class="form-select py-2" [(ngModel)]="newStore.businessDomain" (ngModelChange)="newStore.seedTemplate = $event === 'Supermarket' ? 'supermarket-carrefour' : 'empty'" name="businessDomain">
               @for (domain of businessDomainList; track domain.id) {
                 <option [value]="domain.id">{{ domain.label }}</option>
               }
@@ -300,14 +189,16 @@
 
           <!-- Seed Template -->
           <div class="col-12 col-md-6">
-            <label class="form-label fw-bold small">حزمة البذور المبدئية (Initial Seed) *</label>
+            <label class="form-label fw-bold small">البيانات الأولية *</label>
             <select class="form-select py-2" [(ngModel)]="newStore.seedTemplate" name="seedTemplate">
-              <option value="supermarket-carrefour">قالب السوبر ماركت الشامل وكارفور (1037 صنف + صور)</option>
-              <option value="restaurant-pack">قالب المطاعم والمأكولات البحرية (وجبات وصوصات)</option>
-              <option value="blank">متجر فارغ نظيف (إدخال يدوي لاحقاً)</option>
+              <option value="supermarket-carrefour" [disabled]="newStore.businessDomain !== 'Supermarket'">كتالوج السوبر ماركت — 1037 منتجًا</option>
+
+              <option value="empty">متجر فارغ نظيف (إدخال يدوي لاحقاً)</option>
             </select>
           </div>
 
+          <div class="col-12 col-md-6"><label class="form-label fw-bold small" for="ownerUsername">اسم دخول مالك المتجر</label><input id="ownerUsername" class="form-control" name="ownerUsername" [(ngModel)]="newStore.ownerUsername" pattern="[a-zA-Z0-9._-]{3,50}" required autocomplete="off" /></div>
+          <div class="col-12 col-md-6"><label class="form-label fw-bold small" for="ownerPassword">كلمة مرور أولية (اختياري)</label><input id="ownerPassword" class="form-control" type="password" name="ownerPassword" [(ngModel)]="newStore.ownerPassword" minlength="12" maxlength="128" autocomplete="new-password" /><small class="text-muted">اتركها فارغة لتوليد كلمة مرور قوية تعرض مرة واحدة بعد الإنشاء.</small></div>
           <!-- Custom Domain (Optional) -->
           <div class="col-12 col-md-6">
             <label class="form-label fw-bold small">الدومين المخصص للعميل (اختياري)</label>
@@ -318,7 +209,7 @@
               [(ngModel)]="newStore.customDomain"
               name="customDomain"
             />
-            <small class="text-muted">العميل يوجه CNAME فقط إلى <code>domains.mecart.app</code>.</small>
+            <small class="text-muted">توجيه النطاق إلى <code>domains.mecart.app</code>.</small>
           </div>
 
           <!-- Subscription Plan -->
@@ -362,7 +253,7 @@
             @if (isCreating()) {
               <i class="bi bi-hourglass-split me-1 animate-spin"></i> جاري التأسيس والزرع...
             } @else {
-              <i class="bi bi-check-lg me-1"></i> تأسيس المتجر وتفعيله فوراً
+              <i class="bi bi-check-lg me-1"></i> إنشاء المتجر وتهيئة البيانات
             }
           </button>
         </div>
@@ -371,3 +262,19 @@
   </div>
 }
 
+
+@if (createdOwnerAccess(); as access) {
+  <div class="modal-backdrop-custom flex-center"><div class="modal-box-custom p-4" role="dialog" aria-modal="true" aria-label="بيانات دخول مالك المتجر">
+    <h2 class="mb-3">المتجر وحساب المالك جاهزان</h2><p class="mb-3">احفظ بيانات الدخول الآن؛ كلمة المرور لن تعرض مرة أخرى بعد إغلاق النافذة.</p>
+    <label class="form-label" for="createdOwnerName">اسم المستخدم</label><input id="createdOwnerName" class="form-control mb-3" [value]="access.username" readonly />
+    <label class="form-label" for="createdOwnerPassword">كلمة المرور المولدة</label><input id="createdOwnerPassword" class="form-control mb-3" [value]="access.password" readonly dir="ltr" />
+    <div class="d-flex flex-wrap gap-2"><a class="btn btn-success" [href]="access.url" target="_blank" rel="noopener">فتح دخول مالك المتجر</a><button class="btn" (click)="createdOwnerAccess.set(null)">تم حفظ بيانات الدخول</button></div>
+  </div></div>
+}
+
+@if (supportLoginUrl(); as url) {
+  <div class="modal-backdrop-custom flex-center"><div class="modal-box-custom p-4" role="dialog" aria-modal="true" aria-label="دخول دعم المتجر">
+    <h2 class="mb-3">دخول دعم مؤقت</h2><p class="mb-3">الرابط صالح لمرة واحدة خلال دقيقة. جلسة الدعم مسجلة وتستمر 15 دقيقة، ولا تغير كلمة مرور المالك.</p>
+    <div class="d-flex gap-2"><a class="btn btn-success" [href]="url" target="_blank" rel="noopener noreferrer" (click)="supportLoginUrl.set(null)">فتح جلسة الدعم</a><button class="btn" (click)="supportLoginUrl.set(null)">إغلاق</button></div>
+  </div></div>
+}

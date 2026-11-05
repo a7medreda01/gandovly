@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { StorefrontLayoutComponent } from './layout/storefront-layout/storefront-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
-import { adminGuard } from './core/guards/admin.guard';
+import { adminGuard, platformGuard, storeGuard } from './core/guards/admin.guard';
 
 /**
  * Checks if the current visitor is on a Tenant Subdomain
@@ -23,17 +23,19 @@ export function isTenantSubdomain(): boolean {
   }
 
   // Any tenant subdomain on mecart.app (e.g. albaraka.mecart.app, etc.) except www and apex
-  if (host.endsWith('mecart.app')) {
+  if (host.endsWith('.mecart.app')) {
     const sub = host.replace('.mecart.app', '');
     if (sub !== 'www' && sub !== '' && sub !== 'mecart') {
       return true;
     }
   }
 
-  return false;
+  return !['localhost', '127.0.0.1', 'mecart.app', 'www.mecart.app'].includes(host);
 }
 
 export const routes: Routes = [
+  { path: 'admin/support', loadComponent: () => import('./features/admin/admin-support/admin-support.component').then(m => m.AdminSupportComponent) },
+  { path: 'master', redirectTo: 'admin/stores', pathMatch: 'full' },
   // 1. If visitor is on a Tenant Subdomain (e.g. super.mecart.app), load the Storefront directly at root
   {
     path: '',
@@ -138,7 +140,16 @@ export const routes: Routes = [
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [adminGuard],
+    canActivateChild: [adminGuard],
     children: [
+      { path: 'orders', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-orders/admin-orders.component').then(m => m.AdminOrdersComponent) },
+      { path: 'catalog', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-catalog/admin-catalog.component').then(m => m.AdminCatalogComponent) },
+      { path: 'settings', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-settings/admin-settings.component').then(m => m.AdminSettingsComponent) },
+      { path: 'delivery-zones', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-delivery-zones/admin-delivery-zones.component').then(m => m.AdminDeliveryZonesComponent) },
+      { path: 'reports', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-reports/admin-reports.component').then(m => m.AdminReportsComponent) },
+      { path: 'analytics', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent) },
+      { path: 'notifications', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-notifications/admin-notifications.component').then(m => m.AdminNotificationsComponent) },
+      { path: 'whatsapp', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent) },
       {
         path: '',
         pathMatch: 'full',
@@ -146,14 +157,17 @@ export const routes: Routes = [
       },
       {
         path: 'stores',
+        canActivate: [platformGuard],
         loadComponent: () => import('./features/admin/admin-stores/admin-stores.component').then(m => m.AdminStoresComponent)
       },
       {
         path: 'packages',
+        canActivate: [platformGuard],
         loadComponent: () => import('./features/admin/admin-packages/admin-packages.component').then(m => m.AdminPackagesComponent)
       },
       {
         path: 'dashboard',
+        canActivate: [platformGuard],
         loadComponent: () => import('./features/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
       }
     ]

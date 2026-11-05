@@ -37,9 +37,9 @@ export class ImageUrlPipe implements PipeTransform {
     if (!value || typeof value !== 'string' || value.trim() === '') {
       switch (type) {
         case 'logo':
-          return '/assets/images/branding/logo.png';
+          return '/assets/images/branding/store-mark.svg';
         case 'banner':
-          return '/assets/images/banners/hero-desktop.jpg';
+          return '/assets/images/branding/store-banner.svg';
         case 'category':
           return resolveCategoryPng(nameHint);
         case 'product':
@@ -56,7 +56,7 @@ export class ImageUrlPipe implements PipeTransform {
       if (trimmed.startsWith('/uploads') || trimmed.startsWith('uploads')) {
         let apiHost = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
         if (!apiHost || apiHost.startsWith('/')) {
-          apiHost = 'https://supermarket1.runasp.net';
+          apiHost = '';
         }
         const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
         fullUrl = `${apiHost}${path}`;

@@ -367,16 +367,16 @@ export class AdminService {
     return this.api.get<any>('admin/store-package/stats');
   }
 
-  exportStorePackage(): Observable<Blob> {
-    return this.http.get(`${this.api.baseUrl}/admin/store-package/export`, {
+  exportStorePackage(tenantId?: string): Observable<Blob> {
+    return this.http.get(tenantId ? `${this.api.baseUrl}/admin/tenants/${tenantId}/export` : `${this.api.baseUrl}/admin/store-package/export`, {
       responseType: 'blob'
     });
   }
 
-  importStorePackage(file: File, cleanFirst = false): Observable<any> {
+  importStorePackage(file: File, cleanFirst = false, tenantId?: string): Observable<any> {
     const formData = new FormData();
     formData.append('packageFile', file);
-    return this.http.post<any>(`${this.api.baseUrl}/admin/store-package/import?cleanFirst=${cleanFirst}`, formData);
+    return this.http.post<any>(tenantId ? `${this.api.baseUrl}/admin/tenants/${tenantId}/import` : `${this.api.baseUrl}/admin/store-package/import?cleanFirst=${cleanFirst}`, formData);
   }
 
   reseedSampleData(): Observable<boolean> {

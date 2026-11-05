@@ -1,7 +1,8 @@
+import { isPlatformContext } from './store-context';
 import { Injectable, inject, signal } from '@angular/core';
 import { ApiService } from './api.service';
 import { StorefrontSettings } from '../models/models';
-import { tap, catchError, of } from 'rxjs';
+import { tap, catchError, of, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +13,14 @@ export class SettingsService {
   private readonly defaultSettings: StorefrontSettings = {
     defaultDomain: 'Supermarket',
     isMultiDomain: true,
-    businessDomainLabel: 'سوبر ماركت MeCart',
-    restaurantName: 'MeCart | مي كارت',
+    businessDomainLabel: 'المتجر',
+    restaurantName: 'المتجر',
     tagline: 'تسوق كل احتياجاتك بذكاء وسرعة | عروض السوبرماركت والتوصيل الفوري',
-    description: 'منصة MeCart للتجارة والتسوق الذكي السريع - تسوق أكثر من 1000 صنف غذائي واستهلاكي بأفضل عروض الأسعار وتوصيل فوري.',
-    logoUrl: '/assets/images/branding/mecart-logo.png',
-    heroBannerDesktopUrl: '/assets/images/banners/mecart-hero-desktop.jpg',
-    heroBannerMobileUrl: '/assets/images/banners/mecart-hero-mobile.jpg',
-    faviconUrl: '/favicon.png',
+    description: 'تسوق منتجات المتجر وتابع طلباتك بسهولة.',
+    logoUrl: '',
+    heroBannerDesktopUrl: '',
+    heroBannerMobileUrl: '',
+    faviconUrl: '/assets/images/branding/store-mark.svg',
     primaryColor: '#0a3d62',
     secondaryColor: '#00a8cc',
     accentColor: '#e76f51',
@@ -28,8 +29,8 @@ export class SettingsService {
     countryCode: 'EG',
     phoneCountryCode: '+20',
     cashierWhatsAppNumber: '+201000000000',
-    phone: '16061',
-    whatsapp: '+201000000000',
+    phone: '',
+    whatsapp: '',
     address: 'القاهرة - جمهورية مصر العربية',
     city: 'القاهرة',
     currencyCode: 'EGP',
@@ -46,7 +47,7 @@ export class SettingsService {
     tieredDiscountPercentage: 5,
     isFlatDiscountEnabled: false,
     flatDiscountPercentage: 0,
-    activePromotionBanner: '🔥 مرحباً بك في MeCart: تسوق الآن واستمتع بتوصيل فوري وعروض حصرية على كافة الأقسام!',
+    activePromotionBanner: '',
     estimatedWeightDisclaimer: 'الأسعار شاملة ضريبة القيمة المضافة، والمنتجات بالوزن تخضع للوزن الفعلي عند التعبئة.',
     branches: []
   };
@@ -57,6 +58,14 @@ export class SettingsService {
   loadSettings() {
     this.isLoading.set(true);
     return this.api.get<StorefrontSettings>('storefront/settings').pipe(
+      map(data => {
+        if (!data || isPlatformContext()) return data;
+        const clean = { ...data };
+        for (const key of ['logoUrl', 'heroBannerDesktopUrl', 'heroBannerMobileUrl', 'faviconUrl'] as const) {
+          if (/mecart|mecard|runx/i.test(clean[key] || '')) clean[key] = '';
+        }
+        return clean;
+      }),
       tap(data => {
         if (data) {
           this.settings.set(data);
@@ -164,5 +173,20 @@ export class SettingsService {
 
   applyTheme(settings: StorefrontSettings) {
     this.applyCssThemeVariables(settings);
+    if (typeof document === 'undefined') return;
+    const platform = isPlatformContext();
+    const name = platform ? 'Mecart' : (settings.restaurantName || 'المتجر');
+    const title = platform ? 'Mecart — إدارة المتاجر' : (window.location.pathname.startsWith('/admin') ? 'إدارة ' + name : name);
+    const description = platform ? 'إدارة المتاجر والعملاء والبيانات من مساحة عمل واحدة.' : (settings.description || 'تسوق منتجات ' + name);
+    document.title = title;
+    for (const [key, content] of Object.entries({ title, description, author: name, keywords: name, 'twitter:title': title, 'twitter:description': description })) {
+      document.querySelector('meta[name="' + key + '"]')?.setAttribute('content', content);
+    }
+    for (const [key, content] of Object.entries({ 'og:title': title, 'og:site_name': name, 'og:description': description })) {
+      document.querySelector('meta[property="' + key + '"]')?.setAttribute('content', content);
+    }
+    const icon = document.querySelector('link[rel="icon"]');
+    icon?.setAttribute('href', platform ? '/favicon.png' : (settings.faviconUrl || '/assets/images/branding/store-mark.svg'));
+    icon?.removeAttribute('type');
   }
 }

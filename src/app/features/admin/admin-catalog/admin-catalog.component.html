@@ -130,9 +130,9 @@
                       <span class="prod-name-ar">{{ prod.nameAr }}</span>
                       <div class="d-flex align-items-center gap-2 mt-1">
                         @if (prod.nameEn) { <small class="text-muted">{{ prod.nameEn }}</small> }
-                        <span class="prep-pill" title="مدة التجهيز والتوريد المتوقعة">
-                          <i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes || 25 }} دقيقة
-                        </span>
+                        @if (prod.preparationTimeMinutes > 0) { <span class="prep-pill" title="مدة التجهيز والتوريد المتوقعة">
+                          <i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes }} دقيقة
+                        </span> }
                       </div>
                     </div>
                   </div>
@@ -220,9 +220,9 @@
               @if (prod.pricingType === 'ByWeight') {
                 <span class="pricing-pill weight"><i class="bi bi-speedometer2 me-1"></i> بالوزن</span>
               } @else {
-                <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> طبق ثابت</span>
+                <span class="pricing-pill fixed"><i class="bi bi-box-seam me-1"></i> سعر الوحدة</span>
               }
-              <span class="prep-pill"><i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes || 25 }} د</span>
+              @if (prod.preparationTimeMinutes > 0) { <span class="prep-pill"><i class="bi bi-clock-history me-1"></i>{{ prod.preparationTimeMinutes }} د</span> }
             </div>
 
             <div class="mobile-card-footer">

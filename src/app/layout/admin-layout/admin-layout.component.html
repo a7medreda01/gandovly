@@ -1,87 +1,39 @@
-<div class="admin-wrapper">
-  <!-- Mobile Backdrop Overlay -->
-  @if (isSidebarOpen) {
-  <div class="admin-sidebar-backdrop" (click)="closeSidebar()"></div>
-  }
-
-  <!-- Sidebar: MeCart Cloud Platform Admin -->
-  <aside class="admin-sidebar" [class.open]="isSidebarOpen">
-    <div class="sidebar-header flex-between">
-      <div class="header-brand-wrap flex-center gap-2">
-        <div class="mecart-cloud-logo flex-center">
-          <i class="bi bi-cloud-check-fill"></i>
+<div class="admin-wrapper" [class.platform-workspace]="isPlatform()" [class.store-workspace]="!isPlatform()">
+  @if (isSidebarOpen) { <div class="admin-sidebar-backdrop" (click)="closeSidebar()"></div> }
+  <aside class="admin-sidebar" [class.open]="isSidebarOpen" aria-label="القائمة الرئيسية">
+    <div class="sidebar-header">
+      <div class="workspace-brand">
+        <div class="workspace-mark" [class.platform-mark]="isPlatform()">
+          @if (isPlatform()) { <span>M</span> } @else if (storeLogo()) { <img [src]="storeLogo()" [alt]="storeName()" /> } @else { <i class="bi bi-shop"></i> }
         </div>
-        <div class="header-titles">
-          <h2 class="admin-store-name">MeCart Cloud</h2>
-          <span class="portal-tag"><i class="bi bi-shield-check me-1"></i> إدارة المنصة السحابية &bull; RunX</span>
-        </div>
+        <div class="workspace-identity"><strong>{{ isPlatform() ? 'Mecart' : storeName() }}</strong><span>{{ isPlatform() ? 'مساحة إدارة المنصة' : 'لوحة إدارة متجرك' }}</span></div>
+        <button class="btn-sidebar-close" (click)="closeSidebar()" aria-label="إغلاق القائمة"><i class="bi bi-x-lg"></i></button>
       </div>
-      <!-- Close button on mobile -->
-      <button class="btn-sidebar-close d-md-none" (click)="closeSidebar()" aria-label="إغلاق">
-        <i class="bi bi-x-lg"></i>
-      </button>
     </div>
-
     <nav class="sidebar-nav">
-      <div class="nav-group-title">منظومة MeCart السحابية</div>
-
-      <a routerLink="/admin/stores" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box icon-stores"><i class="bi bi-shop-window"></i></div>
-        <span>المتاجر السحابية والمستأجرين</span>
-      </a>
-
-      <a routerLink="/admin/packages" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box icon-packages"><i class="bi bi-box-seam-fill"></i></div>
-        <span>حزم البيانات والنسخ (Seed Engine)</span>
-      </a>
-
-      <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
-        <div class="nav-icon-box"><i class="bi bi-speedometer2"></i></div>
-        <span>مؤشرات السحابة والخوادم</span>
-      </a>
+      <div class="nav-group-title">{{ isPlatform() ? 'مساحة العمل' : 'إدارة المتجر' }}</div>
+      @if (isPlatform()) {
+        <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-columns-gap"></i><span>نظرة عامة</span></a>
+        <a routerLink="/admin/stores" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-shop"></i><span>المتاجر والعملاء</span></a>
+        <a routerLink="/admin/packages" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-box-seam"></i><span>القوالب والبيانات</span></a>
+        <div class="nav-group-title secondary-group">الواجهة العامة</div>
+        <a routerLink="/projects" class="nav-item"><i class="bi bi-grid-1x2"></i><span>معرض المتاجر</span><i class="bi bi-arrow-up-left nav-external"></i></a>
+      } @else {
+        @for (link of storeLinks; track link.path) { <a [routerLink]="'/admin/' + link.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i [class]="'bi bi-' + link.icon"></i><span>{{ link.label }}</span></a> }
+      }
     </nav>
-
     <div class="sidebar-footer">
-      <a routerLink="/" class="btn-storefront flex-center gap-2" title="الذهاب لبوابة المنصة">
-        <i class="bi bi-globe2"></i>
-        <span>بوابة MeCart الرئيسية</span>
-        <i class="bi bi-arrow-left ms-auto fs-6 opacity-75"></i>
-      </a>
-      <button class="btn-logout flex-center gap-2" (click)="logout()" title="تسجيل الخروج">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>تسجيل الخروج</span>
-      </button>
+      <div class="workspace-note"><i class="bi bi-shield-check"></i><div><strong>{{ isPlatform() ? 'إدارة مركزية' : 'مساحة عمل خاصة' }}</strong><span>{{ isPlatform() ? 'المتاجر والبيانات في مكان واحد' : 'بيانات متجرك وإعداداته' }}</span></div></div>
+      <a routerLink="/" class="sidebar-footer-link"><i class="bi bi-box-arrow-up-right"></i><span>{{ isPlatform() ? 'عرض الموقع الرئيسي' : 'عرض المتجر' }}</span></a>
+      <button class="btn-logout" (click)="logout()"><i class="bi bi-box-arrow-right"></i><span>تسجيل الخروج</span></button>
     </div>
   </aside>
-
-  <!-- Main View Area -->
   <main class="admin-main">
-    <div class="admin-topbar flex-between glass-panel">
-      <div class="topbar-right flex-center gap-2">
-        <button class="btn-mobile-nav-toggle d-md-none" (click)="toggleSidebar()" aria-label="فتح القائمة">
-          <i class="bi bi-list fs-3"></i>
-        </button>
-        <span class="topbar-portal-name">منظومة MeCart السحابية — إحدى مشاريع RunX Tech</span>
-        <span class="topbar-date d-none d-lg-inline text-muted ms-2">
-          <i class="bi bi-calendar3 me-1"></i> {{ todayDate | date:'d MMMM yyyy' }}
-        </span>
-      </div>
-
-      <div class="topbar-user flex-center gap-2">
-        <div class="user-pill flex-center gap-2">
-          <div class="admin-avatar-circle flex-center">
-            <i class="bi bi-person-fill"></i>
-          </div>
-          <span class="user-name">{{ authService.currentAdmin()?.fullName || 'مدير المنصة العام' }}</span>
-        </div>
-        <a routerLink="/" class="btn-store-link" title="معاينة المنصة">
-          <i class="bi bi-box-arrow-up-right"></i>
-        </a>
-      </div>
-    </div>
-
-    <div class="admin-content">
-      <router-outlet></router-outlet>
-    </div>
+    <header class="admin-topbar">
+      <div class="topbar-context"><button class="btn-mobile-nav-toggle" (click)="toggleSidebar()" aria-label="فتح القائمة"><i class="bi bi-list"></i></button><span class="breadcrumb-root">{{ isPlatform() ? 'Mecart' : storeName() }}</span><i class="bi bi-chevron-left breadcrumb-separator"></i><span class="breadcrumb-current">{{ pageTitle }}</span></div>
+      <div class="topbar-user"><span class="topbar-date">{{ todayDate | date:'d MMMM yyyy' }}</span><a routerLink="/" class="btn-store-link" [attr.aria-label]="isPlatform() ? 'عرض الموقع الرئيسي' : 'عرض المتجر'"><i class="bi bi-box-arrow-up-right"></i></a><div class="user-pill"><div class="admin-avatar-circle"><i class="bi bi-person"></i></div><div class="user-caption"><strong>{{ authService.currentAdmin()?.isSupportSession ? 'فريق الدعم' : (authService.currentAdmin()?.fullName || 'المدير') }}</strong><small>{{ isPlatform() ? 'مدير المنصة' : 'إدارة المتجر' }}</small></div></div></div>
+    </header>
+    @if (authService.currentAdmin()?.isSupportSession) { <div class="support-session-banner" role="status"><i class="bi bi-headset"></i> جلسة دعم مؤقتة — تنتهي {{ authService.currentAdmin()?.expiresAt | date:'shortTime' }}</div> }
+    <div class="admin-content"><router-outlet></router-outlet></div>
   </main>
 </div>

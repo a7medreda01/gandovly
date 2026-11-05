@@ -885,7 +885,7 @@ export class AdminCatalogComponent implements OnInit {
       descriptionEn: '',
       imageUrl: '',
       iconName: 'bi-grid-fill',
-      domain: 'Supermarket',
+      domain: this.settingsService.settings().defaultDomain || 'Supermarket',
       displayOrder: this.categories().length + 1,
       isActive: true
     };

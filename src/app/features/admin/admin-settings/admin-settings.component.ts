@@ -302,8 +302,7 @@ export class AdminSettingsComponent implements OnInit {
   loadPackageStats(): void {
     this.adminService.getPackageStats().subscribe({
       next: res => {
-        if (res && res.data) {
-          this.packageStats.set(res.data);
+        if (res) { this.packageStats.set(res);
         }
       },
       error: () => {
@@ -323,7 +322,7 @@ export class AdminSettingsComponent implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `mecart_store_package_${new Date().toISOString().slice(0, 10)}.zip`;
+        a.download = `store_backup_${new Date().toISOString().slice(0, 10)}.zip`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -348,10 +347,10 @@ export class AdminSettingsComponent implements OnInit {
       return;
     }
 
-    const clean = this.cleanBeforeImport();
+    const clean = false;
     const confirmMsg = clean
       ? 'تحذير: لقد اخترت استبدال البيانات بالكامل! سيتم حذف الأصناف الحالية وتطبيق الحزمة الجديدة. هل تريد المتابعة؟'
-      : 'سيتم استيراد الحزمة ودمج الأقسام والمنتجات الجديدة. هل تريد المتابعة؟';
+      : 'سيتم استيراد الحزمة إلى المتجر إذا كان فارغًا. هل تريد المتابعة؟';
 
     if (!confirm(confirmMsg)) {
       input.value = '';
