@@ -165,6 +165,7 @@
                 <button
                   type="button"
                   class="thumb-btn"
+                  [attr.aria-label]="'عرض الصورة ' + ($index + 1)" [attr.aria-pressed]="activeImageIndex === $index"
                   [class.active]="activeImageIndex === $index"
                   (click)="activeImageIndex = $index"
                 >

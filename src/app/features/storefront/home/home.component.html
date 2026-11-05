@@ -56,7 +56,7 @@
       <button type="button" class="btn-cat-nav prev" (click)="scrollCategories(-240)" aria-label="السابق" title="السابق">
         <i class="bi bi-chevron-right"></i>
       </button>
-      <div class="categories-scroll" #catScrollContainer>
+      <div class="categories-scroll" dir="rtl" #catScrollContainer>
         <!-- "الكل" Card (Selected by default) -->
         <button type="button" class="category-item" [class.active]="selectedCategoryId() === null" [attr.aria-pressed]="selectedCategoryId() === null" (click)="selectCategory(null)">
           <div class="category-icon-box box-all">

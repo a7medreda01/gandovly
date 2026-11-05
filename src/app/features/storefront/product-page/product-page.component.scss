@@ -761,3 +761,11 @@
 /* Purchase controls stay below the product data; mobile navigation remains visible. */
 .product-page-grid .page-purchase-bar { position: static; inset: auto; width: auto; z-index: auto; margin-top: 16px; padding: 16px; box-shadow: none; }
 @media(max-width:767px) { .product-page-container { padding-bottom: calc(96px + env(safe-area-inset-bottom)); } }
+/* Grid items must shrink below the intrinsic width of a long thumbnail strip. */
+.product-page-grid { grid-template-columns: minmax(0,1fr); min-width: 0; }
+.product-page-grid > *, .gallery-column, .details-column, .gallery-main-card { min-width: 0; max-width: 100%; }
+.gallery-column .thumbs-strip { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; }
+.gallery-column .hero-image-wrap { min-width: 0; max-width: 100%; }
+.gallery-column .gallery-dots { max-width: calc(100% - 32px); flex-wrap: wrap; justify-content: center; }
+.product-page-grid .product-title { overflow-wrap: anywhere; }
+@media(min-width:992px) { .product-page-grid { grid-template-columns: minmax(0,1.05fr) minmax(0,1.35fr); } }

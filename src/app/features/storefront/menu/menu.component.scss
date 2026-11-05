@@ -510,3 +510,7 @@
 .menu-results-header .menu-active-title { font-size: 1.125rem; line-height: 1.5; margin-bottom: 2px; }
 .menu-results-header .results-count { font-size: .8rem; }
 @media(max-width:767px) { .menu-results-header { margin-block: 8px 10px; } .menu-results-header .menu-active-title { font-size: 1rem; } }
+.menu-categories-section .categories-scroll-wrapper { min-width: 0; max-width: 100%; }
+.menu-categories-section .categories-scroll { direction: rtl; flex-direction: row; min-width: 0; }
+.menu-categories-section .categories-scroll .category-item .category-icon-box { border-radius: var(--radius-card,18px); }
+.menu-categories-section .categories-scroll .category-item .category-icon-box .category-img { display: block; width: 100%; height: 100%; padding: 0; object-fit: cover; border-radius: inherit; filter: none; }

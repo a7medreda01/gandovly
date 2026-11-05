@@ -925,3 +925,10 @@
 .luxury-hero-card .hero-content-overlay { background: linear-gradient(270deg, rgba(16,43,70,.48), rgba(16,43,70,.18) 55%, rgba(16,43,70,.03)); }
 .luxury-hero-card .hero-title, .luxury-hero-card .hero-subtitle { text-shadow: 0 1px 4px rgba(0,0,0,.55); }
 @media(max-width:767px) { .luxury-hero-card .hero-content-overlay { background: linear-gradient(270deg, rgba(16,43,70,.52), rgba(16,43,70,.22) 65%, rgba(16,43,70,.06)); } }
+/* The first category stays at the RTL start; only the strip scrolls. */
+.categories-row-section .categories-scroll-wrapper { min-width: 0; max-width: 100%; }
+.categories-row-section .categories-scroll { direction: rtl; flex-direction: row; min-width: 0; width: 100%; }
+.categories-row-section .categories-scroll .category-item .category-icon-box { border-radius: var(--radius-card,18px); }
+.categories-row-section .categories-scroll .category-item .category-icon-box .category-img { display: block; width: 100%; height: 100%; padding: 0; object-fit: cover; border-radius: inherit; filter: none; }
+.categories-visual-section .cat-compact-card .cat-icon-round { border-radius: var(--radius-card,18px); overflow: hidden; }
+.categories-visual-section .cat-compact-card .cat-icon-round .cat-grid-thumb { width: 100%; height: 100%; padding: 0; object-fit: cover; border-radius: inherit; }
