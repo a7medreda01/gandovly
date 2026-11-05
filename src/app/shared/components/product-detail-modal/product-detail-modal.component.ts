@@ -9,11 +9,12 @@ import { SettingsService } from '../../../core/services/settings.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
+import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 
 @Component({
   selector: 'app-product-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe],
+  imports: [CommonModule, FormsModule, ImageUrlPipe, StoreDialogDirective],
   templateUrl: './product-detail-modal.component.html',
   styleUrl: './product-detail-modal.component.scss'
 })
@@ -238,7 +239,7 @@ export class ProductDetailModalComponent implements OnInit {
         }
       }
     }
-    if (list.length === 0) list.push('/assets/images/products/platter-double.jpg');
+    if (list.length === 0) list.push('/assets/images/branding/product-placeholder.svg');
     return list;
   }
 

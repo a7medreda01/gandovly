@@ -1,6 +1,6 @@
 @if (cartService.isDrawerOpen()) {
   <div class="drawer-backdrop" (click)="cartService.closeDrawer()">
-    <div class="drawer-panel" (click)="$event.stopPropagation()">
+    <div class="drawer-panel" appStoreDialog aria-label="سلة طلباتك" (dialogDismiss)="cartService.closeDrawer()" (click)="$event.stopPropagation()">
       <!-- Mobile Drag Handle -->
       <div class="sheet-drag-handle d-md-none"></div>
 

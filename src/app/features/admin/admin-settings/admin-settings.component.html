@@ -593,6 +593,17 @@
           </div>
         </div>
 
+        <div class="settings-card glass-panel mb-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"><h3 class="mb-0 fs-5">حواف واجهة المتجر</h3><button type="button" class="btn btn-outline" (click)="restoreStorefrontShapes()">استعادة الشكل الافتراضي</button></div>
+          <p class="text-muted mb-3">إعدادات مستقلة للشريطين وكارت المنتج والبحث. القيم بالبكسل؛ 999 تجعل البحث بشكل كبسولة. ألوانك وخطك وشعارك لا تتغير.</p>
+          <div class="form-row">
+            <div class="form-group flex-1"><label for="navbarRadius">حواف الشريط العلوي</label><input id="navbarRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.navbarBorderRadius, 0)" (input)="setRadius('navbarBorderRadius', +$any($event.target).value)" /></div>
+            <div class="form-group flex-1"><label for="bottomNavRadius">حواف الشريط السفلي</label><input id="bottomNavRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.bottomNavBorderRadius, 28)" (input)="setRadius('bottomNavBorderRadius', +$any($event.target).value)" /></div>
+            <div class="form-group flex-1"><label for="productCardRadius">حواف كارت المنتج</label><input id="productCardRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.productCardBorderRadius, 18)" (input)="setRadius('productCardBorderRadius', +$any($event.target).value)" /></div>
+            <div class="form-group flex-1"><label for="searchRadius">حواف مربع البحث</label><input id="searchRadius" type="number" min="0" max="999" class="form-control" [value]="parsePx(settings()!.searchBorderRadius, 999)" (input)="setRadius('searchBorderRadius', +$any($event.target).value)" /></div>
+          </div>
+        </div>
+
         <!-- 5. MULTI-LANGUAGE & LOCALIZATION -->
         <div class="settings-card glass-panel mb-4">
           <div class="section-title-wrap mb-3">

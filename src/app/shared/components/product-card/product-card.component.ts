@@ -67,6 +67,11 @@ export class ProductCardComponent {
     this.isFavorite = !this.isFavorite;
   }
 
+  onImageError(event: Event) {
+    const image = event.target as HTMLImageElement;
+    if (!image.src.endsWith('/assets/images/branding/product-placeholder.svg')) image.src = '/assets/images/branding/product-placeholder.svg';
+  }
+
   onSelect() {
     if (this.settingsService.settings()?.productDetailViewMode === 'page') {
       this.router.navigate(['/product', this.product.id]);

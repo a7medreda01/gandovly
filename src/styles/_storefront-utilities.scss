@@ -1,0 +1,68 @@
+// Shared rules are scoped so store presentation never changes the platform console.
+.storefront-wrapper {
+  --store-ink: var(--text-main, #182b38);
+  --store-muted: color-mix(in srgb, var(--text-main, #182b38) 75%, var(--card-bg, #fff) 25%);
+  --store-border: var(--border-color, #e3e8ee);
+  --store-nav-space: 88px;
+  isolation: isolate;
+  app-header { display: block; position: sticky; top: 0; z-index: 1100; }
+  .store-skip-link { position: fixed; top: -100px; inset-inline-start: 12px; padding: 12px 18px; background: #fff; color: #182b38; z-index: 9000; border-radius: 10px; }
+  .store-skip-link:focus { top: 8px; }
+  .store-load-error { display: grid; justify-items: center; gap: 14px; padding: 32px 20px; margin-block: 24px; border: 1px solid #dce3eb; border-radius: 18px; background: #fff; text-align: center; }
+  .store-load-error p { color: var(--store-muted); line-height: 1.8; }
+  button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+  :is(button, a, input, select, textarea):focus-visible { outline: 3px solid var(--primary-color, #124b89); outline-offset: 3px; }
+  :is(h1, h2, h3, h4, h5, p, a, label, button) { overflow-wrap: break-word; }
+  :is(input, select, textarea) { font-size: 16px; max-width: 100%; }
+  .text-muted { color: var(--store-muted) !important; }
+  .btn, .btn-auth-submit, .btn-submit-order, .btn-checkout, .btn-browse-shop { min-height: 48px; }
+  .btn-icon, .btn-action-pill, .btn-close, .btn-clear-search { min-width: 44px; min-height: 44px; }
+  .bi { flex-shrink: 0; line-height: 1; }
+  .main-content { min-width: 0; }
+  &:has(app-product-detail-modal, .drawer-backdrop, .mobile-menu-overlay) app-mobile-bottom-nav { display: none; }
+  &:has([role="dialog"]) { app-mobile-bottom-nav, app-whatsapp-fab { display: none; } }
+  .phone-input-wrapper { min-width: 0; }
+  .page-title { line-height: 1.45; }
+  .empty-wishlist p { max-width: 32rem; margin-inline: auto; }
+  .wishlist-header-card .title-row { flex-wrap: wrap; }
+  .wishlist-header-card { gap: 16px; flex-wrap: wrap; }
+  .wishlist-page .btn-quick-remove { width: 44px; height: 44px; z-index: 3; }
+  .guest-auth-card .auth-perks-row { gap: 8px; }
+  .guest-auth-card .page-subtitle { line-height: 1.8; color: var(--store-muted); }
+  .custom-modal-card { max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; }
+  .store-footer { padding-bottom: var(--store-nav-space); }
+  app-footer .social-btn { min-width: 44px; min-height: 44px; }
+  &:has(app-product-detail-modal, .drawer-backdrop, .mobile-menu-overlay, .checkout-page, .product-page-container) app-whatsapp-fab { display: none; }
+  .order-details-modal, .address-modern-modal, .confirm-order-modal { max-height: calc(100dvh - 32px); overflow-y: auto; overscroll-behavior: contain; }
+  .price-banner-box { flex-wrap: wrap; }
+  :is(.checkout-card, .summary-card, .guest-auth-card, .wishlist-header-card, .empty-wishlist, .store-load-error) { border-radius: var(--radius-card, 16px); background-color: var(--card-bg, #fff); color: var(--text-main); box-shadow: var(--shadow-card); }
+  :is(.custom-modal-card, .order-details-modal, .address-modern-modal, .confirm-order-modal) { border-radius: var(--radius-modal, 24px); background-color: var(--card-bg, #fff); color: var(--text-main); }
+  @media (max-width: 767px) {
+    .container { padding-inline: 16px; }
+    .main-content { padding-bottom: 12px; }
+    app-footer { padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+    .account-page, .wishlist-page { padding-top: 24px; padding-bottom: 24px; }
+    .guest-auth-card { padding: 24px 18px; }
+    .guest-auth-card .auth-pill-tag { font-size: 12px; }
+    .guest-auth-card .page-title { font-size: 24px; }
+    .guest-auth-card .auth-icon-badge { width: 64px; height: 64px; }
+    .empty-wishlist { padding: 32px 18px !important; }
+    .empty-wishlist h3 { font-size: 21px; }
+    .empty-wishlist p { font-size: 15px; line-height: 1.8; }
+    .wishlist-header-card .page-title { font-size: 22px; }
+    .wishlist-header-card .page-subtitle { font-size: 14px; line-height: 1.7; }
+    .checkout-page { padding-block: 24px; }
+    .checkout-header h1 { font-size: 25px; }
+    .checkout-card, .summary-card { border-radius: 16px; padding: 18px; }
+    .checkout-card h3, .summary-card h3 { font-size: 18px; line-height: 1.5; }
+    .checkout-card .form-row { gap: 16px; }
+    .order-type-tabs { gap: 8px; }
+    .order-type-tabs button { min-height: 64px; }
+    .custom-modal-card { width: calc(100% - 24px); padding: 0; border-radius: 20px; }
+    .custom-modal-card .modal-body { padding: 20px 16px; }
+    .custom-modal-card .modal-header { padding: 18px 16px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .storefront-wrapper *, .storefront-wrapper *::before, .storefront-wrapper *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

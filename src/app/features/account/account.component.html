@@ -5,7 +5,7 @@
       <div class="auth-header text-center">
         <div class="auth-pill-tag">
           <i class="bi bi-shield-check text-success"></i>
-          <span>بوابة الدخول السريع والآمن</span>
+          <span>حسابك في المتجر</span>
         </div>
 
         <div class="auth-icon-badge">
@@ -51,7 +51,7 @@
 
               <div class="auth-input-hint-box mt-2">
                 <i class="bi bi-whatsapp text-success fs-6"></i>
-                <span>سيصلك كود التحقق في رسالة واتساب فوراً لتأكيد الدخول</span>
+                <span>سنرسل رمز تحقق إلى رقمك عبر واتساب لتأكيد الدخول.</span>
               </div>
             </div>
 
@@ -74,7 +74,7 @@
             <!-- Modern Phone Notice Card -->
             <div class="phone-info-card mb-3">
               <div class="phone-info-text">
-                <span class="phone-info-label">تم إرسال الرمز إلى الرقم:</span>
+                <span class="phone-info-label">رقم الهاتف المطلوب تأكيده:</span>
                 <strong class="phone-info-number" dir="ltr">{{ phoneNumber }}</strong>
               </div>
               <button class="btn-change-phone" (click)="changePhone()" type="button" title="تعديل رقم الهاتف">
@@ -140,6 +140,7 @@
                     autocomplete="one-time-code"
                     class="otp-digit-box"
                     [id]="'digit_' + $index"
+                    [attr.aria-label]="'الرقم ' + ($index + 1) + ' من رمز التحقق'"
                     [value]="otpDigits[$index]"
                     (input)="onDigitInput($event, $index)"
                     (keydown)="onDigitKeyDown($event, $index)"
@@ -191,7 +192,7 @@
         <div class="user-info d-flex align-items-center gap-3">
           <div class="user-avatar-circle"></div>
           <div>
-            <h2 class="user-name mb-1">{{ authService.currentCustomer()!.fullName || 'عميل شرق الوادي' }}</h2>
+            <h1 class="user-name mb-1">{{ authService.currentCustomer()!.fullName || 'حسابي' }}</h1>
             <span class="phone-badge" dir="ltr"> {{ authService.currentCustomer()!.usernameOrPhone }}</span>
           </div>
         </div>
@@ -327,7 +328,7 @@
                 <i class="bi bi-pin-map"></i>
               </div>
               <h4 class="empty-title">لم تقم بحفظ أي عناوين بعد</h4>
-              <p class="empty-desc">أضف عنوان منزلك أو عملك الآن لتسريع إتمام طلباتك البحرية مستقبلاً.</p>
+              <p class="empty-desc">احفظ عنوان منزلك أو عملك لتسهيل إتمام طلباتك القادمة.</p>
               <button class="btn-add-first-addr" (click)="showAddressModal.set(true)" type="button">
                 <i class="bi bi-plus-lg me-1"></i>
                 <span>إضافة عنوانك الأول</span>
@@ -342,7 +343,7 @@
   <!-- Add Address Modal (Streamlined & Clean) -->
   @if (showAddressModal()) {
     <div class="modal-backdrop" (click)="showAddressModal.set(false)">
-      <div class="modal-dialog address-modern-modal" (click)="$event.stopPropagation()">
+      <div class="modal-dialog address-modern-modal" appStoreDialog aria-label="إضافة عنوان جديد" (dialogDismiss)="showAddressModal.set(false)" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <div class="d-flex align-items-center gap-2">
             <div class="modal-icon-badge">
@@ -359,10 +360,11 @@
         <div class="modal-body">
           <!-- Full Street Details (All-in-one convenient field) -->
           <div class="form-field-group mb-3">
-            <label class="field-label">تفاصيل العنوان بالكامل *:</label>
+            <label class="field-label" for="savedAddressStreet">تفاصيل العنوان بالكامل *:</label>
             <div class="input-with-icon">
               <i class="bi bi-signpost-2-fill input-icon"></i>
               <textarea
+                id="savedAddressStreet"
                 rows="2"
                 class="modern-input modern-textarea"
                 placeholder="اسم الشارع، رقم العمارة، الدور، الشقة، وأي علامة مميزة..."
@@ -388,10 +390,11 @@
 
           <!-- 4. Delivery Zone Selector Dropdown -->
           <div class="form-field-group mb-3">
-            <label class="field-label">تأكيد منطقة التوصيل *:</label>
+            <label class="field-label" for="savedAddressZone">تأكيد منطقة التوصيل *:</label>
             <div class="input-with-icon">
               <i class="bi bi-pin-map-fill input-icon"></i>
               <select
+                id="savedAddressZone"
                 class="modern-input form-select"
                 [ngModel]="selectedZoneId()"
                 (ngModelChange)="onZoneSelected($event)"
@@ -425,14 +428,14 @@
   <!-- Order Details & Tracking Modal -->
   @if (selectedOrder()) {
     <div class="modal-backdrop" (click)="closeOrderDetails()">
-      <div class="order-details-modal glass-panel animate-scale-up" (click)="$event.stopPropagation()">
+      <div class="order-details-modal glass-panel animate-scale-up" appStoreDialog aria-label="تفاصيل الطلب وتتبعه" (dialogDismiss)="closeOrderDetails()" (click)="$event.stopPropagation()">
         <!-- Modal Header -->
         <div class="modal-header flex-between">
           <div>
             <span class="modal-subtitle text-muted small d-block">تفاصيل ومراحل الطلب</span>
             <h3 class="modal-title mb-0" dir="ltr">#{{ selectedOrder()!.orderNumber }}</h3>
           </div>
-          <button class="btn-close-modal" (click)="closeOrderDetails()" type="button">✕</button>
+          <button class="btn-close-modal" (click)="closeOrderDetails()" type="button" aria-label="إغلاق">✕</button>
         </div>
 
         <div class="modal-body py-3">
@@ -450,26 +453,26 @@
 
           <!-- 4-Step Visual Tracker / Stepper -->
           <div class="modal-stepper-box mb-3">
-            <h5 class="stepper-title mb-2"><i class="bi bi-geo-alt me-1 text-primary"></i> تتبع مراحل التجهيز:</h5>
+            <h5 class="stepper-title mb-2"><i class="bi bi-geo-alt me-1 text-primary"></i> مراحل طلبك</h5>
             <div class="order-stepper">
               <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 1">
                 <div class="node-circle"><i class="bi bi-receipt"></i></div>
-                <span class="node-label">تم الاستلام</span>
+                <span class="node-label">استلام الطلب</span>
               </div>
               <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 2"></div>
               <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 2">
                 <div class="node-circle"><i class="bi bi-gear-wide-connected"></i></div>
-                <span class="node-label">التجهيز والعمليات</span>
+                <span class="node-label">التجهيز</span>
               </div>
               <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 3"></div>
               <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 3">
                 <div class="node-circle"><i class="bi bi-scooter"></i></div>
-                <span class="node-label">خرج للتوصيل</span>
+                <span class="node-label">{{ selectedOrder()!.orderType === 'Pickup' ? 'جاهز للاستلام' : 'في الطريق' }}</span>
               </div>
               <div class="step-line" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 4"></div>
               <div class="step-node" [class.done]="getStatusStepIndex(selectedOrder()!.status) >= 4">
                 <div class="node-circle"><i class="bi bi-check2-all"></i></div>
-                <span class="node-label">تم التسليم</span>
+                <span class="node-label">مكتمل</span>
               </div>
             </div>
           </div>
@@ -479,7 +482,7 @@
             <i class="bi bi-geo-alt-fill text-danger fs-5 me-2"></i>
             <div>
               <span class="tile-label d-block text-muted small">عنوان التوصيل</span>
-              <strong class="tile-val">{{ selectedOrder()!.deliveryAddress || selectedOrder()!.deliveryZoneName || 'استلام من المستودع' }}</strong>
+              <strong class="tile-val">{{ selectedOrder()!.deliveryAddress || selectedOrder()!.deliveryZoneName || 'استلام من الفرع' }}</strong>
             </div>
           </div>
 
@@ -532,7 +535,7 @@
             إغلاق
           </button>
           <button class="btn-modal-reorder" (click)="reorder(selectedOrder()!); closeOrderDetails()" type="button">
-            <i class="bi bi-arrow-repeat me-1"></i> تكرار هذا الطلب بالسلة 🔄
+            <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i> إضافة الطلب للسلة
           </button>
         </div>
       </div>

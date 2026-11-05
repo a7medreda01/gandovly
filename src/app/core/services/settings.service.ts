@@ -64,6 +64,9 @@ export class SettingsService {
         for (const key of ['logoUrl', 'heroBannerDesktopUrl', 'heroBannerMobileUrl', 'faviconUrl'] as const) {
           if (/mecart|mecard|runx/i.test(clean[key] || '')) clean[key] = '';
         }
+          for (const key of ['facebookUrl', 'instagramUrl'] as const) {
+            if (/^https?:\/\/(www\.)?facebook\.com\/runxtech\/?$/i.test(clean[key] || '')) clean[key] = '';
+          }
         return clean;
       }),
       tap(data => {
@@ -102,6 +105,12 @@ export class SettingsService {
   applyCssThemeVariables(settings: StorefrontSettings) {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
+
+    // Clear optional overrides before applying a complete identity, including live previews.
+    // Empty settings must restore defaults rather than retain an earlier store or preset.
+    for (const key of ['--navbar-bg','--navbar-text','--footer-bg','--footer-text','--card-bg','--surface-white','--border-color','--line','--btn-primary-bg','--btn-primary-text','--btn-accent-bg','--btn-accent-text','--success-color','--error-color','--warning-color','--radius-card','--radius-box','--radius-modal','--radius-control','--font-size-base','--font-family-base']) root.style.removeProperty(key);
+    document.body.style.removeProperty('font-family');
+    root.style.removeProperty('font-size');
 
     if (settings.primaryColor) {
       root.style.setProperty('--primary-color', settings.primaryColor);
@@ -152,16 +161,24 @@ export class SettingsService {
     if (settings.warningColor) root.style.setProperty('--warning-color', settings.warningColor);
 
     // Shapes & Border Radius
+    root.style.setProperty('--radius-navbar', settings.navbarBorderRadius || '0px');
+    root.style.setProperty('--radius-bottom-nav', settings.bottomNavBorderRadius || '28px');
+    root.style.setProperty('--radius-product-card', settings.productCardBorderRadius || '18px');
+    root.style.setProperty('--radius-search', settings.searchBorderRadius || '999px');
     if (settings.borderRadius) {
       root.style.setProperty('--radius-card', settings.borderRadius);
       root.style.setProperty('--radius-box', settings.borderRadius);
+      root.style.setProperty('--radius-modal', settings.borderRadius);
     }
     if (settings.buttonBorderRadius) {
       root.style.setProperty('--radius-control', settings.buttonBorderRadius);
     }
     if (settings.fontSizeBase) {
       root.style.setProperty('--font-size-base', `${settings.fontSizeBase}px`);
+      root.style.fontSize = `${settings.fontSizeBase}px`;
     }
+    const shadows: Record<string,string> = { none: 'none', soft: '0 4px 16px #142d450a', medium: '0 6px 22px #142d4517', strong: '0 10px 30px #142d4526' };
+    root.style.setProperty('--shadow-card', shadows[settings.cardShadowStyle || 'soft'] || shadows['soft']);
 
     if (settings.fontFamily) {
       const font = settings.fontFamily.trim();

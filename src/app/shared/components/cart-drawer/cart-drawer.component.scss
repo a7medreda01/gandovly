@@ -492,3 +492,17 @@
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
 }
+
+.drawer-panel { max-height: 100dvh; }
+.drawer-body { overscroll-behavior: contain; }
+.drawer-footer { padding-bottom: calc(16px + env(safe-area-inset-bottom)); }
+.drawer-panel .qty-btn, .drawer-panel .btn-remove, .drawer-panel .btn-close { min-width: 44px; min-height: 44px; }
+@media(max-width:767px) { .drawer-panel { max-height: calc(100dvh - 24px); } }
+
+.drawer-panel .qty-control .btn-qty { min-width: 44px; width: 44px; height: 44px; min-height: 44px; font-size: 18px; }
+.drawer-panel .btn-remove-item { width: 44px; height: 44px; min-width: 44px; }
+.drawer-panel .item-bottom-row { flex-wrap: wrap; gap: 10px; }
+.drawer-panel .qty-control { padding: 2px; }
+.drawer-panel .qty-control .qty-val { font-size: 14px; }
+
+.drawer-panel { border-radius: var(--radius-modal, 24px); background: var(--card-bg, #fff); color: var(--text-main); }

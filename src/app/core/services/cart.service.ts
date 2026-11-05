@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, effect } from '@angular/core';
+import { customerSessionKey } from './tenant-session';
 import { CartItem, ModifierOption, PreparationOption, Product } from '../models/models';
 
 @Injectable({
@@ -9,6 +10,26 @@ export class CartService {
   isDrawerOpen = signal<boolean>(false);
   cartBumped = signal<boolean>(false);
   private bumpTimeout: any;
+
+  constructor() {
+    if (typeof window === 'undefined') return;
+    const key = customerSessionKey('store_cart_v1');
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || 'null');
+      if (saved?.version === 1 && Date.now() - saved.savedAt < 7 * 86400000 && Array.isArray(saved.items)) {
+        this.items.set(saved.items.slice(0, 100).filter((item: CartItem) =>
+          typeof item?.id === 'string' && Number.isInteger(item.product?.id) && typeof item.product?.nameAr === 'string' &&
+          Number.isInteger(item.quantityUnits) && item.quantityUnits >= 1 && item.quantityUnits <= 100 &&
+          Number.isFinite(item.estimatedLineTotal) && item.estimatedLineTotal >= 0 && Number.isFinite(item.estimatedUnitPrice) &&
+          Array.isArray(item.selectedModifiers)));
+      }
+    } catch { /* Unavailable or corrupt storage must not prevent shopping. */ }
+    effect(() => {
+      const items = this.items();
+      try { if (items.length) localStorage.setItem(key, JSON.stringify({ version: 1, savedAt: Date.now(), items })); else localStorage.removeItem(key); }
+      catch { /* Private browsing and storage limits keep the cart in memory. */ }
+    });
+  }
 
   triggerCartBump() {
     this.cartBumped.set(true);

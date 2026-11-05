@@ -1,4 +1,5 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
@@ -20,7 +21,10 @@ import { ProductDetailModalComponent } from '../../../shared/components/product-
   templateUrl: './product-page.component.html',
   styleUrl: './product-page.component.scss'
 })
-export class ProductPageComponent implements OnInit {
+export class ProductPageComponent implements OnInit, OnDestroy {
+  private productRequest?: Subscription;
+  private relatedRequest?: Subscription;
+  private routeSubscription?: Subscription;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly catalogService = inject(CatalogService);
@@ -89,7 +93,7 @@ export class ProductPageComponent implements OnInit {
         }
       }
     }
-    if (list.length === 0) list.push('/assets/images/products/platter-double.jpg');
+    if (list.length === 0) list.push('/assets/images/branding/product-placeholder.svg');
     return list;
   }
 
@@ -162,20 +166,21 @@ export class ProductPageComponent implements OnInit {
       total = this.piecesCount * p.pricePerUnit;
     }
 
-    if (this.selectedPrepOption && this.selectedPrepOption.price) {
-      total += this.selectedPrepOption.price * this.piecesCount;
+    const units = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
+    if (this.selectedPrepOption) {
+      total = this.selectedPrepOption.pricingType === 'FinalPrice' ? this.selectedPrepOption.price * units : total + this.selectedPrepOption.price * units;
     }
 
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
       const opt = this.selectedModifiersByGroup[Number(key)];
       if (opt && opt.price) {
-        total += opt.price * this.piecesCount;
+        total += opt.price * units;
       }
     }
 
     for (const opt of this.multiSelectedModifiers) {
       if (opt.price) {
-        total += opt.price * this.piecesCount;
+        total += opt.price * units;
       }
     }
 
@@ -215,19 +220,21 @@ export class ProductPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.routeSubscription = this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));
-      if (id) {
+      if (Number.isInteger(id) && id > 0) {
         this.loadProduct(id);
-      }
+      } else { this.product.set(null); this.isLoading.set(false); }
     });
   }
 
   loadProduct(id: number): void {
+    this.productRequest?.unsubscribe(); this.relatedRequest?.unsubscribe();
+    this.product.set(null); this.relatedProducts.set([]);
     this.isLoading.set(true);
     this.activeImageIndex = 0;
     this.piecesCount = 1;
-    this.catalogService.getProductById(id).subscribe({
+    this.productRequest = this.catalogService.getProductById(id).subscribe({
       next: prod => {
         this.product.set(prod);
         this.initProductState(prod);
@@ -235,6 +242,7 @@ export class ProductPageComponent implements OnInit {
         this.loadRelated(prod);
       },
       error: () => {
+        this.product.set(null);
         this.isLoading.set(false);
         this.toast.error('لم نتمكن من العثور على الصنف المطلوب');
       }
@@ -263,11 +271,11 @@ export class ProductPageComponent implements OnInit {
 
   private loadRelated(p: Product): void {
     if (p.categoryId) {
-      this.catalogService.getProducts({ categoryId: p.categoryId, pageSize: 6 }).subscribe({
+      this.relatedRequest = this.catalogService.getProducts({ categoryId: p.categoryId, pageSize: 6 }).subscribe({
         next: res => {
           const list = (res.items || []).filter(item => item.id !== p.id).slice(0, 4);
           this.relatedProducts.set(list);
-        }
+        }, error: () => this.relatedProducts.set([])
       });
     }
   }
@@ -341,7 +349,7 @@ export class ProductPageComponent implements OnInit {
       if (opt && !mods.some(m => m.id === opt.id)) mods.push(opt);
     }
 
-    const qty = this.isWeighedProduct && this.orderMode === 'weight' ? 1 : this.piecesCount;
+    const qty = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
     const customGrams = this.isWeighedProduct ? this.calculatedEstimatedWeightGrams : undefined;
 
     this.cartService.addItem(
@@ -369,6 +377,8 @@ export class ProductPageComponent implements OnInit {
       this.selectedRelatedProduct.set(product);
     }
   }
+
+  ngOnDestroy() { this.productRequest?.unsubscribe(); this.relatedRequest?.unsubscribe(); this.routeSubscription?.unsubscribe(); }
 
   goBack(): void {
     if (window.history.length > 1) {

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { ProductCardSkeletonComponent } from '../../../shared/components/product
 import { ProductDetailModalComponent } from '../../../shared/components/product-detail-modal/product-detail-modal.component';
 import { Product } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -21,7 +21,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   readonly settingsService = inject(SettingsService);
   readonly catalogService = inject(CatalogService);
   readonly authService = inject(AuthService);
@@ -47,13 +47,16 @@ export class HomeComponent implements OnInit {
 
   products = signal<Product[]>([]);
   isLoadingProducts = signal<boolean>(true);
+  loadError = signal(false);
+  private productsRequest?: Subscription;
+  private searchSubscription?: Subscription;
 
   ngOnInit() {
     this.settingsService.loadSettings().subscribe();
     this.catalogService.loadCategories().subscribe();
 
     // Debounce search
-    this.searchSubject.pipe(
+    this.searchSubscription = this.searchSubject.pipe(
       debounceTime(350),
       distinctUntilChanged()
     ).subscribe(query => {
@@ -93,8 +96,10 @@ export class HomeComponent implements OnInit {
   }
 
   fetchFeaturedProducts() {
+    this.productsRequest?.unsubscribe();
+    this.loadError.set(false);
     this.isLoadingProducts.set(true);
-    this.catalogService.getProducts({
+    this.productsRequest = this.catalogService.getProducts({
       categoryId: this.selectedCategoryId(),
       search: this.searchQuery(),
       page: 1,
@@ -105,6 +110,7 @@ export class HomeComponent implements OnInit {
         this.isLoadingProducts.set(false);
       },
       error: () => {
+        this.loadError.set(true);
         this.products.set([]);
         this.isLoadingProducts.set(false);
       }
@@ -122,4 +128,5 @@ export class HomeComponent implements OnInit {
   get featuredProducts(): Product[] {
     return this.products();
   }
+  ngOnDestroy() { this.productsRequest?.unsubscribe(); this.searchSubscription?.unsubscribe(); }
 }

@@ -66,10 +66,15 @@ export class AdminSettingsComponent implements OnInit {
     return isNaN(parsed) ? defaultVal : parsed;
   }
 
-  setRadius(prop: 'borderRadius' | 'buttonBorderRadius', px: number): void {
+  restoreStorefrontShapes(): void {
+    this.settings.update(s => s ? { ...s, navbarBorderRadius: '0px', bottomNavBorderRadius: '28px', productCardBorderRadius: '18px', searchBorderRadius: '999px' } : s);
+    this.onColorChange();
+  }
+
+  setRadius(prop: 'borderRadius' | 'buttonBorderRadius' | 'navbarBorderRadius' | 'bottomNavBorderRadius' | 'productCardBorderRadius' | 'searchBorderRadius', px: number): void {
     const current = this.settings();
     if (current) {
-      this.settings.update(s => s ? { ...s, [prop]: `${px}px` } : s);
+        this.settings.update(s => s ? { ...s, [prop]: `${Math.max(0, Math.min(999, Math.round(px || 0)))}px` } : s);
       this.onColorChange();
     }
   }

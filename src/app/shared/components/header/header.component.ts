@@ -8,11 +8,12 @@ import { LanguageService } from '../../../core/services/language.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
 
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
+import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, ImageUrlPipe],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ImageUrlPipe, StoreDialogDirective],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
@@ -24,19 +25,14 @@ export class HeaderComponent {
   readonly wishlistService = inject(WishlistService);
 
   isMobileMenuOpen = false;
+  get whatsappUrl() { return 'https://wa.me/' + (this.settingsService.settings().whatsapp || '').replace(/\D/g, ''); }
 
   toggleMobileMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
-    if (typeof document !== 'undefined') {
-      document.body.style.overflow = this.isMobileMenuOpen ? 'hidden' : '';
-    }
   }
 
   closeMobileMenu() {
     this.isMobileMenuOpen = false;
-    if (typeof document !== 'undefined') {
-      document.body.style.overflow = '';
-    }
   }
 
   get isKitchenAllowed(): boolean {

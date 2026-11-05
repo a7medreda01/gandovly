@@ -44,7 +44,7 @@ export class ImageUrlPipe implements PipeTransform {
           return resolveCategoryPng(nameHint);
         case 'product':
         default:
-          return '/assets/images/categories/rice-pasta.png';
+          return '/assets/images/branding/product-placeholder.svg';
       }
     }
 

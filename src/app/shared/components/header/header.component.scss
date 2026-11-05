@@ -829,3 +829,46 @@
     background: #FFF1F2;
   }
 }
+
+/* Stable header controls and long store names. */
+.header-wrapper { min-height: 72px; height: auto; gap: 20px; padding-block: 8px; }
+.header-brand-group, .brand-logo, .brand-logo .brand-texts { min-width: 0; }
+.brand-logo .restaurant-name { color: var(--navbar-text, #182b38); background: none; -webkit-text-fill-color: currentColor; line-height: 1.5; font-size: 19px; }
+.brand-logo .restaurant-tagline { font-size: 12px; line-height: 1.5; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mobile-toggle-btn, .account-btn, .cart-trigger-btn, .drawer-close-btn { min-width: 44px; min-height: 44px; }
+.header-actions { gap: 8px; }
+.desktop-nav .nav-link { min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 767px) {
+  .header-wrapper { min-height: 64px; gap: 8px; padding-inline: 12px; }
+  .header-brand-group { flex: 1; gap: 4px; }
+  .brand-logo { gap: 6px; min-width: 0; }
+  .brand-logo .restaurant-name { font-size: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .logo-circle-badge, .brand-logo .restaurant-logo-img, .brand-logo .logo-icon { width: 34px; height: 34px; }
+  .brand-logo .restaurant-tagline { display: none; }
+  .header-actions { gap: 2px; }
+  .cart-trigger-btn { padding: 8px; }
+  .mobile-menu-content { max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; }
+}
+
+.header-brand-group { justify-content: flex-start; }
+
+/* Backend identity settings take precedence over structural design defaults. */
+.main-header { border-radius: 0 0 var(--radius-card, 16px) var(--radius-card, 16px); }
+.main-header .mobile-toggle-btn, .main-header .account-btn, .main-header .cart-trigger-btn.is-empty { color: var(--navbar-text); }
+.main-header .cart-trigger-btn.is-empty .cart-icon { color: inherit; }
+.main-header .account-btn, .main-header .cart-trigger-btn { border-radius: var(--radius-control, 12px); }
+.mobile-menu-content { border-radius: var(--radius-card, 16px) 0 0 var(--radius-card, 16px); background: var(--card-bg, #fff); color: var(--text-main); }
+.mobile-menu-content .link-title { color: var(--text-main); }
+@media (max-width: 767px) { .brand-logo .restaurant-logo-img.logo-only-mode { width: auto; max-width: 120px; height: 36px; border-radius: 0; object-fit: contain; } }
+
+/* Reference defaults; each component still follows its own saved setting. */
+.main-header { border-radius: var(--radius-navbar, 0px); }
+@media (max-width: 767px) { .header-wrapper { min-height: 54px; padding-block: 4px; } }
+
+/* A filled-cart icon must remain visible on transparent mobile headers. */
+.main-header .cart-trigger-btn.has-items { background: var(--btn-primary-bg,var(--primary-color)); color: var(--btn-primary-text,#fff); }
+.main-header .cart-trigger-btn.has-items .cart-icon { color: inherit; }
+@media(max-width:900px) {
+  .main-header .cart-trigger-btn, .main-header .cart-trigger-btn.has-items { color: var(--navbar-text,#12263f); }
+  .main-header .cart-trigger-btn .cart-icon, .main-header .cart-trigger-btn.has-items .cart-icon { color: var(--navbar-text,#12263f); opacity: 1; visibility: visible; }
+}

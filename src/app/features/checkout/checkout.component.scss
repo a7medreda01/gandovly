@@ -1932,3 +1932,54 @@
 
 
 
+
+.checkout-empty { min-height: 55dvh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-block: 48px; text-align: center; }
+.checkout-empty > i { font-size: 48px; color: var(--primary-color); }
+.checkout-empty h1 { font-size: 28px; }
+.checkout-empty p { max-width: 36ch; color: #586879; line-height: 1.8; }
+.checkout-empty .btn { min-height: 48px; }
+
+.order-type-tabs .type-tab-btn.active { border-color: var(--primary-color); background: color-mix(in srgb, var(--primary-color) 6%, white); box-shadow: 0 0 0 1px var(--primary-color); }
+.order-type-tabs .type-tab-btn { min-width: 0; }
+.order-type-tabs .type-tab-btn .tab-text .title { font-size: 14px; line-height: 1.5; }
+
+.type-tab-btn { min-height: 48px; }
+
+.checkout-page .checkout-card, .checkout-page .summary-card { border-radius: var(--radius-card, 16px); background: var(--card-bg, #fff); color: var(--text-main); box-shadow: var(--shadow-card); }
+.checkout-page .form-control, .checkout-page .type-tab-btn { border-radius: var(--radius-control, 12px); }
+/* A quiet, consistent checkout surface; all accents follow store identity. */
+.checkout-page { max-width: 1160px; padding-block: 24px 48px; gap: 22px; }
+.checkout-header .page-title { color: var(--text-main); font-size: 1.5rem; line-height: 1.5; }
+.checkout-grid { gap: 24px; grid-template-columns: minmax(0,1.5fr) minmax(280px,1fr); }
+.form-column { gap: 16px; min-width: 0; }
+.checkout-page .checkout-card, .checkout-page .summary-card { padding: 20px; border: 1px solid var(--border-color,#e2e8f0); box-shadow: none; }
+.checkout-page .card-title { font-size: 1rem; line-height: 1.6; font-weight: 700; color: var(--text-main); margin-bottom: 16px; }
+.card-header-row { gap: 10px; flex-wrap: wrap; }
+.card-header-row .badge { white-space: normal; font-size: .75rem; line-height: 1.6; border: 0 !important; background: transparent !important; color: var(--text-muted) !important; padding: 0 !important; }
+.card-header-row .badge i { display: none; }
+.checkout-page .form-group label { font-size: .875rem; margin-bottom: 6px; }
+.checkout-page .form-control { min-height: 46px; padding: 10px 12px; border: 1px solid var(--border-color,#dce3eb); background: var(--card-bg,#fff); color: var(--text-main); }
+.checkout-page textarea.form-control { min-height: 82px; line-height: 1.7; }
+.checkout-page .order-type-tabs { gap: 10px; margin-bottom: 14px; }
+.checkout-page .type-tab-btn { min-height: 48px; padding: 10px 12px; justify-content: center; box-shadow: none; color: var(--text-main); background: var(--card-bg,#fff); }
+.checkout-page .type-tab-btn .tab-icon { font-size: 18px; color: var(--primary-color) !important; }
+.checkout-page .type-tab-btn.active { background: color-mix(in srgb,var(--primary-color) 7%,var(--card-bg,#fff)); border-color: var(--primary-color); box-shadow: none; }
+.checkout-page .timing-badge-compact, .checkout-page .warehouse-box, .checkout-page .safety-tip-pill { padding: 12px; border: 0; background: color-mix(in srgb,var(--primary-color) 4%,var(--card-bg,#fff)); border-radius: var(--radius-control,12px); font-size: .85rem; line-height: 1.7; }
+.checkout-page .payment-option-card { position: relative; gap: 12px; padding: 14px; border-width: 1px; background: var(--card-bg,#fff); box-shadow: none; }
+.checkout-page .payment-option-card.active { background: color-mix(in srgb,var(--primary-color) 5%,var(--card-bg,#fff)); box-shadow: none; }
+.payment-radio { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.payment-option-card:has(input:focus-visible) { outline: 2px solid var(--primary-color); outline-offset: 3px; }
+.checkout-page .payment-option-card .pay-icon-box { width: 34px; height: 34px; background: transparent; color: var(--primary-color); }
+.checkout-page .payment-option-card .pay-icon-box i { font-size: 22px !important; }
+.checkout-page .payment-option-card .pay-info strong { font-size: .9rem; line-height: 1.6; }
+.checkout-page .payment-option-card .pay-info small { font-size: .8rem; line-height: 1.6; }
+.checkout-page .summary-card { position: sticky; top: 88px; }
+.checkout-page .btn-submit-order { min-height: 48px; padding: 12px 18px; font-size: 1rem; border-radius: var(--radius-control,12px); box-shadow: none; }
+.checkout-page .btn-copy-acc { min-width: 44px; min-height: 44px; }
+.confirm-modal-actions button, .schedule-modal .modal-footer button, .btn-modal-action { min-height: 48px; font-size: 1rem; padding: 12px 16px; }
+@media(max-width: 900px) { .checkout-grid { grid-template-columns: minmax(0,1fr); } .checkout-page .summary-card { position: static; } }
+@media(max-width: 767px) { .checkout-page { padding-top: 20px; padding-bottom: calc(100px + env(safe-area-inset-bottom)); gap: 18px; } .checkout-page .checkout-card, .checkout-page .summary-card { padding: 16px; } .checkout-header .page-title { font-size: 1.35rem; } .checkout-page .card-title { font-size: 1rem; } .checkout-page .form-row { gap: 12px; } .checkout-page .payment-option-card { gap: 8px; padding: 12px; } }
+.checkout-page .order-type-tabs .type-tab-btn { flex-direction: row; gap: 8px; }
+.checkout-page .order-type-tabs .type-tab-btn .tab-icon { margin: 0; }
+.checkout-page .order-type-tabs .type-tab-btn .tab-text .title { font-size: .875rem; }
+@media(max-width: 380px) { .checkout-page .order-type-tabs .type-tab-btn { padding-inline: 8px; gap: 6px; } .checkout-page .order-type-tabs .type-tab-btn .tab-text .title { font-size: .8rem; } }

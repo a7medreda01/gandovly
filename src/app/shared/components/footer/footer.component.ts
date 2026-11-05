@@ -14,5 +14,5 @@ import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 export class FooterComponent {
   readonly settingsService = inject(SettingsService);
   currentYear = new Date().getFullYear();
-  readonly tiktokUrl = 'https://www.tiktok.com/@gandofly111';
+  get whatsappUrl() { return 'https://wa.me/' + (this.settingsService.settings().whatsapp || '').replace(/\D/g, ''); }
 }

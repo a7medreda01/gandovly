@@ -1,0 +1,4 @@
+{
+  "/api/v1": { "target": "https://supermarket1.runasp.net", "secure": true, "changeOrigin": true },
+  "/uploads": { "target": "https://supermarket1.runasp.net", "secure": true, "changeOrigin": true }
+}

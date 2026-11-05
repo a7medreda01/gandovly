@@ -10,7 +10,7 @@
       <div class="hero-content-overlay">
         <div class="hero-texts">
           <h1 class="hero-title">
-            <span class="gold-text">{{ settingsService.settings().tagline || settingsService.settings().restaurantName }}</span>
+            <span class="gold-text">{{ settingsService.settings().restaurantName }}</span>
           </h1>
           <p class="hero-subtitle">{{ settingsService.settings().description || 'تسوق كافة المنتجات والطلبات بأفضل جودة وأسرع توصيل لباب منزلك' }}</p>
           <a routerLink="/menu" class="btn-hero-cta">
@@ -27,17 +27,17 @@
   <section class="search-filter-section container" [class.no-hero]="!settingsService.settings().showHeroBanner">
     <div class="search-filter-row">
       <!-- Search Button on Right (1st child in RTL) -->
-      <a routerLink="/menu" class="btn-filter-dark" title="بحث في المنتجات">
+      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null}" class="btn-filter-dark" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
         <i class="bi bi-search"></i>
       </a>
 
       <!-- Search Capsule on Left (2nd child in RTL) -->
       <div class="search-capsule">
         <i class="bi bi-search search-icon"></i>
-        <input type="text" class="search-input" placeholder="بحث عن منتج" [ngModel]="searchQuery()"
+        <input type="search" class="search-input" aria-label="البحث في منتجات المتجر" placeholder="ابحث عن منتج أو علامة تجارية" [ngModel]="searchQuery()"
           (ngModelChange)="onSearchChange($event)" />
         @if (searchQuery()) {
-        <button type="button" class="btn-clear-search" (click)="searchQuery.set(''); onSearchChange('')">
+        <button type="button" class="btn-clear-search" aria-label="مسح البحث" (click)="searchQuery.set(''); onSearchChange('')">
           <i class="bi bi-x-circle-fill"></i>
         </button>
         }
@@ -58,21 +58,21 @@
       </button>
       <div class="categories-scroll" #catScrollContainer>
         <!-- "الكل" Card (Selected by default) -->
-        <div class="category-item" [class.active]="selectedCategoryId() === null" (click)="selectCategory(null)">
+        <button type="button" class="category-item" [class.active]="selectedCategoryId() === null" [attr.aria-pressed]="selectedCategoryId() === null" (click)="selectCategory(null)">
           <div class="category-icon-box box-all">
             <i class="bi bi-grid-fill"></i>
           </div>
           <span class="category-label">جميع الأصناف</span>
-        </div>
+        </button>
 
         <!-- Categories from Backend API -->
         @for (cat of displayedCategories; track cat.id) {
-        <div class="category-item" [class.active]="selectedCategoryId() === cat.id" (click)="selectCategory(cat.id)">
+        <button type="button" class="category-item" [class.active]="selectedCategoryId() === cat.id" [attr.aria-pressed]="selectedCategoryId() === cat.id" (click)="selectCategory(cat.id)">
           <div class="category-icon-box">
             <img [src]="cat.imageUrl | imageUrl:'category':cat.id:cat.nameAr" [alt]="cat.nameAr" class="category-img" loading="lazy" (error)="$any($event.target).src = '/assets/images/categories/rice-pasta.png'" />
           </div>
           <span class="category-label" [title]="languageService.getLocalizedName(cat)">{{ languageService.getLocalizedName(cat) }}</span>
-        </div>
+        </button>
         }
       </div>
       <button type="button" class="btn-cat-nav next" (click)="scrollCategories(240)" aria-label="التالي" title="التالي">
@@ -85,7 +85,7 @@
   <!-- 4. "الأكثر طلباً" Section (2-Column Grid Matching Screenshot) -->
   <section class="popular-section container">
     <div class="section-heading-row">
-      <h2 class="section-title">الأكثر طلباً</h2>
+      <h2 class="section-title">{{ searchQuery() ? 'نتائج البحث' : 'منتجات مختارة' }}</h2>
       <a routerLink="/menu" class="see-all-btn">
         <span>عرض الكل</span>
         <i class="bi bi-chevron-left"></i>
@@ -98,6 +98,8 @@
       <app-product-card-skeleton></app-product-card-skeleton>
       }
     </div>
+    } @else if (loadError()) {
+      <div class="store-load-error" role="alert"><h3>تعذر تحميل المنتجات</h3><p>تحقق من اتصالك بالإنترنت وحاول مرة أخرى.</p><button type="button" class="btn btn-primary" (click)="fetchFeaturedProducts()">إعادة المحاولة</button></div>
     } @else if (products().length > 0) {
     <div class="products-grid-2col">
       @for (prod of featuredProducts; track prod.id) {

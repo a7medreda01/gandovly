@@ -110,6 +110,9 @@
   }
 
   <!-- Main Product Detail Grid -->
+  @else if (!product()) {
+    <section class="store-load-error"><i class="bi bi-box" aria-hidden="true"></i><h1>المنتج غير متاح</h1><p>قد يكون الرابط غير صحيح، أو تعذر تحميل المنتج حاليًا.</p><a routerLink="/menu" class="btn btn-primary">تصفح المنتجات</a></section>
+  }
   @else if (product()) {
     <div class="product-page-grid">
       <!-- Right: Visual Gallery (Desktop Sticky, Mobile Hero) -->
@@ -197,7 +200,7 @@
             <span class="price-val">{{ isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : product()!.pricePerUnit }}</span>
             <span class="price-curr">{{ currencySymbol }}</span>
             @if (isWeighedProduct) {
-              <span class="unit-label">/ لكل كجم</span>
+              <span class="unit-label">لكل كجم</span>
             }
             @if (product()!.originalPrice && product()!.originalPrice! > (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : product()!.pricePerUnit)) {
               <span class="price-original ms-2">{{ product()!.originalPrice }} {{ currencySymbol }}</span>
@@ -244,9 +247,9 @@
                 <div class="stepper-header-row flex-between mb-2">
                   <span class="stepper-title fw-bold text-dark">العدد المطلوب:</span>
                   <div class="stepper-box">
-                    <button type="button" class="btn-step" (click)="changePieces(-1)" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
+                    <button type="button" class="btn-step" (click)="changePieces(-1)" aria-label="تقليل الكمية" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
                     <span class="step-value">{{ piecesCount }} قطعة</span>
-                    <button type="button" class="btn-step" (click)="changePieces(1)"><i class="bi bi-plus-lg"></i></button>
+                    <button type="button" class="btn-step" (click)="changePieces(1)" aria-label="زيادة الكمية"><i class="bi bi-plus-lg"></i></button>
                   </div>
                 </div>
                 <div class="weight-estimate-pill">
@@ -259,9 +262,9 @@
                 <div class="stepper-header-row flex-between mb-2">
                   <span class="stepper-title fw-bold text-dark">الوزن المباشر:</span>
                   <div class="stepper-box">
-                    <button type="button" class="btn-step" (click)="changeWeight(-250)" [disabled]="customWeightGrams <= 250"><i class="bi bi-dash-lg"></i></button>
+                    <button type="button" class="btn-step" (click)="changeWeight(-250)" aria-label="تقليل الوزن" [disabled]="customWeightGrams <= 250"><i class="bi bi-dash-lg"></i></button>
                     <span class="step-value">{{ customWeightGrams >= 1000 ? (customWeightGrams / 1000) + ' كجم' : customWeightGrams + ' جم' }}</span>
-                    <button type="button" class="btn-step" (click)="changeWeight(250)"><i class="bi bi-plus-lg"></i></button>
+                    <button type="button" class="btn-step" (click)="changeWeight(250)" aria-label="زيادة الوزن"><i class="bi bi-plus-lg"></i></button>
                   </div>
                 </div>
                 <!-- Quick Presets -->
@@ -279,9 +282,9 @@
               <div class="stepper-header-row flex-between">
                 <span class="stepper-title fw-bold text-dark">الكمية المطلوبة:</span>
                 <div class="stepper-box">
-                  <button type="button" class="btn-step" (click)="changePieces(-1)" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
+                  <button type="button" class="btn-step" (click)="changePieces(-1)" aria-label="تقليل الكمية" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
                   <span class="step-value">{{ piecesCount }}</span>
-                  <button type="button" class="btn-step" (click)="changePieces(1)"><i class="bi bi-plus-lg"></i></button>
+                  <button type="button" class="btn-step" (click)="changePieces(1)" aria-label="زيادة الكمية"><i class="bi bi-plus-lg"></i></button>
                 </div>
               </div>
             </div>
@@ -295,9 +298,10 @@
               <h4 class="card-sec-title"><i class="bi bi-gear-wide-connected text-primary me-2"></i> {{ grp.nameAr }} (إلزامي):</h4>
               <div class="options-radio-grid mt-2">
                 @for (opt of grp.options; track opt.id) {
-                  <label
+                  <button type="button"
                     class="option-radio-card"
                     [class.active]="selectedPrepOption?.id === opt.id"
+                    [attr.aria-pressed]="selectedPrepOption?.id === opt.id"
                     (click)="selectPrep(opt)"
                   >
                     <div class="d-flex align-items-center gap-2">
@@ -307,7 +311,7 @@
                     @if (opt.price) {
                       <span class="opt-price">+ {{ opt.price }} {{ currencySymbol }}</span>
                     }
-                  </label>
+                  </button>
                 }
               </div>
             </div>

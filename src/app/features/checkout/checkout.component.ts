@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { OrderService } from '../../core/services/order.service';
 import { SettingsService } from '../../core/services/settings.service';
@@ -18,11 +18,12 @@ import {
 
 import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { PhoneInputComponent } from '../../shared/components/phone-input/phone-input.component';
+import { StoreDialogDirective } from '../../shared/directives/store-dialog.directive';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe, PhoneInputComponent],
+  imports: [CommonModule, FormsModule, ImageUrlPipe, PhoneInputComponent, StoreDialogDirective, RouterLink],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.scss'
 })
@@ -43,10 +44,22 @@ export class CheckoutComponent implements OnInit {
   customerPhone: string = '';
   orderType: OrderType = 'Delivery';
   paymentMethod: PaymentMethod = 'CashOnDelivery';
+  get canPayByTransfer(): boolean {
+    const settings = this.settingsService.settings();
+    return settings.paymentEnableWalletTransfer !== false && Boolean(settings.vodafoneCashNumber?.trim() || settings.instaPayAccount?.trim());
+  }
+  get hasPaymentMethod(): boolean { return this.settingsService.settings().paymentEnableCOD !== false || this.canPayByTransfer; }
+  constructor() {
+    effect(() => {
+      const settings = this.settingsService.settings();
+      if (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer) this.paymentMethod = 'CashOnDelivery';
+      if (this.paymentMethod === 'CashOnDelivery' && settings.paymentEnableCOD === false && this.canPayByTransfer) this.paymentMethod = 'WalletTransfer';
+    });
+  }
   notes: string = '';
 
   // Address
-  city: string = 'الرياض';
+  city: string = '';
   district: string = '';
   streetAddress: string = '';
 
@@ -110,8 +123,8 @@ export class CheckoutComponent implements OnInit {
   scheduledDisplaySummary = signal<string>('');
 
   ngOnInit() {
+    this.city = this.settingsService.settings().city || '';
     if (this.cartService.items().length === 0) {
-      this.router.navigate(['/menu']);
       return;
     }
 
@@ -161,7 +174,7 @@ export class CheckoutComponent implements OnInit {
     this.isCustomAddress.set(false);
     this.streetAddress = addr.streetAddress;
     this.district = addr.district;
-    this.city = addr.city || 'الرياض';
+    this.city = addr.city || this.settingsService.settings().city || '';
 
     if (addr.deliveryZoneId) {
       this.selectedZoneId = addr.deliveryZoneId;
@@ -191,8 +204,11 @@ export class CheckoutComponent implements OnInit {
   }
 
   private addressDebounceTimer: any = null;
+  private zoneResolutionVersion = 0;
 
   onAddressChange() {
+    const version = ++this.zoneResolutionVersion;
+    if (this.addressDebounceTimer) clearTimeout(this.addressDebounceTimer);
     const query = (this.streetAddress || '').trim();
     if (!query || this.orderType !== 'Delivery') return;
 
@@ -201,6 +217,7 @@ export class CheckoutComponent implements OnInit {
       this.isResolvingZone.set(true);
       this.orderService.resolveDeliveryZone(this.city, query).subscribe({
         next: (res: any) => {
+          if (version !== this.zoneResolutionVersion) return;
           this.isResolvingZone.set(false);
           if (res.matchFound && res.resolvedZone) {
             this.selectedZoneId = res.resolvedZone.id;
@@ -214,6 +231,7 @@ export class CheckoutComponent implements OnInit {
           }
         },
         error: () => {
+          if (version !== this.zoneResolutionVersion) return;
           this.isResolvingZone.set(false);
         }
       });
@@ -226,6 +244,9 @@ export class CheckoutComponent implements OnInit {
   }
 
   onZoneSelected(zoneId: any) {
+    this.zoneResolutionVersion++;
+    if (this.addressDebounceTimer) clearTimeout(this.addressDebounceTimer);
+    this.isResolvingZone.set(false);
     this.selectedZoneId = Number(zoneId);
     const matched = this.deliveryZones().find(z => z.id === this.selectedZoneId);
     if (matched) {
@@ -348,6 +369,7 @@ export class CheckoutComponent implements OnInit {
 
   // Initiates checkout validations and triggers Auth or Confirmation Modal
   handleCheckoutClick() {
+    if (!this.hasPaymentMethod) { this.toast.error('لا توجد وسيلة دفع متاحة حاليًا. يرجى التواصل مع المتجر.'); return; }
     if (!this.customerName.trim() && this.authService.currentCustomer()) {
       this.toast.error('يرجى إدخال اسم العميل.');
       return;
@@ -427,7 +449,6 @@ export class CheckoutComponent implements OnInit {
         this.otpFailureCount.set(currentFailures);
 
         if (currentFailures >= 2) {
-          // Second failure: Provide instant fallback code so the customer is NEVER blocked!
           this.fallbackOtpCode.set('123456');
           this.authOtpCode = '123456';
           this.authStep.set('otp');
@@ -613,6 +634,7 @@ export class CheckoutComponent implements OnInit {
 
   // Final Order Submission
   confirmAndSubmitOrder() {
+    if (!this.hasPaymentMethod || (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer)) { this.toast.error('وسيلة الدفع المختارة غير متاحة.'); return; }
     this.isSubmitting.set(true);
 
     const isSched = this.prepTimingType() === 'Scheduled' && !!this.scheduledForDate();
@@ -655,7 +677,7 @@ export class CheckoutComponent implements OnInit {
         this.isSubmitting.set(false);
         this.showConfirmModal.set(false);
         this.cartService.clearCart();
-        this.toast.success('تم استلام طلب التوريد بنجاح! تم إرسال رسالة التأكيد عبر واتساب 🔥');
+        this.toast.success('تم استلام طلبك بنجاح. يمكنك متابعة حالته من صفحة طلباتك.');
 
         // Auto-save new address to profile automatically as 'موقع المشروع / المقر'
         if (this.orderType === 'Delivery' && (this.isCustomAddress() || !this.selectedAddressId())) {
@@ -663,8 +685,8 @@ export class CheckoutComponent implements OnInit {
           const identifier = user?.userId || user?.usernameOrPhone || this.customerPhone.trim();
           if (identifier && this.streetAddress.trim()) {
             this.authService.addCustomerAddress(identifier, {
-              label: 'موقع المشروع / المقر',
-              city: this.city || 'الرياض',
+              label: 'عنوان التوصيل',
+              city: this.city || this.settingsService.settings().city || '',
               district: this.district || this.resolvedZoneName() || 'المنطقة المركزية',
               streetAddress: this.streetAddress.trim(),
               deliveryZoneId: this.selectedZoneId || undefined,

@@ -4,11 +4,12 @@ import { Router } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
 import { SettingsService } from '../../../core/services/settings.service';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
+import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 
 @Component({
   selector: 'app-cart-drawer',
   standalone: true,
-  imports: [CommonModule, ImageUrlPipe],
+  imports: [CommonModule, ImageUrlPipe, StoreDialogDirective],
   templateUrl: './cart-drawer.component.html',
   styleUrl: './cart-drawer.component.scss'
 })

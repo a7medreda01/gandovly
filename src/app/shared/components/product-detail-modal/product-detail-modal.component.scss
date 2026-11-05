@@ -1787,3 +1787,17 @@
     }
   }
 }
+
+.luxury-modal { max-height: calc(100dvh - 24px); border-radius: 22px 22px 0 0; }
+.modal-body { overscroll-behavior: contain; }
+.modal-footer-lux { padding-bottom: calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid #e3e8ee; }
+.modal-footer-lux button { min-height: 48px; }
+.hero-top-bar button { min-width: 44px; min-height: 44px; }
+@media (min-width: 768px) { .luxury-modal { max-height: calc(100dvh - 64px); border-radius: 22px; } }
+
+.luxury-modal .stepper-box .btn-step { min-width: 44px; width: 44px; min-height: 44px; height: 44px; }
+.luxury-modal .stepper-row { flex-wrap: wrap; gap: 12px; }
+.luxury-modal .mode-toggle-group { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.luxury-modal .mode-btn { min-height: 54px; }
+
+.luxury-modal { border-radius: var(--radius-modal, 22px); background: var(--card-bg, #fff); color: var(--text-main); }

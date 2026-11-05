@@ -5,7 +5,8 @@
       <div class="search-capsule">
         <i class="bi bi-search search-icon"></i>
         <input
-          type="text"
+          type="search"
+          aria-label="البحث في المنتجات"
           class="search-input"
           placeholder="ابحث عن منتج، ماركة، صنف أو تصنيف..."
           [(ngModel)]="searchTerm"
@@ -27,22 +28,24 @@
         </button>
         <div class="categories-scroll" #catScrollContainer>
           <!-- "الكل" Card -->
-          <div
+          <button type="button"
             class="category-item"
             [class.active]="selectedCatId() === null"
+            [attr.aria-pressed]="selectedCatId() === null"
             (click)="selectCategory(null)"
           >
             <div class="category-icon-box box-all">
               <i class="bi bi-grid-fill"></i>
             </div>
             <span class="category-label">جميع الأصناف</span>
-          </div>
+          </button>
 
           <!-- Categories from Backend API -->
           @for (cat of catalogService.categories(); track cat.id) {
-            <div
+            <button type="button"
               class="category-item"
               [class.active]="selectedCatId() === cat.id"
+              [attr.aria-pressed]="selectedCatId() === cat.id"
               (click)="selectCategory(cat.id)"
             >
               <div class="category-icon-box">
@@ -54,7 +57,7 @@
                 }
               </div>
               <span class="category-label" [title]="cat.nameAr">{{ cat.nameAr }}</span>
-            </div>
+            </button>
           }
         </div>
         <button type="button" class="btn-cat-nav next" (click)="scrollCategories(240)" aria-label="التالي" title="التالي">
@@ -66,13 +69,13 @@
     <!-- 3. Section Title & Results Header -->
     <div class="menu-results-header">
       <div class="header-titles">
-        <h2 class="menu-active-title">
+        <h1 class="menu-active-title">
           @if (selectedCatId() === null) {
             <span>جميع المنتجات والأصناف</span>
           } @else {
             <span>قائمة {{ selectedCategoryName }}</span>
           }
-        </h2>
+        </h1>
         <span class="results-count">{{ totalCount() }} منتج متاح</span>
       </div>
       @if (totalPages() > 1) {
@@ -89,6 +92,8 @@
           <app-product-card-skeleton></app-product-card-skeleton>
         }
       </div>
+    } @else if (loadError() && products().length === 0) {
+      <div class="store-load-error" role="alert"><h2>تعذر تحميل المنتجات</h2><p>تحقق من اتصالك بالإنترنت وحاول مرة أخرى.</p><button type="button" class="btn btn-primary" (click)="fetchProducts(true)">إعادة المحاولة</button></div>
     } @else if (products().length === 0) {
       <div class="empty-results-card animate-fade-in">
         <div class="empty-icon-bubble">
@@ -110,6 +115,8 @@
           ></app-product-card>
         }
       </div>
+
+      @if (loadError()) { <div class="store-load-error" role="alert"><p>تعذر تحميل بقية المنتجات. أصنافك الحالية ما زالت ظاهرة.</p><button type="button" class="btn btn-primary" (click)="loadError.set(false); loadNextPage()">إعادة المحاولة</button></div> }
 
       <!-- Infinite Scroll Loading Spinner -->
       @if (isLoadingMore()) {

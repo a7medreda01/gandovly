@@ -62,7 +62,7 @@
           </a>
           }
           @if (settingsService.settings().whatsapp) {
-          <a [href]="'https://wa.me/' + settingsService.settings().whatsapp" target="_blank" rel="noopener noreferrer"
+          <a [href]="whatsappUrl" target="_blank" rel="noopener noreferrer"
             class="social-btn whatsapp" title="تواصل واتساب" aria-label="WhatsApp">
             <i class="bi bi-whatsapp"></i>
           </a>
@@ -72,8 +72,8 @@
 
       <!-- Col 3: Address & Working Hours -->
       <div class="footer-info-box">
-        <p class="info-item"><i class="bi bi-geo-alt-fill"></i> {{ settingsService.settings().address || 'خدمة التوصيل لكافة المحافظات والمناطق' }}</p>
-        <p class="info-item"><i class="bi bi-clock-fill"></i> خدمة العملاء والتوصيل يومياً</p>
+        @if (settingsService.settings().address) { <p class="info-item"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> {{ settingsService.settings().address }}</p> }
+        @if (settingsService.settings().pickupWorkingHours) { <p class="info-item"><i class="bi bi-clock" aria-hidden="true"></i> {{ settingsService.settings().pickupWorkingHours }}</p> }
       </div>
     </div>
 

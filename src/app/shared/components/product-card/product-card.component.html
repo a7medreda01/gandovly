@@ -1,64 +1,21 @@
-<div class="product-card" [class.is-out-of-stock]="!product.isAvailable" (click)="onSelect()">
-  <!-- Image Box with Badges -->
-  <div class="card-media">
-    <div class="product-img-wrapper">
-      <img
-        [src]="product.imageUrl | imageUrl:'product':(product.updatedAt || product.id)"
-        [alt]="product.nameAr"
-        class="product-real-img"
-        loading="lazy"
-      />
-    </div>
-
-    <!-- Badges (Top Right) -->
-    <div class="card-badges">
-      @if (hasDiscount) {
-        <span class="badge badge-discount"><i class="bi bi-tag-fill"></i> خصم {{ discountPercent }}%</span>
-      }
-    </div>
-  </div>
-
-  <!-- Content Box -->
+<article class="product-card" [class.is-out-of-stock]="!product.isAvailable">
+  <button type="button" class="card-media" (click)="onSelect()" [attr.aria-label]="'عرض تفاصيل ' + languageService.getLocalizedName(product)">
+    <span class="product-img-wrapper"><img [src]="product.imageUrl | imageUrl:'product':(product.updatedAt || product.id)" [alt]="languageService.getLocalizedName(product)" class="product-real-img" loading="lazy" decoding="async" (error)="onImageError($event)" /></span>
+    @if (hasDiscount) { <span class="card-badges"><span class="badge-discount">خصم {{ discountPercent }}%</span></span> }
+    @if (!product.isAvailable) { <span class="unavailable-label">غير متاح حاليًا</span> }
+  </button>
   <div class="card-body">
-    <div class="title-row">
-      <div class="brand-line">
-        @if (product.brand) {
-          <span class="product-brand-tag">{{ product.brand }}</span>
-        }
-      </div>
-      <h3 class="product-name" [title]="languageService.getLocalizedName(product)">{{ languageService.getLocalizedName(product) }}</h3>
-    </div>
-
-    <!-- Pricing Row (Price on right, dark cart button on left in RTL) -->
+    <div class="brand-line">@if (product.brand) { <span>{{ product.brand }}</span> }</div>
+    <h3 class="product-heading"><button type="button" class="product-name" (click)="onSelect()" [title]="languageService.getLocalizedName(product)">{{ languageService.getLocalizedName(product) }}</button></h3>
     <div class="pricing-row">
       <div class="price-box">
-        <div class="current-price">
-          <span class="amount">{{ displayPrice | number:'1.2-2' }}</span>
-          <span class="currency">{{ currencySymbol }}</span>
-          @if (isWeightBased) {
-            <span class="unit-label">/ كجم</span>
-          }
-        </div>
-        <div class="old-price-line">
-          @if (hasDiscount && product.originalPrice) {
-            <div class="old-price">
-              <span class="strike">{{ product.originalPrice | number:'1.2-2' }}</span>
-              <span class="old-curr">{{ currencySymbol }}</span>
-            </div>
-          }
-        </div>
+        <div class="current-price"><bdi class="amount">{{ displayPrice | number:'1.0-2' }}</bdi><span class="currency">{{ currencySymbol }}</span></div>
+        @if (isWeightBased || hasDiscount) { <div class="price-details">
+          @if (isWeightBased) { <span class="unit-label">لكل كجم</span> }
+          @if (hasDiscount && product.originalPrice) { <del class="old-price"><bdi>{{ product.originalPrice | number:'1.2-2' }}</bdi> {{ currencySymbol }}</del> }
+        </div> }
       </div>
-
-      <button
-        type="button"
-        class="btn-cart-square"
-        (click)="$event.stopPropagation(); onSelect()"
-        [disabled]="!product.isAvailable"
-        title="إضافة للسلة"
-        aria-label="إضافة للسلة"
-      >
-        <i class="bi bi-cart3"></i>
-      </button>
+      <button type="button" class="btn-cart-square" (click)="onSelect()" [disabled]="!product.isAvailable" [attr.aria-label]="'إضافة للسلة: ' + languageService.getLocalizedName(product)" title="إضافة للسلة"><i class="bi bi-cart-plus" aria-hidden="true"></i></button>
     </div>
   </div>
-</div>
+</article>

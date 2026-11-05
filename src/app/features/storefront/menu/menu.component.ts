@@ -8,7 +8,7 @@ import { ProductCardSkeletonComponent } from '../../../shared/components/product
 import { ProductDetailModalComponent } from '../../../shared/components/product-detail-modal/product-detail-modal.component';
 import { Product, MenuCategory } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
@@ -40,6 +40,10 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   totalPages = signal<number>(1);
   isLoading = signal<boolean>(true);
   isLoadingMore = signal<boolean>(false);
+  loadError = signal(false);
+  private productsRequest?: Subscription;
+  private searchSubscription?: Subscription;
+  private routeSubscription?: Subscription;
 
   private observer?: IntersectionObserver;
 
@@ -49,27 +53,23 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Debounce search input
-    this.searchSubject.pipe(
+    this.searchSubscription = this.searchSubject.pipe(
       debounceTime(350),
       distinctUntilChanged()
     ).subscribe(term => {
       this.pageIndex.set(1);
-      this.fetchProducts(true);
+      this.updateQueryParams();
     });
 
     // 1. Load Categories from backend
     this.catalogService.loadCategories().subscribe(() => {
       // 2. Read query params
-      this.route.queryParams.subscribe(params => {
-        if (params['category']) {
-          this.selectedCatId.set(+params['category']);
-        }
+      this.routeSubscription = this.route.queryParams.subscribe(params => {
+        this.selectedCatId.set(params['category'] ? +params['category'] : null);
         if (params['page']) {
           this.pageIndex.set(+params['page'] || 1);
         }
-        if (params['search']) {
-          this.searchTerm = params['search'];
-        }
+        this.searchTerm = params['search'] || '';
 
         // Open modal if product query param is provided
         if (params['product']) {
@@ -89,6 +89,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.productsRequest?.unsubscribe(); this.searchSubscription?.unsubscribe(); this.routeSubscription?.unsubscribe();
     if (this.observer) {
       this.observer.disconnect();
     }
@@ -135,14 +136,13 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   clearSearch() {
     this.searchTerm = '';
     this.pageIndex.set(1);
-    this.fetchProducts(true);
+    this.updateQueryParams();
   }
 
   selectCategory(id: number | null) {
     this.selectedCatId.set(id);
     this.pageIndex.set(1);
     this.updateQueryParams();
-    this.fetchProducts(true);
 
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 120, left: 0, behavior: 'smooth' });
@@ -150,12 +150,14 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   fetchProducts(reset: boolean = false) {
+    this.productsRequest?.unsubscribe();
+    this.loadError.set(false);
     if (reset) {
       this.isLoading.set(true);
       this.pageIndex.set(1);
     }
 
-    this.catalogService.getProducts({
+    this.productsRequest = this.catalogService.getProducts({
       categoryId: this.selectedCatId(),
       search: this.searchTerm,
       page: this.pageIndex(),
@@ -189,6 +191,8 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
         }, 100);
       },
       error: (err) => {
+        this.loadError.set(true);
+        if (!reset) this.pageIndex.update(page => Math.max(1, page - 1));
         console.error('Error fetching paged products', err);
         if (reset) this.products.set([]);
         this.isLoading.set(false);
@@ -198,6 +202,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadNextPage() {
+    if (this.loadError()) return;
     if (this.isLoading() || this.isLoadingMore()) return;
     if (this.pageIndex() >= this.totalPages()) return;
 
@@ -208,10 +213,15 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateQueryParams() {
+    const current = this.route.snapshot.queryParamMap;
+    if ((current.get('category') || '') === (this.selectedCatId()?.toString() || '') && (current.get('search') || '') === this.searchTerm.trim()) {
+      this.fetchProducts(true); return;
+    }
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {
         category: this.selectedCatId(),
+        page: null,
         search: this.searchTerm.trim() ? this.searchTerm.trim() : null
       },
       queryParamsHandling: 'merge',

@@ -837,3 +837,87 @@
     }
   }
 }
+/* Storefront review: readable hero and consistent section spacing. */
+.hero-banner-section { padding: 16px 16px 0; max-width: 1280px; margin-inline: auto; }
+.luxury-hero-card { height: auto; min-height: 320px; border-radius: 22px; box-shadow: none; }
+.luxury-hero-card .hero-bg-img { position: absolute; inset: 0; }
+.luxury-hero-card .hero-content-overlay { position: relative; min-height: 320px; padding: 32px 36px; background: linear-gradient(270deg, #102b46ed, #102b4699 55%, #102b4610); }
+.luxury-hero-card .hero-texts { max-width: min(58%, 540px); gap: 14px; }
+.luxury-hero-card .hero-title { font-size: clamp(24px, 2.7vw, 36px); line-height: 1.5; font-weight: 800; }
+.luxury-hero-card .hero-title .gold-text { color: #fff; text-shadow: none; }
+.luxury-hero-card .hero-subtitle { font-size: 16px; line-height: 1.8; font-weight: 500; text-shadow: none; }
+.luxury-hero-card .btn-hero-cta { min-height: 48px; padding: 12px 22px; margin: 0; background: #fff; color: #163854; box-shadow: none; border-radius: 12px; font-size: 15px; }
+.search-filter-section { margin-top: 20px; max-width: 900px; }
+.search-filter-section .search-capsule { border-radius: 14px; box-shadow: none; border-color: #dce3eb; }
+.search-filter-section .search-capsule .search-input { min-height: 52px; padding-inline-start: 42px; padding-inline-end: 44px; }
+.search-filter-section .btn-filter-dark { width: 52px; height: 52px; box-shadow: none; border-radius: 14px; }
+.categories-row-section, .popular-section { margin-top: 28px; }
+.categories-row-section .categories-scroll { gap: 14px; padding-block: 10px; }
+.categories-row-section .category-item { width: 96px; min-width: 96px; max-width: 96px; background: transparent; border: 0; padding: 0; }
+.categories-row-section .category-item .category-label { font-size: 13px; line-height: 1.5; height: 3em; }
+.categories-row-section .categories-header-mini { gap: 12px; margin-bottom: 8px; }
+.categories-row-section .categories-header-mini .categories-see-all, .popular-section .see-all-btn, .categories-visual-section .see-all-btn { color: var(--primary-color); font-size: 14px; min-height: 44px; display: inline-flex; align-items: center; }
+.categories-row-section .categories-header-mini .categories-mini-title { font-size: 17px; }
+.popular-section .section-title, .categories-visual-section .header-titles .section-title { font-size: 23px; line-height: 1.5; }
+.popular-section .products-grid-2col { gap: 16px; }
+.categories-visual-section { margin-top: 36px; }
+.categories-visual-section .cat-compact-card { padding: 18px 10px; min-height: 150px; }
+.categories-visual-section .cat-compact-card .cat-card-name { font-size: 14px; line-height: 1.6; }
+.hotline-card-section .hotline-card { box-shadow: none; border-radius: 18px; }
+@media (max-width: 767px) {
+  .home-container { padding-bottom: 24px; }
+  .hero-banner-section { padding: 12px 12px 0; }
+  .luxury-hero-card { min-height: 280px; border-radius: 18px; }
+  .luxury-hero-card .hero-content-overlay { min-height: 280px; padding: 24px 20px; background: linear-gradient(270deg, #102b46ef, #102b46bd 65%, #102b4660); }
+  .luxury-hero-card .hero-texts { max-width: 100%; gap: 12px; }
+  .luxury-hero-card .hero-title { font-size: clamp(22px, 5.5vw, 28px); line-height: 1.55; }
+  .luxury-hero-card .hero-subtitle { font-size: 14px; line-height: 1.8; max-width: 32ch; }
+  .search-filter-section { margin-top: 16px; }
+  .categories-row-section, .popular-section { margin-top: 24px; }
+  .popular-section .products-grid-2col { gap: 12px; }
+  .popular-section .section-title, .categories-visual-section .header-titles .section-title { font-size: 21px; }
+  .categories-visual-section .section-heading-row { align-items: center; gap: 10px; }
+  .categories-visual-section .categories-compact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+}
+
+.categories-row-section .categories-scroll-wrapper .btn-cat-nav { width: 44px; height: 44px; }
+
+.luxury-hero-card { border-radius: var(--radius-card, 22px); box-shadow: var(--shadow-card); }
+.luxury-hero-card .btn-hero-cta { border-radius: var(--radius-control, 12px); background: var(--btn-accent-bg, var(--accent-color)); color: var(--btn-accent-text, #fff); }
+.search-filter-section .search-capsule, .search-filter-section .btn-filter-dark { border-radius: var(--radius-control, 14px); }
+.hotline-card-section .hotline-card, .categories-visual-section .cat-compact-card { border-radius: var(--radius-card, 18px); }
+
+.search-filter-section .search-capsule { border-radius: var(--radius-search, 999px); box-shadow: var(--shadow-card); }
+.search-filter-section .search-capsule .search-input { min-height: 50px; }
+.search-filter-section .btn-filter-dark { width: 44px; height: 44px; }
+@media(max-width:767px) { .search-filter-section { margin-top: -20px; } .categories-row-section { margin-top: 18px; } }
+
+/* Compact hero, clear category images, and support in the store's identity. */
+.luxury-hero-card, .luxury-hero-card .hero-content-overlay { min-height: 270px; }
+.luxury-hero-card .btn-hero-cta { min-height: 36px; padding: 6px 16px; font-size: .933rem; }
+.categories-visual-section .header-titles .section-title { font-size: 1.133rem; line-height: 1.5; color: var(--text-main); }
+.categories-visual-section .section-heading-row { align-items: center; gap: 12px; }
+.categories-visual-section .cat-compact-card { min-height: 128px; padding: 14px 10px; gap: 8px; box-shadow: var(--shadow-card); border-color: var(--border-color); }
+.categories-visual-section .cat-compact-card .cat-icon-round { width: 68px; height: 68px; border-radius: 16px; margin: 0; background: color-mix(in srgb,var(--primary-color) 5%,var(--card-bg,#fff)); }
+.categories-visual-section .cat-compact-card .cat-grid-thumb { width: 56px; height: 56px; padding: 2px; object-fit: contain; }
+.categories-visual-section .cat-compact-card .cat-card-title { font-size: .933rem; font-weight: 700; line-height: 1.5; min-height: 3em; color: var(--text-main); margin: 0; }
+.hotline-card-section .hotline-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 20px 22px; border-radius: var(--radius-card,16px); background: linear-gradient(135deg,var(--primary-color),color-mix(in srgb,var(--primary-color) 80%,#0f172a)); box-shadow: var(--shadow-card); }
+.hotline-card-section .hotline-card .hotline-texts { align-items: flex-start; gap: 8px; }
+.hotline-card-section .hotline-card .hotline-title-row { gap: 10px; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-title { font-size: 1rem; font-weight: 700; line-height: 1.6; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-icon { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; background: #ffffff18; color: #fff; font-size: 20px; }
+.hotline-card-section .hotline-card .hotline-texts .numbers-str { font-size: .933rem; line-height: 1.5; color: #fff; letter-spacing: .3px; }
+.hotline-card-section .hotline-card .btn-call-action { min-height: 40px; padding: 8px 18px; border-radius: var(--radius-control,12px); background: var(--btn-accent-bg,var(--accent-color)); color: var(--btn-accent-text,#fff); box-shadow: none; font-size: .933rem; }
+@media(max-width:767px) {
+  .luxury-hero-card, .luxury-hero-card .hero-content-overlay { min-height: 220px; }
+  .luxury-hero-card .hero-content-overlay { padding: 20px 18px 34px; }
+  .luxury-hero-card .hero-texts { gap: 10px; }
+  .luxury-hero-card .hero-title { font-size: 22px; line-height: 1.4; }
+  .luxury-hero-card .hero-subtitle { font-size: .933rem; line-height: 1.6; }
+  .categories-visual-section .header-titles .section-title { font-size: 1.067rem; }
+  .categories-visual-section .cat-compact-card { min-height: 124px; padding: 12px 8px; }
+  .hotline-card-section .hotline-card { grid-template-columns: 1fr; text-align: start; padding: 18px; gap: 14px; }
+  .hotline-card-section .hotline-card .hotline-texts { align-items: flex-start; }
+  .hotline-card-section .hotline-card .hotline-texts .hotline-title-row { justify-content: flex-start; }
+  .hotline-card-section .hotline-card .btn-call-action { width: 100%; justify-content: center; }
+}

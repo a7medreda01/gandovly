@@ -6,6 +6,7 @@
 >
   <div
     class="modal-dialog luxury-modal"
+    appStoreDialog [attr.aria-label]="languageService.getLocalizedName(product)" (dialogDismiss)="dismissModal()"
     (click)="$event.stopPropagation()"
     [class.is-closing]="isClosing"
     [style.transform]="modalTransform"
@@ -394,9 +395,9 @@
           <i class="bi bi-patch-check-fill text-success fs-3"></i>
         </div>
         <div class="disclaimer-body">
-          <h4 class="disclaimer-head">ضمان الجودة وسلامة التوصيل:</h4>
+          <h4 class="disclaimer-head">قبل الإضافة إلى السلة</h4>
           <p class="disclaimer-msg">
-            جميع المنتجات أصلية ومطابقة لأعلى معايير الجودة والسلامة مع إمكانية الفحص والمعاينة عند الاستلام.
+            راجع الكمية والخيارات المطلوبة، وأضف أي ملاحظات لتجهيز طلبك.
           </p>
         </div>
       </div>

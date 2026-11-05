@@ -10,11 +10,12 @@ import { SettingsService } from '../../core/services/settings.service';
 import { CustomerAddress, CustomerProfile, DeliveryZone, Order, OrderStatus, Product, PreparationOption } from '../../core/models/models';
 import { LoadingStateComponent } from '../../shared/components/loading-state/loading-state.component';
 import { PhoneInputComponent } from '../../shared/components/phone-input/phone-input.component';
+import { StoreDialogDirective } from '../../shared/directives/store-dialog.directive';
 
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingStateComponent, PhoneInputComponent],
+  imports: [CommonModule, FormsModule, RouterLink, LoadingStateComponent, PhoneInputComponent, StoreDialogDirective],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss'
 })
@@ -68,7 +69,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   isSavingAddress = signal<boolean>(false);
   newAddress = {
     label: 'المنزل',
-    city: 'الرياض',
+    city: '',
     district: '',
     streetAddress: '',
     buildingNumber: '',
@@ -79,6 +80,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit() {
+    this.newAddress.city = this.settingsService.settings().city || '';
     this.checkCurrentProfile();
     this.loadDeliveryZones();
     this.handleRouteTracking();
@@ -104,24 +106,32 @@ export class AccountComponent implements OnInit, OnDestroy {
   }
 
   onZoneSelected(zoneId: any) {
+    this.zoneResolutionVersion++;
+    if (this.resolveTimer) clearTimeout(this.resolveTimer);
+    this.isResolvingZone.set(false);
     const id = Number(zoneId);
     this.selectedZoneId.set(id);
     const z = this.deliveryZones().find(x => x.id === id);
     if (z) {
       this.resolvedZoneName.set(z.name);
       this.newAddress.district = z.name;
+      this.zoneResolutionMessage.set('تم اختيار منطقة التوصيل: ' + z.name);
     }
   }
 
+  private zoneResolutionVersion = 0;
   onAddressChange() {
+    const version = ++this.zoneResolutionVersion;
+    if (this.resolveTimer) clearTimeout(this.resolveTimer);
     const addr = this.newAddress.streetAddress.trim();
     if (!addr || addr.length < 3) return;
 
     if (this.resolveTimer) clearTimeout(this.resolveTimer);
     this.resolveTimer = setTimeout(() => {
       this.isResolvingZone.set(true);
-      this.orderService.resolveDeliveryZone(this.newAddress.city || 'الرياض', addr).subscribe({
+      this.orderService.resolveDeliveryZone(this.newAddress.city || this.settingsService.settings().city || '', addr).subscribe({
         next: (res) => {
+          if (version !== this.zoneResolutionVersion) return;
           this.isResolvingZone.set(false);
           if (res?.matchFound && res.resolvedZone) {
             this.resolvedZoneName.set(res.resolvedZone.name);
@@ -134,6 +144,7 @@ export class AccountComponent implements OnInit, OnDestroy {
           }
         },
         error: () => {
+          if (version !== this.zoneResolutionVersion) return;
           this.isResolvingZone.set(false);
         }
       });
@@ -446,6 +457,7 @@ export class AccountComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
         this.toast.success('تم تسجيل الدخول بنجاح! مرحباً بك.');
         this.checkCurrentProfile();
+        if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
       },
       error: (err: any) => {
         this.isLoading.set(false);
@@ -536,14 +548,14 @@ export class AccountComponent implements OnInit, OnDestroy {
     }
 
     this.isSavingAddress.set(true);
-    this.authService.addCustomerAddress(identifier, this.newAddress).subscribe({
+    this.authService.addCustomerAddress(identifier, { ...this.newAddress, deliveryZoneId: this.selectedZoneId() || undefined }).subscribe({
       next: () => {
         this.isSavingAddress.set(false);
         this.toast.success('تمت إضافة العنوان بنجاح! 📍');
         this.showAddressModal.set(false);
         this.newAddress = {
           label: 'المنزل',
-          city: 'الرياض',
+          city: this.settingsService.settings().city || '',
           district: this.deliveryZones()[0]?.name || '',
           streetAddress: '',
           buildingNumber: '',

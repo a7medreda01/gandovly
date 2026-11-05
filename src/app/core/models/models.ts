@@ -106,6 +106,10 @@ export interface StorefrontSettings {
   // Design & Typography
   borderRadius?: string;
   buttonBorderRadius?: string;
+  navbarBorderRadius?: string;
+  bottomNavBorderRadius?: string;
+  productCardBorderRadius?: string;
+  searchBorderRadius?: string;
   cardShadowStyle?: string;
   fontSizeBase?: number;
 
