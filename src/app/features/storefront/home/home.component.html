@@ -27,7 +27,7 @@
   <section class="search-filter-section container" [class.no-hero]="!settingsService.settings().showHeroBanner">
     <div class="search-filter-row">
       <!-- Search Button on Right (1st child in RTL) -->
-      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null}" class="btn-filter-dark" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
+      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null, category: null, page: null, product: null}" queryParamsHandling="merge" class="btn-filter-dark" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
         <i class="bi bi-search"></i>
       </a>
 
@@ -137,7 +137,7 @@
 
     <div class="categories-compact-grid">
       @for (cat of displayedCategories; track cat.id) {
-      <a [routerLink]="['/menu']" [queryParams]="{category: cat.id}" class="cat-compact-card">
+      <a [routerLink]="['/menu']" [queryParams]="{category: cat.id, page: null, search: null, product: null}" queryParamsHandling="merge" class="cat-compact-card">
         <div class="cat-icon-round">
           <img [src]="cat.imageUrl | imageUrl:'category':cat.id:cat.nameAr" [alt]="cat.nameAr" class="cat-grid-thumb" loading="lazy" (error)="$any($event.target).src = '/assets/images/categories/rice-pasta.png'" />
         </div>
