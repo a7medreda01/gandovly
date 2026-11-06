@@ -43,7 +43,7 @@
         <div class="hero-top-bar">
           @if (product.brand) {
             <span class="brand-badge-overlay">
-              <i class="bi bi-award-fill me-1"></i>
+              <i class="bi bi-tag me-1"></i>
               {{ product.brand }}
             </span>
           } @else {
@@ -136,7 +136,7 @@
       <!-- Title & Price Banner -->
       <div class="product-intro-box">
         <div class="title-wrap">
-          <app-variant-picker [variants]="product.variants || []" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker><div class="product-title-row">
+          <div class="product-title-row">
             <h2 class="product-title">{{ languageService.getLocalizedName(product) }}</h2>
           </div>
           @if (product.nameEn && product.nameEn !== product.nameAr) {
@@ -155,6 +155,7 @@
         </div>
       </div>
 
+      <app-variant-picker [variants]="product.variants || []" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>
       <app-product-commerce [product]="product" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>
       <!-- Written Specifications / Description Card with View More Action -->
       @if (product.description) {
@@ -163,18 +164,7 @@
             {{ previewDescription }}
           </p>
 
-          <button
-            type="button"
-            class="btn-view-more-specs"
-            (click)="openSpecsModal($event)"
-            title="عرض كامل المواصفات الفنية وتفاصيل المنتج"
-          >
-            <span class="btn-specs-text">
-              <i class="bi bi-file-earmark-text-fill text-warning me-2"></i>
-              <span>عرض التفاصيل</span>
-            </span>
-            <i class="bi bi-chevron-left"></i>
-          </button>
+<button type="button" class="btn-view-more-specs" (click)="openSpecsModal($event)">عرض المزيد <i class="bi bi-arrow-left" aria-hidden="true"></i></button>
         </div>
       }
 

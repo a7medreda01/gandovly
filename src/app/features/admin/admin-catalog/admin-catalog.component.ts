@@ -664,8 +664,10 @@ export class AdminCatalogComponent implements OnInit {
 
   variantRows:any[]=[];
   editingProductVersion?:string;
-  addVariant(){this.variantRows.push({id:crypto.randomUUID(),color:'',size:'',sku:'',price:null,stockQuantity:null,isAvailable:true,images:[]});}
+  addVariant(){this.variantRows.push({id:crypto.randomUUID(),color:'',colorId:crypto.randomUUID(),colorHex:'#171717',size:'',sku:'',price:null,stockQuantity:null,isAvailable:true,images:[]});}
   toggleVariantImage(row:any,url:string){row.images=row.images.includes(url)?row.images.filter((x:string)=>x!==url):[...row.images,url];this.syncVariantImages(row);}
+  syncVariantColor(row:any){const same=this.variantRows.find(v=>v!==row&&v.color.trim()===row.color.trim());if(same){row.colorId=same.colorId;row.colorHex=same.colorHex;}else row.colorId ||= crypto.randomUUID();}
+  updateVariantColor(row:any){row.colorId ||= crypto.randomUUID();for(const v of this.variantRows)if(v===row||(v.colorId&&v.colorId===row.colorId)||v.color.trim()===row.color.trim()){v.colorId=row.colorId;v.colorHex=row.colorHex;v.color=row.color;}}
   syncVariantImages(row:any){for(const v of this.variantRows)if(v.color.trim()===row.color.trim())v.images=[...row.images];}
   saveProduct() {
     if (!this.productForm.nameAr.trim()) {

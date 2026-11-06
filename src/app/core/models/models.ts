@@ -257,7 +257,7 @@ export interface ProductImage {
   displayOrder: number;
 }
 
-export interface ProductVariant {id:string;color:string;size:string;sku?:string;price?:number|null;stockQuantity?:number|null;isAvailable:boolean;images:string[];}
+export interface ProductVariant {id:string;color:string;colorId?:string;colorHex?:string|null;size:string;sku?:string;price?:number|null;stockQuantity?:number|null;isAvailable:boolean;images:string[];}
 export interface ProductCommerce {mode:string;prescriptionRequired?:boolean;resourceId?:number|null;durationMinutes?:number;flexibleDuration?:boolean;maxDurationMinutes?:number;subscriptionDays?:number;digitalDelivery?:string;depositAmount?:number;}
 export interface Product {
  activityPreset?:string;

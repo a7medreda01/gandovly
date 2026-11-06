@@ -6,14 +6,14 @@
         <i class="bi bi-arrow-right"></i>
         <span class="ms-1">رجوع</span>
       </button>
-      <nav aria-label="مسار التنقل" class="product-breadcrumb d-none d-sm-block">
+      <nav aria-label="مسار التنقل" class="product-breadcrumb">
         <ol class="breadcrumb mb-0">
           <li class="breadcrumb-item"><a routerLink="/">الرئيسية</a></li>
-          <li class="breadcrumb-item"><a routerLink="/menu">الكتالوج</a></li>
+          <li class="breadcrumb-item"><a routerLink="/menu">المنتجات</a></li>
           @if (product()?.categoryNameAr) {
             <li class="breadcrumb-item"><a [routerLink]="['/menu']" [queryParams]="{category: product()!.categoryId}">{{ product()!.categoryNameAr }}</a></li>
           }
-          <li class="breadcrumb-item active" aria-current="page" [title]="languageService.getLocalizedName(product()!) || 'التفاصيل'">{{ languageService.getLocalizedName(product()!) || 'التفاصيل' }}</li>
+          <li class="breadcrumb-item active" aria-current="page" [title]="(product() ? languageService.getLocalizedName(product()!) : 'التفاصيل')">{{ (product() ? languageService.getLocalizedName(product()!) : 'التفاصيل') }}</li>
         </ol>
       </nav>
     </div>
@@ -52,7 +52,7 @@
 
   <!-- Skeleton Loading State -->
   @if (isLoading()) {
-    <div class="product-page-grid skeleton-loading-layout animate-fade-in">
+    <div class="product-page-grid skeleton-loading-layout animate-fade-in" role="status" aria-label="جاري تحميل المنتج">
       <!-- Gallery Column Skeleton -->
       <div class="gallery-column">
         <div class="gallery-main-card glass-panel">
@@ -183,13 +183,14 @@
           <div class="product-meta">@if(product()!.brand){<span class="brand-label">{{product()!.brand}}</span>}@if(product()!.sku){<bdi class="product-sku">SKU: {{product()!.sku}}</bdi>}</div>
           <h1 class="product-h1">{{languageService.getLocalizedName(product()!)}}</h1>
           @if(product()!.nameEn&&product()!.nameEn!==product()!.nameAr){<p class="product-subtitle-en">{{product()!.nameEn}}</p>}
+        @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
           <div class="summary-price-row">
             <div class="price-banner-box"><span class="price-val">{{(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)|number:'1.0-2'}}</span><span class="price-curr">{{currencySymbol}}</span>@if(isWeighedProduct){<span class="unit-label">لكل كجم</span>}@if(product()!.originalPrice&&product()!.originalPrice!>(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)){<del class="price-original">{{product()!.originalPrice}} {{currencySymbol}}</del>}</div>
             <span class="stock-status-badge" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable"><i class="bi" [class.bi-check-circle]="product()!.isAvailable" [class.bi-x-circle]="!product()!.isAvailable" aria-hidden="true"></i>{{product()!.isAvailable?'متوفر للطلب':'غير متوفر حاليًا'}}</span>
           </div>
         </div>
-        @if(product()!.description){<p class="product-description">{{product()!.description}}</p>}
-        @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
+        @if(product()!.description){<section class="description-panel"><h2>الوصف</h2><p class="product-description">{{product()!.description}}</p></section>}
+
         @if(product()!.commerce?.mode && product()!.commerce?.mode!=='Physical' || product()!.commerce?.prescriptionRequired){<app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>}
         <!-- Preparation Options -->
         @if (product()!.preparationGroups && product()!.preparationGroups!.length > 0) {

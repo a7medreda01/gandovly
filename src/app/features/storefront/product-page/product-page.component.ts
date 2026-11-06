@@ -253,6 +253,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       next: prod => {
         this.product.set(prod);
         if(prod)this.pixels.track('ViewContent',{ids:[String(prod.id)],value:this.variantPrice});
+        if (!prod) { this.isLoading.set(false); return; }
         this.initProductState(prod);
         this.isLoading.set(false);
         this.loadRelated(prod);
