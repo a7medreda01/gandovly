@@ -21,6 +21,7 @@ export class AdminLayoutComponent {
   readonly storeLogo = computed(() => this.settingsService.settings().logoUrl || '');
   readonly storeLinks = [
     { path: 'orders', icon: 'receipt', label: 'الطلبات' },
+    { path: 'commerce', icon: 'briefcase', label: 'تشغيل النشاط' },
     { path: 'catalog', icon: 'grid', label: 'المنتجات والأقسام' },
     { path: 'delivery-zones', icon: 'geo-alt', label: 'مناطق التوصيل' },
     { path: 'reports', icon: 'bar-chart', label: 'التقارير' },

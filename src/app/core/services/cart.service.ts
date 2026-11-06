@@ -83,10 +83,12 @@ export class CartService {
     specialInstructions?: string,
     orderMode?: 'pieces' | 'weight',
     pipeMeters?: number,
-    variant?: ProductVariant
+    variant?: ProductVariant,
+    booking?: {start:string;end:string;blocks:number}
   ) {
     if(product.variants?.length&&!variant)throw new Error('اختر اللون والمقاس.');
     if(variant){product={...product,variants:[variant],pricePerUnit:variant.price??product.pricePerUnit,nameAr:product.nameAr+' — '+variant.color+' / '+variant.size,imageUrl:variant.images?.[0]||product.imageUrl};}
+    if(booking)product={...product,pricePerUnit:product.pricePerUnit*booking.blocks};
     let estimatedWeight: number | undefined;
     let lineTotal = 0;
     let estimatedUnitPrice = 0;
@@ -135,6 +137,7 @@ export class CartService {
       orderMode: resolvedOrderMode,
       selectedPrepOption: prepOption,
       selectedVariant: variant,
+      bookingStartUtc:booking?.start,bookingEndUtc:booking?.end,
       selectedModifiers: modifiers,
       pipeMeters,
       specialInstructions,

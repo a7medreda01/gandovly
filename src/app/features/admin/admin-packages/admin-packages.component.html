@@ -22,13 +22,13 @@
         </div>
 
         <p class="text-muted small mb-4">
-          يقوم المحرك بقراءة إعدادات المتجر الحالية، الفروع، مناطق التوصيل، الأقسام، وكافة المنتجات وصورها، وتغليفها داخل ملف <code>.zip</code> منظم يحتوي على <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>.
+          يقوم المحرك بقراءة إعدادات المتجر الحالية، الفروع، مناطق التوصيل، الأقسام، وكافة المنتجات وصورها، وتغليفها داخل ملف <code>.zip</code> منظم يحتوي على <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>. الإصدار 1.1.0 يشمل قوالب النشاط والموارد والتشغيلات والملفات الرقمية الخاصة؛ يدعم استيراد 1.0.0 أيضًا.
         </p>
 
         <ul class="list-unstyled small text-muted mb-4">
           <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> تفريغ كامل للمنتجات والأقسام والأسعار بصيغة JSON نظيفة</li>
           <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> تجميع كافة الصور ومجلد <code>uploads/</code> بجودتها الأصلية</li>
-          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> جاهز للاستخدام كنسخة احتياطية (Backup) أو كقالب لعميل آخر</li>
+          <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> قالب بيانات للنقل إلى متجر فارغ — لا يشمل الطلبات والعملاء أو أسرار الأكواد</li>
         </ul>
 
         <div class="mt-auto">
@@ -111,6 +111,10 @@
 ├── categories.json     # قائمة الأقسام والتصنيفات
 ├── products.json       # قائمة المنتجات والأسعار والمواصفات
 ├── delivery_zones.json # مناطق ورسوم التوصيل
+├── resources.json      # الموارد والسعة وأيام العمل (اختياري)
+├── batches.json        # التشغيلات والصلاحية (اختياري)
+├── digital_assets.json # بيانات الملفات الخاصة (اختياري)
+├── private_assets/     # الملفات الرقمية الخاصة بالبيع
 └── uploads/            # مجلد الصور المنظم (branding, categories, products)</pre>
 
         <h5 class="fw-bold text-dark mt-4">2. أنواع الأنشطة المدعومة (Business Domains)</h5>
@@ -123,7 +127,7 @@
           <li><strong>GeneralRetail:</strong> محلات ملابس وأزياء ومقاسات وألوان.</li>
         </ul>
 
-        <h5 class="fw-bold text-dark mt-4">3. التثبيت المستقل (Standalone Installation)</h5>
+        <p>اختر activityPreset لتجهيز مواصفات النشاط. يدعم التشغيل المتخصص مراجعة الروشتات، معاينات وعروض السيارات، الحجوزات، الملفات والأكواد، الاشتراكات اليدوية وتشغيلات الصلاحية. الدليل القابل للتنزيل يحتوي أمثلة الحقول والعلاقات. لا تصدّر الروشتات والعملاء أو أسرار الأكواد؛ احتفظ بالحزمة في مكان خاص.</p><h5 class="fw-bold text-dark mt-4">3. التثبيت المستقل (Standalone Installation)</h5>
         <p class="text-muted">
           إذا رغبت في استخراج هذا القالب وتركيبه كـ <strong>موقع مستقل بالكامل لعميل خاص</strong> على سيرفره المنفصل، يتم تصدير الحزمة وضبط المتغير في <code>appsettings.json</code>:
           <code>"DeploymentMode": "StandaloneInstance"</code>.
@@ -136,4 +140,3 @@
     </div>
   </div>
 }
-

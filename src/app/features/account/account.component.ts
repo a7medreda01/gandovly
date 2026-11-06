@@ -1,3 +1,6 @@
+import { ChangeDetectorRef } from '@angular/core';
+import { CommerceService } from '../../core/services/commerce.service';
+import { OrderCommerceComponent } from '../../shared/components/order-commerce/order-commerce.component';
 import { CatalogService } from '../../core/services/catalog.service';
 import { GuestOrdersService } from '../../core/services/guest-orders.service';
 import { from, of, Subscription } from 'rxjs';
@@ -19,7 +22,7 @@ import { StoreDialogDirective } from '../../shared/directives/store-dialog.direc
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LoadingStateComponent, PhoneInputComponent, StoreDialogDirective],
+  imports: [OrderCommerceComponent,CommonModule, FormsModule, RouterLink, LoadingStateComponent, PhoneInputComponent, StoreDialogDirective],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss'
 })
@@ -47,6 +50,8 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.guestOrdersLoading.set(true);this.guestOrdersError.set(false);
     this.guestRequests=from(this.guestOrders.list()).pipe(mergeMap(row=>this.orderService.getOrderByTrackingToken(row.token).pipe(catchError(()=>{this.guestOrdersError.set(true);return of(null);})),4),toArray()).subscribe(rows=>{this.guestOrderList.set(rows.filter((o):o is Order=>!!o).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()));this.guestOrdersLoading.set(false);});
   }
+  private readonly commerceCdr=inject(ChangeDetectorRef);readonly commerce=inject(CommerceService);inquiries:any[]=[];trackedInquiryToken='';
+  loadInquiries(){from(this.commerce.inquiryTokens()).pipe(mergeMap(token=>this.commerce.inquiryStatus(token).pipe(map(row=>({...row,token})),catchError(()=>of(null))),4),toArray()).subscribe(rows=>{this.inquiries=rows.filter(Boolean);this.commerceCdr.markForCheck();});}
   // Tabs
   activeTab = signal<'orders' | 'addresses'>('orders');
 
@@ -100,6 +105,7 @@ export class AccountComponent implements OnInit, OnDestroy {
     if(!this.authService.currentCustomer())this.loadGuestOrders();
     this.loadDeliveryZones();
     this.handleRouteTracking();
+    this.loadInquiries();
   }
 
   ngOnDestroy() {
@@ -254,6 +260,7 @@ export class AccountComponent implements OnInit, OnDestroy {
 
     // 2. Check query parameters (e.g. /account?track=:token or /account?order=:id)
     this.route.queryParamMap.subscribe(params => {
+      const inquiry=params.get('inquiry');if(inquiry){this.trackedInquiryToken=inquiry;this.commerce.inquiryStatus(inquiry).subscribe({next:()=>{this.commerce.rememberInquiry(inquiry);this.loadInquiries();this.router.navigate([], {queryParams:{inquiry:null},queryParamsHandling:'merge',replaceUrl:true});}});}
       const trackToken = params.get('track') || params.get('token');
       const orderId = params.get('order') || params.get('orderId');
       const orderNumber = params.get('orderNumber');
@@ -501,6 +508,7 @@ export class AccountComponent implements OnInit, OnDestroy {
       for(const row of rows){
         if(!row?.product?.isAvailable){skipped++;continue;}
         const p=row.product,line=row.line;
+        if(['Booking','Vehicle'].includes(p.commerce?.mode||'')){skipped++;continue;}
         const variant=p.variants?.find(v=>v.id===line.variantId);
         if(p.variants?.length&&(!variant||!variant.isAvailable||(variant.stockQuantity!=null&&variant.stockQuantity<line.quantityUnits))){skipped++;continue;}
         const prep=p.preparationGroups?.flatMap(g=>g.options).find(o=>o.nameAr===line.preparationOptionNameAr&&o.isAvailable);

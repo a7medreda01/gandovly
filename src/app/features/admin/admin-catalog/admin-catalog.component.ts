@@ -1,3 +1,5 @@
+import { ChangeDetectorRef } from '@angular/core';
+import { CommerceService } from '../../../core/services/commerce.service';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -207,7 +209,14 @@ export class AdminCatalogComponent implements OnInit {
     isActive: true
   };
 
+  private readonly commerceApi=inject(CommerceService);
+  private readonly commerceCdr=inject(ChangeDetectorRef);
+  activityPresets:any[]=[];commerceResources:any[]=[];productActivityPreset='';
+  productCommerce:any={mode:'Physical',prescriptionRequired:false,resourceId:null,durationMinutes:60,flexibleDuration:false,maxDurationMinutes:43200,subscriptionDays:30,digitalDelivery:'File',depositAmount:0};
+  applyPreset(id:string){const preset=this.activityPresets.find(p=>p.id===id);if(!preset)return;this.productActivityPreset=id;this.productForm.domain=preset.domain;this.productCommerce={...this.productCommerce,mode:preset.mode,prescriptionRequired:id==='pharmacy',flexibleDuration:id==='rental'};if(preset.mode!=='Physical'&&preset.mode!=='Perishable'){this.productForm.pricingType='FixedPerUnit';this.variantRows=[];this.productForm.preparationOptionGroupIds=[];}
+  for(const key of preset.fields||[])if(!this.productForm.customSpecs.some((s:any)=>s.key===key))this.productForm.customSpecs.push({key,value:''});}
   ngOnInit() {
+    this.commerceApi.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});this.commerceApi.resources().subscribe(rows=>{this.commerceResources=rows;this.commerceCdr.markForCheck();});
     this.loadAll();
   }
 
@@ -268,6 +277,8 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   openNewProductModal() {
+    this.productActivityPreset=this.settingsService.settings().activityPreset||'';
+    this.productCommerce={mode:'Physical',prescriptionRequired:false,resourceId:null,durationMinutes:60,flexibleDuration:false,maxDurationMinutes:43200,subscriptionDays:30,digitalDelivery:'File',depositAmount:0};
     this.isEditingProduct.set(false);
     this.variantRows=[];
     this.editingProductVersion=undefined;
@@ -317,6 +328,7 @@ export class AdminCatalogComponent implements OnInit {
       powerVoltage: '',
       customSpecs: []
     };
+    if(this.productActivityPreset)this.applyPreset(this.productActivityPreset);
     this.showQuickModifierPanel.set(false);
     this.showProductModal.set(true);
   }
@@ -331,6 +343,8 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   openEditProductModal(prod: Product) {
+    this.productActivityPreset=prod.activityPreset||'';
+    this.productCommerce={mode:'Physical',...prod.commerce};
     this.isEditingProduct.set(true);
     this.editingProductVersion=prod.version;
 
@@ -673,6 +687,7 @@ export class AdminCatalogComponent implements OnInit {
 
     const payload: any = {
       categoryId: this.productForm.categoryId,
+      activityPreset:this.productActivityPreset,commerce:this.productCommerce,
       variants: this.variantRows,
       version: this.editingProductVersion,
       nameAr: this.productForm.nameAr.trim(),

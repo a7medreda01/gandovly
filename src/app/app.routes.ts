@@ -142,6 +142,7 @@ export const routes: Routes = [
     canActivate: [adminGuard],
     canActivateChild: [adminGuard],
     children: [
+      { path: 'commerce', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-commerce/admin-commerce.component').then(m => m.AdminCommerceComponent) },
       { path: 'orders', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-orders/admin-orders.component').then(m => m.AdminOrdersComponent) },
       { path: 'catalog', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-catalog/admin-catalog.component').then(m => m.AdminCatalogComponent) },
       { path: 'settings', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-settings/admin-settings.component').then(m => m.AdminSettingsComponent) },

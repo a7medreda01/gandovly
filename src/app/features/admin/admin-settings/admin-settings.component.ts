@@ -1,3 +1,5 @@
+import { ChangeDetectorRef } from '@angular/core';
+import { CommerceService } from '../../../core/services/commerce.service';
 import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -165,8 +167,11 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
+  activityPresets:any[]=[];
+  private readonly commerce=inject(CommerceService);private readonly commerceCdr=inject(ChangeDetectorRef);
   private readonly route=inject(ActivatedRoute);
   ngOnInit() {
+    this.commerce.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});
     if(this.route.snapshot.queryParamMap.get('tab')==='performance')this.activeTab.set('performance');
     this.loadSettings();
     this.loadPackageStats();

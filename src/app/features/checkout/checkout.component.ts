@@ -1,3 +1,5 @@
+import { ChangeDetectorRef } from '@angular/core';import { finalize } from 'rxjs';
+import { CommerceService } from '../../core/services/commerce.service';
 import { MarketingPixelsService } from '../../core/services/marketing-pixels.service';
 import { GuestOrdersService } from '../../core/services/guest-orders.service';
 import { Component, OnInit, inject, signal, effect } from '@angular/core';
@@ -42,6 +44,12 @@ export class CheckoutComponent implements OnInit {
   }
 
   // Form Fields
+  private readonly commerceApi=inject(CommerceService);private readonly commerceCdr=inject(ChangeDetectorRef);
+  prescriptionToken='';prescriptionBusy=false;
+  get requiresPrescription(){return this.cartService.items().some(i=>i.product.commerce?.prescriptionRequired);}
+  get requiresDelivery(){return this.cartService.items().some(i=>!['Booking','Digital','Subscription'].includes(i.product.commerce?.mode||'Physical'));}
+  get isDigitalOnly(){return this.cartService.items().length>0&&this.cartService.items().every(i=>['Digital','Subscription'].includes(i.product.commerce?.mode||''));}
+  uploadPrescription(event:Event){const file=(event.target as HTMLInputElement).files?.[0];if(!file)return;this.prescriptionToken="";this.prescriptionBusy=true;this.commerceApi.uploadPrescription(file).pipe(finalize(()=>this.commerceCdr.markForCheck())).subscribe({next:r=>{this.prescriptionBusy=false;this.prescriptionToken=r.token;this.toast.success('تم رفع الروشتة بشكل خاص');},error:e=>{this.prescriptionBusy=false;this.prescriptionToken='';this.toast.error(e.error?.message||'تعذر رفع الروشتة');}});}
   customerName: string = '';
   customerPhone: string = '';
   orderType: OrderType = 'Delivery';
@@ -50,7 +58,7 @@ export class CheckoutComponent implements OnInit {
     const settings = this.settingsService.settings();
     return settings.paymentEnableWalletTransfer !== false && Boolean(settings.vodafoneCashNumber?.trim() || settings.instaPayAccount?.trim());
   }
-  get hasPaymentMethod(): boolean { return this.settingsService.settings().paymentEnableCOD !== false || this.canPayByTransfer; }
+  get hasPaymentMethod(): boolean { return this.isDigitalOnly || this.settingsService.settings().paymentEnableCOD !== false || this.canPayByTransfer; }
   constructor() {
     effect(() => {
       const settings = this.settingsService.settings();
@@ -126,6 +134,7 @@ export class CheckoutComponent implements OnInit {
 
   ngOnInit() {
     this.city = this.settingsService.settings().city || '';
+    if(!this.requiresDelivery)this.orderType='Pickup';
     if (this.cartService.items().length === 0) {
       return;
     }
@@ -266,6 +275,7 @@ export class CheckoutComponent implements OnInit {
     const items = this.cartService.items().map(i => ({
       productId: i.product.id,
         variantId: i.selectedVariant?.id,
+        bookingStartUtc:i.bookingStartUtc,bookingEndUtc:i.bookingEndUtc,
       quantityUnits: i.quantityUnits,
       customWeightGrams: i.customWeightGrams,
       preparationOptionId: i.selectedPrepOption?.id,
@@ -372,6 +382,7 @@ export class CheckoutComponent implements OnInit {
 
   // Initiates checkout validations and triggers Auth or Confirmation Modal
   handleCheckoutClick() {
+    if(this.requiresPrescription&&!this.prescriptionToken){this.toast.error('ارفع الروشتة أولًا.');return;}
     if (!this.hasPaymentMethod) { this.toast.error('لا توجد وسيلة دفع متاحة حاليًا. يرجى التواصل مع المتجر.'); return; }
     if (!this.customerName.trim() && this.authService.currentCustomer()) {
       this.toast.error('يرجى إدخال اسم العميل.');
@@ -649,6 +660,7 @@ export class CheckoutComponent implements OnInit {
 
   // Final Order Submission
   confirmAndSubmitOrder() {
+    if(this.requiresPrescription&&!this.prescriptionToken){this.toast.error('ارفع الروشتة أولًا.');return;}
     if (!this.hasPaymentMethod || (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer)) { this.toast.error('وسيلة الدفع المختارة غير متاحة.'); return; }
     this.isSubmitting.set(true);
 
@@ -667,6 +679,7 @@ export class CheckoutComponent implements OnInit {
     const finalNotes = noteParts.join(' ');
 
     const request: CreateOrderRequest = {
+      prescriptionToken:this.prescriptionToken||undefined,
       customerId: this.authService.currentCustomer()?.userId,
       customerName: this.customerName.trim(),
       customerPhone: this.customerPhone.trim(),
@@ -726,4 +739,3 @@ export class CheckoutComponent implements OnInit {
     });
   }
 }
-

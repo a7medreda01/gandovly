@@ -1,3 +1,4 @@
+import { ProductCommerceComponent } from '../product-commerce/product-commerce.component';
 import { MarketingPixelsService } from '../../../core/services/marketing-pixels.service';
 import { ProductVariant } from '../../../core/models/models';
 import { VariantPickerComponent } from '../variant-picker/variant-picker.component';
@@ -17,7 +18,7 @@ import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 @Component({
   selector: 'app-product-detail-modal',
   standalone: true,
-  imports: [VariantPickerComponent,CommonModule, FormsModule, ImageUrlPipe, StoreDialogDirective],
+  imports: [ProductCommerceComponent,VariantPickerComponent,CommonModule, FormsModule, ImageUrlPipe, StoreDialogDirective],
   templateUrl: './product-detail-modal.component.html',
   styleUrl: './product-detail-modal.component.scss'
 })
@@ -220,6 +221,7 @@ export class ProductDetailModalComponent implements OnInit {
   }
 
   private readonly pixels=inject(MarketingPixelsService);
+  booking:any=null;
   selectedVariant:ProductVariant|null=null;
   variantImages:string[]=[];
   get variantPrice(){return this.selectedVariant?.price ?? (this.product.variants?.length?Math.min(...this.product.variants.map(v=>v.price??this.product.pricePerUnit)):this.product.pricePerUnit) ?? 0;}
@@ -346,7 +348,7 @@ export class ProductDetailModalComponent implements OnInit {
         total += modSum * units;
       }
     } else {
-      total = this.variantPrice * this.piecesCount;
+      total = this.variantPrice * this.piecesCount * (this.booking?.blocks||1);
 
       if (this.selectedPrepOption) {
         if (this.selectedPrepOption.pricingType === 'FinalPrice') {
@@ -371,6 +373,7 @@ export class ProductDetailModalComponent implements OnInit {
   }
 
   changePieces(delta: number) {
+    const c=this.product.commerce;if(delta>0&&(c?.mode==='Subscription'||c?.mode==='Digital'&&c.digitalDelivery!=='Code'))return;
     const next = this.piecesCount + delta;
     if (next >= 1 && next <= 50) {
       this.piecesCount = next;
@@ -527,6 +530,8 @@ export class ProductDetailModalComponent implements OnInit {
   isSuccess = false;
 
   onAddToCart() {
+    if(this.product.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
+    if(this.product.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
     if(this.product.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
     // Validate required modifier groups
     if (this.product.modifierGroups) {
@@ -561,7 +566,7 @@ export class ProductDetailModalComponent implements OnInit {
       this.specialInstructions,
       this.orderMode,
       this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
-      this.selectedVariant ?? undefined
+      this.selectedVariant ?? undefined, this.booking ?? undefined
     );
 
     this.toast.success(

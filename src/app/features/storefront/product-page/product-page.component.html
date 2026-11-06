@@ -211,6 +211,7 @@
           </div>
         </div>
 
+        <app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>
         <!-- Description Card -->
         @if (product()!.description) {
           <div class="detail-card glass-panel mb-3">
@@ -362,7 +363,7 @@
             class="btn-add-to-cart flex-center"
             [class.btn-success-state]="isSuccess()"
             (click)="onAddToCart()"
-            [disabled]="isSuccess() || !product()!.isAvailable"
+            [disabled]="isSuccess() || !product()!.isAvailable || product()!.commerce?.mode==='Vehicle'"
           >
             @if (isSuccess()) {
               <i class="bi bi-check2-circle me-2"></i>

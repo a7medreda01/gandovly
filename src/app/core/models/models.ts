@@ -93,6 +93,7 @@ export interface StorefrontSettings {
   metaPixelId?: string;
   tikTokPixelId?: string;
   snapPixelId?: string;
+  activityPreset?:string;
   heroTextColor?: string;
   navbarTextColor?: string;
   footerBgColor?: string;
@@ -255,7 +256,10 @@ export interface ProductImage {
 }
 
 export interface ProductVariant {id:string;color:string;size:string;sku?:string;price?:number|null;stockQuantity?:number|null;isAvailable:boolean;images:string[];}
+export interface ProductCommerce {mode:string;prescriptionRequired?:boolean;resourceId?:number|null;durationMinutes?:number;flexibleDuration?:boolean;maxDurationMinutes?:number;subscriptionDays?:number;digitalDelivery?:string;depositAmount?:number;}
 export interface Product {
+ activityPreset?:string;
+ commerce?:ProductCommerce;
   version?: string;
  variants?: ProductVariant[];
   id: number;
@@ -337,6 +341,7 @@ export interface CartItem {
   quantityUnits: number;
   customWeightGrams?: number;
   orderMode?: 'pieces' | 'weight';
+  bookingStartUtc?:string;bookingEndUtc?:string;
   selectedVariant?: ProductVariant;
   selectedPrepOption?: PreparationOption;
   selectedModifiers: ModifierOption[];
@@ -349,6 +354,7 @@ export interface CartItem {
 
 // Orders
 export interface CreateOrderLineRequest {
+  bookingStartUtc?:string;bookingEndUtc?:string;
   variantId?: string;
   productId: number;
   quantityUnits: number;
@@ -360,6 +366,7 @@ export interface CreateOrderLineRequest {
 }
 
 export interface CreateOrderRequest {
+  prescriptionToken?:string;
   customerId?: number;
   customerName: string;
   customerPhone: string;
@@ -741,4 +748,3 @@ export interface VisitAnalytics {
   topPages: TopVisitedPage[];
   devices: DeviceBreakdown;
 }
-

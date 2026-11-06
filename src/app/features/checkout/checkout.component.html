@@ -50,7 +50,7 @@
         </div>
       </div>
 
-      <!-- 2. Order Type -->
+      @if(requiresDelivery){<!-- 2. Order Type -->
       <div class="checkout-card glass-panel">
         <h3 class="card-title">2. طريقة الاستلام</h3>
         <div class="order-type-tabs">
@@ -217,22 +217,22 @@
         }
       </div>
 
-      <!-- 4. Payment Method -->
+      }<!-- 4. Payment Method -->
       <div class="checkout-card glass-panel">
         <h3 class="card-title mb-3">
           4. طريقة الدفع
         </h3>
 
         <div class="payment-methods-grid">
-          @if (settingsService.settings().paymentEnableCOD !== false) {
+          @if (settingsService.settings().paymentEnableCOD !== false || isDigitalOnly) {
           <label class="payment-option-card" [class.active]="paymentMethod === 'CashOnDelivery'">
             <input type="radio" name="paymentMethodRadio" value="CashOnDelivery" [(ngModel)]="paymentMethod" class="payment-radio" />
             <div class="pay-icon-box">
               <i class="bi bi-cash-stack fs-4"></i>
             </div>
             <div class="pay-info flex-1">
-              <strong class="d-block text-dark">الدفع عند الاستلام</strong>
-              <small class="text-muted">{{ orderType === 'Pickup' ? 'الدفع في الفرع عند الاستلام' : 'الدفع للمندوب عند الاستلام' }}</small>
+              <strong class="d-block text-dark">{{isDigitalOnly?'الدفع بالتنسيق مع المتجر':'الدفع عند الاستلام'}}</strong>
+              <small class="text-muted">{{ isDigitalOnly ? 'التسليم أو التفعيل بعد تأكيد استلام الدفع' : orderType === 'Pickup' ? 'الدفع في الفرع عند الاستلام' : 'الدفع للمندوب عند الاستلام' }}</small>
             </div>
             <div class="pay-check-circle">
               <i class="bi" [class.bi-check-circle-fill]="paymentMethod === 'CashOnDelivery'" [class.bi-circle]="paymentMethod !== 'CashOnDelivery'"></i>
@@ -308,7 +308,7 @@
         }
       </div>
 
-      <!-- 5. Order Notes -->
+      @if(requiresPrescription){<section class="checkout-card"><h3>الروشتة المطلوبة</h3><p>ملف PDF أو صورة حتى 8MB. يبقى خاصًا بالمتجر ولا يبدأ التجهيز قبل المراجعة.</p><input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="uploadPrescription($event)" [disabled]="prescriptionBusy">@if(prescriptionToken){<p role="status">تم رفع الروشتة</p>}</section>}<!-- 5. Order Notes -->
       <div class="checkout-card glass-panel">
         <h3 class="card-title mb-2">5. ملاحظات إضافية (اختياري)</h3>
         <div class="form-group mb-0">
@@ -893,4 +893,3 @@
   </div>
 }
 }
-

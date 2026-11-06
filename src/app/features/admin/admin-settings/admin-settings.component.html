@@ -978,7 +978,7 @@
     @if (activeTab() === 'info') {
       <div class="tab-content animate-fade-in">
                 <section class="settings-card domain-settings mb-4">
-          <h3 class="card-title">الدومين الخاص</h3>
+          <h3 class="card-title">تخصص المتجر الافتراضي</h3><select class="form-control" [(ngModel)]="settings()!.activityPreset"><option value="">حسب المجال الأساسي</option>@for(preset of activityPresets;track preset.id){<option [value]="preset.id">{{preset.name}}</option>}</select><p>يستخدم للمنتجات الجديدة؛ لا يغيّر المنتجات القائمة تلقائيًا.</p><h3 class="card-title">الدومين الخاص</h3>
           @if (customDomain()) {<p>الدومين المسجل: <strong dir="ltr">{{customDomain()}}</strong></p>}
           <p class="text-muted">اربط متجرك بدومين تملكه. تحقق من الملكية هنا، وأضف نفس الدومين إلى استضافة الواجهة مع DNS وHTTPS. حفظه هنا وحده لا يضبط الاستضافة.</p>
           <div class="form-group"><label for="customStoreDomain">اسم الدومين</label><input id="customStoreDomain" class="form-control" dir="ltr" placeholder="shop.example.com" [(ngModel)]="domainInput" (ngModelChange)="domainChallenge.set(null)" /></div>

@@ -1,3 +1,4 @@
+import { ProductCommerceComponent } from '../../../shared/components/product-commerce/product-commerce.component';
 import { MarketingPixelsService } from '../../../core/services/marketing-pixels.service';
 import { ProductVariant } from '../../../core/models/models';
 import { VariantPickerComponent } from '../../../shared/components/variant-picker/variant-picker.component';
@@ -21,7 +22,7 @@ import { ProductDetailModalComponent } from '../../../shared/components/product-
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [VariantPickerComponent,CommonModule, FormsModule, RouterModule, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent, StoreDialogDirective],
+  imports: [ProductCommerceComponent,VariantPickerComponent,CommonModule, FormsModule, RouterModule, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent, StoreDialogDirective],
   templateUrl: './product-page.component.html',
   styleUrl: './product-page.component.scss'
 })
@@ -75,6 +76,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   }
 
   private readonly pixels=inject(MarketingPixelsService);
+  booking:any=null;
   selectedVariant:ProductVariant|null=null;
   variantImages:string[]=[];
   get variantPrice(){return this.selectedVariant?.price ?? (this.product()?.variants?.length?Math.min(...this.product()!.variants!.map(v=>v.price??this.product()!.pricePerUnit)):this.product()?.pricePerUnit) ?? 0;}
@@ -174,7 +176,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
         total = totalWeightKg * pricePerKg;
       }
     } else {
-      total = this.piecesCount * this.variantPrice;
+      total = this.piecesCount * this.variantPrice * (this.booking?.blocks||1);
     }
 
     const units = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
@@ -245,7 +247,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.showImageViewer.set(false);
     this.activeImageIndex = 0;
-    this.selectedVariant=null;this.variantImages=[];
+    this.selectedVariant=null;this.variantImages=[];this.booking=null;
     this.piecesCount = 1;
     this.productRequest = this.catalogService.getProductById(id).subscribe({
       next: prod => {
@@ -299,6 +301,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   }
 
   changePieces(delta: number) {
+    const c=this.product()?.commerce;if(delta>0&&(c?.mode==='Subscription'||c?.mode==='Digital'&&c.digitalDelivery!=='Code'))return;
     const next = this.piecesCount + delta;
     if (next >= 1) this.piecesCount = next;
   }
@@ -354,6 +357,8 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   onAddToCart(): void {
     const p = this.product();
     if (!p) return;
+    if(p.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
+    if(p.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
     if(p.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
 
     this.isSuccess.set(true);
@@ -375,7 +380,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       customGrams,
       this.specialInstructions,
       this.isWeighedProduct ? this.orderMode : 'pieces',
-      undefined, this.selectedVariant ?? undefined
+      undefined, this.selectedVariant ?? undefined, this.booking ?? undefined
     );
 
     this.toast.success(`تمت إضافة "${p.nameAr}" إلى السلة 🛒`);

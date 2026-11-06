@@ -1,4 +1,4 @@
-<div class="account-page container">
+<div class="account-page container">@if(inquiries.length){<section class="guest-orders-panel"><h2>طلبات المعاينة والعروض على هذا الجهاز</h2>@for(i of inquiries;track i.id){<button type="button" class="guest-order-row" (click)="trackedInquiryToken=i.token">طلب #{{i.id}} — {{i.action}} — {{i.status}}</button>}</section>}<app-order-commerce [inquiryToken]="trackedInquiryToken"></app-order-commerce>
   @if (!authService.currentCustomer()) {
     <section class="guest-orders-panel"><h1>طلباتك على هذا الجهاز</h1><p>طلبات الضيف الخاصة بهذا المتجر. احتفظ برابط المتابعة؛ تغيير الجهاز أو مسح بيانات المتصفح قد يخفي القائمة.</p><button type="button" class="btn-outline" (click)="loadGuestOrders()" [disabled]="guestOrdersLoading()">تحديث الحالات</button>
     @if(guestOrdersLoading()){<p role="status">جارٍ تحميل الطلبات…</p>}
@@ -435,6 +435,7 @@
   @if (selectedOrder()) {
     <div class="modal-backdrop" (click)="closeOrderDetails()">
       <div class="order-details-modal glass-panel animate-scale-up" appStoreDialog aria-label="تفاصيل الطلب وتتبعه" (dialogDismiss)="closeOrderDetails()" (click)="$event.stopPropagation()">
+        <app-order-commerce [order]="selectedOrder()"></app-order-commerce>
         <!-- Modal Header -->
         <div class="modal-header flex-between">
           <div>
