@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { ProductCardSkeletonComponent } from '../../../shared/components/product-card-skeleton/product-card-skeleton.component';
@@ -14,7 +14,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-menu',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProductCardComponent, ProductCardSkeletonComponent, ProductDetailModalComponent, ImageUrlPipe],
+  imports: [RouterLink,CommonModule, FormsModule, ProductCardComponent, ProductCardSkeletonComponent, ProductDetailModalComponent, ImageUrlPipe],
   templateUrl: './menu.component.html',
   styleUrl: './menu.component.scss'
 })
@@ -36,6 +36,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   products = signal<Product[]>([]);
   totalCount = signal<number>(0);
   pageIndex = signal<number>(1);
+  sortBy="";
   pageSize = signal<number>(16);
   totalPages = signal<number>(1);
   isLoading = signal<boolean>(true);
@@ -70,6 +71,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
           this.pageIndex.set(+params['page'] || 1);
         }
         this.searchTerm = params['search'] || '';
+        this.sortBy=params['sort']||'';
 
         // Open modal if product query param is provided
         if (params['product']) {
@@ -161,7 +163,8 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
       categoryId: this.selectedCatId(),
       search: this.searchTerm,
       page: this.pageIndex(),
-      pageSize: this.pageSize()
+      sortBy:this.sortBy,
+        pageSize: this.pageSize()
     }).subscribe({
       next: (res) => {
         if (res) {

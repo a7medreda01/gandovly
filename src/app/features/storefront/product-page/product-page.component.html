@@ -134,9 +134,7 @@
 
             <!-- Badges -->
             <div class="badges-overlay">
-              @if (product()!.brand) {
-                <span class="badge badge-brand"><i class="bi bi-award-fill me-1"></i> {{ product()!.brand }}</span>
-              }
+
               @if (!product()!.isAvailable) {
                 <span class="badge badge-out-stock">غير متوفر حالياً</span>
               }
@@ -144,10 +142,10 @@
 
             <!-- Arrows -->
             @if (galleryImages.length > 1) {
-              <button type="button" class="btn-gallery-arrow prev-arrow flex-center" (click)="prevImage()">
+              <button type="button" class="btn-gallery-arrow prev-arrow flex-center" aria-label="الصورة السابقة" (click)="prevImage()">
                 <i class="bi bi-chevron-right"></i>
               </button>
-              <button type="button" class="btn-gallery-arrow next-arrow flex-center" (click)="nextImage()">
+              <button type="button" class="btn-gallery-arrow next-arrow flex-center" aria-label="الصورة التالية" (click)="nextImage()">
                 <i class="bi bi-chevron-left"></i>
               </button>
 
@@ -179,49 +177,51 @@
         </div>
       </div>
 
-      <!-- Left: Configuration & Purchase Details -->
+      <!-- Product overview, options and purchase -->
       <div class="details-column">
-        <!-- Title & Brand Card -->
-        <div class="detail-card glass-panel mb-3">
-          <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-2">
-            @if (product()!.brand) {
-              <span class="brand-badge"><i class="bi bi-award-fill me-1"></i> {{ product()!.brand }}</span>
-            }
-            <span class="stock-status-badge" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable">
-              <i class="bi" [class.bi-check-circle-fill]="product()!.isAvailable" [class.bi-x-circle-fill]="!product()!.isAvailable"></i>
-              {{ product()!.isAvailable ? 'متوفر وجاهز للطلب' : 'غير متوفر حالياً' }}
-            </span>
-          </div>
-
-          <app-variant-picker [variants]="product()!.variants || []" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker><h1 class="product-h1 mb-1">{{ languageService.getLocalizedName(product()!) }}</h1>
-          @if (product()!.nameEn && product()!.nameEn !== product()!.nameAr) {
-            <h2 class="product-subtitle-en text-muted mb-3">{{ product()!.nameEn }}</h2>
-          }
-
-          <!-- Price Display -->
-          <div class="price-banner-box d-flex align-items-baseline gap-2 mt-2">
-            <span class="price-val">{{ isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice }}</span>
-            <span class="price-curr">{{ currencySymbol }}</span>
-            @if (isWeighedProduct) {
-              <span class="unit-label">لكل كجم</span>
-            }
-            @if (product()!.originalPrice && product()!.originalPrice! > (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : product()!.pricePerUnit)) {
-              <span class="price-original ms-2">{{ product()!.originalPrice }} {{ currencySymbol }}</span>
-            }
+        <div class="product-summary">
+          <div class="product-meta">@if(product()!.brand){<span class="brand-label">{{product()!.brand}}</span>}@if(product()!.sku){<bdi class="product-sku">SKU: {{product()!.sku}}</bdi>}</div>
+          <h1 class="product-h1">{{languageService.getLocalizedName(product()!)}}</h1>
+          @if(product()!.nameEn&&product()!.nameEn!==product()!.nameAr){<p class="product-subtitle-en">{{product()!.nameEn}}</p>}
+          <div class="summary-price-row">
+            <div class="price-banner-box"><span class="price-val">{{(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)|number:'1.0-2'}}</span><span class="price-curr">{{currencySymbol}}</span>@if(isWeighedProduct){<span class="unit-label">لكل كجم</span>}@if(product()!.originalPrice&&product()!.originalPrice!>(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)){<del class="price-original">{{product()!.originalPrice}} {{currencySymbol}}</del>}</div>
+            <span class="stock-status-badge" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable"><i class="bi" [class.bi-check-circle]="product()!.isAvailable" [class.bi-x-circle]="!product()!.isAvailable" aria-hidden="true"></i>{{product()!.isAvailable?'متوفر للطلب':'غير متوفر حاليًا'}}</span>
           </div>
         </div>
-
-        <app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>
-        <!-- Description Card -->
-        @if (product()!.description) {
-          <div class="detail-card glass-panel mb-3">
-            <h4 class="card-sec-title"><i class="bi bi-card-text text-primary me-2"></i> نبذة</h4>
-            <p class="product-desc-p mb-0">{{ product()!.description }}</p>
-          </div>
+        @if(product()!.description){<p class="product-description">{{product()!.description}}</p>}
+        @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
+        @if(product()!.commerce?.mode && product()!.commerce?.mode!=='Physical' || product()!.commerce?.prescriptionRequired){<app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>}
+        <!-- Preparation Options -->
+        @if (product()!.preparationGroups && product()!.preparationGroups!.length > 0) {
+          @for (grp of product()!.preparationGroups; track grp.id) {
+            <div class="detail-card glass-panel mb-3">
+              <h4 class="card-sec-title"><i class="bi bi-gear-wide-connected text-primary me-2"></i> {{ grp.nameAr }} (إلزامي):</h4>
+              <div class="options-radio-grid mt-2">
+                @for (opt of grp.options; track opt.id) {
+                  <button type="button"
+                    class="option-radio-card"
+                    [class.active]="selectedPrepOption?.id === opt.id"
+                    [attr.aria-pressed]="selectedPrepOption?.id === opt.id"
+                    (click)="selectPrep(opt)"
+                  >
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="bi" [class.bi-check-circle-fill]="selectedPrepOption?.id === opt.id" [class.bi-circle]="selectedPrepOption?.id !== opt.id"></i>
+                      <span class="opt-name">{{ opt.nameAr }}</span>
+                    </div>
+                    @if (opt.price) {
+                      <span class="opt-price">+ {{ opt.price }} {{ currencySymbol }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          }
         }
 
-        <!-- Quantity & Weight Card -->
-        <div class="detail-card glass-panel mb-3">
+
+@for(group of product()!.modifierGroups||[];track group.id){<section class="product-option-group"><header><h3>{{group.nameAr}}</h3><small>{{group.isRequired?'مطلوب':'اختياري'}} · حتى {{group.maxSelection}}</small></header><div class="product-option-list">@for(opt of group.options;track opt.id){<button type="button" [class.selected]="modifierSelected(group,opt)" [disabled]="!opt.isAvailable" [attr.aria-pressed]="modifierSelected(group,opt)" (click)="toggleModifier(group,opt)"><span>{{opt.nameAr}}</span>@if(opt.price){<bdi>+{{opt.price|number:'1.0-2'}} {{currencySymbol}}</bdi>}<i class="bi" [class.bi-check-circle-fill]="modifierSelected(group,opt)" [class.bi-circle]="!modifierSelected(group,opt)" aria-hidden="true"></i></button>}</div></section>}
+@if(product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
+        <div class="quantity-panel">
           <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> الكمية</h4>
 
           @if (isWeighedProduct) {
@@ -295,65 +295,12 @@
           }
         </div>
 
-        <!-- Preparation Options -->
-        @if (product()!.preparationGroups && product()!.preparationGroups!.length > 0) {
-          @for (grp of product()!.preparationGroups; track grp.id) {
-            <div class="detail-card glass-panel mb-3">
-              <h4 class="card-sec-title"><i class="bi bi-gear-wide-connected text-primary me-2"></i> {{ grp.nameAr }} (إلزامي):</h4>
-              <div class="options-radio-grid mt-2">
-                @for (opt of grp.options; track opt.id) {
-                  <button type="button"
-                    class="option-radio-card"
-                    [class.active]="selectedPrepOption?.id === opt.id"
-                    [attr.aria-pressed]="selectedPrepOption?.id === opt.id"
-                    (click)="selectPrep(opt)"
-                  >
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="bi" [class.bi-check-circle-fill]="selectedPrepOption?.id === opt.id" [class.bi-circle]="selectedPrepOption?.id !== opt.id"></i>
-                      <span class="opt-name">{{ opt.nameAr }}</span>
-                    </div>
-                    @if (opt.price) {
-                      <span class="opt-price">+ {{ opt.price }} {{ currencySymbol }}</span>
-                    }
-                  </button>
-                }
-              </div>
-            </div>
-          }
-        }
-
-        <!-- Special Notes -->
-        <div class="detail-card glass-panel mb-3">
-          <h4 class="card-sec-title"><i class="bi bi-chat-left-dots text-primary me-2"></i> ملاحظات</h4>
-          <textarea
-            class="product-notes-textarea"
-            rows="2"
-            placeholder="مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة..."
-            [(ngModel)]="specialInstructions"
-          ></textarea>
-        </div>
-
-        <!-- Specifications Table (if any) -->
-        @if (parsedKeySpecs.length > 0) {
-          <div class="detail-card glass-panel mb-3">
-            <h4 class="card-sec-title"><i class="bi bi-info-circle text-primary me-2"></i> المواصفات</h4>
-            <div class="specs-grid mt-2">
-              @for (spec of parsedKeySpecs; track spec.label) {
-                <div class="spec-row flex-between py-2 border-bottom">
-                  <span class="spec-label text-muted"><i class="bi me-1 text-primary" [class]="spec.icon || 'bi-dot'"></i> {{ spec.label }}</span>
-                  <span class="spec-val fw-bold text-dark">{{ spec.value }}</span>
-                </div>
-              }
-            </div>
-          </div>
-        }
-
         <!-- Sticky Bottom CTA Purchase Bar -->
-        <div class="page-purchase-bar glass-panel flex-between p-3">
+        <div class="page-purchase-bar">
           <div class="total-summary-col">
             <span class="caption text-muted small d-block">الإجمالي:</span>
             <div class="amount-wrap d-flex align-items-baseline gap-1">
-              <span class="amount-val fw-bold">{{ calculatedEstimatedTotal }}</span>
+              <span class="amount-val fw-bold">{{ calculatedEstimatedTotal|number:'1.0-2' }}</span>
               <span class="amount-curr fw-bold small text-primary">{{ currencySymbol }}</span>
             </div>
           </div>
@@ -369,11 +316,32 @@
               <i class="bi bi-check2-circle me-2"></i>
               <span>تمت الإضافة بنجاح!</span>
             } @else {
-              <i class="bi bi-bag-check-fill me-2"></i>
+              <i class="bi bi-cart-plus me-2"></i>
               <span>إضافة إلى السلة</span>
             }
           </button>
-        </div>
+        </div></div>}
+<details class="product-disclosure"><summary>ملاحظات للطلب <span>اختياري</span></summary>          <textarea
+            class="product-notes-textarea"
+            rows="2"
+            placeholder="مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة..."
+            [(ngModel)]="specialInstructions"
+          ></textarea></details>        <!-- Specifications Table (if any) -->
+        @if (parsedKeySpecs.length > 0) {
+          <details class="product-disclosure">
+            <summary>المواصفات</summary>
+            <div class="specs-grid mt-2">
+              @for (spec of parsedKeySpecs; track spec.label) {
+                <div class="spec-row flex-between py-2 border-bottom">
+                  <span class="spec-label text-muted"><i class="bi me-1 text-primary" [class]="spec.icon || 'bi-dot'"></i> {{ spec.label }}</span>
+                  <span class="spec-val fw-bold text-dark">{{ spec.value }}</span>
+                </div>
+              }
+            </div>
+          </details>
+        }
+
+
       </div>
     </div>
 

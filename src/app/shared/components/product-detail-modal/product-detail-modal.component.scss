@@ -1805,3 +1805,5 @@
 .modal-backdrop { overscroll-behavior: none; }
 .luxury-modal { border-bottom-left-radius: 0; border-bottom-right-radius: 0; overscroll-behavior: none; }
 .luxury-modal .modal-body { min-height: 0; overflow-y: auto; overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
+
+.hero-image-container .hero-food-img{object-fit:var(--detail-image-fit,contain)}.product-intro-box{box-shadow:none}.modal-body .quantity-selection-section{padding-block:16px}

@@ -112,6 +112,13 @@ export class SettingsService {
     document.body.style.removeProperty('font-family');
     root.style.removeProperty('font-size');
 
+    const layout=settings.storeLayout;
+    root.style.setProperty('--mobile-product-columns',String(layout?.mobileColumns||2));
+    root.style.setProperty('--product-image-fit',layout?.cardImageFit||'cover');
+    root.style.setProperty('--product-image-padding',String(layout?.cardImagePadding||0)+'px');
+    root.style.setProperty('--product-image-radius',(layout?.cardImageRadius??-1)<0?'var(--radius-product-card)':layout!.cardImageRadius+'px');
+    root.style.setProperty('--product-image-aspect',layout?.cardImageAspect==='portrait'?'3 / 4':layout?.cardImageAspect==='landscape'?'4 / 3':'1 / 1');
+    root.style.setProperty('--detail-image-fit',layout?.detailImageFit||'contain');
     if (settings.primaryColor) {
       root.style.setProperty('--primary-color', settings.primaryColor);
       root.style.setProperty('--color-primary', settings.primaryColor);

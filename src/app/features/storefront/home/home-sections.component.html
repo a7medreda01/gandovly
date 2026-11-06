@@ -1,0 +1,26 @@
+<div class="home-builder container">
+  <h1 class="sr-only">{{settings.settings().restaurantName}}</h1>
+  <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()"><input type="search" [(ngModel)]="search" name="search" placeholder="ابحث عن منتج" aria-label="البحث في المتجر"><a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" aria-label="عرض نتائج البحث"><i class="bi bi-search" aria-hidden="true"></i></a></form>
+  @if(loading()){<div class="home-loading" role="status">جاري تجهيز واجهة المتجر...</div>}
+  @if(error()){<div class="home-error" role="alert">تعذر تحميل الرئيسية. <button type="button" (click)="load()">إعادة المحاولة</button></div>}
+  @for(row of sections();track row.config.id){@let s=row.config;
+    @if(s.kind==='hero'||s.kind==='banner'){
+      <section class="promo" [class.hero]="s.kind==='hero'" [class.overlay]="s.layout==='overlay'" [class.no-image]="!s.imageUrl&&!s.mobileImageUrl&&!row.products.length" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)" [style.--overlay]="s.overlayOpacity/100">
+        @if(s.imageUrl||s.mobileImageUrl){<picture class="promo-media">@if(s.mobileImageUrl){<source media="(max-width:767px)" [srcset]="s.mobileImageUrl|imageUrl:'banner'">}<img [src]="(s.imageUrl||s.mobileImageUrl)|imageUrl:'banner'" [alt]="s.title" [attr.loading]="$first?'eager':'lazy'" [attr.fetchpriority]="$first?'high':'auto'" decoding="async"></picture>}
+        @else if(row.products.length){<div class="spotlight"><app-product-card [product]="row.products[0]" (selectProduct)="open($event)"></app-product-card></div>}
+        <div class="promo-copy">@if(s.eyebrow){<span class="eyebrow">{{s.eyebrow}}</span>}<h2>{{s.title}}</h2>@if(s.subtitle){<p>{{s.subtitle}}</p>}@if(s.buttonText){<a class="primary-action" [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge">{{s.buttonText}} <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</div>
+      </section>
+    }
+    @if(s.kind==='products'&&row.products.length){
+      <section class="collection"><header><div>@if(s.eyebrow){<span class="eyebrow">{{s.eyebrow}}</span>}<h2>{{s.title}}</h2>@if(s.subtitle){<p>{{s.subtitle}}</p>}</div>@if(s.buttonText){<a [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge">{{s.buttonText}} <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</header><div class="collection-grid">@for(p of row.products;track p.id){<app-product-card [product]="p" (selectProduct)="open($event)"></app-product-card>}</div></section>
+    }
+    @if((s.kind==='features'||s.kind==='brands')&&s.items.length){
+      <section class="content-section" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)"><header>@if(s.eyebrow){<span class="eyebrow">{{s.eyebrow}}</span>}<h2>{{s.title}}</h2>@if(s.subtitle){<p>{{s.subtitle}}</p>}</header><div class="items-grid" [class.brands]="s.kind==='brands'">@for(item of s.items;track $index){<a class="info-card" [routerLink]="path(item)" [queryParams]="query(item)" queryParamsHandling="merge">@if(item.imageUrl){<img [src]="item.imageUrl|imageUrl:'category'" [alt]="item.title" loading="lazy" decoding="async">}@else{<span class="info-icon"><i class="bi" [ngClass]="item.icon" aria-hidden="true"></i></span>}<div><h3>{{item.title}}</h3>@if(item.text){<p>{{item.text}}</p>}</div></a>}</div></section>
+    }
+    @if(s.kind==='categories'){
+      <section class="content-section"><header><h2>{{s.title}}</h2><p>{{s.subtitle}}</p></header><div class="items-grid categories">@for(cat of catalog.categories().slice(0,s.limit);track cat.id){<a class="info-card" routerLink="/menu" [queryParams]="{category:cat.id,page:null,search:null,sort:null}" queryParamsHandling="merge"><img [src]="cat.imageUrl|imageUrl:'category'" [alt]="cat.nameAr" loading="lazy"><h3>{{cat.nameAr}}</h3></a>}</div></section>
+    }
+  }
+  @if(loadingProduct()){<div class="product-opening" role="status">جاري تحميل تفاصيل المنتج...</div>}
+  @if(selected()){<app-product-detail-modal [product]="selected()!" (closeModal)="selected.set(null)"></app-product-detail-modal>}
+</div>

@@ -1,4 +1,42 @@
-# دليل تجهيز حزمة بيانات متجر — الإصدار 1.1.0
+# دليل تجهيز حزمة بيانات متجر — الإصدار 1.2.0
+
+## تصميم الكروت وسكشنات الرئيسية — جديد في 1.2.0
+
+إعدادات التصميم في settings.json داخل كائن storeLayout. الحزم القديمة 1.0.0 و1.1.0 مقبولة؛ غياب هذا الكائن يحافظ على الرئيسية التقليدية. من الإدارة افتح إعدادات المتجر ← الرئيسية والكروت. الإعدادات تخص المتجر الحالي فقط وتحفظ مع هويته.
+
+```json
+{
+  "storeLayout": {
+    "mobileColumns": 2,
+    "cardImageFit": "contain",
+    "cardImagePadding": 12,
+    "cardImageRadius": -1,
+    "cardImageAspect": "square",
+    "detailImageFit": "contain",
+    "useCustomHome": true,
+    "sections": [
+      {"id":"intro","kind":"hero","enabled":true,"title":"اختيارات المتجر","subtitle":"تصفح المنتجات واختر ما يناسبك.","eyebrow":"اكتشف الجديد","imageUrl":"/uploads/branding/home-desktop.webp","mobileImageUrl":"/uploads/branding/home-mobile.webp","layout":"split","backgroundColor":"#f2f0ff","textColor":"#172238","overlayOpacity":20,"buttonText":"تسوق الآن","link":"/menu","source":"featured","categoryId":null,"productIds":[],"limit":8,"items":[]},
+      {"id":"new","kind":"products","enabled":true,"title":"وصل حديثًا","source":"latest","limit":8,"buttonText":"عرض الكل","link":"/menu"},
+      {"id":"offers","kind":"products","enabled":true,"title":"عروض وخصومات","source":"offers","limit":8,"buttonText":"كل العروض","link":"/menu?sort=offers"},
+      {"id":"help","kind":"features","title":"تسوق بسهولة","items":[{"title":"متابعة الطلب","text":"تفاصيل طلباتك وحالتها","icon":"bi-box-seam","imageUrl":"","link":"/account"}]}
+    ]
+  }
+}
+```
+
+- mobileColumns: عدد الكروت في صف الموبايل، 1 أو2 أو3. يستخدم في الرئيسية والكتالوج. عرض سطح المكتب يتكيف تلقائيًا.
+- cardImageFit: contain للصورة الكاملة دون قص، أو cover لملء الإطار مع احتمال قص أطراف الصورة. cardImagePadding: مساحة داخلية من0 إلى32 بكسل. cardImageRadius: ‎-1 لوراثة حواف الكارت، أو0 إلى100 بكسل. cardImageAspect: square (1:1)، portrait (3:4)، landscape (4:3). detailImageFit: contain أوcover لصفحة/موديل التفاصيل؛ عارض التكبير يعرض الصورة كاملة.
+- useCustomHome=false يعيد الرئيسية التقليدية دون حذف السكشنات المحفوظة. true يعرض السكشنات المفعلة بترتيب المصفوفة. ابدأ بترتيب جاهز من الإدارة ثم عدله؛ لا توجد شعارات أو ضمانات أو تقييمات وهمية مضافة تلقائيًا.
+- الأنواع kind: hero بانر رئيسي، products مجموعة منتجات، banner بانر ترويجي، features مميزات، brands علامات تجارية، categories أقسام المتجر.
+- حدود الأداء: حتى16 سكشنًا، منها حتى6 مجموعات منتجات، حتى12 منتجًا في المجموعة، و12 عنصرًا للمميزات أو الماركات. المجموعة الفارغة تخفى تلقائيًا. الصور أسفل أول سكشن تحمل عند الاقتراب منها، مع تثبيت نسب الإطارات لتقليل تغير التخطيط.
+- مصادر المنتجات source: featured ترتيب الكتالوج، latest آخر المنتجات المضافة بترتيب المعرف تنازليًا، offers سعر أصلي أعلى من سعر البيع الأساسي، bestsellers مجموع كميات الطلبات المكتملة فقط، category باستخدام categoryId، manual باستخدام productIds حسب ترتيب الاختيار. لا يُستخدم عدد طلبات عشوائي ولا تحسب الطلبات الملغاة ضمن المبيعات. الأقسام غير المتاحة والمنتجات غير المتاحة لا تعرضها واجهة الرئيسية.
+- layout: split للصورة بجوار النص، أو overlay للنص فوق الصورة. imageUrl لصورة الكمبيوتر وmobileImageUrl بديل الموبايل الاختياري. overlayOpacity من0 إلى80. backgroundColor وtextColor لون HEX مثل #FFFFFF أو نص فارغ للهوية. ارفع صورك من الإدارة؛ لا تضع بيانات سرية في رابط الصورة.
+- title حتى160 حرفًا، subtitle حتى600، eyebrow حتى80، buttonText حتى60؛ إفراغ نص الزر يخفيه. الروابط داخل المتجر فقط: /menu، /account، /product/123، مع category أوsort أوsearch للكتالوج. لا تدعم JavaScript أو تغيير tenant داخل الرابط. source يحدد فلتر زر عرض الكل تلقائيًا.
+- عناصر features وbrands: title حتى100 حرفًا، text حتى240، icon اسم Bootstrap Icons مثل bi-truck أوbi-headset أوbi-shield-check، imageUrl صورة/شعار اختياري، link وجهة داخل المتجر. استخدم فقط مميزات وسياسات وشعارات حقيقية ومصرحًا بها.
+- كل imageUrl وmobileImageUrl في السكشنات وعناصرها يشير إلى صورة مضمنة في ZIP مثل باقي الصور. النظام يعيد كتابة الصور تلقائيًا، ويعيد ترقيم productIds وcategoryId وروابط /product/ID و/menu?category=ID عند النقل إلى متجر جديد. لا تستخدم storeLayoutJson؛ هو تمثيل داخلي فقط. أرفق الأقسام والمنتجات المشار إليها في نفس الحزمة. المنتج أو القسم المشار إليه في الرئيسية يجب إزالته من السكشنات قبل حذفه، أو تعطيل إتاحته بدلًا من الحذف.
+- endpoint الرئيسية: GET /api/v1/storefront/home يعيد السكشنات المفعلة ومنتجاتها في استجابة واحدة. يطبق عزل المتاجر، وحدود المجموعات، ويجلب تفاصيل المنتجات دفعة واحدة دون طلب قاعدة بيانات لكل كارت. فلاتر الكتالوج عبر GET /api/v1/storefront/products?sortBy=latest أوoffers أوbestsellers.
+
+للحزم الجديدة استخدم manifest.version="1.2.0". باقي مواصفات الأنشطة والمخزون والمنتجات في الأقسام التالية تظل سارية.
 
 ## تشغيل الأنشطة المتخصصة — اقرأ هذا القسم أولًا
 
@@ -161,8 +199,8 @@ uploads/branding/...
 uploads/categories/...
 uploads/products/...
 
-ملفات القوائم مصفوفات JSON، ويمكن [] للقوائم الفارغة. settings وmanifest كائنات JSON. استخدم UTF-8 وJSON صالحًا دون تعليقات أو فاصلة زائدة. manifest.version للحزمة الجديدة يجب أن يساوي "1.1.0". مثال:
-{"templateId":"store-package-v1","version":"1.1.0","businessDomain":"GeneralRetail","counts":{"categories":1,"products":1}}
+ملفات القوائم مصفوفات JSON، ويمكن [] للقوائم الفارغة. settings وmanifest كائنات JSON. استخدم UTF-8 وJSON صالحًا دون تعليقات أو فاصلة زائدة. manifest.version للحزمة الجديدة يجب أن يساوي "1.2.0". مثال:
+{"templateId":"store-package-v1","version":"1.2.0","businessDomain":"GeneralRetail","counts":{"categories":1,"products":1}}
 counts معلومات توثيقية، ولا تغني عن العد الفعلي.
 
 ## 3. الصور والهوية

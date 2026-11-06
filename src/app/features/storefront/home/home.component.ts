@@ -1,3 +1,4 @@
+import { HomeSectionsComponent } from './home-sections.component';
 import { Component, OnInit, OnDestroy, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterModule } from '@angular/router';
@@ -17,7 +18,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterModule, FormsModule, ProductCardComponent, ProductCardSkeletonComponent, ProductDetailModalComponent, ImageUrlPipe],
+  imports: [HomeSectionsComponent,CommonModule, RouterLink, RouterModule, FormsModule, ProductCardComponent, ProductCardSkeletonComponent, ProductDetailModalComponent, ImageUrlPipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
@@ -52,7 +53,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private searchSubscription?: Subscription;
 
   ngOnInit() {
-    this.settingsService.loadSettings().subscribe();
+    this.settingsService.loadSettings().subscribe(settings=>{if(!settings.storeLayout?.useCustomHome)this.fetchFeaturedProducts();});
     this.catalogService.loadCategories().subscribe();
 
     // Debounce search
@@ -64,7 +65,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.fetchFeaturedProducts();
     });
 
-    this.fetchFeaturedProducts();
   }
 
   onSearchChange(val: string) {

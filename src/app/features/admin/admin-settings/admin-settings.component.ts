@@ -1,3 +1,4 @@
+import { StoreLayoutEditorComponent } from './store-layout-editor.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { CommerceService } from '../../../core/services/commerce.service';
 import { ActivatedRoute } from '@angular/router';
@@ -18,7 +19,7 @@ import { PhoneInputComponent } from '../../../shared/components/phone-input/phon
 @Component({
   selector: 'app-admin-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe, LoadingStateComponent, PhoneInputComponent],
+  imports: [StoreLayoutEditorComponent,CommonModule, FormsModule, ImageUrlPipe, LoadingStateComponent, PhoneInputComponent],
   templateUrl: './admin-settings.component.html',
   styleUrl: './admin-settings.component.scss'
 })
@@ -42,7 +43,7 @@ export class AdminSettingsComponent implements OnInit {
     this.domainBusy.set(true);
     this.domainHttp.post<any>(environment.apiUrl+'/admin/settings/custom-domain/verify',challenge).subscribe({next:r=>{this.domainBusy.set(false);this.customDomain.set(r.data.customDomain);this.domainChallenge.set(null);this.toast.success(r.message);},error:e=>{this.domainBusy.set(false);this.toast.error(e.error?.message||'تعذر التحقق من الدومين.');}});
   }
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance'>('info');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -172,7 +173,7 @@ export class AdminSettingsComponent implements OnInit {
   private readonly route=inject(ActivatedRoute);
   ngOnInit() {
     this.commerce.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});
-    if(this.route.snapshot.queryParamMap.get('tab')==='performance')this.activeTab.set('performance');
+    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(requestedTab==='performance'||requestedTab==='layout')this.activeTab.set(requestedTab);
     this.loadSettings();
     this.loadPackageStats();
     this.loadDomain();
@@ -204,9 +205,9 @@ export class AdminSettingsComponent implements OnInit {
       countryCode: current.countryCode || 'EG',
       phoneCountryCode: current.phoneCountryCode || '+20',
       fontFamily: current.fontFamily || 'Cairo',
-      whatsApp: current.whatsapp || (current as any).whatsApp || '01010415774',
-      WhatsApp: current.whatsapp || (current as any).whatsApp || '01010415774',
-      whatsapp: current.whatsapp || (current as any).whatsApp || '01010415774'
+      whatsApp: current.whatsapp || (current as any).whatsApp || '',
+      WhatsApp: current.whatsapp || (current as any).whatsApp || '',
+      whatsapp: current.whatsapp || (current as any).whatsApp || ''
     };
 
     this.isSaving.set(true);
@@ -227,7 +228,7 @@ export class AdminSettingsComponent implements OnInit {
       error: (err) => {
         this.isSaving.set(false);
         console.error('Save settings error:', err);
-        this.toast.error('حدث خطأ أثناء حفظ الإعدادات في قاعدة البيانات.');
+        this.toast.error(err.error?.message||'حدث خطأ أثناء حفظ الإعدادات في قاعدة البيانات.');
       }
     });
   }

@@ -250,7 +250,7 @@ import { Product, PagedResult } from '../../../core/models/models';
       }
 
       .wishlist-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(var(--mobile-product-columns,2), minmax(0,1fr));
         gap: 0.75rem;
       }
     }
@@ -303,4 +303,3 @@ export class WishlistComponent implements OnInit {
     }
   }
 }
-

@@ -934,3 +934,5 @@
 .categories-visual-section .cat-compact-card .cat-icon-round .cat-grid-thumb { width: 100%; height: 100%; padding: 0; object-fit: cover; border-radius: inherit; }
 
 .luxury-hero-card .hero-title, .luxury-hero-card .hero-title .gold-text, .luxury-hero-card .hero-subtitle { color: var(--hero-text-color, #fff); }
+
+@media(max-width:767px){.products-grid,.popular-section .products-grid-2col{grid-template-columns:repeat(var(--mobile-product-columns,2),minmax(0,1fr));}}

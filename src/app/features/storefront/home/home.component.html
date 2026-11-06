@@ -1,3 +1,4 @@
+@if(settingsService.settings().storeLayout?.useCustomHome){<app-home-sections></app-home-sections>}@else{
 <div class="home-container">
   <!-- 1. Hero Promo Banner (Full Width on Mobile) -->
   @if (settingsService.settings().showHeroBanner) {
@@ -173,3 +174,5 @@
     (closeModal)="closeProductModal()"></app-product-detail-modal>
   }
 </div>
+
+}

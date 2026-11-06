@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
-import { Product, PreparationOption, ModifierOption } from '../../../core/models/models';
+import { Product, PreparationOption, ModifierOption, ModifierGroup } from '../../../core/models/models';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { CartService } from '../../../core/services/cart.service';
 import { SettingsService } from '../../../core/services/settings.service';
@@ -247,7 +247,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.showImageViewer.set(false);
     this.activeImageIndex = 0;
-    this.selectedVariant=null;this.variantImages=[];this.booking=null;
+    this.selectedVariant=null;this.variantImages=[];this.booking=null;this.selectedPrepOption=null;this.selectedModifiersByGroup={};this.multiSelectedModifiers=[];this.specialInstructions='';
     this.piecesCount = 1;
     this.productRequest = this.catalogService.getProductById(id).subscribe({
       next: prod => {
@@ -323,6 +323,16 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  modifierSelected(group:ModifierGroup,opt:ModifierOption){return this.selectedModifiersByGroup[group.id]?.id===opt.id||this.multiSelectedModifiers.some(m=>m.id===opt.id);}
+  toggleModifier(group:ModifierGroup,opt:ModifierOption){
+    if(!opt.isAvailable)return;
+    if(group.maxSelection===1){this.selectSingleModifier(group.id,opt);return;}
+    const index=this.multiSelectedModifiers.findIndex(m=>m.id===opt.id);
+    if(index>=0){this.multiSelectedModifiers.splice(index,1);return;}
+    const count=this.multiSelectedModifiers.filter(m=>group.options.some(o=>o.id===m.id)).length;
+    if(count>=group.maxSelection){this.toast.info('الحد الأقصى لهذه المجموعة '+group.maxSelection);return;}
+    this.multiSelectedModifiers.push(opt);
+  }
   toggleWishlist(): void {
     const p = this.product();
     if (!p) return;
@@ -361,6 +371,8 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     if(p.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
     if(p.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
 
+    for(const group of p.modifierGroups||[]){const count=group.options.filter(o=>this.modifierSelected(group,o)).length;if(count<(group.isRequired?Math.max(1,group.minSelection):group.minSelection)||count>group.maxSelection){this.toast.error('راجع اختيارات '+group.nameAr);return;}}
+    if(p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===this.selectedPrepOption?.id))){this.toast.error('اختر طريقة التجهيز المطلوبة');return;}
     this.isSuccess.set(true);
 
     const mods: ModifierOption[] = [...this.multiSelectedModifiers];

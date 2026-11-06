@@ -70,13 +70,13 @@
     <div class="menu-results-header">
       <div class="header-titles">
         <h1 class="menu-active-title">
-          @if (selectedCatId() === null) {
+          @if(sortBy==='latest'||sortBy==='offers'||sortBy==='bestsellers'){<span>{{sortBy==='latest'?'وصل حديثًا':sortBy==='offers'?'عروض وخصومات':'الأكثر مبيعًا'}}</span>}@else if (selectedCatId() === null) {
             <span>جميع المنتجات والأصناف</span>
           } @else {
             <span>قائمة {{ selectedCategoryName }}</span>
           }
         </h1>
-        <span class="results-count">{{ totalCount() }} منتج متاح</span>
+        <span class="results-count">{{ totalCount() }} منتج متاح</span>@if(sortBy){<a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">إزالة فلتر المجموعة</a>}
       </div>
 
     </div>

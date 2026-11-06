@@ -1,3 +1,4 @@
+import type { StoreLayout } from './store-layout';
 // API Response Envelopes
 export interface ApiResponse<T> {
   success: boolean;
@@ -37,6 +38,7 @@ export type PaymentStatus = 'CashDue' | 'Pending' | 'Paid' | 'Failed' | 'Refunde
 
 // Settings
 export interface StorefrontSettings {
+  storeLayout?: StoreLayout;
   defaultDomain?: BusinessDomain;
   isMultiDomain?: boolean;
   businessDomainLabel?: string;
