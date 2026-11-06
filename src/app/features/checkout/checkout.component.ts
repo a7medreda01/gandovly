@@ -706,7 +706,7 @@ export class CheckoutComponent implements OnInit {
         this.isSubmitting.set(false);
         this.showConfirmModal.set(false);
         if (!this.authService.currentCustomer()) this.guestOrders.remember(order.publicTrackingToken);
-        this.pixels.track('Purchase',{orderId:String(order.id),ids:this.cartService.items().map(i=>String(i.product.id)),value:order.estimatedTotal,quantity:this.cartService.totalItemsCount()});
+        if(order.paymentStatus!=='Pending')this.pixels.track('Purchase',{orderId:String(order.id),ids:this.cartService.items().map(i=>String(i.product.id)),value:order.estimatedTotal,quantity:this.cartService.totalItemsCount()});
         this.cartService.clearCart();
         this.toast.success('تم استلام طلبك بنجاح. احتفظ برابط متابعة الطلب.');
 
