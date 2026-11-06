@@ -342,15 +342,11 @@ export class AccountComponent implements OnInit, OnDestroy {
         this.isOtpSent.set(true);
         this.startResendTimer();
 
-        if (currentFailures >= 2) {
-          this.fallbackOtpCode.set('123456');
-          this.setDigitsFromCode('123456');
-          this.otpNoticeMessage.set('نعتذر عن عدم وصول رسالة الواتساب. استخدم كود التأكيد 123456 لتأكيد الدخول فوراً.');
-          this.toast.info('استخدم كود التأكيد 123456 لإتمام الدخول مباشرة.');
-        } else {
-          this.otpNoticeMessage.set('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
-          this.toast.error('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
-        }
+        this.fallbackOtpCode.set(null);
+        this.setDigitsFromCode('');
+        const message = err?.error?.message || 'تعذر إرسال رمز التحقق. أعد المحاولة لاحقًا أو تواصل مع المتجر.';
+        this.otpNoticeMessage.set(message);
+        this.toast.error(message);
       }
     });
   }

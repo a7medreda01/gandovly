@@ -448,17 +448,12 @@ export class CheckoutComponent implements OnInit {
         const currentFailures = this.otpFailureCount() + 1;
         this.otpFailureCount.set(currentFailures);
 
-        if (currentFailures >= 2) {
-          this.fallbackOtpCode.set('123456');
-          this.authOtpCode = '123456';
-          this.authStep.set('otp');
-          this.otpNoticeMessage.set('نعتذر عن عدم وصول رسالة الواتساب. استخدم كود التأكيد التالي لتأكيد طلبك فوراً دون انتظار.');
-          this.toast.info('استخدم كود التأكيد المعروض لإكمال طلبك مباشرة.');
-        } else {
-          this.authStep.set('otp');
-          this.otpNoticeMessage.set('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
-          this.toast.error('فشل إرسال الكود عبر واتساب. برجاء الضغط على إعادة الإرسال مرة أخرى.');
-        }
+        this.fallbackOtpCode.set(null);
+        this.authOtpCode = '';
+        this.authStep.set('otp');
+        const message = err?.error?.message || 'تعذر إرسال رمز التحقق. أعد المحاولة لاحقًا أو تواصل مع المتجر.';
+        this.otpNoticeMessage.set(message);
+        this.toast.error(message);
       }
     });
   }
