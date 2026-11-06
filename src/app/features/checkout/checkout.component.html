@@ -577,6 +577,7 @@
             </div>
           </div>
         }
+        <div class="guest-checkout-option"><button type="button" class="btn-outline w-100" (click)="continueAsGuest()" [disabled]="isRequestingOtp() || isVerifyingOtp()"><i class="bi bi-person"></i> المتابعة كضيف بدون كود</button><p>لا يتم تسجيل دخولك أو فتح طلبات سابقة. ستتابع هذا الطلب فقط برابطه الخاص.</p></div>
       </div>
     </div>
   </div>

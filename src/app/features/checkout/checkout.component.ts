@@ -405,6 +405,19 @@ export class CheckoutComponent implements OnInit {
     this.showConfirmModal.set(true);
   }
 
+  continueAsGuest() {
+    if (this.isRequestingOtp() || this.isVerifyingOtp()) return;
+    const name = this.authFullName.trim();
+    const phone = this.authPhone.trim().replace(/[\s-]/g, '');
+    if (name.length < 2 || name.length > 100) { this.toast.error('أدخل اسمك لإتمام الطلب كضيف.'); return; }
+    if (!/^\+?[0-9]{8,15}$/.test(phone)) { this.toast.error('أدخل رقم هاتف صحيح للتواصل بشأن الطلب.'); return; }
+    this.customerName = name;
+    this.customerPhone = phone;
+    this.fallbackOtpCode.set(null);
+    this.showAuthModal.set(false);
+    this.showConfirmModal.set(true);
+  }
+
   // OTP Flow
   requestAuthOtp(isRetry: boolean = false) {
     if (!this.authPhone.trim()) {
@@ -672,10 +685,10 @@ export class CheckoutComponent implements OnInit {
         this.isSubmitting.set(false);
         this.showConfirmModal.set(false);
         this.cartService.clearCart();
-        this.toast.success('تم استلام طلبك بنجاح. يمكنك متابعة حالته من صفحة طلباتك.');
+        this.toast.success('تم استلام طلبك بنجاح. احتفظ برابط متابعة الطلب.');
 
         // Auto-save new address to profile automatically as 'موقع المشروع / المقر'
-        if (this.orderType === 'Delivery' && (this.isCustomAddress() || !this.selectedAddressId())) {
+        if (this.authService.currentCustomer() && this.orderType === 'Delivery' && (this.isCustomAddress() || !this.selectedAddressId())) {
           const user = this.authService.currentCustomer();
           const identifier = user?.userId || user?.usernameOrPhone || this.customerPhone.trim();
           if (identifier && this.streetAddress.trim()) {
@@ -693,7 +706,7 @@ export class CheckoutComponent implements OnInit {
           }
         }
 
-        this.router.navigate(['/account']);
+        this.router.navigate(['/account'], { queryParams: this.authService.currentCustomer() ? {} : { track: order.publicTrackingToken }, queryParamsHandling: 'merge' });
       },
       error: (err: any) => {
         this.isSubmitting.set(false);
