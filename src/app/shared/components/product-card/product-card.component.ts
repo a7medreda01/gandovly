@@ -36,6 +36,7 @@ export class ProductCardComponent {
 
   get displayPrice(): number {
     if (!this.product) return 0;
+    if(this.product.variants?.length)return Math.min(...this.product.variants.map(v=>v.price??this.product.pricePerUnit));
     if (this.isWeightBased && this.product.pricePerKg != null && this.product.pricePerKg > 0) {
       return this.product.pricePerKg;
     }

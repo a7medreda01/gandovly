@@ -1,3 +1,4 @@
+import { MarketingPixelsService } from '../../core/services/marketing-pixels.service';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
@@ -23,9 +24,11 @@ import { SettingsService } from '../../core/services/settings.service';
       <app-cart-drawer></app-cart-drawer>
       <app-whatsapp-fab></app-whatsapp-fab>
       <app-mobile-bottom-nav></app-mobile-bottom-nav>
+      @if(pixels.configured()){@if(pixels.consent()===null){<aside class="marketing-consent" aria-label="تفضيلات التتبع"><p>نستخدم أدوات قياس من منصات التواصل لتحسين الإعلانات وقياس الزيارات والطلبات. هل توافق على تشغيلها؟</p><button type="button" (click)="pixels.choose('accepted')">أوافق</button><button type="button" (click)="pixels.choose('rejected')">لا أوافق</button></aside>}@else{<button type="button" class="marketing-preferences" (click)="pixels.preferences()">تفضيلات التتبع</button>}}
     </div>
   `,
   styles: [`
+    .marketing-consent{position:fixed;z-index:1200;bottom:90px;inset-inline:16px;max-width:560px;margin:auto;padding:18px;background:var(--card-bg,#fff);color:var(--text-main,#123);border:1px solid var(--border-color,#ddd);border-radius:16px;box-shadow:0 8px 40px #1233}.marketing-consent p{line-height:1.8;font-size:14px}.marketing-consent button{min-height:44px;padding:8px 20px;margin:4px;border:1px solid var(--primary-color);border-radius:10px;background:transparent;color:inherit;font:inherit}.marketing-preferences{font:inherit;font-size:12px;border:0;background:transparent;color:var(--footer-text,#fff);padding:10px}
     .storefront-wrapper {
       display: flex;
       flex-direction: column;
@@ -48,6 +51,7 @@ import { SettingsService } from '../../core/services/settings.service';
   `]
 })
 export class StorefrontLayoutComponent {
+  readonly pixels=inject(MarketingPixelsService);
   readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
   get skipLinkHref() { return this.router.url.split('#')[0] + '#store-main'; }

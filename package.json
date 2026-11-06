@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:TngProject": "node dist/TngProject/server/server.mjs",
-    "postbuild": "node scripts/prepare-hosting.mjs"
+    "postbuild": "node scripts/prepare-hosting.mjs",
+    "test:commerce": "node tests/commerce-services.mjs"
   },
   "prettier": {
     "printWidth": 100,

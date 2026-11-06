@@ -1,11 +1,13 @@
-import { Injectable, computed, signal, effect } from '@angular/core';
+import { MarketingPixelsService } from './marketing-pixels.service';
+import { Injectable, computed, signal, effect, inject } from '@angular/core';
 import { customerSessionKey } from './tenant-session';
-import { CartItem, ModifierOption, PreparationOption, Product } from '../models/models';
+import { CartItem, ModifierOption, PreparationOption, Product, ProductVariant } from '../models/models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CartService {
+  private readonly pixels=inject(MarketingPixelsService);
   items = signal<CartItem[]>([]);
   isDrawerOpen = signal<boolean>(false);
   cartBumped = signal<boolean>(false);
@@ -80,8 +82,11 @@ export class CartService {
     customWeightGrams?: number,
     specialInstructions?: string,
     orderMode?: 'pieces' | 'weight',
-    pipeMeters?: number
+    pipeMeters?: number,
+    variant?: ProductVariant
   ) {
+    if(product.variants?.length&&!variant)throw new Error('اختر اللون والمقاس.');
+    if(variant){product={...product,variants:[variant],pricePerUnit:variant.price??product.pricePerUnit,nameAr:product.nameAr+' — '+variant.color+' / '+variant.size,imageUrl:variant.images?.[0]||product.imageUrl};}
     let estimatedWeight: number | undefined;
     let lineTotal = 0;
     let estimatedUnitPrice = 0;
@@ -129,6 +134,7 @@ export class CartService {
       customWeightGrams,
       orderMode: resolvedOrderMode,
       selectedPrepOption: prepOption,
+      selectedVariant: variant,
       selectedModifiers: modifiers,
       pipeMeters,
       specialInstructions,
@@ -138,6 +144,7 @@ export class CartService {
     };
 
     this.items.update(list => [...list, newItem]);
+    this.pixels.track('AddToCart',{ids:[String(product.id)],value:newItem.estimatedLineTotal,quantity:quantityUnits});
     this.triggerCartBump();
   }
 

@@ -1,3 +1,5 @@
+import { MarketingPixelsService } from '../../core/services/marketing-pixels.service';
+import { GuestOrdersService } from '../../core/services/guest-orders.service';
 import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -263,6 +265,7 @@ export class CheckoutComponent implements OnInit {
     this.isCalculatingQuote.set(true);
     const items = this.cartService.items().map(i => ({
       productId: i.product.id,
+        variantId: i.selectedVariant?.id,
       quantityUnits: i.quantityUnits,
       customWeightGrams: i.customWeightGrams,
       preparationOptionId: i.selectedPrepOption?.id,
@@ -402,6 +405,7 @@ export class CheckoutComponent implements OnInit {
     }
 
     // User is logged in -> Open Order Confirmation Modal
+    this.pixels.track('InitiateCheckout',{ids:this.cartService.items().map(i=>String(i.product.id)),value:this.cartService.estimatedSubtotal()});
     this.showConfirmModal.set(true);
   }
 
@@ -640,6 +644,9 @@ export class CheckoutComponent implements OnInit {
     this.toast.success(`تم ضبط موعد التوريد: ${this.scheduledDisplaySummary()} 📅`);
   }
 
+  private readonly pixels=inject(MarketingPixelsService);
+  private readonly guestOrders=inject(GuestOrdersService);
+
   // Final Order Submission
   confirmAndSubmitOrder() {
     if (!this.hasPaymentMethod || (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer)) { this.toast.error('وسيلة الدفع المختارة غير متاحة.'); return; }
@@ -671,6 +678,7 @@ export class CheckoutComponent implements OnInit {
       scheduledFor: isSched ? this.scheduledForDate()! : undefined,
       items: this.cartService.items().map(i => ({
         productId: i.product.id,
+        variantId: i.selectedVariant?.id,
         quantityUnits: i.quantityUnits,
         customWeightGrams: i.customWeightGrams,
         preparationOptionId: i.selectedPrepOption?.id,
@@ -684,6 +692,8 @@ export class CheckoutComponent implements OnInit {
       next: (order: any) => {
         this.isSubmitting.set(false);
         this.showConfirmModal.set(false);
+        if (!this.authService.currentCustomer()) this.guestOrders.remember(order.publicTrackingToken);
+        this.pixels.track('Purchase',{orderId:String(order.id),ids:this.cartService.items().map(i=>String(i.product.id)),value:order.estimatedTotal,quantity:this.cartService.totalItemsCount()});
         this.cartService.clearCart();
         this.toast.success('تم استلام طلبك بنجاح. احتفظ برابط متابعة الطلب.');
 

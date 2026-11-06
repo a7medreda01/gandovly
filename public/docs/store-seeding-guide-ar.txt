@@ -328,3 +328,11 @@ categoryId يطابق قسمًا موجودًا. النظام يعيد تولي�
     public bool IsActive { get; set; } = true;
     public string WorkingHoursText { get; set; } = "يومياً من 11:00 صباحاً حتى 01:00 بعد منتصف الليل";
 ```
+
+## تحديث: متغيرات المقاسات والألوان
+أضف داخل كل صف في products.json حقل variants كمصفوفة. لا تستخدم variantsJson في الحزمة؛ النظام يحفظها داخليًا فقط.
+مثال:
+[{"id":"black-m","color":"أسود","size":"M","sku":"TS-BLK-M","price":250,"stockQuantity":5,"isAvailable":true,"images":["/uploads/products/shirt-black.webp"]},{"id":"black-l","color":"أسود","size":"L","sku":"TS-BLK-L","price":null,"stockQuantity":0,"isAvailable":true,"images":["/uploads/products/shirt-black.webp"]}]
+المعرف id نص ثابت وفريد داخل المنتج (حروف إنجليزية وأرقام وشرطة، حتى 64 حرفًا). نفس اللون والمقاس لا يتكرران. الحد 200 تركيبة؛ color حتى 80 حرفًا، size حتى 40، sku حتى 100. السعر null يستخدم سعر المنتج، وstockQuantity=null يعني مخزونًا غير محدد، و0 يعني نفاد المخزون. الأسعار لا تتجاوز منزلتين عشريتين. images مصفوفة حتى 10 روابط صور للون، وتُرفق ملفات /uploads/ داخل الأرشيف مثل بقية الصور. اجعل صور اللون متطابقة بين مقاساته. المتغيرات للمنتجات FixedPerUnit فقط.
+في السلة والطلب يُرسل variantId، ويحسب الباك السعر ويخصم المخزون ويحفظ اللون والمقاس في لقطة اسم الصنف. لا تحذف تركيبة مرتبطة بطلب قائم؛ عطّل إتاحتها بدل ذلك. إعادة استيراد الحزمة تحافظ على معرفات المتغيرات داخل المنتج الجديد.
+قبل تسليم قالب لعميل آخر امسح metaPixelId وtikTokPixelId وsnapPixelId من settings.json أو ضع قيمًا فارغة؛ كل متجر يستخدم معرفاته الخاصة، وليس حساب إعلانات صاحب القالب.

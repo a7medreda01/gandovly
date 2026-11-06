@@ -90,6 +90,9 @@ export interface StorefrontSettings {
 
   // Extended Colors
   navbarBgColor?: string;
+  metaPixelId?: string;
+  tikTokPixelId?: string;
+  snapPixelId?: string;
   heroTextColor?: string;
   navbarTextColor?: string;
   footerBgColor?: string;
@@ -251,7 +254,10 @@ export interface ProductImage {
   displayOrder: number;
 }
 
+export interface ProductVariant {id:string;color:string;size:string;sku?:string;price?:number|null;stockQuantity?:number|null;isAvailable:boolean;images:string[];}
 export interface Product {
+  version?: string;
+ variants?: ProductVariant[];
   id: number;
   categoryId: number;
   categoryNameAr?: string;
@@ -331,6 +337,7 @@ export interface CartItem {
   quantityUnits: number;
   customWeightGrams?: number;
   orderMode?: 'pieces' | 'weight';
+  selectedVariant?: ProductVariant;
   selectedPrepOption?: PreparationOption;
   selectedModifiers: ModifierOption[];
   pipeMeters?: number;
@@ -342,6 +349,7 @@ export interface CartItem {
 
 // Orders
 export interface CreateOrderLineRequest {
+  variantId?: string;
   productId: number;
   quantityUnits: number;
   customWeightGrams?: number;
@@ -400,6 +408,7 @@ export interface OrderLineModifier {
 }
 
 export interface OrderLine {
+  variantId?: string;
   id: number;
   productId: number;
   productNameAr: string;

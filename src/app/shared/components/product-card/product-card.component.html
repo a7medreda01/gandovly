@@ -9,7 +9,7 @@
     <h3 class="product-heading"><button type="button" class="product-name" (click)="onSelect()" [title]="languageService.getLocalizedName(product)">{{ languageService.getLocalizedName(product) }}</button></h3>
     <div class="pricing-row">
       <div class="price-box">
-        <div class="current-price"><bdi class="amount">{{ displayPrice | number:'1.0-2' }}</bdi><span class="currency">{{ currencySymbol }}</span></div>
+        <div class="current-price">@if(product.variants?.length){<small>يبدأ من </small>}<bdi class="amount">{{ displayPrice | number:'1.0-2' }}</bdi><span class="currency">{{ currencySymbol }}</span></div>
         @if (isWeightBased || hasDiscount) { <div class="price-details">
           @if (isWeightBased) { <span class="unit-label">لكل كجم</span> }
           @if (hasDiscount && product.originalPrice) { <del class="old-price"><bdi>{{ product.originalPrice | number:'1.2-2' }}</bdi> {{ currencySymbol }}</del> }

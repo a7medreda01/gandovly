@@ -269,6 +269,8 @@ export class AdminCatalogComponent implements OnInit {
 
   openNewProductModal() {
     this.isEditingProduct.set(false);
+    this.variantRows=[];
+    this.editingProductVersion=undefined;
     this.productImages = [];
     const firstCat = this.categories()[0];
     const catId = firstCat?.id || 1;
@@ -330,6 +332,7 @@ export class AdminCatalogComponent implements OnInit {
 
   openEditProductModal(prod: Product) {
     this.isEditingProduct.set(true);
+    this.editingProductVersion=prod.version;
 
     const imgs: { id?: number; imageUrl: string; isPrimary: boolean; displayOrder: number }[] = [];
     if (prod.images && prod.images.length > 0) {
@@ -360,6 +363,7 @@ export class AdminCatalogComponent implements OnInit {
       }
     }
     this.productImages = imgs;
+    this.variantRows=JSON.parse(JSON.stringify(prod.variants||[]));
 
     const cat = this.categories().find(c => c.id === prod.categoryId);
     const domain = prod.domain || cat?.domain || 'Supermarket';
@@ -644,6 +648,11 @@ export class AdminCatalogComponent implements OnInit {
     }
   }
 
+  variantRows:any[]=[];
+  editingProductVersion?:string;
+  addVariant(){this.variantRows.push({id:crypto.randomUUID(),color:'',size:'',sku:'',price:null,stockQuantity:null,isAvailable:true,images:[]});}
+  toggleVariantImage(row:any,url:string){row.images=row.images.includes(url)?row.images.filter((x:string)=>x!==url):[...row.images,url];this.syncVariantImages(row);}
+  syncVariantImages(row:any){for(const v of this.variantRows)if(v.color.trim()===row.color.trim())v.images=[...row.images];}
   saveProduct() {
     if (!this.productForm.nameAr.trim()) {
       this.toast.error('يرجى إدخال اسم الصنف باللغة العربية.');
@@ -664,6 +673,8 @@ export class AdminCatalogComponent implements OnInit {
 
     const payload: any = {
       categoryId: this.productForm.categoryId,
+      variants: this.variantRows,
+      version: this.editingProductVersion,
       nameAr: this.productForm.nameAr.trim(),
       nameEn: this.productForm.nameEn?.trim() || null,
       description: this.productForm.description?.trim() || null,

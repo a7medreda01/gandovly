@@ -8,7 +8,7 @@
   </div>
 
   <!-- Settings Navigation Tabs -->
-  <div class="settings-tabs-bar" aria-label="أقسام إعدادات المتجر">
+  <div class="settings-tabs-bar" aria-label="أقسام إعدادات المتجر"><button type="button" class="tab-btn" [class.active]="activeTab()==='performance'" (click)="activeTab.set('performance')"><i class="bi bi-graph-up"></i> الأداء وPixels</button>
 <button
       type="button"
       class="tab-btn"
@@ -67,6 +67,7 @@
   } @else if (settings()) {
 
     <!-- TAB 1: Discounts & Promotions -->
+    @if(activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section>}
     @if (activeTab() === 'discounts') {
       <div class="tab-content animate-fade-in">
         <div class="settings-card glass-panel highlight-border">

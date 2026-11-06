@@ -1558,3 +1558,7 @@
 
 .account-page .guest-auth-card, .account-page .profile-header, .account-page .order-compact-card { border-radius: var(--radius-card, 20px); background: var(--card-bg, #fff); box-shadow: var(--shadow-card); }
 .account-page .guest-auth-card .page-title, .account-page .user-name { color: var(--text-main); }
+
+.guest-orders-panel{padding:22px;background:var(--card-bg,#fff);border:1px solid var(--border-color,#ddd);border-radius:var(--radius-card,18px);margin-bottom:24px}.guest-orders-panel h1{font-size:22px}.guest-orders-panel p{line-height:1.8;color:var(--text-muted,#61758a)}.guest-order-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:16px;margin-top:12px;border:1px solid var(--border-color,#ddd);border-radius:12px;background:transparent;color:inherit;font:inherit;text-align:start}.guest-order-row small{display:block;font-size:12px;color:var(--text-muted,#61758a)}@media(max-width:600px){.guest-order-row{flex-wrap:wrap}.guest-orders-panel{padding:16px}}
+
+.guest-track-link{display:inline-flex;align-items:center;min-height:44px;padding:6px;color:var(--primary-color)}.guest-account-login summary{padding:16px;cursor:pointer;color:var(--primary-color)}

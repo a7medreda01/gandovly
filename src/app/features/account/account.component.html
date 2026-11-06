@@ -1,7 +1,13 @@
 <div class="account-page container">
   @if (!authService.currentCustomer()) {
+    <section class="guest-orders-panel"><h1>طلباتك على هذا الجهاز</h1><p>طلبات الضيف الخاصة بهذا المتجر. احتفظ برابط المتابعة؛ تغيير الجهاز أو مسح بيانات المتصفح قد يخفي القائمة.</p><button type="button" class="btn-outline" (click)="loadGuestOrders()" [disabled]="guestOrdersLoading()">تحديث الحالات</button>
+    @if(guestOrdersLoading()){<p role="status">جارٍ تحميل الطلبات…</p>}
+    @if(guestOrdersError()){<p role="alert">تعذر تحديث بعض الطلبات. حاول مرة أخرى أو افتح رابط المتابعة المحفوظ.</p>}
+    @for(order of guestOrderList();track order.id){<button class="guest-order-row" type="button" (click)="openOrderDetails(order)"><span>طلب #{{order.orderNumber}}<small>{{order.createdAt|date:'short'}}</small></span><span>{{getStatusLabel(order.status)}}</span><strong>{{order.finalTotal ?? order.estimatedTotal}} {{currencySymbol}}</strong></button><a class="guest-track-link" [href]="guestTrackingUrl(order)">رابط متابعة الطلب #{{order.orderNumber}}</a>}
+    @if(!guestOrdersLoading()&&!guestOrderList().length){<p>لا توجد طلبات محفوظة على هذا الجهاز بعد.</p>}
+    </section>
     <!-- Guest Must Authenticate with Mobile Phone -->
-    <div class="guest-auth-card animate-fade-in">
+    <details class="guest-account-login"><summary>تسجيل الدخول لعرض حسابك على أجهزة أخرى</summary><div class="guest-auth-card animate-fade-in">
       <div class="auth-header text-center">
         <div class="auth-pill-tag">
           <i class="bi bi-shield-check text-success"></i>
@@ -183,7 +189,7 @@
           </div>
         }
       </div>
-    </div>
+    </div></details>
   } @else {
     <!-- Logged in Customer Portal -->
     <div class="profile-layout animate-fade-in">

@@ -1,3 +1,4 @@
+import { RouterLink } from '@angular/router';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +11,7 @@ import { LoadingStateComponent } from '../../../shared/components/loading-state/
 @Component({
   selector: 'app-admin-analytics',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingStateComponent],
+  imports: [RouterLink,CommonModule, FormsModule, LoadingStateComponent],
   templateUrl: './admin-analytics.component.html',
   styleUrl: './admin-analytics.component.scss'
 })

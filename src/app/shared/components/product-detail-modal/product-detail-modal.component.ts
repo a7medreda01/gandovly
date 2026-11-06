@@ -1,3 +1,6 @@
+import { MarketingPixelsService } from '../../../core/services/marketing-pixels.service';
+import { ProductVariant } from '../../../core/models/models';
+import { VariantPickerComponent } from '../variant-picker/variant-picker.component';
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +17,7 @@ import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 @Component({
   selector: 'app-product-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe, StoreDialogDirective],
+  imports: [VariantPickerComponent,CommonModule, FormsModule, ImageUrlPipe, StoreDialogDirective],
   templateUrl: './product-detail-modal.component.html',
   styleUrl: './product-detail-modal.component.scss'
 })
@@ -177,6 +180,7 @@ export class ProductDetailModalComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.pixels.track('ViewContent',{ids:[String(this.product.id)],value:this.variantPrice});
     // Default preparation selection
     if (this.product.preparationGroups && this.product.preparationGroups.length > 0) {
       const firstGroup = this.product.preparationGroups[0];
@@ -215,7 +219,12 @@ export class ProductDetailModalComponent implements OnInit {
     return this.product.pricingType === 'ByWeight' || (this.product.pricingType as any) === 1 || (this.product.pricingType as any) === 'WeightedByKilo';
   }
 
+  private readonly pixels=inject(MarketingPixelsService);
+  selectedVariant:ProductVariant|null=null;
+  variantImages:string[]=[];
+  get variantPrice(){return this.selectedVariant?.price ?? (this.product.variants?.length?Math.min(...this.product.variants.map(v=>v.price??this.product.pricePerUnit)):this.product.pricePerUnit) ?? 0;}
   get galleryImages(): string[] {
+    if(this.variantImages.length)return this.variantImages;
     const list: string[] = [];
     if (this.product.images && this.product.images.length > 0) {
       const sorted = [...this.product.images].sort((a, b) => {
@@ -337,7 +346,7 @@ export class ProductDetailModalComponent implements OnInit {
         total += modSum * units;
       }
     } else {
-      total = this.product.pricePerUnit * this.piecesCount;
+      total = this.variantPrice * this.piecesCount;
 
       if (this.selectedPrepOption) {
         if (this.selectedPrepOption.pricingType === 'FinalPrice') {
@@ -518,6 +527,7 @@ export class ProductDetailModalComponent implements OnInit {
   isSuccess = false;
 
   onAddToCart() {
+    if(this.product.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
     // Validate required modifier groups
     if (this.product.modifierGroups) {
       for (const grp of this.product.modifierGroups) {
@@ -550,7 +560,8 @@ export class ProductDetailModalComponent implements OnInit {
       customGrams,
       this.specialInstructions,
       this.orderMode,
-      this.selectedPipeType !== 'none' ? this.pipeMeters : undefined
+      this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
+      this.selectedVariant ?? undefined
     );
 
     this.toast.success(

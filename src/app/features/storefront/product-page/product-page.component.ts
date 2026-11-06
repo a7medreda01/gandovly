@@ -1,3 +1,6 @@
+import { MarketingPixelsService } from '../../../core/services/marketing-pixels.service';
+import { ProductVariant } from '../../../core/models/models';
+import { VariantPickerComponent } from '../../../shared/components/variant-picker/variant-picker.component';
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -18,7 +21,7 @@ import { ProductDetailModalComponent } from '../../../shared/components/product-
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent, StoreDialogDirective],
+  imports: [VariantPickerComponent,CommonModule, FormsModule, RouterModule, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent, StoreDialogDirective],
   templateUrl: './product-page.component.html',
   styleUrl: './product-page.component.scss'
 })
@@ -71,7 +74,12 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     return p.pricingType === 'ByWeight' || (p.pricingType as any) === 1 || (p.pricingType as any) === 'WeightedByKilo';
   }
 
+  private readonly pixels=inject(MarketingPixelsService);
+  selectedVariant:ProductVariant|null=null;
+  variantImages:string[]=[];
+  get variantPrice(){return this.selectedVariant?.price ?? (this.product()?.variants?.length?Math.min(...this.product()!.variants!.map(v=>v.price??this.product()!.pricePerUnit)):this.product()?.pricePerUnit) ?? 0;}
   get galleryImages(): string[] {
+    if(this.variantImages.length)return this.variantImages;
     const p = this.product();
     if (!p) return [];
     const list: string[] = [];
@@ -166,7 +174,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
         total = totalWeightKg * pricePerKg;
       }
     } else {
-      total = this.piecesCount * p.pricePerUnit;
+      total = this.piecesCount * this.variantPrice;
     }
 
     const units = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
@@ -237,10 +245,12 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.showImageViewer.set(false);
     this.activeImageIndex = 0;
+    this.selectedVariant=null;this.variantImages=[];
     this.piecesCount = 1;
     this.productRequest = this.catalogService.getProductById(id).subscribe({
       next: prod => {
         this.product.set(prod);
+        if(prod)this.pixels.track('ViewContent',{ids:[String(prod.id)],value:this.variantPrice});
         this.initProductState(prod);
         this.isLoading.set(false);
         this.loadRelated(prod);
@@ -344,6 +354,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   onAddToCart(): void {
     const p = this.product();
     if (!p) return;
+    if(p.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
 
     this.isSuccess.set(true);
 
@@ -363,7 +374,8 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       mods,
       customGrams,
       this.specialInstructions,
-      this.isWeighedProduct ? this.orderMode : 'pieces'
+      this.isWeighedProduct ? this.orderMode : 'pieces',
+      undefined, this.selectedVariant ?? undefined
     );
 
     this.toast.success(`تمت إضافة "${p.nameAr}" إلى السلة 🛒`);

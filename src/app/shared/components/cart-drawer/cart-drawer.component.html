@@ -51,7 +51,7 @@
                   <!-- Product Info & Actions -->
                   <div class="item-details-box">
                     <div class="item-title-row flex-between">
-                      <h4 class="item-name" [title]="item.product.nameAr">{{ item.product.nameAr }}</h4>
+                      <h4 class="item-name" [title]="item.product.nameAr">{{ item.product.nameAr }}</h4>@if(item.selectedVariant){<small class="variant-summary">{{item.selectedVariant.color}} / {{item.selectedVariant.size}}</small>}
                       <button class="btn-remove-item" (click)="cartService.removeItem(item.id)" title="حذف الصنف" aria-label="حذف">
                         <i class="bi bi-trash3"></i>
                       </button>

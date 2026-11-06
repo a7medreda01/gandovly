@@ -193,14 +193,14 @@
             </span>
           </div>
 
-          <h1 class="product-h1 mb-1">{{ languageService.getLocalizedName(product()!) }}</h1>
+          <app-variant-picker [variants]="product()!.variants || []" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker><h1 class="product-h1 mb-1">{{ languageService.getLocalizedName(product()!) }}</h1>
           @if (product()!.nameEn && product()!.nameEn !== product()!.nameAr) {
             <h2 class="product-subtitle-en text-muted mb-3">{{ product()!.nameEn }}</h2>
           }
 
           <!-- Price Display -->
           <div class="price-banner-box d-flex align-items-baseline gap-2 mt-2">
-            <span class="price-val">{{ isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : product()!.pricePerUnit }}</span>
+            <span class="price-val">{{ isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice }}</span>
             <span class="price-curr">{{ currencySymbol }}</span>
             @if (isWeighedProduct) {
               <span class="unit-label">لكل كجم</span>

@@ -1,3 +1,7 @@
+import { CatalogService } from '../../core/services/catalog.service';
+import { GuestOrdersService } from '../../core/services/guest-orders.service';
+import { from, of, Subscription } from 'rxjs';
+import { catchError, mergeMap, toArray, map } from 'rxjs/operators';
 import { Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -32,6 +36,17 @@ export class AccountComponent implements OnInit, OnDestroy {
     return this.settingsService.settings().currencySymbol || 'ج.م';
   }
 
+  readonly guestOrders=inject(GuestOrdersService);
+  guestOrderList=signal<Order[]>([]);
+  guestOrdersLoading=signal(false);
+  guestOrdersError=signal(false);
+  private guestRequests?:Subscription;
+  guestTrackingUrl(order:Order){const url=new URL('/account',window.location.origin);const tenant=new URLSearchParams(window.location.search).get('tenant');if(tenant)url.searchParams.set('tenant',tenant);url.searchParams.set('track',order.publicTrackingToken);return url.href;}
+  loadGuestOrders(){
+    this.guestRequests?.unsubscribe();
+    this.guestOrdersLoading.set(true);this.guestOrdersError.set(false);
+    this.guestRequests=from(this.guestOrders.list()).pipe(mergeMap(row=>this.orderService.getOrderByTrackingToken(row.token).pipe(catchError(()=>{this.guestOrdersError.set(true);return of(null);})),4),toArray()).subscribe(rows=>{this.guestOrderList.set(rows.filter((o):o is Order=>!!o).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()));this.guestOrdersLoading.set(false);});
+  }
   // Tabs
   activeTab = signal<'orders' | 'addresses'>('orders');
 
@@ -82,11 +97,13 @@ export class AccountComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.newAddress.city = this.settingsService.settings().city || '';
     this.checkCurrentProfile();
+    if(!this.authService.currentCustomer())this.loadGuestOrders();
     this.loadDeliveryZones();
     this.handleRouteTracking();
   }
 
   ngOnDestroy() {
+    this.guestRequests?.unsubscribe();
     if (this.resendTimer) clearInterval(this.resendTimer);
     if (this.resolveTimer) clearTimeout(this.resolveTimer);
   }
@@ -258,6 +275,8 @@ export class AccountComponent implements OnInit, OnDestroy {
         this.isLoadingOrders.set(false);
         if (order) {
           this.selectedOrder.set(order);
+          this.router.navigate(['/account'],{queryParams:{track:null,token:null,order:null,orderId:null,orderNumber:null},queryParamsHandling:'merge',replaceUrl:true});
+          if(!this.authService.currentCustomer()){this.guestOrders.remember(token);this.loadGuestOrders();}
           if (order.customerPhone && !this.phoneNumber) {
             this.phoneNumber = order.customerPhone;
           }
@@ -472,57 +491,31 @@ export class AccountComponent implements OnInit, OnDestroy {
   }
 
   // Reorder functionality
+  private readonly catalog=inject(CatalogService);
+  isReordering=signal(false);
   reorder(order: Order) {
-    if (!order.orderLines || order.orderLines.length === 0) {
-      this.toast.error('لا توجد أصناف في هذا الطلب لإعادة طلبها.');
-      return;
-    }
-
-    let addedCount = 0;
-    for (const line of order.orderLines) {
-      const dummyProduct: Product = {
-        id: line.productId,
-        categoryId: 0,
-        nameAr: line.productNameAr,
-        pricingType: line.pricingType,
-        pricePerUnit: line.unitPriceSnapshot,
-        pricePerKg: line.pricingType === 'ByWeight' ? line.unitPriceSnapshot : undefined,
-        averageUnitWeightGrams: line.averageUnitWeightGramsSnapshot || 500,
-        allowOrderByPieces: true,
-        allowOrderByWeight: true,
-        preparationTimeMinutes: 25,
-        displayOrder: 1,
-        isAvailable: true,
-        preparationGroups: [],
-        modifierGroups: []
-      };
-
-      let prepOption: PreparationOption | undefined = undefined;
-      if (line.preparationOptionNameAr) {
-        prepOption = {
-          id: 0,
-          groupId: 0,
-          nameAr: line.preparationOptionNameAr,
-          pricingType: line.preparationPricingType || 'AddOn',
-          price: line.preparationPriceSnapshot || 0,
-          isAvailable: true,
-          displayOrder: 1
-        };
+    if(this.isReordering()||!order.orderLines?.length)return;
+    this.isReordering.set(true);
+    from(order.orderLines).pipe(mergeMap(line=>this.catalog.getProductById(line.productId).pipe(map(product=>({line,product})),catchError(()=>of(null))),4),toArray()).subscribe(rows=>{
+      let added=0,skipped=0;
+      for(const row of rows){
+        if(!row?.product?.isAvailable){skipped++;continue;}
+        const p=row.product,line=row.line;
+        const variant=p.variants?.find(v=>v.id===line.variantId);
+        if(p.variants?.length&&(!variant||!variant.isAvailable||(variant.stockQuantity!=null&&variant.stockQuantity<line.quantityUnits))){skipped++;continue;}
+        const prep=p.preparationGroups?.flatMap(g=>g.options).find(o=>o.nameAr===line.preparationOptionNameAr&&o.isAvailable);
+        if(line.preparationOptionNameAr&&!prep){skipped++;continue;}
+        const available=p.modifierGroups?.flatMap(g=>g.options)||[];
+        const mods=(line.modifiers||[]).map(m=>available.find(o=>o.nameAr===m.modifierOptionNameAr&&o.isAvailable));
+        if(mods.some(m=>!m)){skipped++;continue;}
+        const selected=mods.filter((m):m is NonNullable<typeof m>=>!!m);
+        if(p.modifierGroups?.some(g=>{const n=selected.filter(m=>g.options.some(o=>o.id===m.id)).length;return n<(g.isRequired?Math.max(1,g.minSelection):g.minSelection)||n>g.maxSelection;})||p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===prep?.id))){skipped++;continue;}
+        this.cartService.addItem(p,line.quantityUnits,prep,selected,line.actualWeightGrams||line.estimatedWeightGrams,line.specialInstructions,undefined,undefined,variant);added++;
       }
-
-      this.cartService.addItem(
-        dummyProduct,
-        line.quantityUnits,
-        prepOption,
-        [],
-        line.actualWeightGrams || line.estimatedWeightGrams,
-        line.specialInstructions
-      );
-      addedCount++;
-    }
-
-    this.toast.success(`تمت إضافة ${addedCount} أصناف من الطلب #${order.orderNumber} إلى السلة! 🛒`);
-    this.cartService.openDrawer();
+      this.isReordering.set(false);
+      if(added){this.toast.success('تمت إضافة '+added+' أصناف بالأسعار والخيارات الحالية.');this.cartService.openDrawer();}
+      if(skipped)this.toast.info('بعض الأصناف أو خياراتها غير متاحة الآن. اخترها من صفحة المنتج من جديد.');
+    });
   }
 
   saveAddress() {

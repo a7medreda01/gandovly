@@ -24,7 +24,7 @@
             </span>
           } @else {
             <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-0.5 small">
-              <i class="bi bi-whatsapp me-1"></i> تأكيد بالواتساب
+              <i class="bi bi-whatsapp me-1"></i> ضيف أو تأكيد بالواتساب
             </span>
           }
         </div>
@@ -439,8 +439,8 @@
           <span>التحقق السريع عبر واتساب</span>
         </div>
         @if (authStep() === 'info') {
-          <h3 class="modal-title">تسجيل الدخول / تأكيد رقم الجوال</h3>
-          <p class="modal-sub">أدخل بياناتك لتأكيد الطلب واستلام إشعارات التتبع وحالة التجهيز والتوصيل على الواتساب</p>
+          <h3 class="modal-title">متابعة الطلب</h3>
+          <p class="modal-sub">تابع كضيف بدون كود، أو أكد رقمك عبر واتساب للدخول إلى حسابك.</p>
         } @else {
           <h3 class="modal-title">أدخل رمز التحقق (OTP)</h3>
           <p class="modal-sub">أرسلنا كود التحقق المكون من 6 أرقام إلى رقم واتساب الخاص بك: <strong>{{ authPhone }}</strong></p>
@@ -577,7 +577,7 @@
             </div>
           </div>
         }
-        <div class="guest-checkout-option"><button type="button" class="btn-outline w-100" (click)="continueAsGuest()" [disabled]="isRequestingOtp() || isVerifyingOtp()"><i class="bi bi-person"></i> المتابعة كضيف بدون كود</button><p>لا يتم تسجيل دخولك أو فتح طلبات سابقة. ستتابع هذا الطلب فقط برابطه الخاص.</p></div>
+        <div class="guest-checkout-option"><button type="button" class="btn-outline w-100" (click)="continueAsGuest()" [disabled]="isRequestingOtp() || isVerifyingOtp()"><i class="bi bi-person"></i> المتابعة كضيف بدون كود</button><p>لا يتم تسجيل دخولك أو فتح طلبات سابقة. ستحفظ متابعة هذا الطلب على هذا الجهاز، ويمكنك فتحه برابطه الخاص.</p></div>
       </div>
     </div>
   </div>
@@ -695,7 +695,7 @@
                 <div class="entry-right">
                   <img [src]="item.product.imageUrl | imageUrl:'product'" [alt]="item.product.nameAr" class="entry-img" />
                   <div class="entry-info">
-                    <span class="entry-name">{{ item.product.nameAr }}</span>
+                    <span class="entry-name">{{ item.product.nameAr }}</span>@if(item.selectedVariant){<small class="variant-summary">{{item.selectedVariant.color}} / {{item.selectedVariant.size}}</small>}
                     @if (item.selectedPrepOption) {
                       <span class="entry-prep"><i class="bi bi-gear-fill text-primary"></i> {{ item.selectedPrepOption.nameAr }}</span>
                     }

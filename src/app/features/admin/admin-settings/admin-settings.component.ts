@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -39,7 +40,7 @@ export class AdminSettingsComponent implements OnInit {
     this.domainBusy.set(true);
     this.domainHttp.post<any>(environment.apiUrl+'/admin/settings/custom-domain/verify',challenge).subscribe({next:r=>{this.domainBusy.set(false);this.customDomain.set(r.data.customDomain);this.domainChallenge.set(null);this.toast.success(r.message);},error:e=>{this.domainBusy.set(false);this.toast.error(e.error?.message||'تعذر التحقق من الدومين.');}});
   }
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages'>('info');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -164,7 +165,9 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
+  private readonly route=inject(ActivatedRoute);
   ngOnInit() {
+    if(this.route.snapshot.queryParamMap.get('tab')==='performance')this.activeTab.set('performance');
     this.loadSettings();
     this.loadPackageStats();
     this.loadDomain();
