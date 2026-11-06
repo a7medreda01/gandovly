@@ -829,3 +829,29 @@
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
+/* Keep the entire quantity control inside its available grid column. */
+.product-page-grid .quantity-panel .stepper-header-row { width: 100%; min-width: 0; }
+.product-page-grid .quantity-panel .stepper-box {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  gap: 0;
+  padding: 3px;
+}
+.product-page-grid .quantity-panel .stepper-box .btn-step {
+  width: 100%; min-width: 0; max-width: 100%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0; padding: 0; flex-shrink: 1;
+  color: var(--primary-color);
+}
+.product-page-grid .quantity-panel .stepper-box .step-value {
+  min-width: 0; width: 100%; text-align: center;
+}
+.product-page-container { padding-top: 6px; }
+.product-page-top-nav { margin: 0 0 8px; padding: 0; align-items: center !important; }
+@media(min-width:768px) {
+  .product-page-container { padding-top: 10px; }
+  .product-page-top-nav { margin-bottom: 12px; }
+}

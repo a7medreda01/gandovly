@@ -1,3 +1,4 @@
+import { CartItem } from '../../../core/models/models';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -17,6 +18,11 @@ export class CartDrawerComponent {
   readonly cartService = inject(CartService);
   readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
+
+  displayName(item: CartItem): string {
+    const suffix = item.selectedVariant ? ' — ' + item.selectedVariant.color + ' / ' + item.selectedVariant.size : '';
+    return suffix && item.product.nameAr.endsWith(suffix) ? item.product.nameAr.slice(0, -suffix.length) : item.product.nameAr;
+  }
 
   formatWeight(grams?: number | null): string {
     if (!grams || grams <= 0) return '0 جم';

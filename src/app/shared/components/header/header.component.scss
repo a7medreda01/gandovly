@@ -872,3 +872,61 @@
   .main-header .cart-trigger-btn, .main-header .cart-trigger-btn.has-items { color: var(--navbar-text,#12263f); }
   .main-header .cart-trigger-btn .cart-icon, .main-header .cart-trigger-btn.has-items .cart-icon { color: var(--navbar-text,#12263f); opacity: 1; visibility: visible; }
 }
+/* Header actions follow the store identity, without competing glows or counters. */
+.main-header .header-actions {
+  gap: 8px;
+  .btn-whatsapp, .account-btn, .cart-trigger-btn {
+    height: 42px;
+    min-height: 42px;
+    border-radius: var(--radius-control, 12px);
+    box-shadow: none;
+    transform: none;
+    font-weight: 600;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease;
+    &:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
+  }
+  .btn-whatsapp, .account-btn {
+    color: var(--navbar-text, var(--primary-color));
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--navbar-text, var(--primary-color)) 18%, transparent);
+    &:hover { background: color-mix(in srgb, var(--primary-color) 8%, transparent); color: var(--primary-color); }
+  }
+  .account-btn { width: 42px; font-size: 20px; }
+  .btn-whatsapp { padding: 0 13px; gap: 7px; font-size: 13px; }
+  .btn-whatsapp i { font-size: 16px; }
+  .cart-trigger-btn, .cart-trigger-btn.has-items, .cart-trigger-btn.is-empty {
+    padding: 0 14px;
+    gap: 9px;
+    background: var(--btn-primary-bg, var(--primary-color));
+    color: var(--btn-primary-text, #fff);
+    border: 1px solid transparent;
+    box-shadow: none;
+    &:hover { background: var(--btn-primary-bg, var(--primary-color)); color: var(--btn-primary-text, #fff); box-shadow: none; transform: none; filter: brightness(.96); }
+    .cart-icon { color: inherit; opacity: 1; font-size: 19px; }
+    .cart-badge {
+      top: -8px; right: -9px;
+      min-width: 17px; height: 17px;
+      padding: 0 3px;
+      background: var(--card-bg, #fff);
+      color: var(--primary-color);
+      border: 1px solid var(--btn-primary-bg, var(--primary-color));
+      font-size: 10px; line-height: 1;
+      box-shadow: none; animation: none;
+    }
+  }
+}
+@media(max-width:900px) {
+  .main-header .header-actions {
+    gap: 3px;
+    .account-btn, .cart-trigger-btn, .cart-trigger-btn.has-items, .cart-trigger-btn.is-empty {
+      background: transparent;
+      color: var(--navbar-text, var(--primary-color));
+      border-color: transparent;
+      min-width: 42px;
+      padding-inline: 8px;
+      .cart-icon { color: inherit; }
+    }
+    .cart-trigger-btn .cart-badge { border-color: var(--navbar-bg, var(--card-bg, #fff)); background: var(--primary-color); color: var(--btn-primary-text, #fff); }
+  }
+}
+@media(prefers-reduced-motion:reduce) { .main-header .cart-trigger-btn.cart-bump { animation:none; } }

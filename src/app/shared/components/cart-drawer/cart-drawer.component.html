@@ -51,12 +51,13 @@
                   <!-- Product Info & Actions -->
                   <div class="item-details-box">
                     <div class="item-title-row flex-between">
-                      <h4 class="item-name" [title]="item.product.nameAr">{{ item.product.nameAr }}</h4>@if(item.selectedVariant){<small class="variant-summary">{{item.selectedVariant.color}} / {{item.selectedVariant.size}}</small>}
+                      <h4 class="item-name" [title]="displayName(item)">{{ displayName(item) }}</h4>
                       <button class="btn-remove-item" (click)="cartService.removeItem(item.id)" title="حذف الصنف" aria-label="حذف">
                         <i class="bi bi-trash3"></i>
                       </button>
                     </div>
 
+                    @if(item.selectedVariant){<div class="variant-summary"><span class="variant-tag">@if(item.selectedVariant.colorHex){<span class="variant-swatch" [style.background-color]="item.selectedVariant.colorHex"></span>}<span class="variant-label">اللون:</span> {{item.selectedVariant.color}}</span><span class="variant-tag"><span class="variant-label">المقاس:</span> <bdi>{{item.selectedVariant.size}}</bdi></span></div>}
                     <!-- Prep Option & Sub-Badges -->
                     <div class="item-badges-row">
                       @if (item.selectedPrepOption) {
@@ -149,7 +150,7 @@
                             type="button"
                             class="btn-qty"
                             (click)="cartService.updateQuantity(item.id, item.quantityUnits - 1)"
-                            aria-label="تقليل"
+                            aria-label="تقليل الكمية" [disabled]="item.quantityUnits <= 1"
                           >
                             <i class="bi bi-dash"></i>
                           </button>
@@ -158,7 +159,7 @@
                             type="button"
                             class="btn-qty"
                             (click)="cartService.updateQuantity(item.id, item.quantityUnits + 1)"
-                            aria-label="زيادة"
+                            aria-label="زيادة الكمية"
                           >
                             <i class="bi bi-plus"></i>
                           </button>
