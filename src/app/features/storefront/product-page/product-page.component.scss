@@ -804,3 +804,28 @@
 .product-sku{min-width:0;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.brand-label{min-width:0;overflow-wrap:anywhere}
 
 .description-panel{padding:18px;border:1px solid var(--border-color,#e2e8f0);border-radius:var(--radius-card,16px);background:var(--card-bg,#fff)}.description-panel h2{font-size:15px;margin:0 0 10px}.description-panel .product-description{text-align:start;line-height:1.9;font-size:14px;overflow-wrap:anywhere}.skeleton-loading-layout{pointer-events:none}.skeleton-img-hero{aspect-ratio:1;height:auto!important}.product-page-top-nav>div:first-child{min-width:0;flex:1}.product-breadcrumb{min-width:0}.product-breadcrumb ol{list-style:none;display:flex;flex-wrap:wrap;padding:0;gap:4px;font-size:12px}.product-breadcrumb .active{max-width:200px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}@media(max-width:767px){.product-page-top-nav{gap:8px;align-items:flex-start!important}.product-page-top-nav>div:first-child{gap:8px!important;flex-wrap:nowrap!important;align-items:flex-start!important}.product-breadcrumb ol{font-size:10px;line-height:1.8}.product-breadcrumb .active{display:none}.product-page-top-nav .btn-back-nav{min-height:36px;padding:6px 9px;font-size:12px;flex:none}.product-page-top-nav .top-nav-actions{gap:5px!important}.product-page-top-nav .top-nav-actions .btn-action-pill{width:36px;height:36px;min-width:36px;min-height:36px;padding:0;font-size:13px}.purchase-controls{grid-template-columns:112px minmax(0,1fr);gap:10px}.product-page-grid .quantity-panel .stepper-box{min-width:0;height:48px}.product-page-grid .quantity-panel .stepper-box .btn-step{min-width:30px;width:30px;height:40px;min-height:40px}.product-page-grid .page-purchase-bar .btn-add-to-cart{min-height:48px}.product-page-grid .product-h1{font-size:21px}.description-panel{padding:14px}}
+/* Quiet product actions with comfortable touch targets. */
+.product-page-top-nav .btn-back-nav,
+.product-page-top-nav .top-nav-actions .btn-action-pill {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 44px;
+  min-width: 44px;
+  color: var(--text-main, #173047);
+}
+.product-page-top-nav .btn-back-nav:hover,
+.product-page-top-nav .top-nav-actions .btn-action-pill:hover {
+  background: transparent;
+  box-shadow: none;
+  color: var(--primary-color);
+}
+.product-page-top-nav .top-nav-actions .btn-action-pill.active {
+  color: var(--primary-color);
+  background: transparent;
+}
+.product-page-top-nav button:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}

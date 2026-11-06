@@ -6,16 +6,6 @@
         <i class="bi bi-arrow-right"></i>
         <span class="ms-1">رجوع</span>
       </button>
-      <nav aria-label="مسار التنقل" class="product-breadcrumb">
-        <ol class="breadcrumb mb-0">
-          <li class="breadcrumb-item"><a routerLink="/">الرئيسية</a></li>
-          <li class="breadcrumb-item"><a routerLink="/menu">المنتجات</a></li>
-          @if (product()?.categoryNameAr) {
-            <li class="breadcrumb-item"><a [routerLink]="['/menu']" [queryParams]="{category: product()!.categoryId}">{{ product()!.categoryNameAr }}</a></li>
-          }
-          <li class="breadcrumb-item active" aria-current="page" [title]="(product() ? languageService.getLocalizedName(product()!) : 'التفاصيل')">{{ (product() ? languageService.getLocalizedName(product()!) : 'التفاصيل') }}</li>
-        </ol>
-      </nav>
     </div>
 
     <!-- Quick Actions (Wishlist & Share) -->
@@ -390,3 +380,4 @@
     </section>
   </div>
 }
+
