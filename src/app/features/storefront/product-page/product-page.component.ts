@@ -365,12 +365,16 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  onAddToCart(): void {
+  async onAddToCart() {
     const p = this.product();
     if (!p) return;
     if(p.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
     if(p.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
-    if(p.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
+    if(p.variants?.length&&!this.selectedVariant){
+      const hasSizes = p.variants.some(v => !!v.size?.trim());
+      this.toast.error(hasSizes ? 'اختر اللون والمقاس أولاً.' : 'اختر اللون أولاً.');
+      return;
+    }
 
     for(const group of p.modifierGroups||[]){const count=group.options.filter(o=>this.modifierSelected(group,o)).length;if(count<(group.isRequired?Math.max(1,group.minSelection):group.minSelection)||count>group.maxSelection){this.toast.error('راجع اختيارات '+group.nameAr);return;}}
     if(p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===this.selectedPrepOption?.id))){this.toast.error('اختر طريقة التجهيز المطلوبة');return;}
@@ -385,7 +389,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     const qty = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
     const customGrams = this.isWeighedProduct ? this.calculatedEstimatedWeightGrams : undefined;
 
-    this.cartService.addItem(
+    if (!await this.cartService.addItem(
       p,
       qty,
       this.selectedPrepOption ?? undefined,
@@ -394,7 +398,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       this.specialInstructions,
       this.isWeighedProduct ? this.orderMode : 'pieces',
       undefined, this.selectedVariant ?? undefined, this.booking ?? undefined
-    );
+    )) return;
 
     this.toast.success(`تمت إضافة "${p.nameAr}" إلى السلة 🛒`);
 

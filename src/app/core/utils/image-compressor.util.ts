@@ -91,9 +91,10 @@ export async function compressImage(
             return;
           }
 
-          // Generate .webp file
-          const cleanName = file.name.replace(/\.[^/.]+$/, '') + '.webp';
-          const compressedFile = new File([blob], cleanName, { type: 'image/webp' });
+          const extension = blob.type === 'image/webp' ? '.webp'
+            : blob.type === 'image/jpeg' ? '.jpg' : '.png';
+          const cleanName = file.name.replace(/\.[^/.]+$/, '') + extension;
+          const compressedFile = new File([blob], cleanName, { type: blob.type });
 
           const savedPercent = Math.round(((file.size - blob.size) / file.size) * 100);
           console.log(

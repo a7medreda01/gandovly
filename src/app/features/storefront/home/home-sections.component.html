@@ -3,7 +3,7 @@
 } @else {
 <div class="home-builder container">
   <h1 class="sr-only">{{settings.settings().restaurantName}}</h1>
-  <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()"><input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج', 'Search products')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')"><a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')"><i class="bi bi-search" aria-hidden="true"></i></a></form>
+  <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()"><input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج', 'Search products')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')"><a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')"><i class="bi bi-search" aria-hidden="true"></i></a></form>
   @if(error()){<div class="home-error" role="alert">{{ language.text('تعذر تحميل الرئيسية.', 'Could not load the homepage.') }} <button type="button" (click)="load()">{{ language.text('إعادة المحاولة', 'Try again') }}</button></div>}
   @for(row of sections();track row.config.id){@let s=row.config;
     @let title = language.text(s.title, s.titleEn);

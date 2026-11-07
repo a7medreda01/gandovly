@@ -31,7 +31,7 @@
   <section class="search-filter-section container" [class.no-hero]="!settingsService.settings().showHeroBanner">
     <div class="search-filter-row">
       <!-- Search Button on Right (1st child in RTL) -->
-      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null, category: null, page: null, product: null}" queryParamsHandling="merge" class="btn-filter-dark" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
+      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null, category: null, page: null, product: null}" queryParamsHandling="merge" class="btn-filter-dark" [style.background]="settingsService.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
         <i class="bi bi-search"></i>
       </a>
 
@@ -166,8 +166,17 @@
   </section>
   }
 
-  <!-- 6. Customer Support Call Banner -->
-  @if ((settingsService.settings().showCustomerServiceBar ?? true) && settingsService.settings().phone) {
+  <!-- Product Detail Modal -->
+  @if (selectedProductForModal()) {
+  <app-product-detail-modal [product]="selectedProductForModal()!"
+    (closeModal)="closeProductModal()"></app-product-detail-modal>
+  }
+</div>
+
+}
+
+<!-- Customer Support Call Banner -->
+@if (!loadingSettings() && (settingsService.settings().showCustomerServiceBar ?? true) && settingsService.settings().phone) {
   <section class="hotline-card-section container mb-4">
     <div class="hotline-card">
       <div class="hotline-texts">
@@ -184,14 +193,5 @@
     </div>
   </section>
   }
-
-  <!-- Product Detail Modal -->
-  @if (selectedProductForModal()) {
-  <app-product-detail-modal [product]="selectedProductForModal()!"
-    (closeModal)="closeProductModal()"></app-product-detail-modal>
-  }
-</div>
-
-}
 
 @if(loadingProductDetail()){<div class="product-detail-loading" role="status">جاري تحميل تفاصيل المنتج…</div>}

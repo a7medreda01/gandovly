@@ -726,7 +726,7 @@ export class AdminCatalogComponent implements OnInit {
           this.showProductModal.set(false);
           this.loadAll();
         },
-        error: () => this.toast.error('حدث خطأ أثناء تعديل الصنف.')
+        error: (err) => this.toast.error(this.extractErrorMessage(err, 'حدث خطأ أثناء تعديل الصنف.'))
       });
     } else {
       this.adminService.createProduct(payload).subscribe({
@@ -735,9 +735,23 @@ export class AdminCatalogComponent implements OnInit {
           this.showProductModal.set(false);
           this.loadAll();
         },
-        error: () => this.toast.error('حدث خطأ أثناء إضافة الصنف.')
+        error: (err) => this.toast.error(this.extractErrorMessage(err, 'حدث خطأ أثناء إضافة الصنف.'))
       });
     }
+  }
+
+  private extractErrorMessage(err: any, fallback: string): string {
+    if (!err) return fallback;
+    if (typeof err === 'string') return err;
+    if (err.error?.message) return err.error.message;
+    if (err.error?.errors) {
+      const errs = err.error.errors;
+      if (Array.isArray(errs)) return errs.join(' - ');
+      if (typeof errs === 'object') return Object.values(errs).flat().join(' - ');
+    }
+    if (err.error?.title) return err.error.title;
+    if (err.message && !err.message.includes('Http failure response')) return err.message;
+    return fallback;
   }
 
   toggleAvailability(prod: Product) {
@@ -771,7 +785,8 @@ export class AdminCatalogComponent implements OnInit {
         next: () => {
           this.toast.success('تم حذف الصنف بنجاح.');
           this.loadAll();
-        }
+        },
+        error: (err) => this.toast.error(this.extractErrorMessage(err, 'حدث خطأ أثناء حذف الصنف.'))
       });
     }
   }

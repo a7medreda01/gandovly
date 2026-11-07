@@ -28,7 +28,7 @@ import { SettingsService } from '../../core/services/settings.service';
     </div>
   `,
   styles: [`
-    .marketing-consent{position:fixed;z-index:1200;bottom:90px;inset-inline:16px;max-width:560px;margin:auto;padding:18px;background:var(--card-bg,#fff);color:var(--text-main,#123);border:1px solid var(--border-color,#ddd);border-radius:16px;box-shadow:0 8px 40px #1233}.marketing-consent p{line-height:1.8;font-size:14px}.marketing-consent button{min-height:44px;padding:8px 20px;margin:4px;border:1px solid var(--primary-color);border-radius:10px;background:transparent;color:inherit;font:inherit}.marketing-preferences{font:inherit;font-size:12px;border:0;background:transparent;color:var(--footer-text,#fff);padding:10px}
+    .marketing-consent{position:fixed;z-index:1200;bottom:90px;inset-inline:16px;max-width:560px;margin:auto;padding:18px;background:var(--card-bg,#fff);color:var(--text-main,#123);border:1px solid var(--border-color,#ddd);border-radius:16px;box-shadow:0 8px 40px #1233}.marketing-consent p{line-height:1.8;font-size:14px}.marketing-consent button{min-height:44px;padding:8px 20px;margin:4px;border:1px solid var(--primary-color);border-radius:10px;background:transparent;color:inherit;font:inherit}.marketing-preferences{position:fixed;bottom:10px;inset-inline-start:10px;z-index:990;font:inherit;font-size:11px;border:1px solid rgba(255,255,255,0.18);border-radius:6px;background:rgba(0,0,0,0.55);color:#fff;padding:2px 8px;opacity:0.55;transition:opacity .2s;text-decoration:none}.marketing-preferences:hover{opacity:1}
     .storefront-wrapper {
       display: flex;
       flex-direction: column;

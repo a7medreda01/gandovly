@@ -48,10 +48,10 @@ export class AccountComponent implements OnInit, OnDestroy {
   loadGuestOrders(){
     this.guestRequests?.unsubscribe();
     this.guestOrdersLoading.set(true);this.guestOrdersError.set(false);
-    this.guestRequests=from(this.guestOrders.list()).pipe(mergeMap(row=>this.orderService.getOrderByTrackingToken(row.token).pipe(catchError(()=>{this.guestOrdersError.set(true);return of(null);})),4),toArray()).subscribe(rows=>{this.guestOrderList.set(rows.filter((o):o is Order=>!!o).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()));this.guestOrdersLoading.set(false);});
+    this.guestRequests=from(this.guestOrders.list()).pipe(mergeMap(row=>this.orderService.getOrderByTrackingToken(row.token).pipe(catchError(()=>{this.guestOrdersError.set(true);return of(null);})),4),toArray()).subscribe(async rows=>{this.guestOrderList.set(rows.filter((o):o is Order=>!!o).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()));this.guestOrdersLoading.set(false);});
   }
   private readonly commerceCdr=inject(ChangeDetectorRef);readonly commerce=inject(CommerceService);inquiries:any[]=[];trackedInquiryToken='';
-  loadInquiries(){from(this.commerce.inquiryTokens()).pipe(mergeMap(token=>this.commerce.inquiryStatus(token).pipe(map(row=>({...row,token})),catchError(()=>of(null))),4),toArray()).subscribe(rows=>{this.inquiries=rows.filter(Boolean);this.commerceCdr.markForCheck();});}
+  loadInquiries(){from(this.commerce.inquiryTokens()).pipe(mergeMap(token=>this.commerce.inquiryStatus(token).pipe(map(row=>({...row,token})),catchError(()=>of(null))),4),toArray()).subscribe(async rows=>{this.inquiries=rows.filter(Boolean);this.commerceCdr.markForCheck();});}
   // Tabs
   activeTab = signal<'orders' | 'addresses'>('orders');
 
@@ -456,7 +456,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   reorder(order: Order) {
     if(this.isReordering()||!order.orderLines?.length)return;
     this.isReordering.set(true);
-    from(order.orderLines).pipe(mergeMap(line=>this.catalog.getProductById(line.productId).pipe(map(product=>({line,product})),catchError(()=>of(null))),4),toArray()).subscribe(rows=>{
+    from(order.orderLines).pipe(mergeMap(line=>this.catalog.getProductById(line.productId).pipe(map(product=>({line,product})),catchError(()=>of(null))),4),toArray()).subscribe(async rows=>{
       let added=0,skipped=0;
       for(const row of rows){
         if(!row?.product?.isAvailable){skipped++;continue;}
@@ -471,7 +471,7 @@ export class AccountComponent implements OnInit, OnDestroy {
         if(mods.some(m=>!m)){skipped++;continue;}
         const selected=mods.filter((m):m is NonNullable<typeof m>=>!!m);
         if(p.modifierGroups?.some(g=>{const n=selected.filter(m=>g.options.some(o=>o.id===m.id)).length;return n<(g.isRequired?Math.max(1,g.minSelection):g.minSelection)||n>g.maxSelection;})||p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===prep?.id))){skipped++;continue;}
-        this.cartService.addItem(p,line.quantityUnits,prep,selected,line.actualWeightGrams||line.estimatedWeightGrams,line.specialInstructions,undefined,undefined,variant);added++;
+        if (await this.cartService.addItem(p,line.quantityUnits,prep,selected,line.actualWeightGrams||line.estimatedWeightGrams,line.specialInstructions,undefined,undefined,variant)) added++;
       }
       this.isReordering.set(false);
       if(added){this.toast.success('تمت إضافة '+added+' أصناف بالأسعار والخيارات الحالية.');this.cartService.openDrawer();}

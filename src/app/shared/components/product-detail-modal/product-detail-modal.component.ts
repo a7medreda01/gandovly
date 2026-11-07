@@ -529,10 +529,14 @@ export class ProductDetailModalComponent implements OnInit {
 
   isSuccess = false;
 
-  onAddToCart() {
+  async onAddToCart() {
     if(this.product.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
     if(this.product.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
-    if(this.product.variants?.length&&!this.selectedVariant){this.toast.error('اختر اللون والمقاس أولًا.');return;}
+    if(this.product.variants?.length&&!this.selectedVariant){
+      const hasSizes = this.product.variants.some(v => !!v.size?.trim());
+      this.toast.error(hasSizes ? 'اختر اللون والمقاس أولاً.' : 'اختر اللون أولاً.');
+      return;
+    }
     // Validate required modifier groups
     if (this.product.modifierGroups) {
       for (const grp of this.product.modifierGroups) {
@@ -557,7 +561,7 @@ export class ProductDetailModalComponent implements OnInit {
       ? this.customWeightGrams
       : (this.product.pricingType === 'ByWeight' ? this.piecesCount * (this.product.averageUnitWeightGrams || 500) : undefined);
 
-    this.cartService.addItem(
+    if (!await this.cartService.addItem(
       this.product,
       qty,
       this.selectedPrepOption ?? undefined,
@@ -567,7 +571,7 @@ export class ProductDetailModalComponent implements OnInit {
       this.orderMode,
       this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
       this.selectedVariant ?? undefined, this.booking ?? undefined
-    );
+    )) return;
 
     this.toast.success(
       'تمت الإضافة إلى السلة بنجاح',

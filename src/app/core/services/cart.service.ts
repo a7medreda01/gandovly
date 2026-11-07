@@ -1,3 +1,6 @@
+import { firstValueFrom } from 'rxjs';
+import { ApiService } from './api.service';
+import { NotificationService } from './notification.service';
 import { MarketingPixelsService } from './marketing-pixels.service';
 import { Injectable, computed, signal, effect, inject } from '@angular/core';
 import { customerSessionKey } from './tenant-session';
@@ -8,6 +11,9 @@ import { CartItem, ModifierOption, PreparationOption, Product, ProductVariant } 
 })
 export class CartService {
   private readonly pixels=inject(MarketingPixelsService);
+  private readonly toast = inject(NotificationService);
+  private readonly api = inject(ApiService);
+  private readonly pendingStock = new Set<number>();
   items = signal<CartItem[]>([]);
   isDrawerOpen = signal<boolean>(false);
   cartBumped = signal<boolean>(false);
@@ -74,7 +80,28 @@ export class CartService {
     this.isDrawerOpen.update(v => !v);
   }
 
-  addItem(
+  private async hasStock(product: Product, quantity: number, variant?: ProductVariant, excludedItemId?: string): Promise<boolean> {
+    if (this.pendingStock.has(product.id)) return false;
+    this.pendingStock.add(product.id);
+    try {
+      const alreadyInCart = this.items()
+        .filter(item => item.id !== excludedItemId && item.product.id === product.id && item.selectedVariant?.id === variant?.id)
+        .reduce((total, item) => total + item.quantityUnits, 0);
+      await firstValueFrom(this.api.get<number | null>(`storefront/products/${product.id}/stock`, {
+        quantity: alreadyInCart + quantity,
+        variantId: variant?.id
+      }));
+      return true;
+    } catch (error) {
+      const response = error as { error?: { message?: string } };
+      this.toast.error(response.error?.message || 'تعذر التحقق من المخزون. حاول مرة أخرى.');
+      return false;
+    } finally {
+      this.pendingStock.delete(product.id);
+    }
+  }
+
+  async addItem(
     product: Product,
     quantityUnits: number,
     prepOption?: PreparationOption,
@@ -86,8 +113,15 @@ export class CartService {
     variant?: ProductVariant,
     booking?: {start:string;end:string;blocks:number}
   ) {
-    if(product.variants?.length&&!variant)throw new Error('اختر اللون والمقاس.');
-    if(variant){product={...product,variants:[variant],pricePerUnit:variant.price??product.pricePerUnit,nameAr:product.nameAr+' — '+variant.color+' / '+variant.size,imageUrl:variant.images?.[0]||product.imageUrl};}
+    if(product.variants?.length&&!variant){
+      const hasSizes = product.variants.some(v => !!v.size?.trim());
+      throw new Error(hasSizes ? 'اختر اللون والمقاس.' : 'اختر اللون.');
+    }
+    if (!await this.hasStock(product, Math.max(1, quantityUnits), variant)) return false;
+    if(variant){
+      const variantDesc = variant.size?.trim() ? `${variant.color} / ${variant.size}` : variant.color;
+      product={...product,variants:[variant],pricePerUnit:variant.price??product.pricePerUnit,nameAr:product.nameAr + (variantDesc ? ' — ' + variantDesc : ''),imageUrl:variant.images?.[0]||product.imageUrl};
+    }
     if(booking)product={...product,pricePerUnit:product.pricePerUnit*booking.blocks};
     let estimatedWeight: number | undefined;
     let lineTotal = 0;
@@ -149,17 +183,22 @@ export class CartService {
     this.items.update(list => [...list, newItem]);
     this.pixels.track('AddToCart',{ids:[String(product.id)],value:newItem.estimatedLineTotal,quantity:quantityUnits});
     this.triggerCartBump();
+    return true;
   }
 
-  updateQuantity(itemId: string, newQty: number) {
+  async updateQuantity(itemId: string, newQty: number) {
     if (newQty <= 0) {
       this.removeItem(itemId);
       return;
     }
 
+    const current = this.items().find(item => item.id === itemId);
+    if (current && newQty > current.quantityUnits
+      && !await this.hasStock(current.product, newQty, current.selectedVariant, itemId)) return;
+
     this.items.update(list =>
       list.map(item => {
-        if (item.id !== itemId) return item;
+        if (item.id !== itemId || item !== current) return item;
 
         const updated = { ...item, quantityUnits: newQty };
         let lineTotal = 0;
