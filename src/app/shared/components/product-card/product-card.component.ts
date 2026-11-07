@@ -1,3 +1,4 @@
+import { ImageRevealDirective } from '../../directives/image-reveal.directive';
 import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -9,12 +10,12 @@ import { LanguageService } from '../../../core/services/language.service';
 @Component({
   selector: 'app-product-card',
   standalone: true,
-  imports: [CommonModule, ImageUrlPipe],
+  imports: [ImageRevealDirective, CommonModule, ImageUrlPipe],
   templateUrl: './product-card.component.html',
   styleUrl: './product-card.component.scss'
 })
 export class ProductCardComponent {
-  private readonly settingsService = inject(SettingsService);
+  readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
   readonly languageService = inject(LanguageService);
 
@@ -36,6 +37,7 @@ export class ProductCardComponent {
 
   get displayPrice(): number {
     if (!this.product) return 0;
+    if (this.product.variantStartingPrice != null) return this.product.variantStartingPrice;
     if(this.product.variants?.length)return Math.min(...this.product.variants.map(v=>v.price??this.product.pricePerUnit));
     if (this.isWeightBased && this.product.pricePerKg != null && this.product.pricePerKg > 0) {
       return this.product.pricePerKg;

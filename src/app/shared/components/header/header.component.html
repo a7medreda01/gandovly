@@ -82,6 +82,12 @@
 
     <!-- Header Actions (Left Side in RTL) -->
     <div class="header-actions flex-center">
+      @if (languageService.canSwitchLanguage()) {
+        <button type="button" class="account-btn header-language flex-center" (click)="languageService.toggleLanguage()"
+          [attr.aria-label]="languageService.text('Switch to English', 'التحويل للعربية')">
+          {{ languageService.text('EN', 'عربي') }}
+        </button>
+      }
       <!-- WhatsApp CTA -->
       @if (settingsService.settings().showWhatsAppInNavbar && settingsService.settings().whatsapp) {
       <a [href]="whatsappUrl" target="_blank" rel="noopener noreferrer"
@@ -106,6 +112,7 @@
       </a>
 
       <!-- Cart Button -->
+      @if (settingsService.settings().storeLayout?.onlineOrdering !== false) {
       <button 
         type="button"
         class="cart-trigger-btn flex-center"
@@ -124,6 +131,7 @@
         </div>
         <span class="cart-text">السلة</span>
       </button>
+      }
     </div>
   </div>
 

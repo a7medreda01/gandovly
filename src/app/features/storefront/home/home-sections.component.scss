@@ -5,3 +5,6 @@
 .content-section .info-card{color:var(--text-main,#152138)}.content-section[style*='background']{padding:24px;border-radius:var(--radius-card,18px)}
 
 .product-opening{position:fixed;inset-inline:16px;bottom:90px;margin:auto;max-width:320px;z-index:1500;background:var(--card-bg,#fff);color:var(--primary-color);padding:14px 20px;border:1px solid var(--border-color,#ddd);border-radius:var(--radius-control,12px);text-align:center;box-shadow:var(--shadow-card)}
+
+img.image-pending { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) { img[appImageReveal] { transition: opacity .22s ease-out; } }

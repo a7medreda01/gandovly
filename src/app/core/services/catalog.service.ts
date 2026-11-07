@@ -35,12 +35,14 @@ export class CatalogService {
     page?: number;
     pageSize?: number;
     sortBy?: string;
+    cardsOnly?: boolean;
   }): Observable<PagedResult<Product>> {
     const p: Record<string, any> = {};
     if (params?.categoryId) p['categoryId'] = params.categoryId;
     if (params?.search && params.search.trim()) p['search'] = params.search.trim();
     if (params?.page) p['page'] = params.page;
     if (params?.pageSize) p['pageSize'] = params.pageSize;
+    if (params?.cardsOnly) p['cardsOnly'] = true;
     if (params?.sortBy) p['sortBy'] = params.sortBy;
 
     return this.api.get<PagedResult<Product>>('storefront/products', p);

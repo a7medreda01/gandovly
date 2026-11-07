@@ -19,7 +19,7 @@ export class StoreLayoutEditorComponent {
     readonly catalog = inject(CatalogService);
     private admin = inject(AdminService);
     private toast = inject(NotificationService);
-    private settings = inject(SettingsService);
+    readonly settings = inject(SettingsService);
     expanded = signal('');
     busy = signal(false);
     previewImage = signal('');

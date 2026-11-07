@@ -26,7 +26,7 @@
         <button type="button" class="btn-cat-nav prev" (click)="scrollCategories(-240)" aria-label="السابق" title="السابق">
           <i class="bi bi-chevron-right"></i>
         </button>
-        <div class="categories-scroll" dir="rtl" #catScrollContainer>
+        <div class="categories-scroll" [dir]="language.isRtl() ? 'rtl' : 'ltr'" #catScrollContainer>
           <!-- "الكل" Card -->
           <button type="button"
             class="category-item"
@@ -37,7 +37,7 @@
             <div class="category-icon-box box-all">
               <i class="bi bi-grid-fill"></i>
             </div>
-            <span class="category-label">جميع الأصناف</span>
+            <span class="category-label">{{language.text('جميع الأصناف', 'All products')}}</span>
           </button>
 
           <!-- Categories from Backend API -->
@@ -50,13 +50,13 @@
             >
               <div class="category-icon-box">
                 @if (cat.imageUrl) {
-                  <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="cat.nameAr" class="category-img" loading="lazy" (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='inline-flex'" />
+                  <img [src]="cat.imageUrl | imageUrl:'category'" [alt]="language.getLocalizedName(cat)" class="category-img" loading="lazy" (error)="$any($event.target).style.display='none'; $any($event.target).nextElementSibling.style.display='inline-flex'" />
                   <i class="bi" [class]="cat.iconName || 'bi-basket2'" style="display:none; font-size: 1.6rem; color: var(--primary-color);"></i>
                 } @else {
                   <i class="bi" [class]="cat.iconName || 'bi-basket2'" style="font-size: 1.6rem; color: var(--primary-color);"></i>
                 }
               </div>
-              <span class="category-label" [title]="cat.nameAr">{{ cat.nameAr }}</span>
+              <span class="category-label" [title]="language.getLocalizedName(cat)">{{ language.getLocalizedName(cat) }}</span>
             </button>
           }
         </div>
@@ -70,13 +70,13 @@
     <div class="menu-results-header">
       <div class="header-titles">
         <h1 class="menu-active-title">
-          @if(sortBy==='latest'||sortBy==='offers'||sortBy==='bestsellers'){<span>{{sortBy==='latest'?'وصل حديثًا':sortBy==='offers'?'عروض وخصومات':'الأكثر مبيعًا'}}</span>}@else if (selectedCatId() === null) {
-            <span>جميع المنتجات والأصناف</span>
+          @if(sortBy==='latest'||sortBy==='offers'||sortBy==='bestsellers'){<span>{{sortBy==='latest'?language.text('وصل حديثًا','New arrivals'):sortBy==='offers'?language.text('عروض وخصومات','Offers'):language.text('الأكثر مبيعًا','Bestsellers')}}</span>}@else if (selectedCatId() === null) {
+            <span>{{language.text('جميع المنتجات والأصناف', 'All products')}}</span>
           } @else {
-            <span>قائمة {{ selectedCategoryName }}</span>
+            <span>{{ selectedCategoryName }}</span>
           }
         </h1>
-        <span class="results-count">{{ totalCount() }} منتج متاح</span>@if(sortBy){<a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">إزالة فلتر المجموعة</a>}
+        <span class="results-count">{{ totalCount() }} {{ language.text('منتج متاح', 'products available') }}</span>@if(sortBy){<a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">إزالة فلتر المجموعة</a>}
       </div>
 
     </div>
@@ -152,3 +152,5 @@
     }
   </div>
 </div>
+
+@if(loadingProductDetail()){<div class="product-detail-loading" role="status">جاري تحميل تفاصيل المنتج…</div>}

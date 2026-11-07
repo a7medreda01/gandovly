@@ -8,7 +8,13 @@ export class LanguageService {
   private readonly STORAGE_KEY = 'mecart_language';
   private settingsService = inject(SettingsService);
 
-  currentLang = signal<SupportedLanguage>(this.getInitialLanguage());
+  private readonly preferredLanguage = signal<SupportedLanguage>(this.getInitialLanguage());
+  readonly currentLang = computed<SupportedLanguage>(() => {
+    const mode = this.settingsService.settings().languageMode;
+    if (mode === 'en_only') return 'en';
+    if (mode === 'ar_only') return 'ar';
+    return this.preferredLanguage();
+  });
 
   isRtl = computed(() => this.currentLang() === 'ar');
 
@@ -32,7 +38,7 @@ export class LanguageService {
           document.body.classList.remove('lang-en');
         }
       }
-      if (typeof localStorage !== 'undefined') {
+      if (this.canSwitchLanguage() && typeof localStorage !== 'undefined') {
         localStorage.setItem(this.STORAGE_KEY, lang);
       }
     });
@@ -40,11 +46,15 @@ export class LanguageService {
 
   toggleLanguage(): void {
     const nextLang: SupportedLanguage = this.currentLang() === 'ar' ? 'en' : 'ar';
-    this.currentLang.set(nextLang);
+    this.preferredLanguage.set(nextLang);
   }
 
   setLanguage(lang: SupportedLanguage): void {
-    this.currentLang.set(lang);
+    this.preferredLanguage.set(lang);
+  }
+
+  text(ar: string | null | undefined, en?: string | null): string {
+    return (this.currentLang() === 'en' ? en?.trim() : '') || ar || '';
   }
 
   getLocalizedName(item: { nameAr: string; nameEn?: string | null }): string {

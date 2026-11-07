@@ -124,7 +124,7 @@
               (click)="activeImageIndex = $index"
               [title]="product.nameAr"
             >
-              <img [src]="img | imageUrl:'product'" [alt]="product.nameAr" />
+              <img loading="lazy" decoding="async" [src]="img | imageUrl:'product'" [alt]="product.nameAr" />
             </button>
           }
         </div>
@@ -143,19 +143,24 @@
             <span class="product-subtitle">{{ product.nameEn }}</span>
           }
         </div>
-
-        <div class="product-price-badge">
-          <div class="price-amount-row">
-            <span class="price-val">{{ isWeighedProduct ? (product.pricePerKg || product.pricePerUnit) : variantPrice }}</span>
-            <span class="price-curr">{{ currencySymbol }}</span>
-          </div>
-          @if (isWeighedProduct) {
-            <span class="price-unit-tag">لكل كجم</span>
-          }
-        </div>
       </div>
 
       <app-variant-picker [variants]="product.variants || []" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>
+      @let unitPrice = isWeighedProduct ? (product.pricePerKg || product.pricePerUnit) : variantPrice;
+      <div class="modal-price-row">
+        <div class="modal-unit-price">
+          <bdi class="amount">{{ unitPrice | number:'1.0-2' }}</bdi>
+          <span class="currency">{{ currencySymbol }}</span>
+          @if (isWeighedProduct) { <span class="price-unit">{{ languageService.text('لكل كجم', 'per kg') }}</span> }
+          @if (product.originalPrice && product.originalPrice > unitPrice) {
+            <del class="price-unit">{{ product.originalPrice | number:'1.0-2' }} {{ currencySymbol }}</del>
+          }
+        </div>
+        <span class="modal-stock" [class.available]="product.isAvailable">
+          <i class="bi" [class.bi-check2]="product.isAvailable" [class.bi-x-circle]="!product.isAvailable" aria-hidden="true"></i>
+          {{ product.isAvailable ? languageService.text('متوفر', 'In stock') : languageService.text('غير متوفر', 'Out of stock') }}
+        </span>
+      </div>
       <app-product-commerce [product]="product" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>
       <!-- Written Specifications / Description Card with View More Action -->
       @if (product.description) {
@@ -217,11 +222,11 @@
                 </span>
               </div>
               <div class="stepper-box">
-                <button type="button" class="btn-step" (click)="changePieces(-1)" [disabled]="piecesCount <= 1" aria-label="تقليل">
+                <button type="button" class="btn-step" aria-label="تقليل الكمية" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
                   <i class="bi bi-dash-lg"></i>
                 </button>
                 <span class="step-value">{{ piecesCount }}</span>
-                <button type="button" class="btn-step" (click)="changePieces(1)" aria-label="زيادة">
+                <button type="button" class="btn-step" aria-label="زيادة الكمية" (click)="changePieces(1)">
                   <i class="bi bi-plus-lg"></i>
                 </button>
               </div>
@@ -258,18 +263,18 @@
         </div>
       } @else {
         <!-- Fixed Quantity Counter -->
-        <div class="config-card">
+        <div class="config-card fixed-quantity">
           <div class="stepper-row flex-between">
             <div class="stepper-title-wrap">
               <span class="stepper-main-title">الكمية المطلوبة</span>
               <span class="stepper-sub-title">اختر عدد الوحدات المراد طلبها</span>
             </div>
             <div class="stepper-box">
-              <button type="button" class="btn-step" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
+              <button type="button" class="btn-step" aria-label="تقليل الكمية" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
                 <i class="bi bi-dash-lg"></i>
               </button>
               <span class="step-value">{{ piecesCount }}</span>
-              <button type="button" class="btn-step" (click)="changePieces(1)">
+              <button type="button" class="btn-step" aria-label="زيادة الكمية" (click)="changePieces(1)">
                 <i class="bi bi-plus-lg"></i>
               </button>
             </div>
@@ -395,11 +400,12 @@
     </div>
 
     <!-- Sticky Luxury Modal Footer -->
-    <div class="modal-footer-lux">
+    @if (settingsService.settings().storeLayout?.onlineOrdering !== false) {
+<div class="modal-footer-lux">
       <div class="footer-price-summary">
         <span class="summary-caption">الإجمالي:</span>
         <div class="summary-amount">
-          <span class="amount-val">{{ calculatedEstimatedTotal }}</span>
+          <span class="amount-val">{{ calculatedEstimatedTotal | number:'1.0-2' }}</span>
           <span class="amount-curr">{{ currencySymbol }}</span>
         </div>
       </div>
@@ -419,6 +425,7 @@
         }
       </button>
     </div>
+    }
   </div>
 
   <!-- Dedicated Full Specifications Modal (Opens on clicking "عرض المزيد") -->

@@ -936,3 +936,13 @@
 .luxury-hero-card .hero-title, .luxury-hero-card .hero-title .gold-text, .luxury-hero-card .hero-subtitle { color: var(--hero-text-color, #fff); }
 
 @media(max-width:767px){.products-grid,.popular-section .products-grid-2col{grid-template-columns:repeat(var(--mobile-product-columns,2),minmax(0,1fr));}}
+
+.product-detail-loading { position: fixed; inset-inline: 16px; bottom: 76px; z-index: 1041; width: fit-content; margin-inline: auto; padding: 10px 16px; border-radius: var(--radius-control, 10px); color: var(--text-main); background: var(--card-bg, #fff); box-shadow: var(--shadow-card); }
+
+.category-loading-row { display: flex; gap: 12px; overflow: hidden; }
+.category-loading-row .category-icon-box,
+.category-loading-label { background: color-mix(in srgb, var(--primary-color, #52697e) 9%, var(--card-bg, #fff)); }
+.category-loading-label { display: block; width: 52px; height: 10px; border-radius: 8px; margin-inline: auto; }
+
+img.image-pending { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) { img[appImageReveal] { transition: opacity .22s ease-out; } }

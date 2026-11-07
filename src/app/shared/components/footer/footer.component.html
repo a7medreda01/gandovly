@@ -9,7 +9,7 @@
             [alt]="settingsService.settings().restaurantName" class="footer-logo-img" />
           }
           <div class="brand-texts">
-            <h3 class="restaurant-name">{{ settingsService.settings().restaurantName }}</h3>
+            @if(settingsService.settings().storeLayout?.showFooterStoreName !== false){<h3 class="restaurant-name">{{ settingsService.settings().restaurantName }}</h3>}
             <p class="brand-sub">{{ settingsService.settings().tagline || 'منصة التجارة الشاملة - كافة المنتجات والطلبات بأعلى جودة' }}</p>
           </div>
         </a>

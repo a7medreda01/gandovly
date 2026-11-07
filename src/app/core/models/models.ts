@@ -264,6 +264,7 @@ export interface Product {
  commerce?:ProductCommerce;
   version?: string;
  variants?: ProductVariant[];
+ variantStartingPrice?: number | null;
   id: number;
   categoryId: number;
   categoryNameAr?: string;

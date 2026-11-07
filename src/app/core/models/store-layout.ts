@@ -1,4 +1,6 @@
 export interface HomeSectionItem {
+    titleEn?: string;
+    textEn?: string;
     title: string;
     text: string;
     icon: string;
@@ -6,6 +8,10 @@ export interface HomeSectionItem {
     link: string;
 }
 export interface HomeSection {
+    titleEn?: string;
+    subtitleEn?: string;
+    eyebrowEn?: string;
+    buttonTextEn?: string;
     id: string;
     kind: 'hero' | 'products' | 'banner' | 'features' | 'brands' | 'categories';
     enabled: boolean;
@@ -27,12 +33,28 @@ export interface HomeSection {
     items: HomeSectionItem[];
 }
 export interface StoreLayout {
+    homeTitleEn?: string;
+    homeSubtitleEn?: string;
+    homeButtonTextEn?: string;
+    homeCategoriesTitleEn?: string;
+    homeFeaturedTitleEn?: string;
+    homeCategoryGridTitleEn?: string;
     mobileColumns: number;
     cardImageFit: 'cover' | 'contain';
     cardImagePadding: number;
     cardImageRadius: number;
     cardImageAspect: 'square' | 'portrait' | 'landscape';
     detailImageFit: 'cover' | 'contain';
+    onlineOrdering?: boolean;
+    guestCheckout?: boolean;
+    showFooterStoreName?: boolean;
+    navbarLogoWidth?: number;
+    navbarLogoHeight?: number;
+    footerLogoWidth?: number;
+    footerLogoHeight?: number;
+    modalImageHeight?: number;
+    orderNumberMode?: 'random' | 'continuous' | 'daily' | 'weekly' | 'monthly' | null;
+    orderNumberStart?: number;
     useCustomHome: boolean;
     sections: HomeSection[];
 }

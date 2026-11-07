@@ -1,21 +1,24 @@
-@if(settingsService.settings().storeLayout?.useCustomHome){<app-home-sections></app-home-sections>}@else{
+@if (loadingSettings()) {
+  <app-home-skeleton />
+} @else if (settingsService.settings().storeLayout?.useCustomHome){<app-home-sections></app-home-sections>}@else{
+@let layout = settingsService.settings().storeLayout;
 <div class="home-container">
   <!-- 1. Hero Promo Banner (Full Width on Mobile) -->
   @if (settingsService.settings().showHeroBanner) {
   <section class="hero-banner-section">
     <div class="luxury-hero-card" [style.--hero-text-color]="settingsService.settings().heroTextColor || '#FFFFFF'">
-      <img
+      <img appImageReveal
         [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl) | imageUrl:'banner'"
         [alt]="settingsService.settings().restaurantName || 'منصة التجارة الشاملة'" class="hero-bg-img"
         fetchpriority="high" />
       <div class="hero-content-overlay">
         <div class="hero-texts">
           <h1 class="hero-title">
-            <span class="gold-text">{{ settingsService.settings().restaurantName }}</span>
+            <span class="gold-text">{{ languageService.text(settingsService.settings().restaurantName, layout?.homeTitleEn) }}</span>
           </h1>
-          <p class="hero-subtitle">{{ settingsService.settings().description || 'تسوق كافة المنتجات والطلبات بأفضل جودة وأسرع توصيل لباب منزلك' }}</p>
+          <p class="hero-subtitle">{{ languageService.text(settingsService.settings().description || 'تسوق كافة المنتجات والطلبات بأفضل جودة وأسرع توصيل لباب منزلك', layout?.homeSubtitleEn || 'Explore our products and shop online.') }}</p>
           <a routerLink="/menu" class="btn-hero-cta">
-            <span>تسوق الآن</span>
+            <span>{{ languageService.text('تسوق الآن', layout?.homeButtonTextEn || 'Shop now') }}</span>
             <i class="bi bi-arrow-left"></i>
           </a>
         </div>
@@ -35,7 +38,7 @@
       <!-- Search Capsule on Left (2nd child in RTL) -->
       <div class="search-capsule">
         <i class="bi bi-search search-icon"></i>
-        <input type="search" class="search-input" aria-label="البحث في منتجات المتجر" placeholder="ابحث عن منتج أو علامة تجارية" [ngModel]="searchQuery()"
+        <input type="search" class="search-input" [attr.aria-label]="languageService.text('البحث في منتجات المتجر', 'Search the store')" [placeholder]="languageService.text('ابحث عن منتج أو علامة تجارية', 'Search for a product or brand')" [ngModel]="searchQuery()"
           (ngModelChange)="onSearchChange($event)" />
         @if (searchQuery()) {
         <button type="button" class="btn-clear-search" aria-label="مسح البحث" (click)="searchQuery.set(''); onSearchChange('')">
@@ -50,27 +53,34 @@
   @if (settingsService.settings().showCategoriesRow) {
   <section class="categories-row-section container">
     <div class="categories-header-mini">
-      <span class="categories-mini-title"><i class="bi bi-grid-3x3-gap-fill text-primary me-1"></i> تسوق حسب القسم</span>
-      <a routerLink="/menu" class="categories-see-all">عرض الكل ({{ catalogService.categories().length }})</a>
+      <span class="categories-mini-title"><i class="bi bi-grid-3x3-gap-fill text-primary me-1"></i> {{ languageService.text('تسوق حسب القسم', layout?.homeCategoriesTitleEn || 'Shop by category') }}</span>
+      <a routerLink="/menu" class="categories-see-all">{{ languageService.text('عرض الكل', 'View all') }} ({{ catalogService.categories().length }})</a>
     </div>
+    @if (loadingCategories()) {
+      <div class="category-loading-row" aria-hidden="true">
+        @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+          <div class="category-item"><span class="category-icon-box"></span><span class="category-loading-label"></span></div>
+        }
+      </div>
+    } @else {
     <div class="categories-scroll-wrapper">
       <button type="button" class="btn-cat-nav prev" (click)="scrollCategories(-240)" aria-label="السابق" title="السابق">
         <i class="bi bi-chevron-right"></i>
       </button>
-      <div class="categories-scroll" dir="rtl" #catScrollContainer>
+      <div class="categories-scroll" [dir]="languageService.isRtl() ? 'rtl' : 'ltr'" #catScrollContainer>
         <!-- "الكل" Card (Selected by default) -->
         <button type="button" class="category-item" [class.active]="selectedCategoryId() === null" [attr.aria-pressed]="selectedCategoryId() === null" (click)="selectCategory(null)">
           <div class="category-icon-box box-all">
             <i class="bi bi-grid-fill"></i>
           </div>
-          <span class="category-label">جميع الأصناف</span>
+          <span class="category-label">{{ languageService.text('جميع الأصناف', 'All products') }}</span>
         </button>
 
         <!-- Categories from Backend API -->
         @for (cat of displayedCategories; track cat.id) {
         <button type="button" class="category-item" [class.active]="selectedCategoryId() === cat.id" [attr.aria-pressed]="selectedCategoryId() === cat.id" (click)="selectCategory(cat.id)">
           <div class="category-icon-box">
-            <img [src]="cat.imageUrl | imageUrl:'category':cat.id:cat.nameAr" [alt]="cat.nameAr" class="category-img" loading="lazy" (error)="$any($event.target).src = '/assets/images/categories/rice-pasta.png'" />
+            <img appImageReveal [src]="cat.imageUrl | imageUrl:'category':cat.id:cat.nameAr" [alt]="languageService.getLocalizedName(cat)" class="category-img" loading="lazy" (error)="$any($event.target).src = '/assets/images/categories/rice-pasta.png'" />
           </div>
           <span class="category-label" [title]="languageService.getLocalizedName(cat)">{{ languageService.getLocalizedName(cat) }}</span>
         </button>
@@ -80,15 +90,16 @@
         <i class="bi bi-chevron-left"></i>
       </button>
     </div>
+    }
   </section>
   }
 
   <!-- 4. "الأكثر طلباً" Section (2-Column Grid Matching Screenshot) -->
   <section class="popular-section container">
     <div class="section-heading-row">
-      <h2 class="section-title">{{ searchQuery() ? 'نتائج البحث' : 'منتجات مختارة' }}</h2>
+      <h2 class="section-title">{{ searchQuery() ? languageService.text('نتائج البحث', 'Search results') : languageService.text('منتجات مختارة', layout?.homeFeaturedTitleEn || 'Featured products') }}</h2>
       <a routerLink="/menu" class="see-all-btn">
-        <span>عرض الكل</span>
+        <span>{{ languageService.text('عرض الكل', 'View all') }}</span>
         <i class="bi bi-chevron-left"></i>
       </a>
     </div>
@@ -127,24 +138,30 @@
   <section class="categories-visual-section container">
     <div class="section-heading-row">
       <div class="header-titles">
-        <span class="sub-label">تصفح الكتالوج</span>
-        <h2 class="section-title">أقسام وتصنيفات المتجر</h2>
+        <span class="sub-label">{{ languageService.text('تصفح الكتالوج', 'Browse the catalog') }}</span>
+        <h2 class="section-title">{{ languageService.text('أقسام وتصنيفات المتجر', layout?.homeCategoryGridTitleEn || 'Product categories') }}</h2>
       </div>
       <a routerLink="/menu" class="see-all-btn">
-        <span>كل الأقسام</span>
+        <span>{{ languageService.text('كل الأقسام', 'All categories') }}</span>
         <i class="bi bi-chevron-left"></i>
       </a>
     </div>
 
     <div class="categories-compact-grid">
+      @if (loadingCategories()) {
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="cat-compact-card" aria-hidden="true"><span class="cat-icon-round"></span><span class="category-loading-label"></span></div>
+        }
+      } @else {
       @for (cat of displayedCategories; track cat.id) {
       <a [routerLink]="['/menu']" [queryParams]="{category: cat.id, page: null, search: null, product: null}" queryParamsHandling="merge" class="cat-compact-card">
         <div class="cat-icon-round">
-          <img [src]="cat.imageUrl | imageUrl:'category':cat.id:cat.nameAr" [alt]="cat.nameAr" class="cat-grid-thumb" loading="lazy" (error)="$any($event.target).src = '/assets/images/categories/rice-pasta.png'" />
+          <img appImageReveal [src]="cat.imageUrl | imageUrl:'category':cat.id:cat.nameAr" [alt]="languageService.getLocalizedName(cat)" class="cat-grid-thumb" loading="lazy" (error)="$any($event.target).src = '/assets/images/categories/rice-pasta.png'" />
         </div>
         <span class="cat-card-title">{{ languageService.getLocalizedName(cat) }}</span>
       </a>
       }
+    }
     </div>
   </section>
   }
@@ -176,3 +193,5 @@
 </div>
 
 }
+
+@if(loadingProductDetail()){<div class="product-detail-loading" role="status">جاري تحميل تفاصيل المنتج…</div>}

@@ -145,3 +145,6 @@
 }
 
 .product-card-skeleton{border-radius:var(--radius-product-card,18px)}.skeleton-media{height:auto;aspect-ratio:var(--product-image-aspect,1 / 1)}
+
+.product-card-skeleton { background: var(--card-bg, #fff); }
+@media (prefers-reduced-motion: reduce) { .shimmer { animation: none; } }

@@ -68,7 +68,18 @@
   } @else if (settings()) {
 
     <!-- TAB 1: Discounts & Promotions -->
-    @if(activeTab()==='layout'){<app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
+    @if(activeTab()==='layout'){
+@if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
+<section class="settings-card"><h3>نصوص الرئيسية بالإنجليزية</h3><div class="form-row">
+<label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
+<label class="form-group">وصف البانر<input type="text" dir="ltr" class="form-control" maxlength="600" [(ngModel)]="layoutOptions.homeSubtitleEn"></label>
+<label class="form-group">زر البانر<input type="text" dir="ltr" class="form-control" maxlength="60" [(ngModel)]="layoutOptions.homeButtonTextEn"></label>
+<label class="form-group">عنوان صف الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoriesTitleEn"></label>
+<label class="form-group">عنوان المنتجات المختارة<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeFeaturedTitleEn"></label>
+<label class="form-group">عنوان شبكة الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoryGridTitleEn"></label>
+</div></section>
+}
+<section class="settings-card"><h3>نافذة تفاصيل المنتج</h3><label class="form-group">ارتفاع مساحة الصورة بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="520" step="1" [(ngModel)]="layoutOptions.modalImageHeight"></label></section><app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
     @if(activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section>}
     @if (activeTab() === 'discounts') {
       <div class="tab-content animate-fade-in">
@@ -201,6 +212,13 @@
     <!-- TAB 2: BRANDING, VISUAL MEDIA & FULL UI CUSTOMIZATION 🎨✨ -->
     <!-- ========================================================= -->
     @if (activeTab() === 'branding') {
+      <section class="settings-card"><h3>أبعاد اللوجو</h3><p>الأبعاد بالبكسل. استخدم 0 للمقاس الافتراضي. تُعرض الصورة كاملة داخل المساحة المتاحة.</p>
+      <div class="form-row"><label class="form-group">عرض لوجو شريط التنقل<input class="form-control" type="number" min="0" max="240" step="1" [(ngModel)]="layoutOptions.navbarLogoWidth"></label>
+<label class="form-group">ارتفاع لوجو شريط التنقل<input class="form-control" type="number" min="0" max="100" step="1" [(ngModel)]="layoutOptions.navbarLogoHeight"></label>
+<label class="form-group">عرض لوجو التذييل<input class="form-control" type="number" min="0" max="320" step="1" [(ngModel)]="layoutOptions.footerLogoWidth"></label>
+<label class="form-group">ارتفاع لوجو التذييل<input class="form-control" type="number" min="0" max="160" step="1" [(ngModel)]="layoutOptions.footerLogoHeight"></label></div>
+      <label><input type="checkbox" [ngModel]="layoutOptions.showFooterStoreName !== false" (ngModelChange)="layoutOptions.showFooterStoreName=$event"> إظهار اسم المتجر في التذييل</label>
+      </section>
       <div class="tab-content animate-fade-in">
         
         <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
@@ -891,6 +909,40 @@
 
     <!-- TAB 3: Operating Policies & Weights -->
     @if (activeTab() === 'policies') {
+      <section class="settings-card">
+        <h3>ابدأ بإعدادات تناسب نشاطك</h3>
+        <p>القالب يجهّز نوع النشاط وطريقة عرض المنتج والكروت للمراجعة قبل الحفظ.</p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button type="button" class="btn-outline" (click)="applyStorePreset('clothing')">قالب الملابس</button>
+          <button type="button" class="btn-outline" (click)="applyStorePreset('supermarket')">قالب السوبر ماركت</button>
+        </div>
+        <ol>
+          <li>اضبط اسم المتجر واللوجو من «تصميم المتجر».</li>
+          <li><a routerLink="../catalog" queryParamsHandling="preserve">جهّز المنتجات</a> مع الألوان والمقاسات للملابس، أو سعر القطعة والوزن للسوبر ماركت.</li>
+          <li><a routerLink="../delivery-zones" queryParamsHandling="preserve">اضبط تغطية الشحن والرسوم</a> ثم راجع طرق الاستلام والدفع.</li>
+        </ol>
+      </section>
+      <section class="settings-card"><h3>الطلبات أونلاين</h3>
+        <div class="form-row">
+          <label class="form-group">ترقيم الطلبات
+            <select class="form-control" [(ngModel)]="layoutOptions.orderNumberMode">
+              <option [ngValue]="null">الترقيم اليومي الحالي</option>
+              <option value="random">رمز عشوائي (حروف وأرقام)</option>
+              <option value="continuous">تسلسل مستمر</option>
+              <option value="daily">تسلسل يومي</option>
+              <option value="weekly">تسلسل أسبوعي</option>
+              <option value="monthly">تسلسل شهري</option>
+            </select>
+          </label>
+          @if (layoutOptions.orderNumberMode && layoutOptions.orderNumberMode !== 'random') {
+            <label class="form-group">بداية التسلسل<input class="form-control" type="number" min="1" max="999999999" step="1" [ngModel]="layoutOptions.orderNumberStart ?? 400" (ngModelChange)="layoutOptions.orderNumberStart = $event ?? 400"></label>
+          }
+        </div>
+        <p>الترقيم الدوري يضيف تاريخ الفترة إلى الرقم. يبدأ الأسبوع يوم الاثنين. يسري الإعداد على الطلبات الجديدة.</p>
+        <label><input type="checkbox" [ngModel]="layoutOptions.onlineOrdering !== false" (ngModelChange)="layoutOptions.onlineOrdering=$event"> تفعيل السلة وإتمام الطلب</label>
+        <p>عند الإيقاف يظل الكتالوج متاحًا للتصفح وتظل الطلبات السابقة قابلة للمتابعة.</p>
+        <label><input type="checkbox" [ngModel]="layoutOptions.guestCheckout !== false" (ngModelChange)="layoutOptions.guestCheckout=$event" [disabled]="layoutOptions.onlineOrdering === false"> السماح بالطلب بدون تسجيل دخول</label>
+      </section>
       <div class="tab-content animate-fade-in">
         <div class="settings-card glass-panel">
           <h3 class="card-title"><i class="bi bi-shield-check text-primary me-2"></i> سياسات العمل والطلب والوزن التقديري</h3>

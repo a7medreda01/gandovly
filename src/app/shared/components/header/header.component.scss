@@ -859,7 +859,7 @@
 .main-header .account-btn, .main-header .cart-trigger-btn { border-radius: var(--radius-control, 12px); }
 .mobile-menu-content { border-radius: var(--radius-card, 16px) 0 0 var(--radius-card, 16px); background: var(--card-bg, #fff); color: var(--text-main); }
 .mobile-menu-content .link-title { color: var(--text-main); }
-@media (max-width: 767px) { .brand-logo .restaurant-logo-img.logo-only-mode { width: auto; max-width: 120px; height: 36px; border-radius: 0; object-fit: contain; } }
+@media (max-width: 767px) { .brand-logo .restaurant-logo-img.logo-only-mode { width: var(--navbar-logo-width, auto); max-width: min(120px, 30vw); height: var(--navbar-logo-height, 36px); border-radius: 0; object-fit: contain; } }
 
 /* Reference defaults; each component still follows its own saved setting. */
 .main-header { border-radius: var(--radius-navbar, 0px); }
@@ -930,3 +930,22 @@
   }
 }
 @media(prefers-reduced-motion:reduce) { .main-header .cart-trigger-btn.cart-bump { animation:none; } }
+
+.brand-logo .logo-circle-badge, .brand-logo .restaurant-logo-img {
+  width: var(--navbar-logo-width, 42px);
+  height: var(--navbar-logo-height, 42px);
+  max-width: min(240px, 32vw);
+  border-radius: var(--radius-control, 8px);
+  object-fit: contain;
+}
+.brand-logo .logo-circle-badge .restaurant-logo-img { width: 100%; height: 100%; }
+@media(max-width:767px) {
+  .brand-logo .logo-circle-badge, .brand-logo .restaurant-logo-img {
+    width: var(--navbar-logo-width, 34px);
+    height: var(--navbar-logo-height, 34px);
+    max-width: min(120px, 30vw);
+  }
+}
+
+.header-actions .header-language { font-size: 12px; }
+@media (max-width: 767px) { .header-actions .header-language { display: none; } }

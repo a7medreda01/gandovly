@@ -1,4 +1,4 @@
-@if (cartService.isDrawerOpen()) {
+@if (cartService.isDrawerOpen() && settingsService.settings().storeLayout?.onlineOrdering !== false) {
   <div class="drawer-backdrop" (click)="cartService.closeDrawer()">
     <div class="drawer-panel" appStoreDialog aria-label="سلة طلباتك" (dialogDismiss)="cartService.closeDrawer()" (click)="$event.stopPropagation()">
       <!-- Mobile Drag Handle -->

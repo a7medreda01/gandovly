@@ -118,6 +118,16 @@ export class SettingsService {
     root.style.setProperty('--product-image-padding',String(layout?.cardImagePadding||0)+'px');
     root.style.setProperty('--product-image-radius',(layout?.cardImageRadius??-1)<0?'var(--radius-product-card)':layout!.cardImageRadius+'px');
     root.style.setProperty('--product-image-aspect',layout?.cardImageAspect==='portrait'?'3 / 4':layout?.cardImageAspect==='landscape'?'4 / 3':'1 / 1');
+    if (layout?.navbarLogoWidth) root.style.setProperty('--navbar-logo-width', layout.navbarLogoWidth + 'px');
+    else root.style.removeProperty('--navbar-logo-width');
+    if (layout?.navbarLogoHeight) root.style.setProperty('--navbar-logo-height', layout.navbarLogoHeight + 'px');
+    else root.style.removeProperty('--navbar-logo-height');
+    if (layout?.footerLogoWidth) root.style.setProperty('--footer-logo-width', layout.footerLogoWidth + 'px');
+    else root.style.removeProperty('--footer-logo-width');
+    if (layout?.footerLogoHeight) root.style.setProperty('--footer-logo-height', layout.footerLogoHeight + 'px');
+    else root.style.removeProperty('--footer-logo-height');
+    if (layout?.modalImageHeight) root.style.setProperty('--modal-image-height', layout.modalImageHeight + 'px');
+    else root.style.removeProperty('--modal-image-height');
     root.style.setProperty('--detail-image-fit',layout?.detailImageFit||'contain');
     if (settings.primaryColor) {
       root.style.setProperty('--primary-color', settings.primaryColor);

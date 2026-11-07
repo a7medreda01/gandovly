@@ -63,10 +63,11 @@
   }
 
   .footer-logo-img {
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    object-fit: cover;
+    width: var(--footer-logo-width, 46px);
+    height: var(--footer-logo-height, 46px);
+    max-width: 100%;
+    border-radius: var(--radius-control, 8px);
+    object-fit: contain;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
     border: 2px solid rgba(244, 162, 97, 0.4);
     flex-shrink: 0;

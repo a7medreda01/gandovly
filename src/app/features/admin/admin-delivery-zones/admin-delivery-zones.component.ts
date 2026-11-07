@@ -46,7 +46,7 @@ export class AdminDeliveryZonesComponent implements OnInit {
   zoneForm = {
     id: 0,
     name: '',
-    city: 'الرياض',
+    city: '',
     parentZoneId: null as number | null,
     level: 'Sub' as 'Macro' | 'Sub' | 'Micro',
     neighborhoodKeywords: '',
@@ -59,6 +59,24 @@ export class AdminDeliveryZonesComponent implements OnInit {
 
   ngOnInit() {
     this.loadZones();
+  }
+
+  readonly importingGovernorates = signal(false);
+
+  addEgyptGovernorates() {
+    if (this.importingGovernorates()) return;
+    this.importingGovernorates.set(true);
+    this.adminService.addEgyptGovernorates().subscribe({
+      next: count => {
+        this.importingGovernorates.set(false);
+        this.toast.success(count ? 'تمت إضافة ' + count + ' محافظة غير مفعّلة.' : 'كل المحافظات موجودة بالفعل.');
+        this.loadZones();
+      },
+      error: error => {
+        this.importingGovernorates.set(false);
+        this.toast.error(error?.error?.message || 'تعذرت إضافة المحافظات. حاول مرة أخرى.');
+      }
+    });
   }
 
   loadZones() {
@@ -74,7 +92,7 @@ export class AdminDeliveryZonesComponent implements OnInit {
     this.zoneForm = {
       id: 0,
       name: '',
-      city: 'الرياض',
+      city: this.settingsService.settings().city || '',
       parentZoneId: null,
       level: 'Micro',
       neighborhoodKeywords: '',

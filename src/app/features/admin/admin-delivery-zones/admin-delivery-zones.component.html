@@ -13,6 +13,15 @@
     </button>
   </div>
 
+  @if (settingsService.settings().countryCode === 'EG') {
+    <section class="zones-card glass-panel governorate-preset">
+      <h2>الشحن بين محافظات مصر</h2>
+      <p>أضف المحافظات الناقصة، ثم اضبط الرسوم وفعّل المحافظات اللي بتشحن لها.</p>
+      <button type="button" class="btn-primary" (click)="addEgyptGovernorates()" [disabled]="importingGovernorates()">
+        {{ importingGovernorates() ? 'جاري الإضافة…' : 'إضافة محافظات مصر' }}
+      </button>
+    </section>
+  }
   @if (isLoading()) {
     <app-loading-state
       mode="table"

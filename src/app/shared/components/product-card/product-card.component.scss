@@ -53,3 +53,8 @@
 .product-card .product-real-img { display: block; width: 100%; height: 100%; max-height: none; object-fit: cover; border-radius: inherit; }
 
 .product-card .card-media{height:auto;aspect-ratio:var(--product-image-aspect,1 / 1);padding:0;background:var(--card-bg,#fff)}.product-card .product-img-wrapper{inset:var(--product-image-padding,0px);width:auto;height:auto;border-radius:var(--product-image-radius,var(--radius-product-card,18px))}.product-card .product-real-img{object-fit:var(--product-image-fit,cover)}.card-media:hover .product-real-img{transform:none}
+
+img.image-pending { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) { img[appImageReveal] { transition: opacity .22s ease-out; } }
+
+.product-card .product-img-wrapper { background: color-mix(in srgb, var(--primary-color, #52697e) 6%, var(--card-bg, #fff)); }

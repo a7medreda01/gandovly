@@ -1,7 +1,8 @@
+import { defaultStoreLayout } from '../../../core/models/store-layout';
 import { StoreLayoutEditorComponent } from './store-layout-editor.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { CommerceService } from '../../../core/services/commerce.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
@@ -19,7 +20,7 @@ import { PhoneInputComponent } from '../../../shared/components/phone-input/phon
 @Component({
   selector: 'app-admin-settings',
   standalone: true,
-  imports: [StoreLayoutEditorComponent,CommonModule, FormsModule, ImageUrlPipe, LoadingStateComponent, PhoneInputComponent],
+  imports: [RouterLink, StoreLayoutEditorComponent,CommonModule, FormsModule, ImageUrlPipe, LoadingStateComponent, PhoneInputComponent],
   templateUrl: './admin-settings.component.html',
   styleUrl: './admin-settings.component.scss'
 })
@@ -192,6 +193,28 @@ export class AdminSettingsComponent implements OnInit {
       },
       error: () => this.isLoading.set(false)
     });
+  }
+
+  applyStorePreset(preset: 'clothing' | 'supermarket') {
+    const current = this.settings();
+    if (!current) return;
+    this.settings.set({
+      ...current,
+      defaultDomain: preset === 'clothing' ? 'GeneralRetail' : 'Supermarket',
+      productDetailViewMode: preset === 'clothing' ? 'page' : 'modal',
+      storeLayout: {
+        ...(current.storeLayout ?? defaultStoreLayout()),
+        cardImageAspect: preset === 'clothing' ? 'portrait' : 'square',
+        detailImageFit: 'contain',
+        mobileColumns: 2
+      }
+    });
+    this.toast.info('تم تجهيز الإعدادات للمراجعة. اضغط حفظ لتطبيقها.');
+  }
+
+  get layoutOptions() {
+    const settings = this.settings()!;
+    return settings.storeLayout ??= defaultStoreLayout();
   }
 
   saveSettings(section?: string, silent = false) {

@@ -7,10 +7,10 @@ import { SettingsService } from '../../../core/services/settings.service';
   selector: 'app-mobile-bottom-nav', standalone: true, imports: [RouterModule],
   template: `
 
-      <nav class="store-bottom-nav" [class.compact]="compact()" aria-label="التنقل في المتجر">
+      <nav class="store-bottom-nav" [class.compact]="compact()" [style.grid-template-columns]="settings.settings().storeLayout?.onlineOrdering === false ? 'repeat(3,minmax(0,1fr))' : null" aria-label="التنقل في المتجر">
         <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{exact: true}"><i class="bi bi-house-door" aria-hidden="true"></i><span>الرئيسية</span></a>
         <a routerLink="/menu" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-grid" aria-hidden="true"></i><span>{{ settings.settings().labelProducts || 'المنتجات' }}</span></a>
-        <button type="button" (click)="cart.toggleDrawer()" [attr.aria-label]="'السلة، ' + cart.totalItemsCount() + ' منتج'"><span class="cart-icon"><i class="bi bi-bag" aria-hidden="true"></i>@if(cart.totalItemsCount() && settings.settings().showCartBadge !== false) { <b>{{cart.totalItemsCount()}}</b> }</span><span>{{ settings.settings().labelCart || 'السلة' }}</span></button>
+        @if(settings.settings().storeLayout?.onlineOrdering !== false){<button type="button" (click)="cart.toggleDrawer()" [attr.aria-label]="'السلة، ' + cart.totalItemsCount() + ' منتج'"><span class="cart-icon"><i class="bi bi-bag" aria-hidden="true"></i>@if(cart.totalItemsCount() && settings.settings().showCartBadge !== false) { <b>{{cart.totalItemsCount()}}</b> }</span><span>{{ settings.settings().labelCart || 'السلة' }}</span></button>}
         <a routerLink="/account" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-person" aria-hidden="true"></i><span>{{ settings.settings().labelOrders || 'حسابي' }}</span></a>
       </nav>
   `,

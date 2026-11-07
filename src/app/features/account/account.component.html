@@ -1,42 +1,50 @@
 <div class="account-page container">@if(inquiries.length){<section class="guest-orders-panel"><h2>طلبات المعاينة والعروض على هذا الجهاز</h2>@for(i of inquiries;track i.id){<button type="button" class="guest-order-row" (click)="trackedInquiryToken=i.token">طلب #{{i.id}} — {{i.action}} — {{i.status}}</button>}</section>}<app-order-commerce [inquiryToken]="trackedInquiryToken"></app-order-commerce>
   @if (!authService.currentCustomer()) {
-    <section class="guest-orders-panel"><h1>طلباتك على هذا الجهاز</h1><p>طلبات الضيف الخاصة بهذا المتجر. احتفظ برابط المتابعة؛ تغيير الجهاز أو مسح بيانات المتصفح قد يخفي القائمة.</p><button type="button" class="btn-outline" (click)="loadGuestOrders()" [disabled]="guestOrdersLoading()">تحديث الحالات</button>
-    @if(guestOrdersLoading()){<p role="status">جارٍ تحميل الطلبات…</p>}
-    @if(guestOrdersError()){<p role="alert">تعذر تحديث بعض الطلبات. حاول مرة أخرى أو افتح رابط المتابعة المحفوظ.</p>}
-    @for(order of guestOrderList();track order.id){<button class="guest-order-row" type="button" (click)="openOrderDetails(order)"><span>طلب #{{order.orderNumber}}<small>{{order.createdAt|date:'short'}}</small></span><span>{{getStatusLabel(order.status)}}</span><strong>{{order.finalTotal ?? order.estimatedTotal}} {{currencySymbol}}</strong></button><a class="guest-track-link" [href]="guestTrackingUrl(order)">رابط متابعة الطلب #{{order.orderNumber}}</a>}
-    @if(!guestOrdersLoading()&&!guestOrderList().length){<p>لا توجد طلبات محفوظة على هذا الجهاز بعد.</p>}
+    <section class="guest-orders-panel guest-orders-list">
+      <header class="guest-orders-heading">
+        <div><h1>طلباتي</h1><p>تابع الطلبات المحفوظة على هذا الجهاز.</p></div>
+        <button type="button" class="guest-refresh" aria-label="تحديث حالة الطلبات" (click)="loadGuestOrders()" [disabled]="guestOrdersLoading()">
+          <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+        </button>
+      </header>
+      @if (guestOrdersLoading()) { <p role="status">جاري تحميل الطلبات…</p> }
+      @if (guestOrdersError()) { <p role="alert">تعذر تحديث بعض الطلبات. حاول التحديث مرة تانية.</p> }
+      @for (order of guestOrderList(); track order.id) {
+        <article class="guest-order-card">
+          <button class="guest-order-hit" type="button" (click)="openOrderDetails(order)" [attr.aria-label]="'تفاصيل الطلب ' + order.orderNumber"></button>
+          <div class="guest-order-top">
+            <div><strong>طلب <bdi>#{{ order.orderNumber }}</bdi></strong><small>{{ order.createdAt | date:'mediumDate' }} · {{ order.createdAt | date:'shortTime' }}</small></div>
+            <span class="guest-order-status">{{ getStatusLabel(order.status) }}</span>
+          </div>
+          <div class="guest-order-actions">
+            <strong class="guest-order-total"><bdi>{{ (order.finalTotal ?? order.estimatedTotal) | number:'1.0-2' }}</bdi> {{ currencySymbol }}</strong>
+            <a class="guest-track-link" [href]="guestTrackingUrl(order)">رابط المتابعة</a>
+            <i class="bi bi-chevron-left guest-order-arrow" aria-hidden="true"></i>
+          </div>
+        </article>
+      }
+      @if (!guestOrdersLoading() && !guestOrdersError() && !guestOrderList().length) {
+        <div class="guest-orders-empty"><i class="bi bi-receipt" aria-hidden="true"></i><p>لسه مفيش طلبات على الجهاز ده.</p><a routerLink="/menu">تصفح المنتجات</a></div>
+      }
+      @if (guestOrderList().length) { <p class="guest-orders-hint">احتفظ برابط المتابعة عشان تفتح الطلب من أي جهاز.</p> }
     </section>
     <!-- Guest Must Authenticate with Mobile Phone -->
-    <details class="guest-account-login"><summary>تسجيل الدخول لعرض حسابك على أجهزة أخرى</summary><div class="guest-auth-card animate-fade-in">
-      <div class="auth-header text-center">
-        <div class="auth-pill-tag">
-          <i class="bi bi-shield-check text-success"></i>
-          <span>حسابك في المتجر</span>
-        </div>
-
-        <div class="auth-icon-badge">
-          @if (!isOtpSent()) {
-            <i class="bi bi-shield-lock-fill"></i>
-          } @else {
-            <i class="bi bi-chat-square-dots-fill"></i>
-          }
-        </div>
-
-        @if (!isOtpSent()) {
-          <h1 class="page-title">تسجيل الدخول إلى حسابك</h1>
-          <p class="page-subtitle">سجل برقم هاتفك لمتابعة طلباتك الحالية، تكرار مشترياتك المفضلة، وحفظ عناوينك الدائمة</p>
-
-          <div class="auth-perks-row">
-            <span class="auth-perk-item"><i class="bi bi-box-seam text-primary"></i> تتبع فوري</span>
-            <span class="auth-perk-item"><i class="bi bi-lightning-charge-fill text-warning"></i> بدون كلمة سر</span>
-            <span class="auth-perk-item"><i class="bi bi-whatsapp text-success"></i> كود واتساب</span>
-          </div>
-        } @else {
-          <h1 class="page-title">رمز التحقق السريع</h1>
-          <p class="page-subtitle">أدخل الرمز المكون من 6 أرقام لتأكيد رقم هاتفك والبدء فوراً</p>
-        }
-      </div>
-
+    <button type="button" class="guest-login-trigger" (click)="showGuestLogin.set(true)">
+      <i class="bi bi-person" aria-hidden="true"></i> تسجيل الدخول
+    </button>
+    @if (showGuestLogin()) {
+      <div class="modal-backdrop" (click)="showGuestLogin.set(false)">
+        <section class="guest-auth-card guest-login-dialog" appStoreDialog aria-label="تسجيل الدخول"
+          (dialogDismiss)="showGuestLogin.set(false)" (click)="$event.stopPropagation()">
+          <header class="guest-login-header">
+            <div>
+              <h2>{{ isOtpSent() ? 'رمز التحقق' : 'تسجيل الدخول' }}</h2>
+              <p>{{ isOtpSent() ? 'أدخل الرمز المكوّن من ٦ أرقام.' : 'هيوصلك رمز دخول على واتساب.' }}</p>
+            </div>
+            <button type="button" class="guest-refresh" aria-label="إغلاق" (click)="showGuestLogin.set(false)">
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+          </header>
       <div class="auth-box-body">
         @if (!isOtpSent()) {
           <div class="auth-form">
@@ -45,7 +53,7 @@
                 <span>
                   <i class="bi bi-phone-fill me-1 text-primary"></i> رقم الهاتف المحمول
                 </span>
-                <span class="required-badge">مطلوب</span>
+
               </label>
 
               <app-phone-input
@@ -54,11 +62,6 @@
                 (enterPressed)="sendOtp()"
                 [autoFocus]="true"
               ></app-phone-input>
-
-              <div class="auth-input-hint-box mt-2">
-                <i class="bi bi-whatsapp text-success fs-6"></i>
-                <span>سنرسل رمز تحقق إلى رقمك عبر واتساب لتأكيد الدخول.</span>
-              </div>
             </div>
 
             <button class="btn-auth-submit" (click)="sendOtp()" [disabled]="isLoading() || !phoneNumber.trim()">
@@ -80,7 +83,7 @@
             <!-- Modern Phone Notice Card -->
             <div class="phone-info-card mb-3">
               <div class="phone-info-text">
-                <span class="phone-info-label">رقم الهاتف المطلوب تأكيده:</span>
+                <span class="phone-info-label">رقم الهاتف</span>
                 <strong class="phone-info-number" dir="ltr">{{ phoneNumber }}</strong>
               </div>
               <button class="btn-change-phone" (click)="changePhone()" type="button" title="تعديل رقم الهاتف">
@@ -136,24 +139,11 @@
                 </button>
               </div>
 
-              <div class="otp-boxes-grid" dir="ltr" (paste)="onOtpPaste($event)">
-                @for (digit of otpDigits; track $index) {
-                  <input
-                    type="text"
-                    inputmode="numeric"
-                    maxlength="1"
-                    pattern="[0-9]*"
-                    autocomplete="one-time-code"
-                    class="otp-digit-box"
-                    [id]="'digit_' + $index"
-                    [attr.aria-label]="'الرقم ' + ($index + 1) + ' من رمز التحقق'"
-                    [value]="otpDigits[$index]"
-                    (input)="onDigitInput($event, $index)"
-                    (keydown)="onDigitKeyDown($event, $index)"
-                    placeholder="-"
-                  />
-                }
-              </div>
+              <input type="text" class="form-control text-center" inputmode="numeric"
+                autocomplete="one-time-code" dir="ltr" maxlength="6"
+                aria-label="رمز التحقق المكون من ستة أرقام"
+                [ngModel]="otpCode" (ngModelChange)="setDigitsFromCode($event)"
+                (keyup.enter)="verifyOtp()" />
 
               <!-- 30s Countdown & Resend Button -->
               <div class="resend-countdown-row text-center mt-3">
@@ -189,7 +179,9 @@
           </div>
         }
       </div>
-    </div></details>
+        </section>
+      </div>
+    }
   } @else {
     <!-- Logged in Customer Portal -->
     <div class="profile-layout animate-fade-in">
@@ -279,7 +271,7 @@
                         <i class="bi bi-eye"></i>
                         <span>التفاصيل والتتبع</span>
                       </button>
-                      <button class="btn-reorder-icon" type="button" (click)="$event.stopPropagation(); reorder(ord)" title="تكرار الطلب">
+                      <button [hidden]="settingsService.settings().storeLayout?.onlineOrdering === false" class="btn-reorder-icon" type="button" (click)="$event.stopPropagation(); reorder(ord)" title="تكرار الطلب">
                         <i class="bi bi-arrow-repeat"></i>
                       </button>
                     </div>
@@ -435,17 +427,18 @@
   @if (selectedOrder()) {
     <div class="modal-backdrop" (click)="closeOrderDetails()">
       <div class="order-details-modal glass-panel animate-scale-up" appStoreDialog aria-label="تفاصيل الطلب وتتبعه" (dialogDismiss)="closeOrderDetails()" (click)="$event.stopPropagation()">
-        <app-order-commerce [order]="selectedOrder()"></app-order-commerce>
+
         <!-- Modal Header -->
         <div class="modal-header flex-between">
           <div>
-            <span class="modal-subtitle text-muted small d-block">تفاصيل ومراحل الطلب</span>
+            <span class="modal-subtitle text-muted small d-block">تفاصيل الطلب</span>
             <h3 class="modal-title mb-0" dir="ltr">#{{ selectedOrder()!.orderNumber }}</h3>
           </div>
           <button class="btn-close-modal" (click)="closeOrderDetails()" type="button" aria-label="إغلاق">✕</button>
         </div>
 
         <div class="modal-body py-3">
+          <app-order-commerce [order]="selectedOrder()"></app-order-commerce>
           <!-- Status Banner -->
           <div class="status-banner mb-3" [ngClass]="'status-banner-' + selectedOrder()!.status.toLowerCase()">
             <div class="d-flex align-items-center justify-content-between">
@@ -488,14 +481,14 @@
           <div class="modal-info-tile mb-3">
             <i class="bi bi-geo-alt-fill text-danger fs-5 me-2"></i>
             <div>
-              <span class="tile-label d-block text-muted small">عنوان التوصيل</span>
+              <span class="tile-label d-block text-muted small">{{ selectedOrder()!.orderType === 'Pickup' ? 'طريقة الاستلام' : 'عنوان التوصيل' }}</span>
               <strong class="tile-val">{{ selectedOrder()!.deliveryAddress || selectedOrder()!.deliveryZoneName || 'استلام من الفرع' }}</strong>
             </div>
           </div>
 
           <!-- Order Items List -->
           <div class="modal-items-section mb-3">
-            <h5 class="items-title mb-2"><i class="bi bi-basket2 me-1 text-primary"></i> الأصناف المطلوبة ({{ selectedOrder()!.orderLines.length }}):</h5>
+            <h5 class="items-title mb-2"><i class="bi bi-basket2 me-1 text-primary"></i> الأصناف ({{ selectedOrder()!.orderLines.length }})</h5>
             <div class="items-list-box">
               @for (line of selectedOrder()!.orderLines; track line.id) {
                 <div class="item-detail-row">
@@ -511,7 +504,7 @@
                       }
                     </div>
                   </div>
-                  <strong class="item-price">{{ line.finalLineTotal || line.estimatedLineTotal }} {{ currencySymbol }}</strong>
+                  <strong class="item-price">{{ line.finalLineTotal ?? line.estimatedLineTotal }} {{ currencySymbol }}</strong>
                 </div>
               }
             </div>
@@ -521,7 +514,7 @@
           <div class="price-summary-box mb-2">
             <div class="summary-line">
               <span>إجمالي الأصناف:</span>
-              <span>{{ selectedOrder()!.finalSubtotal || selectedOrder()!.estimatedSubtotal }} {{ currencySymbol }}</span>
+              <span>{{ selectedOrder()!.finalSubtotal ?? selectedOrder()!.estimatedSubtotal }} {{ currencySymbol }}</span>
             </div>
             @if (selectedOrder()!.deliveryFee > 0) {
               <div class="summary-line">
@@ -530,8 +523,8 @@
               </div>
             }
             <div class="summary-line total-line">
-              <strong>المبلغ الإجمالي:</strong>
-              <strong class="total-number">{{ selectedOrder()!.finalTotal || selectedOrder()!.estimatedTotal }} {{ currencySymbol }}</strong>
+              <strong>إجمالي الطلب</strong>
+              <strong class="total-number">{{ selectedOrder()!.finalTotal ?? selectedOrder()!.estimatedTotal }} {{ currencySymbol }}</strong>
             </div>
           </div>
         </div>
@@ -541,8 +534,8 @@
           <button class="btn-modal-close" (click)="closeOrderDetails()" type="button">
             إغلاق
           </button>
-          <button class="btn-modal-reorder" (click)="reorder(selectedOrder()!); closeOrderDetails()" type="button">
-            <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i> إضافة الطلب للسلة
+          <button [hidden]="settingsService.settings().storeLayout?.onlineOrdering === false" class="btn-modal-reorder" (click)="reorder(selectedOrder()!); closeOrderDetails()" type="button">
+            <i class="bi bi-arrow-repeat me-1" aria-hidden="true"></i> إعادة الطلب
           </button>
         </div>
       </div>

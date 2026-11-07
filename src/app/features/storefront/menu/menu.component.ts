@@ -1,3 +1,5 @@
+import { LanguageService } from '../../../core/services/language.service';
+import { NotificationService } from '../../../core/services/notification.service';
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -43,6 +45,9 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   isLoadingMore = signal<boolean>(false);
   loadError = signal(false);
   private productsRequest?: Subscription;
+  private productDetailRequest?: Subscription;
+  private readonly productNotice = inject(NotificationService);
+  readonly loadingProductDetail = signal(false);
   private searchSubscription?: Subscription;
   private routeSubscription?: Subscription;
 
@@ -90,7 +95,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     this.setupIntersectionObserver();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy() { this.productDetailRequest?.unsubscribe();
     this.productsRequest?.unsubscribe(); this.searchSubscription?.unsubscribe(); this.routeSubscription?.unsubscribe();
     if (this.observer) {
       this.observer.disconnect();
@@ -160,6 +165,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.productsRequest = this.catalogService.getProducts({
+      cardsOnly: true,
       categoryId: this.selectedCatId(),
       search: this.searchTerm,
       page: this.pageIndex(),
@@ -232,15 +238,28 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  readonly language = inject(LanguageService);
+
   get selectedCategoryName(): string {
     const catId = this.selectedCatId();
     if (catId === null) return 'جميع المنتجات والأصناف';
     const cat = this.catalogService.categories().find(c => c.id === catId);
-    return cat ? cat.nameAr : 'الأصناف';
+    return cat ? this.language.getLocalizedName(cat) : this.language.text('الأصناف', 'Products');
   }
 
   openProductModal(product: Product) {
-    this.selectedProductForModal.set(product);
+    this.productDetailRequest?.unsubscribe();
+    this.loadingProductDetail.set(true);
+    this.productDetailRequest = this.catalogService.getProductById(product.id).subscribe({
+      next: details => {
+        this.loadingProductDetail.set(false);
+        this.selectedProductForModal.set(details);
+      },
+      error: () => {
+        this.loadingProductDetail.set(false);
+        this.productNotice.error('تعذر تحميل تفاصيل المنتج. حاول مرة أخرى.');
+      }
+    });
   }
 
   closeProductModal() {

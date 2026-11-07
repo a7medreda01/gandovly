@@ -1,4 +1,6 @@
-@if (cartService.items().length === 0) {
+@if (settingsService.settings().storeLayout?.onlineOrdering === false) {
+  <section class="checkout-empty container"><h1>الطلب أونلاين متوقف حاليًا</h1><a routerLink="/menu">تصفح المنتجات</a></section>
+} @else if (cartService.items().length === 0) {
   <section class="checkout-empty container">
     <i class="bi bi-bag" aria-hidden="true"></i>
     <h1>سلتك فارغة</h1><p>أضف المنتجات التي تحتاجها، ثم أكمل بيانات طلبك هنا.</p>
@@ -23,9 +25,7 @@
               <i class="bi bi-check-circle-fill me-1"></i> مسجل ({{ authService.currentCustomer()?.fullName }})
             </span>
           } @else {
-            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-0.5 small">
-              <i class="bi bi-whatsapp me-1"></i> ضيف أو تأكيد بالواتساب
-            </span>
+            <button type="button" class="btn-link-action" (click)="openCheckoutLogin()">تسجيل الدخول</button>
           }
         </div>
 
@@ -41,7 +41,7 @@
             />
           </div>
           <div class="form-group flex-1">
-            <label for="cPhone">رقم الهاتف (واتساب) *</label>
+            <label for="cPhone">رقم الموبايل *</label>
             <app-phone-input
               inputId="cPhone"
               [(ngModel)]="customerPhone"
@@ -330,25 +330,7 @@
           ملخص الطلب
         </h3>
 
-        <!-- Items Mini List -->
-        <div class="summary-items-list">
-          @for (item of cartService.items(); track item.id) {
-            <div class="summary-item-row flex-between">
-              <div class="item-name-box">
-                <span class="name">{{ item.product.nameAr }} (×{{ item.quantityUnits }})</span>
-                @if (item.selectedPrepOption) {
-                  <small class="prep"><i class="bi bi-gear-fill me-1"></i> {{ item.selectedPrepOption.nameAr }}</small>
-                }
-              </div>
-              <div class="item-meta-box">
-                @if (item.product.pricingType === 'ByWeight' && item.estimatedWeightGrams) {
-                  <span class="weight-approx">≈ {{ item.estimatedWeightGrams }} جم / وحدة</span>
-                }
-                <span class="price">{{ item.estimatedLineTotal }} {{ currencySymbol }}</span>
-              </div>
-            </div>
-          }
-        </div>
+        <ng-container [ngTemplateOutlet]="orderItems" />
 
         <hr class="divider" />
 
@@ -388,7 +370,7 @@
 
             <div class="t-row flex-between grand-total">
               <span>المجموع الكلي:</span>
-              <span class="total-val">{{ serverQuote()!.estimatedTotal }} {{ currencySymbol }}</span>
+              <span class="checkout-price"><bdi>{{ serverQuote()!.estimatedTotal | number:'1.0-2' }}</bdi> <small>{{ currencySymbol }}</small></span>
             </div>
           </div>
         }
@@ -418,7 +400,7 @@
           @if (isSubmitting()) {
             <span><i class="bi bi-hourglass-split me-1"></i> جاري تجهيز الطلب...</span>
           } @else {
-            <span>{{ settingsService.settings().checkoutSubmitBtnText || 'تأكيد الطلب' }}</span>
+            <span>{{ !authService.currentCustomer() && settingsService.settings().storeLayout?.guestCheckout === false ? 'سجّل الدخول للمتابعة' : (settingsService.settings().checkoutSubmitBtnText || 'مراجعة الطلب') }} @if(serverQuote()){ · {{serverQuote()!.estimatedTotal}} {{currencySymbol}} }</span>
             <i class="bi bi-arrow-left ms-2"></i>
           }
         </button>
@@ -439,11 +421,11 @@
           <span>التحقق السريع عبر واتساب</span>
         </div>
         @if (authStep() === 'info') {
-          <h3 class="modal-title">متابعة الطلب</h3>
-          <p class="modal-sub">تابع كضيف بدون كود، أو أكد رقمك عبر واتساب للدخول إلى حسابك.</p>
+          <h3 class="modal-title">تسجيل الدخول</h3>
+          <p class="modal-sub">أدخل رقم موبايلك لاستلام رمز التحقق على واتساب.</p>
         } @else {
           <h3 class="modal-title">أدخل رمز التحقق (OTP)</h3>
-          <p class="modal-sub">أرسلنا كود التحقق المكون من 6 أرقام إلى رقم واتساب الخاص بك: <strong>{{ authPhone }}</strong></p>
+          <p class="modal-sub">رمز التحقق على رقم: <strong>{{ authPhone }}</strong></p>
         }
         <button type="button" class="btn-close-modal" aria-label="إغلاق" (click)="closeAuthModal()">
           <i class="bi bi-x-lg"></i>
@@ -536,7 +518,7 @@
                 </button>
               </div>
               <input
-                id="mOtp"
+                id="mOtp" inputmode="numeric" autocomplete="one-time-code"
                 type="text"
                 maxlength="6"
                 dir="ltr"
@@ -577,213 +559,68 @@
             </div>
           </div>
         }
-        <div class="guest-checkout-option"><button type="button" class="btn-outline w-100" (click)="continueAsGuest()" [disabled]="isRequestingOtp() || isVerifyingOtp()"><i class="bi bi-person"></i> المتابعة كضيف بدون كود</button><p>لا يتم تسجيل دخولك أو فتح طلبات سابقة. ستحفظ متابعة هذا الطلب على هذا الجهاز، ويمكنك فتحه برابطه الخاص.</p></div>
+        @if (settingsService.settings().storeLayout?.guestCheckout !== false) {
+          <button type="button" class="btn-link-action w-100 mt-3" (click)="closeAuthModal()">كمّل كضيف</button>
+        }
       </div>
     </div>
   </div>
 }
 
 <!-- ========================================================= -->
-<!-- MODAL 2: Order Confirmation & Summary Modal               -->
-<!-- ========================================================= -->
-@if (showConfirmModal()) {
-  <div class="modal-backdrop animate-fade-in" (click)="closeConfirmModal()">
-    <div class="confirm-order-modal" appStoreDialog aria-label="مراجعة الطلب وتأكيده" (dialogDismiss)="closeConfirmModal()" (click)="$event.stopPropagation()">
-      <button type="button" class="btn-close-modal" (click)="closeConfirmModal()" aria-label="إغلاق">
-        <i class="bi bi-x-lg"></i>
-      </button>
 
-      <div class="confirm-modal-header">
-        <div class="badge-review-status">
-          <i class="bi bi-shield-check"></i>
-          <span>مراجعة وتأكيد الطلب النهائي</span>
-        </div>
-        <h2 class="confirm-modal-title">هل تريد تأكيد إرسال الطلب؟</h2>
-        <p class="confirm-modal-subtitle">يرجى مراجعة تفاصيل المنتجات وعنوان التوصيل قبل تأكيد الطلب</p>
-      </div>
-
-      <div class="confirm-modal-body">
-        <!-- 1. Customer & Order Details Card -->
-        <div class="modal-card-box customer-details-card">
-          @if (customerName || authService.currentCustomer()?.fullName) {
-            <div class="card-detail-row">
-              <div class="row-label-side">
-                <div class="icon-avatar blue"><i class="bi bi-person-fill"></i></div>
-                <span class="label-text">العميل</span>
-              </div>
-              <div class="row-value-side">
-                {{ customerName || authService.currentCustomer()?.fullName }}
-              </div>
-            </div>
-          }
-
-          <div class="card-detail-row">
-            <div class="row-label-side">
-              <div class="icon-avatar green"><i class="bi bi-telephone-fill"></i></div>
-              <span class="label-text">الجوال</span>
-            </div>
-            <div class="row-value-side" dir="ltr">
-              {{ customerPhone || authService.currentCustomer()?.usernameOrPhone }}
-            </div>
-          </div>
-
-          <div class="card-detail-row">
-            <div class="row-label-side">
-              <div class="icon-avatar amber"><i class="bi bi-truck"></i></div>
-              <span class="label-text">طريقة الاستلام</span>
-            </div>
-            <div class="row-value-side">
-              {{ orderType === 'Delivery' ? 'توصيل للعنوان' : 'استلام من الفرع' }}
-            </div>
-          </div>
-
-          @if (orderType === 'Delivery') {
-            <div class="card-detail-row address-row">
-              <div class="row-label-side">
-                <div class="icon-avatar red"><i class="bi bi-geo-alt-fill"></i></div>
-                <span class="label-text">عنوان التوصيل</span>
-                @if (selectedZone?.name || resolvedZoneName()) {
-                  <span class="zone-badge-pill ms-auto" [title]="selectedZone?.name || resolvedZoneName()">
-                    {{ getShortZoneName(selectedZone?.name || resolvedZoneName()) }}
-                  </span>
+<ng-template #orderItems>
+        <!-- Items Mini List -->
+        <div class="summary-items-list">
+          @for (item of cartService.items(); track item.id) {
+            <div class="summary-item-row flex-between">
+              <img class="summary-item-thumb" [src]="(item.selectedVariant?.images?.[0] || item.product.imageUrl) | imageUrl:'product'" alt="" width="44" height="44" loading="lazy">
+              <div class="item-name-box">
+                <span class="name">{{ item.product.nameAr }} (×{{ item.quantityUnits }})</span>
+                @if (item.selectedPrepOption) {
+                  <small class="prep"><i class="bi bi-gear-fill me-1"></i> {{ item.selectedPrepOption.nameAr }}</small>
                 }
               </div>
-              <div class="row-value-side address-text">
-                {{ streetAddress || fullFormattedAddress }}
-              </div>
-            </div>
-          }
-
-          @if (prepTimingType() === 'Scheduled' && scheduledDisplaySummary()) {
-            <div class="card-detail-row">
-              <div class="row-label-side">
-                <div class="icon-avatar purple"><i class="bi bi-calendar-check-fill"></i></div>
-                <span class="label-text">موعد التوصيل</span>
-              </div>
-              <div class="row-value-side text-primary">
-                {{ scheduledDisplaySummary() }}
-              </div>
-            </div>
-          }
-
-          @if (notes.trim()) {
-            <div class="card-detail-row">
-              <div class="row-label-side">
-                <div class="icon-avatar blue-soft"><i class="bi bi-chat-text-fill"></i></div>
-                <span class="label-text">ملاحظات</span>
-              </div>
-              <div class="row-value-side notes-text">
-                {{ notes }}
+              <div class="item-meta-box">
+                @if (item.product.pricingType === 'ByWeight' && item.estimatedWeightGrams) {
+                  <span class="weight-approx">≈ {{ item.estimatedWeightGrams }} جم / وحدة</span>
+                }
+                <span class="checkout-price"><bdi>{{ item.estimatedLineTotal | number:'1.0-2' }}</bdi> <small>{{ currencySymbol }}</small></span>
               </div>
             </div>
           }
         </div>
 
-        <!-- 2. Items Details & Calculations Card -->
-        <div class="modal-card-box items-details-card">
-          <div class="items-card-header">
-            <div class="header-right">
-              <div class="icon-avatar blue"><i class="bi bi-basket3-fill"></i></div>
-              <span class="header-title">تفاصيل المنتجات والأصناف</span>
-            </div>
-            <span class="header-count">{{ cartService.items().length }} أصناف مختارة</span>
-          </div>
+</ng-template>
 
-          <div class="items-list-container">
-            @for (item of cartService.items(); track item.id) {
-              <div class="item-entry-row">
-                <div class="entry-right">
-                  <img [src]="item.product.imageUrl | imageUrl:'product'" [alt]="item.product.nameAr" class="entry-img" />
-                  <div class="entry-info">
-                    <span class="entry-name">{{ item.product.nameAr }}</span>@if(item.selectedVariant){<small class="variant-summary">{{item.selectedVariant.color}} / {{item.selectedVariant.size}}</small>}
-                    @if (item.selectedPrepOption) {
-                      <span class="entry-prep"><i class="bi bi-gear-fill text-primary"></i> {{ item.selectedPrepOption.nameAr }}</span>
-                    }
-                    @if (item.product.pricingType === 'ByWeight' && (item.customWeightGrams || item.estimatedWeightGrams)) {
-                      <span class="entry-weight">≈ {{ item.customWeightGrams || item.estimatedWeightGrams }} جم / وحدة</span>
-                    }
-                    @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
-                      <span class="entry-mods">الخيارات: {{ getModifiersSummary(item) }}</span>
-                    }
-                  </div>
-                </div>
-                <div class="entry-qty">
-                  ×{{ item.quantityUnits }}
-                  <span class="text-primary ms-1 small fw-bold">({{ item.estimatedLineTotal }} {{ currencySymbol }})</span>
-                </div>
-              </div>
-            }
-          </div>
-
-          <div class="calc-divider"></div>
-
-          <div class="calc-section">
-            @if (serverQuote()) {
-              <div class="calc-row">
-                <span class="calc-lbl">إجمالي المنتجات:</span>
-                <span class="calc-val">{{ serverQuote()!.estimatedSubtotal }} {{ currencySymbol }}</span>
-              </div>
-
-              @if (orderType === 'Delivery') {
-                <div class="calc-row">
-                  <span class="calc-lbl">رسوم التوصيل والشحن:</span>
-                  <span class="calc-val">
-                    @if (serverQuote()!.isFreeDelivery || serverQuote()!.deliveryFee === 0) {
-                      مجاناً
-                    } @else {
-                      {{ serverQuote()!.deliveryFee }} {{ currencySymbol }}
-                    }
-                  </span>
-                </div>
-              }
-
-              @if (serverQuote()!.discountAmount > 0) {
-                <div class="calc-row text-success">
-                  <span class="calc-lbl">الخصم المطبق:</span>
-                  <span class="calc-val">- {{ serverQuote()!.discountAmount }} {{ currencySymbol }}</span>
-                </div>
-              }
-
-              <div class="calc-row total-calc-row">
-                <span class="total-lbl">الإجمالي النهائي للطلب:</span>
-                <span class="calc-total-amount">{{ serverQuote()!.estimatedTotal }} {{ currencySymbol }}</span>
-              </div>
-            }
-          </div>
-        </div>
-
-        <!-- Safety & Quality Notice -->
-        <div class="weight-disclaimer-alert">
-          <i class="bi bi-shield-check me-1 text-success fs-5"></i>
-          جميع المنتجات أصلية وتخضع لأعلى معايير الجودة والسلامة والتغليف الصحي الآمن.
-        </div>
-
-        <!-- 3. Actions -->
-        <div class="confirm-modal-actions">
-          <button
-            type="button"
-            class="btn-confirm-order-submit"
-            (click)="confirmAndSubmitOrder()"
-            [disabled]="isSubmitting()"
-          >
-            @if (isSubmitting()) {
-              <i class="bi bi-hourglass-split me-2"></i> جاري تأكيد وإرسال الطلب...
-            } @else {
-              <i class="bi bi-check-circle-fill me-2 fs-5"></i> تأكيد وإرسال الطلب
-            }
-          </button>
-
-          <button
-            type="button"
-            class="btn-modify-order-action"
-            (click)="closeConfirmModal()"
-            [disabled]="isSubmitting()"
-          >
-            <i class="bi bi-pencil-square me-1"></i> تعديل بيانات الطلب
-          </button>
-        </div>
+@if (showOrderReview()) {
+  <div class="modal-backdrop order-review-backdrop" (click)="closeOrderReview()">
+    <section class="order-review-dialog" appStoreDialog aria-label="مراجعة الطلب"
+      (dialogDismiss)="closeOrderReview()" (click)="$event.stopPropagation()">
+      <header class="order-review-header">
+        <div><h2>مراجعة الطلب</h2><p>راجع الأصناف وبيانات الاستلام قبل التأكيد.</p></div>
+        <button type="button" class="order-review-close" aria-label="إغلاق" (click)="closeOrderReview()" [disabled]="isSubmitting()">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div class="order-review-body">
+        <ng-container [ngTemplateOutlet]="orderItems" />
+        <dl class="order-review-details">
+          <div><dt>العميل</dt><dd>{{ customerName }} · <bdi>{{ customerPhone }}</bdi></dd></div>
+          <div><dt>الاستلام</dt><dd>{{ orderType === 'Delivery' ? fullFormattedAddress : (requiresDelivery ? 'استلام من الفرع' : 'طلب بدون توصيل') }}</dd></div>
+          <div><dt>الدفع</dt><dd>{{ paymentLabels[paymentMethod] }}</dd></div>
+        </dl>
+        @if (serverQuote(); as quote) {
+          <div class="order-review-total"><span>إجمالي الطلب</span><span class="checkout-price"><bdi>{{ quote.estimatedTotal | number:'1.0-2' }}</bdi> <small>{{ currencySymbol }}</small></span></div>
+        }
       </div>
-    </div>
+      <footer class="order-review-actions">
+        <button type="button" class="order-review-edit" (click)="closeOrderReview()" [disabled]="isSubmitting()">تعديل البيانات</button>
+        <button type="button" class="order-review-confirm" (click)="confirmAndSubmitOrder()" [disabled]="isSubmitting() || isCalculatingQuote() || !serverQuote()?.meetsMinimumOrder">
+          {{ isSubmitting() ? 'جاري تأكيد الطلب…' : 'تأكيد الطلب' }}
+        </button>
+      </footer>
+    </section>
   </div>
 }
 

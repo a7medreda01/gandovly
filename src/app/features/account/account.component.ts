@@ -64,10 +64,10 @@ export class AccountComponent implements OnInit, OnDestroy {
   phoneNumber: string = '';
   otpCode: string = '';
   fullName: string = '';
+  readonly showGuestLogin = signal(false);
   isOtpSent = signal<boolean>(false);
   isLoading = signal<boolean>(false);
   resendCountdown = signal<number>(30);
-  otpDigits: string[] = ['', '', '', '', '', ''];
   fallbackOtpCode = signal<string | null>(null);
   otpNoticeMessage = signal<string>('');
   otpFailureCount = signal<number>(0);
@@ -382,11 +382,7 @@ export class AccountComponent implements OnInit, OnDestroy {
   }
 
   setDigitsFromCode(code: string) {
-    const chars = code.split('').slice(0, 6);
-    for (let i = 0; i < 6; i++) {
-      this.otpDigits[i] = chars[i] || '';
-    }
-    this.otpCode = code;
+    this.otpCode = code.replace(/\D/g, '').slice(0, 6);
   }
 
   useFallbackCode() {
@@ -418,57 +414,13 @@ export class AccountComponent implements OnInit, OnDestroy {
   changePhone() {
     this.isOtpSent.set(false);
     this.otpCode = '';
-    this.otpDigits = ['', '', '', '', '', ''];
     this.fallbackOtpCode.set(null);
     this.otpNoticeMessage.set('');
   }
 
-  onDigitInput(event: any, index: number) {
-    const val = (event.target as HTMLInputElement).value;
-    if (val) {
-      const clean = val.replace(/\D/g, '');
-      this.otpDigits[index] = clean.slice(-1);
-      (event.target as HTMLInputElement).value = this.otpDigits[index];
-      if (index < 5 && clean) {
-        const nextInput = document.getElementById(`digit_${index + 1}`) as HTMLInputElement;
-        if (nextInput) nextInput.focus();
-      }
-    } else {
-      this.otpDigits[index] = '';
-    }
-    this.otpCode = this.otpDigits.join('');
-  }
-
-  onDigitKeyDown(event: KeyboardEvent, index: number) {
-    if (event.key === 'Backspace' && !this.otpDigits[index] && index > 0) {
-      const prevInput = document.getElementById(`digit_${index - 1}`) as HTMLInputElement;
-      if (prevInput) {
-        prevInput.focus();
-        this.otpDigits[index - 1] = '';
-        this.otpCode = this.otpDigits.join('');
-      }
-    }
-  }
-
-  onOtpPaste(event: ClipboardEvent) {
-    event.preventDefault();
-    const pasted = event.clipboardData?.getData('text') || '';
-    const clean = pasted.replace(/\D/g, '').slice(0, 6);
-    if (!clean) return;
-
-    for (let i = 0; i < 6; i++) {
-      this.otpDigits[i] = clean[i] || '';
-      const input = document.getElementById(`digit_${i}`) as HTMLInputElement;
-      if (input) input.value = this.otpDigits[i];
-    }
-    this.otpCode = this.otpDigits.join('');
-    const lastFilled = Math.min(clean.length, 5);
-    const targetInput = document.getElementById(`digit_${lastFilled}`) as HTMLInputElement;
-    if (targetInput) targetInput.focus();
-  }
-
   verifyOtp() {
-    if (!this.otpCode.trim()) {
+    if (this.isLoading()) return;
+    if (this.otpCode.length !== 6) {
       this.toast.error('يرجى إدخال رمز التحقق.');
       return;
     }
@@ -477,7 +429,8 @@ export class AccountComponent implements OnInit, OnDestroy {
     this.authService.verifyOtp(this.phoneNumber.trim(), this.otpCode.trim(), this.fullName.trim()).subscribe({
       next: (_res: unknown) => {
         this.isLoading.set(false);
-        this.toast.success('تم تسجيل الدخول بنجاح! مرحباً بك.');
+        this.showGuestLogin.set(false);
+        this.toast.success('تم تسجيل الدخول.');
         this.checkCurrentProfile();
         if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
       },

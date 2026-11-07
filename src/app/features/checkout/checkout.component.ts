@@ -1,4 +1,5 @@
-import { ChangeDetectorRef } from '@angular/core';import { finalize } from 'rxjs';
+import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
+import { ChangeDetectorRef } from '@angular/core';import { finalize, Subscription } from 'rxjs';
 import { CommerceService } from '../../core/services/commerce.service';
 import { MarketingPixelsService } from '../../core/services/marketing-pixels.service';
 import { GuestOrdersService } from '../../core/services/guest-orders.service';
@@ -20,14 +21,13 @@ import {
   PaymentMethod
 } from '../../core/models/models';
 
-import { ImageUrlPipe } from '../../shared/pipes/image-url.pipe';
 import { PhoneInputComponent } from '../../shared/components/phone-input/phone-input.component';
 import { StoreDialogDirective } from '../../shared/directives/store-dialog.directive';
 
 @Component({
   selector: 'app-checkout',
   standalone: true,
-  imports: [CommonModule, FormsModule, ImageUrlPipe, PhoneInputComponent, StoreDialogDirective, RouterLink],
+  imports: [ImageUrlPipe, CommonModule, FormsModule, PhoneInputComponent, StoreDialogDirective, RouterLink],
   templateUrl: './checkout.component.html',
   styleUrl: './checkout.component.scss'
 })
@@ -54,6 +54,12 @@ export class CheckoutComponent implements OnInit {
   customerPhone: string = '';
   orderType: OrderType = 'Delivery';
   paymentMethod: PaymentMethod = 'CashOnDelivery';
+  readonly paymentLabels: Record<PaymentMethod, string> = {
+    CashOnDelivery: 'الدفع عند الاستلام',
+    CardOnDelivery: 'بطاقة عند الاستلام',
+    OnlinePayment: 'الدفع الإلكتروني',
+    WalletTransfer: 'تحويل إلكتروني'
+  };
   get canPayByTransfer(): boolean {
     const settings = this.settingsService.settings();
     return settings.paymentEnableWalletTransfer !== false && Boolean(settings.vodafoneCashNumber?.trim() || settings.instaPayAccount?.trim());
@@ -121,7 +127,6 @@ export class CheckoutComponent implements OnInit {
   private timerInterval: any = null;
 
   // Order Confirmation Modal State
-  showConfirmModal = signal<boolean>(false);
 
   // Scheduled Order Timing State
   prepTimingType = signal<'Now' | 'Scheduled'>('Now');
@@ -268,7 +273,12 @@ export class CheckoutComponent implements OnInit {
     this.fetchQuote();
   }
 
+  private quoteRequest?: Subscription;
+  readonly showOrderReview = signal(false);
+
   fetchQuote() {
+    this.quoteRequest?.unsubscribe();
+    this.serverQuote.set(null);
     if (this.cartService.items().length === 0) return;
 
     this.isCalculatingQuote.set(true);
@@ -284,7 +294,7 @@ export class CheckoutComponent implements OnInit {
       specialInstructions: i.pipeMeters ? `${i.specialInstructions ? i.specialInstructions + ' | ' : ''}[خدمات إضافية: ${i.pipeMeters} وحدة]` : i.specialInstructions
     }));
 
-    this.orderService.calculateQuote({
+    this.quoteRequest = this.orderService.calculateQuote({
       orderType: this.orderType,
       deliveryZoneId: this.orderType === 'Delivery' ? (this.selectedZoneId ?? undefined) : undefined,
       items
@@ -381,13 +391,32 @@ export class CheckoutComponent implements OnInit {
   }
 
   // Initiates checkout validations and triggers Auth or Confirmation Modal
+  openCheckoutLogin() {
+    this.authFullName = this.customerName;
+    this.authPhone = this.customerPhone;
+    this.authOtpCode = '';
+    this.authStep.set('info');
+    this.showAuthModal.set(true);
+  }
+
   handleCheckoutClick() {
-    if(this.requiresPrescription&&!this.prescriptionToken){this.toast.error('ارفع الروشتة أولًا.');return;}
-    if (!this.hasPaymentMethod) { this.toast.error('لا توجد وسيلة دفع متاحة حاليًا. يرجى التواصل مع المتجر.'); return; }
-    if (!this.customerName.trim() && this.authService.currentCustomer()) {
-      this.toast.error('يرجى إدخال اسم العميل.');
+    if (this.isSubmitting() || this.settingsService.settings().storeLayout?.onlineOrdering === false) return;
+    const customer = this.authService.currentCustomer();
+    if (!customer && this.settingsService.settings().storeLayout?.guestCheckout === false) {
+      this.openCheckoutLogin();
       return;
     }
+    if (this.customerName.trim().length < 2 || this.customerName.trim().length > 100) {
+      this.toast.error('أدخل اسمك لإتمام الطلب.');
+      return;
+    }
+    if (!/^\+?[0-9]{8,15}$/.test(this.customerPhone.trim().replace(/[\s-]/g, ''))) {
+      this.toast.error('أدخل رقم هاتف صحيح للتواصل بشأن الطلب.');
+      return;
+    }
+    if(this.requiresPrescription&&!this.prescriptionToken){this.toast.error('ارفع الروشتة أولًا.');return;}
+    if (!this.hasPaymentMethod) { this.toast.error('لا توجد وسيلة دفع متاحة حاليًا. يرجى التواصل مع المتجر.'); return; }
+
 
     if (this.orderType === 'Delivery') {
       if (!this.streetAddress.trim()) {
@@ -406,32 +435,15 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    // If user is not logged in, prompt Auth/OTP modal first
-    if (!this.authService.currentCustomer()) {
-      this.authFullName = this.customerName;
-      this.authPhone = this.customerPhone;
-      this.authStep.set('info');
-      this.showAuthModal.set(true);
+    this.pixels.track('InitiateCheckout',{ids:this.cartService.items().map(i=>String(i.product.id)),value:this.cartService.estimatedSubtotal()});
+    if (!quote) {
+      if (!this.isCalculatingQuote()) this.fetchQuote();
+      this.toast.info('انتظر حساب الإجمالي قبل تأكيد الطلب.');
       return;
     }
-
-    // User is logged in -> Open Order Confirmation Modal
-    this.pixels.track('InitiateCheckout',{ids:this.cartService.items().map(i=>String(i.product.id)),value:this.cartService.estimatedSubtotal()});
-    this.showConfirmModal.set(true);
+    this.showOrderReview.set(true);
   }
 
-  continueAsGuest() {
-    if (this.isRequestingOtp() || this.isVerifyingOtp()) return;
-    const name = this.authFullName.trim();
-    const phone = this.authPhone.trim().replace(/[\s-]/g, '');
-    if (name.length < 2 || name.length > 100) { this.toast.error('أدخل اسمك لإتمام الطلب كضيف.'); return; }
-    if (!/^\+?[0-9]{8,15}$/.test(phone)) { this.toast.error('أدخل رقم هاتف صحيح للتواصل بشأن الطلب.'); return; }
-    this.customerName = name;
-    this.customerPhone = phone;
-    this.fallbackOtpCode.set(null);
-    this.showAuthModal.set(false);
-    this.showConfirmModal.set(true);
-  }
 
   // OTP Flow
   requestAuthOtp(isRetry: boolean = false) {
@@ -546,13 +558,12 @@ export class CheckoutComponent implements OnInit {
       next: (res) => {
         this.isVerifyingOtp.set(false);
         this.toast.success('تم تسجيل الدخول وتأكيد الحساب بنجاح ✅');
-        this.customerName = resolvedName || res.fullName || 'عميل شرق الوادي';
+        this.customerName = resolvedName || res.fullName || '';
         this.customerPhone = this.authPhone.trim();
         this.showAuthModal.set(false);
         this.loadSavedAddresses(res.userId || this.customerPhone);
         
-        // Directly transition to Order Confirmation Modal
-        this.showConfirmModal.set(true);
+
       },
       error: (err) => {
         this.isVerifyingOtp.set(false);
@@ -580,9 +591,6 @@ export class CheckoutComponent implements OnInit {
     this.showAuthModal.set(false);
   }
 
-  closeConfirmModal() {
-    this.showConfirmModal.set(false);
-  }
 
   // --- Scheduled Prep Flow ---
   openScheduleModal() {
@@ -659,7 +667,14 @@ export class CheckoutComponent implements OnInit {
   private readonly guestOrders=inject(GuestOrdersService);
 
   // Final Order Submission
+  closeOrderReview() {
+    if (!this.isSubmitting()) this.showOrderReview.set(false);
+  }
+
   confirmAndSubmitOrder() {
+    if (!this.showOrderReview() || !this.serverQuote()?.meetsMinimumOrder || this.isCalculatingQuote()) return;
+    if (this.isSubmitting() || this.settingsService.settings().storeLayout?.onlineOrdering === false) return;
+    if (!this.authService.currentCustomer() && this.settingsService.settings().storeLayout?.guestCheckout === false) return;
     if(this.requiresPrescription&&!this.prescriptionToken){this.toast.error('ارفع الروشتة أولًا.');return;}
     if (!this.hasPaymentMethod || (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer)) { this.toast.error('وسيلة الدفع المختارة غير متاحة.'); return; }
     this.isSubmitting.set(true);
@@ -694,6 +709,8 @@ export class CheckoutComponent implements OnInit {
         variantId: i.selectedVariant?.id,
         quantityUnits: i.quantityUnits,
         customWeightGrams: i.customWeightGrams,
+        bookingStartUtc: i.bookingStartUtc,
+        bookingEndUtc: i.bookingEndUtc,
         preparationOptionId: i.selectedPrepOption?.id,
         modifierOptionIds: i.selectedModifiers.map(m => m.id),
         pipeMeters: i.pipeMeters,
@@ -704,7 +721,8 @@ export class CheckoutComponent implements OnInit {
     this.orderService.createOrder(request).subscribe({
       next: (order: any) => {
         this.isSubmitting.set(false);
-        this.showConfirmModal.set(false);
+        this.showOrderReview.set(false);
+
         if (!this.authService.currentCustomer()) this.guestOrders.remember(order.publicTrackingToken);
         if(order.paymentStatus!=='Pending')this.pixels.track('Purchase',{orderId:String(order.id),ids:this.cartService.items().map(i=>String(i.product.id)),value:order.estimatedTotal,quantity:this.cartService.totalItemsCount()});
         this.cartService.clearCart();

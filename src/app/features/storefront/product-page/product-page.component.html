@@ -118,7 +118,7 @@
             <img
               [src]="currentImageUrl | imageUrl:'product':(product()!.updatedAt || product()!.id)"
               [alt]="product()!.nameAr"
-              class="hero-img"
+              class="hero-img" fetchpriority="high" decoding="async"
             />
             </button>
 
@@ -159,7 +159,7 @@
                   [class.active]="activeImageIndex === $index"
                   (click)="activeImageIndex = $index"
                 >
-                  <img [src]="img | imageUrl:'product'" [alt]="product()!.nameAr" />
+                  <img loading="lazy" decoding="async" [src]="img | imageUrl:'product'" [alt]="product()!.nameAr" />
                 </button>
               }
             </div>
@@ -170,16 +170,15 @@
       <!-- Product overview, options and purchase -->
       <div class="details-column">
         <div class="product-summary">
-          <div class="product-meta">@if(product()!.brand){<span class="brand-label">{{product()!.brand}}</span>}@if(product()!.sku){<bdi class="product-sku">SKU: {{product()!.sku}}</bdi>}</div>
+          @if (product()!.brand) { <div class="product-meta"><span class="brand-label">{{product()!.brand}}</span></div> }
           <h1 class="product-h1">{{languageService.getLocalizedName(product()!)}}</h1>
-          @if(product()!.nameEn&&product()!.nameEn!==product()!.nameAr){<p class="product-subtitle-en">{{product()!.nameEn}}</p>}
+          @if(languageService.isRtl() && product()!.nameEn&&product()!.nameEn!==product()!.nameAr){<p class="product-subtitle-en">{{product()!.nameEn}}</p>}
         @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
           <div class="summary-price-row">
             <div class="price-banner-box"><span class="price-val">{{(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)|number:'1.0-2'}}</span><span class="price-curr">{{currencySymbol}}</span>@if(isWeighedProduct){<span class="unit-label">لكل كجم</span>}@if(product()!.originalPrice&&product()!.originalPrice!>(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)){<del class="price-original">{{product()!.originalPrice}} {{currencySymbol}}</del>}</div>
-            <span class="stock-status-badge" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable"><i class="bi" [class.bi-check-circle]="product()!.isAvailable" [class.bi-x-circle]="!product()!.isAvailable" aria-hidden="true"></i>{{product()!.isAvailable?'متوفر للطلب':'غير متوفر حاليًا'}}</span>
+            <span class="stock-status" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable"><i class="bi" [class.bi-check2]="product()!.isAvailable" [class.bi-x-circle]="!product()!.isAvailable" aria-hidden="true"></i>{{ product()!.isAvailable ? languageService.text('متوفر', 'In stock') : languageService.text('غير متوفر', 'Out of stock') }}</span>
           </div>
         </div>
-        @if(product()!.description){<section class="description-panel"><h2>الوصف</h2><p class="product-description">{{product()!.description}}</p></section>}
 
         @if(product()!.commerce?.mode && product()!.commerce?.mode!=='Physical' || product()!.commerce?.prescriptionRequired){<app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>}
         <!-- Preparation Options -->
@@ -211,7 +210,7 @@
 
 
 @for(group of product()!.modifierGroups||[];track group.id){<section class="product-option-group"><header><h3>{{group.nameAr}}</h3><small>{{group.isRequired?'مطلوب':'اختياري'}} · حتى {{group.maxSelection}}</small></header><div class="product-option-list">@for(opt of group.options;track opt.id){<button type="button" [class.selected]="modifierSelected(group,opt)" [disabled]="!opt.isAvailable" [attr.aria-pressed]="modifierSelected(group,opt)" (click)="toggleModifier(group,opt)"><span>{{opt.nameAr}}</span>@if(opt.price){<bdi>+{{opt.price|number:'1.0-2'}} {{currencySymbol}}</bdi>}<i class="bi" [class.bi-check-circle-fill]="modifierSelected(group,opt)" [class.bi-circle]="!modifierSelected(group,opt)" aria-hidden="true"></i></button>}</div></section>}
-@if(product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
+@if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
         <div class="quantity-panel">
           <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> الكمية</h4>
 
@@ -308,10 +307,11 @@
               <span>تمت الإضافة بنجاح!</span>
             } @else {
               <i class="bi bi-cart-plus me-2"></i>
-              <span>إضافة إلى السلة</span>
+              <span>{{ languageService.text('إضافة إلى السلة', 'Add to cart') }}</span>
             }
           </button>
         </div></div>}
+@if(languageService.getLocalizedDesc(product()!)){<section class="description-panel"><h2>{{ languageService.text('الوصف', 'Description') }}</h2><p class="product-description">{{languageService.getLocalizedDesc(product()!)}}</p></section>}
 <details class="product-disclosure"><summary>ملاحظات للطلب <span>اختياري</span></summary>          <textarea
             class="product-notes-textarea"
             rows="2"
@@ -320,7 +320,7 @@
           ></textarea></details>        <!-- Specifications Table (if any) -->
         @if (parsedKeySpecs.length > 0) {
           <details class="product-disclosure">
-            <summary>المواصفات</summary>
+            <summary>{{ languageService.text('المواصفات', 'Specifications') }}</summary>
             <div class="specs-grid mt-2">
               @for (spec of parsedKeySpecs; track spec.label) {
                 <div class="spec-row flex-between py-2 border-bottom">
