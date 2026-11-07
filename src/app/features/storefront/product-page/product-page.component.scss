@@ -83,6 +83,8 @@
   @media (min-width: 992px) {
     position: sticky;
     top: 90px;
+    width: min(100%, 700px);
+    justify-self: center;
   }
 
   .gallery-main-card {
