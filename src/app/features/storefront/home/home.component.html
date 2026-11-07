@@ -31,7 +31,7 @@
   <section class="search-filter-section container" [class.no-hero]="!settingsService.settings().showHeroBanner">
     <div class="search-filter-row">
       <!-- Search Button on Right (1st child in RTL) -->
-      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null, category: null, page: null, product: null}" queryParamsHandling="merge" class="btn-filter-dark" [style.background]="(settingsService.isColorTooLight(settingsService.settings().primaryColor) ? (settingsService.settings().btnPrimaryBg || '#0a3d62') : settingsService.settings().primaryColor) || 'var(--primary-color)'" [style.color]="'#ffffff'" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
+      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null, category: null, page: null, product: null}" queryParamsHandling="merge" class="btn-filter-dark" [style.background]="settingsService.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
         <i class="bi bi-search"></i>
       </a>
 
@@ -178,7 +178,7 @@
 <!-- Customer Support Call Banner -->
 @if (!loadingSettings() && (settingsService.settings().showCustomerServiceBar ?? true) && settingsService.settings().phone) {
   <section class="hotline-card-section container mb-4">
-    <div class="hotline-card" [style.background]="'linear-gradient(135deg, ' + (settingsService.isColorTooLight(settingsService.settings().primaryColor) ? (settingsService.settings().btnPrimaryBg || '#0d2b45') : (settingsService.settings().primaryColor || 'var(--primary-color, #0d2b45)')) + ', #0f172a)'">
+    <div class="hotline-card">
       <div class="hotline-texts">
         <div class="hotline-title-row">
           <i class="bi bi-headset hotline-icon"></i>

@@ -102,26 +102,6 @@ export class SettingsService {
     return '18, 38, 63';
   }
 
-  isColorTooLight(hex?: string): boolean {
-    if (!hex) return false;
-    const clean = hex.replace('#', '').trim();
-    if (clean.length === 3) {
-      const r = parseInt(clean[0] + clean[0], 16);
-      const g = parseInt(clean[1] + clean[1], 16);
-      const b = parseInt(clean[2] + clean[2], 16);
-      if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
-      return (r * 299 + g * 587 + b * 114) / 1000 > 215;
-    }
-    if (clean.length >= 6) {
-      const r = parseInt(clean.substring(0, 2), 16);
-      const g = parseInt(clean.substring(2, 4), 16);
-      const b = parseInt(clean.substring(4, 6), 16);
-      if (isNaN(r) || isNaN(g) || isNaN(b)) return false;
-      return (r * 299 + g * 587 + b * 114) / 1000 > 215;
-    }
-    return false;
-  }
-
   applyCssThemeVariables(settings: StorefrontSettings) {
     if (typeof document === 'undefined') return;
     const root = document.documentElement;
@@ -149,20 +129,11 @@ export class SettingsService {
     if (layout?.modalImageHeight) root.style.setProperty('--modal-image-height', layout.modalImageHeight + 'px');
     else root.style.removeProperty('--modal-image-height');
     root.style.setProperty('--detail-image-fit',layout?.detailImageFit||'contain');
-    let primary = settings.primaryColor?.trim();
-    // Safety guard: A pure white or overly-bright primary color breaks contrast on buttons, active tabs, and cards
-    if (primary && this.isColorTooLight(primary)) {
-      primary = (settings.secondaryColor && !this.isColorTooLight(settings.secondaryColor))
-        ? settings.secondaryColor
-        : (settings.btnPrimaryBg && !this.isColorTooLight(settings.btnPrimaryBg))
-          ? settings.btnPrimaryBg
-          : '#0a3d62';
-    }
-    if (primary) {
-      root.style.setProperty('--primary-color', primary);
-      root.style.setProperty('--color-primary', primary);
-      root.style.setProperty('--bs-primary', primary);
-      root.style.setProperty('--primary-rgb', this.hexToRgb(primary));
+    if (settings.primaryColor) {
+      root.style.setProperty('--primary-color', settings.primaryColor);
+      root.style.setProperty('--color-primary', settings.primaryColor);
+      root.style.setProperty('--bs-primary', settings.primaryColor);
+      root.style.setProperty('--primary-rgb', this.hexToRgb(settings.primaryColor));
     }
     // Main text color should remain a clean neutral dark unless explicitly customized
     const textColor = settings.textColor || '#0f172a';
