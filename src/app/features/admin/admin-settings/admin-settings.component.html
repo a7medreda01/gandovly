@@ -212,13 +212,6 @@
     <!-- TAB 2: BRANDING, VISUAL MEDIA & FULL UI CUSTOMIZATION 🎨✨ -->
     <!-- ========================================================= -->
     @if (activeTab() === 'branding') {
-      <section class="settings-card"><h3>أبعاد اللوجو</h3><p>الأبعاد بالبكسل. استخدم 0 للمقاس الافتراضي. تُعرض الصورة كاملة داخل المساحة المتاحة.</p>
-      <div class="form-row"><label class="form-group">عرض لوجو شريط التنقل<input class="form-control" type="number" min="0" max="240" step="1" [(ngModel)]="layoutOptions.navbarLogoWidth"></label>
-<label class="form-group">ارتفاع لوجو شريط التنقل<input class="form-control" type="number" min="0" max="100" step="1" [(ngModel)]="layoutOptions.navbarLogoHeight"></label>
-<label class="form-group">عرض لوجو التذييل<input class="form-control" type="number" min="0" max="320" step="1" [(ngModel)]="layoutOptions.footerLogoWidth"></label>
-<label class="form-group">ارتفاع لوجو التذييل<input class="form-control" type="number" min="0" max="160" step="1" [(ngModel)]="layoutOptions.footerLogoHeight"></label></div>
-      <label><input type="checkbox" [ngModel]="layoutOptions.showFooterStoreName !== false" (ngModelChange)="layoutOptions.showFooterStoreName=$event"> إظهار اسم المتجر في التذييل</label>
-      </section>
       <div class="tab-content animate-fade-in">
         
         <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
@@ -271,6 +264,28 @@
                     </div>
                   </div>
                 </div>
+                <fieldset class="mt-3">
+                  <legend class="fs-6 fw-bold">أبعاد اللوجو</legend>
+                  <p class="text-muted small">الأبعاد بالبكسل. استخدم 0 للمقاس الافتراضي.</p>
+                  <div class="row g-2">
+                    <label class="col-6">عرض اللوجو في شريط التنقل
+                      <input class="form-control" type="number" min="0" max="240" step="1" [(ngModel)]="layoutOptions.navbarLogoWidth">
+                    </label>
+                    <label class="col-6">ارتفاع اللوجو في شريط التنقل
+                      <input class="form-control" type="number" min="0" max="100" step="1" [(ngModel)]="layoutOptions.navbarLogoHeight">
+                    </label>
+                    <label class="col-6">عرض اللوجو في التذييل
+                      <input class="form-control" type="number" min="0" max="320" step="1" [(ngModel)]="layoutOptions.footerLogoWidth">
+                    </label>
+                    <label class="col-6">ارتفاع اللوجو في التذييل
+                      <input class="form-control" type="number" min="0" max="160" step="1" [(ngModel)]="layoutOptions.footerLogoHeight">
+                    </label>
+                  </div>
+                  <label class="mt-2">
+                    <input type="checkbox" [ngModel]="layoutOptions.showFooterStoreName !== false" (ngModelChange)="layoutOptions.showFooterStoreName=$event">
+                    إظهار اسم المتجر في التذييل
+                  </label>
+                </fieldset>
               </div>
             </div>
 

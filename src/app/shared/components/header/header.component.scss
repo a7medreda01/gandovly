@@ -75,22 +75,10 @@
 .logo-circle-badge {
   width: 38px;
   height: 38px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1.5px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;
   flex-shrink: 0;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-
-  .restaurant-logo-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-  }
 }
 
 .brand-logo {
@@ -102,9 +90,7 @@
   .restaurant-logo-img {
     width: 42px;
     height: 42px;
-    border-radius: 50%;
-    object-fit: cover;
-    box-shadow: 0 2px 8px rgba(13, 43, 69, 0.15);
+    object-fit: contain;
     flex-shrink: 0;
   }
 
@@ -935,7 +921,6 @@
   width: var(--navbar-logo-width, 42px);
   height: var(--navbar-logo-height, 42px);
   max-width: min(240px, 32vw);
-  border-radius: var(--radius-control, 8px);
   object-fit: contain;
 }
 .brand-logo .logo-circle-badge .restaurant-logo-img { width: 100%; height: 100%; }
