@@ -1,49 +1,20 @@
 import { Routes } from '@angular/router';
 import { StorefrontLayoutComponent } from './layout/storefront-layout/storefront-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
-import { adminGuard, platformGuard, storeGuard } from './core/guards/admin.guard';
-
-/**
- * Checks if the current visitor is on a Tenant Subdomain
- * e.g. super.mecart.app, or testing via ?tenant=super
- */
-export function isTenantSubdomain(): boolean {
-  if (typeof window === 'undefined') return false;
-  const host = window.location.hostname.toLowerCase();
-  const search = window.location.search.toLowerCase();
-
-  // Test / preview parameter
-  if (search.includes('tenant=') || search.includes('store=')) {
-    return true;
-  }
-
-  // Subdomain: super.mecart.app or backend direct URL
-  if (host.startsWith('super.') || host.includes('supermarket1.runasp.net')) {
-    return true;
-  }
-
-  // Any tenant subdomain on mecart.app (e.g. albaraka.mecart.app, etc.) except www and apex
-  if (host.endsWith('.mecart.app')) {
-    const sub = host.replace('.mecart.app', '');
-    if (sub !== 'www' && sub !== '' && sub !== 'mecart') {
-      return true;
-    }
-  }
-
-  return !['localhost', '127.0.0.1', 'mecart.app', 'www.mecart.app'].includes(host);
-}
+import { adminGuard, storeGuard } from './core/guards/admin.guard';
+import { isTenantSubdomain } from './core/services/store-context';
+import { platformAdminRoutes, platformRoutes } from './platform.routes';
 
 export const routes: Routes = [
-  { path: 'admin/support', loadComponent: () => import('./features/admin/admin-support/admin-support.component').then(m => m.AdminSupportComponent) },
-  { path: 'master', redirectTo: 'admin/stores', pathMatch: 'full' },
-  // 1. If visitor is on a Tenant Subdomain (e.g. super.mecart.app), load the Storefront directly at root
+  ...platformRoutes,
   {
     path: '',
-    canMatch: [() => isTenantSubdomain()],
     component: StorefrontLayoutComponent,
     children: [
       {
         path: '',
+        pathMatch: 'full',
+        canMatch: [isTenantSubdomain],
         loadComponent: () => import('./features/storefront/home/home.component').then(m => m.HomeComponent)
       },
       {
@@ -77,65 +48,10 @@ export const routes: Routes = [
       }
     ]
   },
-
-  // 2. Main Platform Root for mecart.app & www.mecart.app (Mecart SaaS Platform Portal)
-  {
-    path: '',
-    pathMatch: 'full',
-    canMatch: [() => !isTenantSubdomain()],
-    loadComponent: () => import('./features/landing/mecart-landing/mecart-landing.component').then(m => m.MecartLandingComponent)
-  },
-
-  // 3. Dedicated Projects Showcase Page with Pagination (/projects)
-  {
-    path: 'projects',
-    loadComponent: () => import('./features/landing/mecart-projects/mecart-projects.component').then(m => m.MecartProjectsComponent)
-  },
-
-  // 4. Customer Storefront Direct Routes
-  {
-    path: '',
-    component: StorefrontLayoutComponent,
-    children: [
-      {
-        path: 'menu',
-        loadComponent: () => import('./features/storefront/menu/menu.component').then(m => m.MenuComponent)
-      },
-      {
-        path: 'checkout',
-        loadComponent: () => import('./features/checkout/checkout.component').then(m => m.CheckoutComponent)
-      },
-      {
-        path: 'wishlist',
-        loadComponent: () => import('./features/storefront/wishlist/wishlist.component').then(m => m.WishlistComponent)
-      },
-      {
-        path: 'product/:id',
-        loadComponent: () => import('./features/storefront/product-page/product-page.component').then(m => m.ProductPageComponent)
-      },
-      {
-        path: 'track',
-        redirectTo: 'account',
-        pathMatch: 'full'
-      },
-      {
-        path: 'track/:token',
-        loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent)
-      },
-      {
-        path: 'account',
-        loadComponent: () => import('./features/account/account.component').then(m => m.AccountComponent)
-      }
-    ]
-  },
-
-  // Admin Login (Standalone)
   {
     path: 'admin/login',
     loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
   },
-
-  // 5. MeCart Cloud Platform Admin (ONLY Stores, Packages, Cloud Dashboard)
   {
     path: 'admin',
     component: AdminLayoutComponent,
@@ -151,37 +67,9 @@ export const routes: Routes = [
       { path: 'analytics', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent) },
       { path: 'notifications', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent) },
       { path: 'whatsapp', redirectTo: 'notifications', pathMatch: 'full' },
-      {
-        path: '',
-        pathMatch: 'full',
-        redirectTo: 'stores'
-      },
-      {
-        path: 'stores/:id',
-        canActivate: [platformGuard],
-        loadComponent: () => import('./features/admin/admin-stores/admin-store-detail.component').then(m => m.AdminStoreDetailComponent)
-      },
-      {
-        path: 'stores',
-        canActivate: [platformGuard],
-        loadComponent: () => import('./features/admin/admin-stores/admin-stores.component').then(m => m.AdminStoresComponent)
-      },
-      {
-        path: 'packages',
-        canActivate: [platformGuard],
-        loadComponent: () => import('./features/admin/admin-packages/admin-packages.component').then(m => m.AdminPackagesComponent)
-      },
-      {
-        path: 'dashboard',
-        canActivate: [platformGuard],
-        loadComponent: () => import('./features/admin/admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
-      }
+      { path: '', pathMatch: 'full', redirectTo: platformAdminRoutes.length ? 'stores' : 'orders' },
+      ...platformAdminRoutes
     ]
   },
-
-  // Wildcard -> Homepage
-  {
-    path: '**',
-    redirectTo: ''
-  }
+  { path: '**', redirectTo: '' }
 ];

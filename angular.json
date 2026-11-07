@@ -58,6 +58,49 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "standalone": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2MB",
+                  "maximumError": "4MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "50kB",
+                  "maximumError": "100kB"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.standalone.ts"
+                },
+                {
+                  "replace": "src/app/platform.routes.ts",
+                  "with": "src/app/platform.routes.standalone.ts"
+                }
+              ],
+              "optimization": {
+                "scripts": true,
+                "styles": true,
+                "fonts": false
+              },
+              "outputHashing": "all",
+              "outputPath": "dist/standalone",
+              "assets": [
+                {
+                  "glob": "**/*",
+                  "input": "public",
+                  "ignore": [
+                    "**/mecart-*",
+                    "**/runx-logo.png",
+                    "sitemap.xml",
+                    "robots.txt"
+                  ]
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -70,6 +113,9 @@
             },
             "development": {
               "buildTarget": "TngProject:build:development"
+            },
+            "standalone": {
+              "buildTarget": "TngProject:build:standalone"
             }
           },
           "defaultConfiguration": "development",

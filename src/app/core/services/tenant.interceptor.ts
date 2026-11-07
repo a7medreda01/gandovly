@@ -10,7 +10,7 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
   const headers: Record<string, string> = {};
   const query = new URLSearchParams(window.location.search).get('tenant');
   const host = window.location.hostname;
-  const slug = host.endsWith('.mecart.app') && host !== 'www.mecart.app'
+  const slug = environment.standalone ? null : host.endsWith('.mecart.app') && host !== 'www.mecart.app'
     ? host.slice(0, -'.mecart.app'.length) : query;
   if (slug) headers['X-Tenant-Slug'] = slug;
   try {
@@ -20,6 +20,6 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
     if (session?.token) headers['Authorization'] = `Bearer ${session.token}`;
   } catch { /* Invalid stored session is handled by the login flow. */ }
   const customHost = !['localhost','127.0.0.1','mecart.app','www.mecart.app','supermarket1.runasp.net'].includes(host) && !host.endsWith('.mecart.app');
-  if (!slug && customHost) return inject(StoreDomainResolver).slug.pipe(switchMap(resolved => next(request.clone({setHeaders:{...headers,'X-Tenant-Slug':resolved}}))));
+  if (!environment.standalone && !slug && customHost) return inject(StoreDomainResolver).slug.pipe(switchMap(resolved => next(request.clone({setHeaders:{...headers,'X-Tenant-Slug':resolved}}))));
   return next(request.clone({ setHeaders: headers }));
 };
