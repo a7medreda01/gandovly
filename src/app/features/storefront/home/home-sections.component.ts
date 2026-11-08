@@ -47,6 +47,22 @@ export class HomeSectionsComponent {
         return s.textColor; if (s.layout === 'overlay' && (s.kind === 'hero' || s.kind === 'banner'))
         return '#ffffff'; if (!s.backgroundColor)
         return null; const c = s.backgroundColor.slice(1); const brightness = (parseInt(c.slice(0, 2), 16) * 299 + parseInt(c.slice(2, 4), 16) * 587 + parseInt(c.slice(4, 6), 16) * 114) / 1000; return brightness < 140 ? '#ffffff' : '#152138'; }
+    buttonBgColor(s: HomeSection): string {
+        if (s.textColor) return s.textColor;
+        return this.colorFor(s) || 'var(--btn-primary-bg, var(--primary-color))';
+    }
+    buttonTextColor(s: HomeSection): string {
+        const bg = this.buttonBgColor(s);
+        if (!bg || bg.startsWith('var(')) return 'var(--btn-primary-text, #ffffff)';
+        const clean = bg.replace('#', '').trim();
+        if (clean.length === 6) {
+            const r = parseInt(clean.substring(0, 2), 16);
+            const g = parseInt(clean.substring(2, 4), 16);
+            const b = parseInt(clean.substring(4, 6), 16);
+            return ((r * 299 + g * 587 + b * 114) / 1000) > 180 ? '#152138' : '#ffffff';
+        }
+        return '#ffffff';
+    }
     path(s: {
         link: string;
     }) { return s.link.split('?')[0] || '/menu'; }
