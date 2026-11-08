@@ -891,3 +891,246 @@
 }
 .stock-status.available { color: var(--success-color, #008b65); }
 .stock-status .bi { font-size: 16px; line-height: 1; }
+
+/* ==========================================================================
+   Page-Load Entrance Animation Sequence (Rokn & Dar / MeCart)
+   ========================================================================== */
+
+.title-mask-wrap {
+  display: block;
+  overflow: hidden;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.stock-check-svg {
+  display: inline-block;
+  vertical-align: middle;
+  color: var(--success-color, #008b65);
+  flex-shrink: 0;
+}
+
+.stock-check-path {
+  stroke: currentColor;
+}
+
+/* Entrance Sequence Active */
+.product-page-container.entrance-active {
+  /* 1. Hero Image: 0s, 1.2s duration, clip-path reveal + scale 1.15 -> 1 */
+  .gallery-column .hero-image-wrap {
+    clip-path: inset(0 0 0% 0);
+    animation: prodHeroClipReveal 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0s forwards;
+    will-change: clip-path;
+  }
+  .gallery-column .hero-image-wrap .hero-img {
+    animation: prodHeroScaleReveal 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0s forwards;
+    will-change: transform;
+  }
+
+  /* 2. Brand Name: 0.55s delay, fade + translateY(16px -> 0) */
+  .product-meta, .brand-label {
+    animation: prodBrandFadeIn 0.55s cubic-bezier(0.25, 1, 0.5, 1) 0.55s backwards;
+    will-change: transform, opacity;
+  }
+
+  /* 3. Product Title: 0.65s delay, mask reveal translateY(110% -> 0) */
+  .product-h1 {
+    animation: prodTitleMaskReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.65s backwards;
+    will-change: transform;
+  }
+
+  /* 4. Price Card: 0.85s delay, fade-up */
+  .summary-price-row {
+    animation: prodPriceFadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.85s backwards;
+    will-change: transform, opacity;
+  }
+
+  /* 4b. Stock checkmark drawn with stroke-dashoffset */
+  .stock-check-path {
+    stroke-dasharray: 28;
+    stroke-dashoffset: 28;
+    animation: prodStockCheckDraw 0.6s cubic-bezier(0.65, 0, 0.35, 1) 1.15s forwards;
+    will-change: stroke-dashoffset;
+  }
+
+  /* 5. Quantity & Purchase Controls: 1.25s delay, translateY 60px -> 0 with spring */
+  .purchase-controls {
+    animation: prodControlsSpringUp 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s backwards;
+    will-change: transform, opacity;
+  }
+
+  /* 5b. Add to cart CTA single pulse: scale 1.04 + fading outer shadow */
+  .btn-add-to-cart {
+    animation: prodCtaPulseOnce 0.65s cubic-bezier(0.25, 1, 0.5, 1) 1.85s forwards;
+    will-change: transform, box-shadow;
+  }
+
+  /* 6. Description: 1.5s delay, calm fade-up */
+  .description-panel {
+    animation: prodDescFadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) 1.5s backwards;
+    will-change: transform, opacity;
+  }
+
+  /* 6b. Disclosures & Top Nav: 1.7s delay, calm fade-up */
+  .product-disclosure, .product-page-top-nav {
+    animation: prodNavFadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) 1.7s backwards;
+    will-change: transform, opacity;
+  }
+}
+
+/* When entrance is done (or animations disabled), freeze to default without re-animating on user actions */
+.product-page-container.entrance-done {
+  .gallery-column .hero-image-wrap,
+  .gallery-column .hero-image-wrap .hero-img,
+  .product-meta,
+  .brand-label,
+  .product-h1,
+  .summary-price-row,
+  .purchase-controls,
+  .btn-add-to-cart,
+  .description-panel,
+  .product-disclosure,
+  .product-page-top-nav {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .stock-check-path {
+    stroke-dashoffset: 0 !important;
+  }
+}
+
+/* Keyframes */
+@keyframes prodHeroClipReveal {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+@keyframes prodHeroScaleReveal {
+  from {
+    transform: scale(1.15);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes prodBrandFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prodTitleMaskReveal {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes prodPriceFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prodStockCheckDraw {
+  from {
+    stroke-dashoffset: 28;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes prodControlsSpringUp {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prodCtaPulseOnce {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px rgba(107, 79, 58, 0.25);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 14px rgba(107, 79, 58, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 14px rgba(107, 79, 58, 0.25);
+  }
+}
+
+@keyframes prodDescFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes prodNavFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Cart Badge Pop (Triggered when flying dot hits cart) */
+@keyframes cartBadgePop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.5); }
+  75% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+.cart-badge-pop {
+  animation: cartBadgePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both !important;
+  transform-origin: center center;
+}
+
+/* Respect prefers-reduced-motion: disable all entrance motion immediately */
+@media (prefers-reduced-motion: reduce) {
+  .product-page-container,
+  .product-page-container * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    clip-path: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .stock-check-path {
+    stroke-dashoffset: 0 !important;
+  }
+}

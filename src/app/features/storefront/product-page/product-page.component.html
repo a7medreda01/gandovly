@@ -1,4 +1,4 @@
-<div class="product-page-container container">
+<div class="product-page-container container" [class.entrance-active]="entranceAnimationActive()" [class.entrance-done]="entranceAnimationDone()">
   <!-- Top Breadcrumbs & Back Navigation -->
   <div class="product-page-top-nav d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -171,12 +171,30 @@
       <div class="details-column">
         <div class="product-summary">
           @if (product()!.brand) { <div class="product-meta"><span class="brand-label">{{product()!.brand}}</span></div> }
-          <h1 class="product-h1">{{languageService.getLocalizedName(product()!)}}</h1>
+          <div class="title-mask-wrap">
+            <h1 class="product-h1">{{languageService.getLocalizedName(product()!)}}</h1>
+          </div>
           @if(languageService.isRtl() && product()!.nameEn&&product()!.nameEn!==product()!.nameAr){<p class="product-subtitle-en">{{product()!.nameEn}}</p>}
         @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
           <div class="summary-price-row">
-            <div class="price-banner-box"><span class="price-val">{{(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)|number:'1.0-2'}}</span><span class="price-curr">{{currencySymbol}}</span>@if(isWeighedProduct){<span class="unit-label">لكل كجم</span>}@if(product()!.originalPrice&&product()!.originalPrice!>(isWeighedProduct?(product()!.pricePerKg||product()!.pricePerUnit):variantPrice)){<del class="price-original">{{product()!.originalPrice}} {{currencySymbol}}</del>}</div>
-            <span class="stock-status" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable"><i class="bi" [class.bi-check2]="product()!.isAvailable" [class.bi-x-circle]="!product()!.isAvailable" aria-hidden="true"></i>{{ product()!.isAvailable ? languageService.text('متوفر', 'In stock') : languageService.text('غير متوفر', 'Out of stock') }}</span>
+            <div class="price-banner-box">
+              <span class="price-val">{{ (entranceAnimationActive() ? displayPrice() : (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice)) | number:'1.0-2' }}</span>
+              <span class="price-curr">{{currencySymbol}}</span>
+              @if(isWeighedProduct){<span class="unit-label">لكل كجم</span>}
+              @if(product()!.originalPrice && product()!.originalPrice! > (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice)){
+                <del class="price-original">{{product()!.originalPrice}} {{currencySymbol}}</del>
+              }
+            </div>
+            <span class="stock-status" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable">
+              @if (product()!.isAvailable) {
+                <svg class="stock-check-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                  <path class="stock-check-path" d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              } @else {
+                <i class="bi bi-x-circle" aria-hidden="true"></i>
+              }
+              <span>{{ product()!.isAvailable ? languageService.text('متوفر', 'In stock') : languageService.text('غير متوفر', 'Out of stock') }}</span>
+            </span>
           </div>
         </div>
 
@@ -299,7 +317,7 @@
             type="button"
             class="btn-add-to-cart flex-center"
             [class.btn-success-state]="isSuccess()"
-            (click)="onAddToCart()"
+            (click)="onAddToCart($event)"
             [disabled]="isSuccess() || !product()!.isAvailable || product()!.commerce?.mode==='Vehicle'"
           >
             @if (isSuccess()) {

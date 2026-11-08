@@ -46,6 +46,19 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   isSuccess = signal<boolean>(false);
   isCopied = signal<boolean>(false);
 
+  // Entrance Animation & Price Counter State
+  entranceAnimationActive = signal<boolean>(false);
+  entranceAnimationDone = signal<boolean>(false);
+  displayPrice = signal<number>(0);
+  private priceRafId: number | null = null;
+  private hasAnimatedForProduct = false;
+
+  get targetUnitPrice(): number {
+    const p = this.product();
+    if (!p) return 0;
+    return (this.isWeighedProduct ? (p.pricePerKg || p.pricePerUnit) : this.variantPrice) || 0;
+  }
+
   // Gallery
   activeImageIndex = 0;
   showImageViewer = signal(false);
@@ -257,6 +270,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
         this.initProductState(prod);
         this.isLoading.set(false);
         this.loadRelated(prod);
+        this.initEntranceAnimation();
       },
       error: () => {
         this.product.set(null);
@@ -264,6 +278,64 @@ export class ProductPageComponent implements OnInit, OnDestroy {
         this.toast.error('لم نتمكن من العثور على الصنف المطلوب');
       }
     });
+  }
+
+  private initEntranceAnimation(): void {
+    if (this.priceRafId) {
+      cancelAnimationFrame(this.priceRafId);
+      this.priceRafId = null;
+    }
+    const allowAnimations = this.settingsService.settings().storeLayout?.enableProductPageAnimations !== false;
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isBackNav = typeof window !== 'undefined' && (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'back_forward';
+
+    if (allowAnimations && !prefersReduced && !isBackNav && !this.hasAnimatedForProduct) {
+      this.hasAnimatedForProduct = true;
+      this.entranceAnimationActive.set(true);
+      this.entranceAnimationDone.set(false);
+      this.startPriceCounterAnimation();
+      setTimeout(() => {
+        this.entranceAnimationActive.set(false);
+        this.entranceAnimationDone.set(true);
+      }, 2500);
+    } else {
+      this.entranceAnimationActive.set(false);
+      this.entranceAnimationDone.set(true);
+      this.displayPrice.set(this.targetUnitPrice);
+    }
+  }
+
+  private startPriceCounterAnimation(): void {
+    if (typeof window === 'undefined') {
+      this.displayPrice.set(this.targetUnitPrice);
+      return;
+    }
+    const target = this.targetUnitPrice;
+    if (target <= 0) {
+      this.displayPrice.set(0);
+      return;
+    }
+    this.displayPrice.set(0);
+    const startTime = performance.now() + 850; // starts at 0.85s delay
+    const duration = 1100;
+
+    const step = (now: number) => {
+      if (now < startTime) {
+        this.priceRafId = requestAnimationFrame(step);
+        return;
+      }
+      const elapsed = now - startTime;
+      const progress = Math.min(1, Math.max(0, elapsed / duration));
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(target * eased * 100) / 100;
+      this.displayPrice.set(current);
+      if (progress < 1) {
+        this.priceRafId = requestAnimationFrame(step);
+      } else {
+        this.displayPrice.set(target);
+      }
+    };
+    this.priceRafId = requestAnimationFrame(step);
   }
 
   private initProductState(p: Product): void {
@@ -365,7 +437,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onAddToCart() {
+  async onAddToCart(event?: MouseEvent) {
     const p = this.product();
     if (!p) return;
     if(p.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
@@ -378,6 +450,9 @@ export class ProductPageComponent implements OnInit, OnDestroy {
 
     for(const group of p.modifierGroups||[]){const count=group.options.filter(o=>this.modifierSelected(group,o)).length;if(count<(group.isRequired?Math.max(1,group.minSelection):group.minSelection)||count>group.maxSelection){this.toast.error('راجع اختيارات '+group.nameAr);return;}}
     if(p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===this.selectedPrepOption?.id))){this.toast.error('اختر طريقة التجهيز المطلوبة');return;}
+
+    // Launch flying dot
+    this.launchFlyingCartDot(event);
 
     const mods: ModifierOption[] = [...this.multiSelectedModifiers];
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
@@ -412,6 +487,94 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }, 1200);
   }
 
+  private launchFlyingCartDot(event?: MouseEvent): void {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.popCartBadges();
+      return;
+    }
+
+    const btn = (event?.currentTarget as HTMLElement) || document.querySelector('.btn-add-to-cart');
+    const isMobile = window.innerWidth <= 767;
+    let cartTarget = isMobile
+      ? document.querySelector('.store-bottom-nav .cart-icon, .store-bottom-nav button')
+      : document.querySelector('.cart-trigger-btn .cart-icon-wrapper, .cart-trigger-btn');
+    if (!cartTarget) {
+      cartTarget = document.querySelector('.cart-trigger-btn, .cart-icon');
+    }
+    if (!btn || !cartTarget) {
+      this.popCartBadges();
+      return;
+    }
+
+    const btnRect = btn.getBoundingClientRect();
+    const cartRect = cartTarget.getBoundingClientRect();
+
+    const startX = btnRect.left + btnRect.width / 2;
+    const startY = btnRect.top + btnRect.height / 2;
+    const targetX = cartRect.left + cartRect.width / 2;
+    const targetY = cartRect.top + cartRect.height / 2;
+
+    const dx = targetX - startX;
+    const dy = targetY - startY;
+
+    // Outer wrapper translates horizontally
+    const wrap = document.createElement('div');
+    wrap.className = 'flying-cart-dot-wrap';
+    wrap.style.cssText = `
+      position: fixed;
+      left: ${startX}px;
+      top: ${startY}px;
+      width: 18px;
+      height: 18px;
+      margin-left: -9px;
+      margin-top: -9px;
+      z-index: 999999;
+      pointer-events: none;
+      transition: transform 750ms linear;
+    `;
+
+    // Inner dot translates vertically with curved arc
+    const dot = document.createElement('div');
+    dot.className = 'flying-cart-dot';
+    const btnStyle = window.getComputedStyle(btn);
+    const dotBg = btnStyle.backgroundColor || '#6b4f3a';
+    dot.style.cssText = `
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: ${dotBg};
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 14px rgba(107, 79, 58, 0.45);
+      transition: transform 750ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 750ms ease;
+    `;
+
+    wrap.appendChild(dot);
+    document.body.appendChild(wrap);
+
+    void wrap.offsetWidth;
+
+    wrap.style.transform = `translateX(${dx}px)`;
+    dot.style.transform = `translateY(${dy}px) scale(0.45)`;
+    dot.style.opacity = '0.7';
+
+    setTimeout(() => {
+      wrap.remove();
+      this.popCartBadges();
+    }, 750);
+  }
+
+  private popCartBadges(): void {
+    if (typeof document === 'undefined') return;
+    const badges = document.querySelectorAll('.cart-badge, .store-bottom-nav .cart-icon b');
+    badges.forEach(badge => {
+      badge.classList.remove('cart-badge-pop');
+      void (badge as HTMLElement).offsetWidth;
+      badge.classList.add('cart-badge-pop');
+      setTimeout(() => badge.classList.remove('cart-badge-pop'), 450);
+    });
+  }
+
   openRelatedProduct(product: Product): void {
     if (this.settingsService.settings()?.productDetailViewMode === 'page') {
       this.router.navigate(['/product', product.id]);
@@ -421,7 +584,15 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy() { this.productRequest?.unsubscribe(); this.relatedRequest?.unsubscribe(); this.routeSubscription?.unsubscribe(); }
+  ngOnDestroy() {
+    if (this.priceRafId) {
+      cancelAnimationFrame(this.priceRafId);
+      this.priceRafId = null;
+    }
+    this.productRequest?.unsubscribe();
+    this.relatedRequest?.unsubscribe();
+    this.routeSubscription?.unsubscribe();
+  }
 
   goBack(): void {
     if (window.history.length > 1) {
