@@ -79,7 +79,7 @@
 <label class="form-group">عنوان شبكة الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoryGridTitleEn"></label>
 </div></section>
 }
-<section class="settings-card"><h3>نافذة وصفحة تفاصيل المنتج</h3><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [(ngModel)]="layoutOptions.enableProductPageAnimations" (ngModelChange)="onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label></section><app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
+<section class="settings-card"><h3>نافذة وصفحة تفاصيل المنتج</h3><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [(ngModel)]="layoutOptions.enableProductPageAnimations" (ngModelChange)="onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label></section><app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
     @if(activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section>}
     @if (activeTab() === 'discounts') {
       <div class="tab-content animate-fade-in">
@@ -406,28 +406,28 @@
                 <label>اللون الأساسي (Primary):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('primaryColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>اللون الثانوي (Secondary):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.secondaryColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.secondaryColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.secondaryColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('secondaryColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>لون التمييز والخصومات (Accent):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.accentColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.accentColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.accentColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('accentColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>لون خلفية الصفحة (Surface):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('surfaceColor')" />
                 </div>
               </div>
             </div>
@@ -439,28 +439,28 @@
                 <label>خلفية الهيدر (Navbar Bg):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.navbarBgColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.navbarBgColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.navbarBgColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('navbarBgColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>نصوص وروابط الهيدر:</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.navbarTextColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.navbarTextColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.navbarTextColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('navbarTextColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>خلفية الفوتر (Footer Bg):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.footerBgColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.footerBgColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.footerBgColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('footerBgColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>نصوص وروابط الفوتر:</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.footerTextColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.footerTextColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.footerTextColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('footerTextColor')" />
                 </div>
               </div>
             </div>
@@ -472,28 +472,28 @@
                 <label>خلفية بطاقات المنتجات:</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('cardBgColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>لون الحدود والفواصل (Border):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.borderColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.borderColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.borderColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('borderColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>خلفية الزر الرئيسي (Btn Primary):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.btnPrimaryBg" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.btnPrimaryBg" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.btnPrimaryBg" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('btnPrimaryBg')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>نص الزر الرئيسي:</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.btnPrimaryText" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.btnPrimaryText" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.btnPrimaryText" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('btnPrimaryText')" />
                 </div>
               </div>
             </div>
@@ -505,21 +505,21 @@
                 <label>لون النجاح والتأكيد (Success):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.successColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.successColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.successColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('successColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>لون التحذير (Warning):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.warningColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.warningColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.warningColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('warningColor')" />
                 </div>
               </div>
               <div class="color-item-row">
                 <label>لون الخطأ والإلغاء (Error):</label>
                 <div class="color-picker-wrap">
                   <input type="color" [(ngModel)]="settings()!.errorColor" (ngModelChange)="onColorChange()" />
-                  <input type="text" class="color-hex-input" [(ngModel)]="settings()!.errorColor" (ngModelChange)="onColorChange()" />
+                  <input type="text" dir="ltr" class="color-hex-input" [(ngModel)]="settings()!.errorColor" (ngModelChange)="onColorChange()" (blur)="sanitizeHexField('errorColor')" />
                 </div>
               </div>
             </div>

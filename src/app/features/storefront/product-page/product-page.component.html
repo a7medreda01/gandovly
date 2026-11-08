@@ -138,19 +138,12 @@
               <button type="button" class="btn-gallery-arrow next-arrow flex-center" aria-label="الصورة التالية" (click)="nextImage()">
                 <i class="bi bi-chevron-left"></i>
               </button>
-
-              <!-- Dots -->
-              <div class="gallery-dots">
-                @for (img of galleryImages; track $index) {
-                  <span class="dot" [class.active]="activeImageIndex === $index" (click)="activeImageIndex = $index"></span>
-                }
-              </div>
             }
           </div>
 
           <!-- Thumbnails Strip -->
           @if (galleryImages.length > 1) {
-            <div class="thumbs-strip mt-3">
+            <div class="thumbs-strip">
               @for (img of galleryImages; track $index) {
                 <button
                   type="button"

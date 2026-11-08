@@ -65,12 +65,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.settingsService.loadSettings().subscribe(settings => {
       this.loadingSettings.set(false);
-      if (!settings?.storeLayout?.useCustomHome) this.fetchFeaturedProducts();
+      if (!this.settingsService.isStoreUnavailable() && !settings?.storeLayout?.useCustomHome) {
+        this.fetchFeaturedProducts();
+      }
     });
-    this.catalogService.loadCategories().subscribe({
-      next: () => this.loadingCategories.set(false),
-      error: () => this.loadingCategories.set(false)
-    });
+    if (!this.settingsService.isStoreUnavailable()) {
+      this.catalogService.loadCategories().subscribe({
+        next: () => this.loadingCategories.set(false),
+        error: () => this.loadingCategories.set(false)
+      });
+    }
 
     // Debounce search
     this.searchSubscription = this.searchSubject.pipe(

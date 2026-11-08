@@ -643,14 +643,16 @@
     }
 
     .color-hex-input {
-      width: 82px;
+      width: 86px;
       padding: 4px 6px;
-      font-size: 0.8rem;
-      font-family: monospace;
+      font-size: 0.82rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       font-weight: 700;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      text-align: center;
+      text-align: left;
+      direction: ltr !important;
+      unicode-bidi: isolate;
       background: #fff;
     }
   }

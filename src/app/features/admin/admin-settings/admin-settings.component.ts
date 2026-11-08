@@ -169,6 +169,16 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
+  sanitizeHexField(field: string): void {
+    const s = this.settings();
+    if (!s) return;
+    const val = (s as any)[field];
+    if (val) {
+      (s as any)[field] = this.settingsService.sanitizeHexColor(val, val);
+      this.onColorChange();
+    }
+  }
+
   activityPresets:any[]=[];
   private readonly commerce=inject(CommerceService);private readonly commerceCdr=inject(ChangeDetectorRef);
   private readonly route=inject(ActivatedRoute);

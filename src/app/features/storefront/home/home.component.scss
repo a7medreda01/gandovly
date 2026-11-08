@@ -901,13 +901,13 @@
 .categories-visual-section .cat-compact-card .cat-icon-round { width: 68px; height: 68px; border-radius: 16px; margin: 0; background: color-mix(in srgb,var(--primary-color) 5%,var(--card-bg,#fff)); }
 .categories-visual-section .cat-compact-card .cat-grid-thumb { width: 56px; height: 56px; padding: 2px; object-fit: contain; }
 .categories-visual-section .cat-compact-card .cat-card-title { font-size: .933rem; font-weight: 700; line-height: 1.5; min-height: 3em; color: var(--text-main); margin: 0; }
-.hotline-card-section .hotline-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 20px 22px; border-radius: var(--radius-card,16px); background: linear-gradient(135deg,var(--primary-color),color-mix(in srgb,var(--primary-color) 80%,#0f172a)); box-shadow: var(--shadow-card); }
+.hotline-card-section .hotline-card { display: grid; grid-template-columns: 1fr auto; gap: 18px; padding: 20px 22px; border-radius: var(--radius-card,16px); background: linear-gradient(135deg, var(--primary-color, #102b46) 0%, color-mix(in srgb, var(--primary-color, #102b46) 65%, #081524) 100%) !important; box-shadow: 0 10px 25px rgba(0,0,0,0.12); color: #ffffff !important; }
 .hotline-card-section .hotline-card .hotline-texts { align-items: flex-start; gap: 8px; }
 .hotline-card-section .hotline-card .hotline-title-row { gap: 10px; }
-.hotline-card-section .hotline-card .hotline-texts .hotline-title { font-size: 1rem; font-weight: 700; line-height: 1.6; }
-.hotline-card-section .hotline-card .hotline-texts .hotline-icon { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; background: #ffffff18; color: #fff; font-size: 20px; }
-.hotline-card-section .hotline-card .hotline-texts .numbers-str { font-size: .933rem; line-height: 1.5; color: #fff; letter-spacing: .3px; }
-.hotline-card-section .hotline-card .btn-call-action { min-height: 40px; padding: 8px 18px; border-radius: var(--radius-control,12px); background: var(--btn-accent-bg,var(--accent-color)); color: var(--btn-accent-text,#fff); box-shadow: none; font-size: .933rem; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-title { font-size: 1rem; font-weight: 700; line-height: 1.6; color: #ffffff !important; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-icon { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; background: rgba(255, 255, 255, 0.16) !important; color: #f4a261 !important; font-size: 20px; }
+.hotline-card-section .hotline-card .hotline-texts .numbers-str { font-size: .933rem; line-height: 1.5; color: #f1f5f9 !important; letter-spacing: .3px; }
+.hotline-card-section .hotline-card .btn-call-action { min-height: 40px; padding: 8px 18px; border-radius: var(--radius-control,12px); background: var(--btn-accent-bg, var(--accent-color, #f4a261)) !important; color: var(--btn-accent-text, #ffffff) !important; box-shadow: 0 4px 12px rgba(244, 162, 97, 0.35); font-size: .933rem; font-weight: 700; }
 @media(max-width:767px) {
   .luxury-hero-card, .luxury-hero-card .hero-content-overlay { min-height: 220px; }
   .luxury-hero-card .hero-content-overlay { padding: 20px 18px 34px; }

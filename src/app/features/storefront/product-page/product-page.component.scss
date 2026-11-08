@@ -89,32 +89,47 @@
 
   .gallery-main-card {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 20px;
-    padding: 0.85rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: var(--radius-card, 20px);
+    padding: 0;
+    overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
   }
 
   .hero-image-wrap {
     position: relative;
     width: 100%;
-    height: 320px;
-    border-radius: 16px;
+    aspect-ratio: var(--modal-image-aspect, 1 / 1);
+    max-height: var(--modal-image-height, min(560px, 75vh));
     overflow: hidden;
-    background: #f8fafc;
+    background: #fafafa;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    @media (min-width: 768px) {
-      height: 400px;
+    @media (max-width: 767px) {
+      max-height: min(440px, 85vw);
+    }
+
+    .image-open-btn {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      cursor: zoom-in;
     }
 
     .hero-img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      object-fit: var(--detail-image-fit, cover);
+      display: block;
+      transition: filter 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .badges-overlay {
@@ -208,16 +223,18 @@
   .thumbs-strip {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding: 12px 14px 14px;
+    border-top: 1px solid #f1f5f9;
+    background: #ffffff;
 
     .thumb-btn {
-      width: 62px;
-      height: 62px;
+      width: 60px;
+      height: 60px;
       border-radius: 12px;
       border: 2px solid transparent;
-      padding: 3px;
+      padding: 2px;
       background: #f8fafc;
       cursor: pointer;
       flex-shrink: 0;
@@ -226,7 +243,7 @@
       img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: cover;
         border-radius: 8px;
       }
 
@@ -916,32 +933,27 @@
 
 /* Entrance Sequence Active */
 .product-page-container.entrance-active {
-  /* 1. Hero Image: 0s, 1.2s duration, clip-path reveal + scale 1.15 -> 1 */
-  .gallery-column .hero-image-wrap {
-    clip-path: inset(0 0 0% 0);
-    animation: prodHeroClipReveal 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0s forwards;
-    will-change: clip-path;
-  }
+  /* 1. Hero Image: Progressive focus reveal (blur to clear, subtle scale) */
   .gallery-column .hero-image-wrap .hero-img {
-    animation: prodHeroScaleReveal 1.2s cubic-bezier(0.65, 0, 0.35, 1) 0s forwards;
-    will-change: transform;
+    animation: prodHeroFocusReveal 1.05s cubic-bezier(0.25, 1, 0.5, 1) 0s forwards;
+    will-change: filter, transform, opacity;
   }
 
-  /* 2. Brand Name: 0.55s delay, fade + translateY(16px -> 0) */
+  /* 2. Brand Name: 0.25s delay, calm rise */
   .product-meta, .brand-label {
-    animation: prodBrandFadeIn 0.55s cubic-bezier(0.25, 1, 0.5, 1) 0.55s backwards;
+    animation: prodCalmRise 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.25s backwards;
     will-change: transform, opacity;
   }
 
-  /* 3. Product Title: 0.65s delay, mask reveal translateY(110% -> 0) */
+  /* 3. Product Title: 0.40s delay, calm rise */
   .product-h1 {
-    animation: prodTitleMaskReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.65s backwards;
-    will-change: transform;
+    animation: prodCalmRise 0.55s cubic-bezier(0.25, 1, 0.5, 1) 0.40s backwards;
+    will-change: transform, opacity;
   }
 
-  /* 4. Price Card: 0.85s delay, fade-up */
+  /* 4. Price Card: 0.55s delay, calm rise */
   .summary-price-row {
-    animation: prodPriceFadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.85s backwards;
+    animation: prodCalmRise 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.55s backwards;
     will-change: transform, opacity;
   }
 
@@ -949,31 +961,31 @@
   .stock-check-path {
     stroke-dasharray: 28;
     stroke-dashoffset: 28;
-    animation: prodStockCheckDraw 0.6s cubic-bezier(0.65, 0, 0.35, 1) 1.15s forwards;
+    animation: prodStockCheckDraw 0.6s cubic-bezier(0.65, 0, 0.35, 1) 0.85s forwards;
     will-change: stroke-dashoffset;
   }
 
-  /* 5. Quantity & Purchase Controls: 1.25s delay, translateY 60px -> 0 with spring */
+  /* 5. Quantity & Purchase Controls: 0.70s delay, smooth rise */
   .purchase-controls {
-    animation: prodControlsSpringUp 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s backwards;
+    animation: prodCalmRise 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.70s backwards;
     will-change: transform, opacity;
   }
 
-  /* 5b. Add to cart CTA single pulse: scale 1.04 + fading outer shadow */
+  /* 5b. Add to cart CTA single gentle pulse */
   .btn-add-to-cart {
-    animation: prodCtaPulseOnce 0.65s cubic-bezier(0.25, 1, 0.5, 1) 1.85s forwards;
+    animation: prodCtaPulseOnce 0.65s cubic-bezier(0.25, 1, 0.5, 1) 1.35s forwards;
     will-change: transform, box-shadow;
   }
 
-  /* 6. Description: 1.5s delay, calm fade-up */
+  /* 6. Description: 0.85s delay, calm fade-up */
   .description-panel {
-    animation: prodDescFadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) 1.5s backwards;
+    animation: prodCalmRise 0.6s cubic-bezier(0.25, 1, 0.5, 1) 0.85s backwards;
     will-change: transform, opacity;
   }
 
-  /* 6b. Disclosures & Top Nav: 1.7s delay, calm fade-up */
+  /* 6b. Disclosures & Top Nav: 1.0s delay, calm fade-up */
   .product-disclosure, .product-page-top-nav {
-    animation: prodNavFadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) 1.7s backwards;
+    animation: prodCalmRise 0.6s cubic-bezier(0.25, 1, 0.5, 1) 1.0s backwards;
     will-change: transform, opacity;
   }
 }
@@ -994,6 +1006,7 @@
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
   }
   .stock-check-path {
     stroke-dashoffset: 0 !important;
@@ -1001,48 +1014,23 @@
 }
 
 /* Keyframes */
-@keyframes prodHeroClipReveal {
+@keyframes prodHeroFocusReveal {
   from {
-    clip-path: inset(0 0 100% 0);
+    filter: blur(14px);
+    opacity: 0.15;
+    transform: scale(1.04);
   }
   to {
-    clip-path: inset(0 0 0% 0);
-  }
-}
-
-@keyframes prodHeroScaleReveal {
-  from {
-    transform: scale(1.15);
-  }
-  to {
+    filter: blur(0);
+    opacity: 1;
     transform: scale(1);
   }
 }
 
-@keyframes prodBrandFadeIn {
+@keyframes prodCalmRise {
   from {
     opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes prodTitleMaskReveal {
-  from {
-    transform: translateY(110%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes prodPriceFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -1059,17 +1047,6 @@
   }
 }
 
-@keyframes prodControlsSpringUp {
-  from {
-    opacity: 0;
-    transform: translateY(60px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 @keyframes prodCtaPulseOnce {
   0% {
     transform: scale(1);
@@ -1082,28 +1059,6 @@
   100% {
     transform: scale(1);
     box-shadow: 0 4px 14px rgba(107, 79, 58, 0.25);
-  }
-}
-
-@keyframes prodDescFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes prodNavFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 

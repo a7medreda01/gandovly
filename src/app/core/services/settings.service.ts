@@ -127,13 +127,15 @@ export class SettingsService {
     if (!color) return fallback;
     const str = String(color).trim();
     if (!str) return fallback;
-    const match = str.match(/#?([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/);
-    if (match) {
-      const hex = match[1];
-      if (hex.length === 3) {
-        return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toLowerCase();
-      }
-      return `#${hex}`.toLowerCase();
+    // Check 6-char hex first (prefer the last valid 6-char match to fix typos like C3A#684C3A)
+    const matches6 = [...str.matchAll(/#?([0-9a-fA-F]{6})\b/g)];
+    if (matches6.length > 0) {
+      return `#${matches6[matches6.length - 1][1].toLowerCase()}`;
+    }
+    const match3 = str.match(/#?([0-9a-fA-F]{3})\b/);
+    if (match3) {
+      const hex = match3[1];
+      return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toLowerCase();
     }
     if (/^(rgb|hsl)/i.test(str)) return str;
     return fallback;
@@ -177,12 +179,12 @@ export class SettingsService {
     const modalImgH = Number(layout?.modalImageHeight);
     if (modalImgH > 0) {
       root.style.setProperty('--modal-image-height', modalImgH + 'px');
-      root.style.setProperty('--modal-image-aspect', 'auto');
     } else {
       root.style.removeProperty('--modal-image-height');
-      root.style.removeProperty('--modal-image-aspect');
     }
-    root.style.setProperty('--detail-image-fit',layout?.detailImageFit||'contain');
+    const detailAspect = layout?.detailImageAspect;
+    root.style.setProperty('--modal-image-aspect', detailAspect === 'portrait' ? '3 / 4' : detailAspect === 'landscape' ? '4 / 3' : detailAspect === 'auto' ? 'auto' : '1 / 1');
+    root.style.setProperty('--detail-image-fit', layout?.detailImageFit || 'cover');
     if (settings.primaryColor) {
       const primary = this.sanitizeHexColor(settings.primaryColor, '#0a3d62');
       root.style.setProperty('--primary-color', primary);

@@ -18,14 +18,14 @@ import { SettingsService } from '../../../core/services/settings.service';
     :host { display: none; }
     @media(max-width: 767px) {
       :host { display: block; }
-      .store-bottom-nav { position: fixed; z-index: 1040; inset-inline: 12px; bottom: max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-height: 54px; padding: 3px; border: 1px solid var(--border-color, #dfe5ec); border-radius: var(--radius-bottom-nav, 28px); background: var(--navbar-bg, #fff); color: var(--navbar-text, #586879); box-shadow: var(--shadow-card); }
-      a, button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 46px; min-width: 0; padding: 3px 2px; border: 0; background: none; border-radius: var(--radius-control, 12px); color: inherit; text-decoration: none; font-size: .75rem; font-weight: 600; line-height: 1.3; }
+      .store-bottom-nav { position: fixed; z-index: 1040; inset-inline: 12px; bottom: max(10px, env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); min-height: 54px; padding: 4px; border: 1px solid var(--border-color, #dfe5ec); border-radius: var(--radius-bottom-nav, 28px); background: color-mix(in srgb, var(--navbar-bg, #fff) 94%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); color: var(--navbar-text, #586879); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); }
+      a, button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; min-height: 46px; min-width: 0; padding: 4px 2px; border: 0; background: none; border-radius: calc(var(--radius-bottom-nav, 28px) - 4px); color: inherit; text-decoration: none; font-size: .75rem; font-weight: 600; line-height: 1.3; transition: all 0.2s ease; }
       .store-bottom-nav { transition: padding .18s ease, min-height .18s ease; }
-      .store-bottom-nav.compact { min-height: 48px; padding: 1px 3px; }
+      .store-bottom-nav.compact { min-height: 48px; padding: 2px 4px; }
       .store-bottom-nav.compact a, .store-bottom-nav.compact button { min-height: 44px; gap: 2px; }
       .store-bottom-nav.compact i { font-size: 17px; }
       @media(prefers-reduced-motion:reduce) { .store-bottom-nav { transition: none; } }
-      a.active { background: color-mix(in srgb,var(--primary-color,#124b89) 12%,var(--navbar-bg,#fff)); color: var(--primary-color,#124b89); }
+      a.active { background: color-mix(in srgb,var(--primary-color,#684c3a) 14%,var(--navbar-bg,#fff)); color: var(--primary-color,#684c3a); font-weight: 700; }
       i { font-size: 19px; line-height: 1; }
       .cart-icon { position: relative; }
       b { position: absolute; top: -8px; inset-inline-end: -13px; min-width: 18px; height: 18px; padding-inline: 4px; border-radius: 10px; background: #b91c32; color: #fff; font-size: 10px; line-height: 18px; border: 1px solid #fff; }
