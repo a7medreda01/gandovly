@@ -1,9 +1,535 @@
-<main dir="rtl"><a routerLink="/admin/stores">العودة لسجل المتاجر</a>
-@if(isLoading()){<p role="status">جارٍ التحميل…</p>} @else if(loadError()){<p role="alert">{{loadError()}}</p><button (click)="loadStores()">إعادة المحاولة</button>} @else if(store();as s){
-<header><h1>{{s.name}}</h1><p>{{getDomainLabel(s.businessDomain)}} · {{s.status==='Active'?'نشط':s.status==='Suspended'?'موقوف':'قيد التجهيز'}}</p><a class="action" [href]="storeUrl(s)" target="_blank" rel="noopener">معاينة المتجر</a></header>
-@if(editing){<section><h2>تعديل سجل المتجر</h2><p>هذه بيانات سجل المنصة؛ الهوية المعروضة للعملاء تُضبط من إعدادات المتجر.</p><form (ngSubmit)="saveDetails()"><label>اسم المتجر<input name="name" [(ngModel)]="draft.name" required maxlength="150"></label><label>الباقة<select name="plan" [(ngModel)]="draft.plan"><option>Trial</option><option>Growth</option><option>Pro</option><option>Enterprise</option></select></label><label>هاتف المالك<input name="phone" [(ngModel)]="draft.ownerPhone" maxlength="40" dir="ltr"></label><label>بريد المالك<input type="email" name="email" [(ngModel)]="draft.ownerEmail" maxlength="254" dir="ltr"></label><button class="action" type="submit" [disabled]="saving">{{saving?'جارٍ الحفظ…':'حفظ'}}</button><button class="action" type="button" (click)="editing=false" [disabled]="saving">إلغاء</button></form></section>}<div class="grid"><section><h2>بيانات المتجر</h2><button class="action" (click)="editDetails()">تعديل بيانات السجل والباقة</button><dl><dt>النطاق</dt><dd dir="ltr">{{s.subdomain}}.mecart.app</dd><dt>الدومين الخاص</dt><dd dir="ltr">{{s.customDomain||'غير مربوط'}}</dd><dt>الباقة</dt><dd>{{s.plan}}</dd><dt>المنتجات</dt><dd>{{s.productsCount}}</dd><dt>تاريخ الإنشاء</dt><dd>{{s.createdAt|date:'yyyy/MM/dd'}}</dd><dt>هاتف المالك</dt><dd dir="ltr">{{s.ownerPhone||'غير مسجل'}}</dd><dt>بريد المالك</dt><dd dir="ltr">{{s.ownerEmail||'غير مسجل'}}</dd></dl></section>
-<section><h2>الوصول والتحكم</h2><a class="action" [href]="ownerLoginUrl(s)" target="_blank" rel="noopener">صفحة دخول المالك</a>@if(s.id!=='1' && s.status==='Active'){<button class="action" (click)="openSupport(s)">إنشاء جلسة دعم مؤقتة</button>}<p>جلسة الدعم مسجلة لمدة 15 دقيقة. رابط الدخول يستخدم مرة واحدة خلال دقيقة.</p>@if(s.id!=='1' && s.status==='Active') {<div class="section-actions">@for(item of sections;track item.path){<button class="action" (click)="openSection(item.path)">{{item.label}}</button>}</div>}<p>من جلسة الدعم يمكنك إدارة الهوية والتصميم والدومين، المنتجات والأقسام والخيارات، الطلبات والتوصيل والعملاء والعروض والإشعارات وواتساب بحسب الصلاحيات.</p></section>
-<section><h2>القوالب والبيانات</h2><button class="action" (click)="exportStoreZip(s)">تنزيل حزمة المتجر ZIP</button><a class="action" routerLink="/admin/packages" [queryParams]="{store:s.id}" queryParamsHandling="merge">فتح الاستيراد والتصدير</a><a class="action" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md">تنزيل دليل تجهيز البيانات</a><p>الاستيراد لمتجر فارغ فقط. صدّر نسخة من البيانات قبل نقلها.</p></section>
-<section><h2>الدومين المخصص</h2><p>الدومين الحالي: <strong dir="ltr">{{s.customDomain||'غير مربوط'}}</strong></p><label for="platformDomain">اسم الدومين</label><input id="platformDomain" dir="ltr" placeholder="shop.example.com" [(ngModel)]="domainInput" (ngModelChange)="domainProof=null"><button class="action" (click)="prepareDomain()" [disabled]="domainBusy||!domainInput.trim()">إنشاء بيانات التحقق</button>@if(domainProof;as proof){<p>أضف سجل TXT التالي في DNS:</p><label>اسم السجل<input readonly dir="ltr" [value]="proof.recordName"></label><label>قيمة السجل<textarea readonly dir="ltr" rows="4" [value]="proof.recordValue"></textarea></label><button class="action" (click)="verifyDomain()" [disabled]="domainBusy">التحقق وربط الدومين</button>}<p>الربط يحفظ بعد إثبات الملكية. إعداد DNS واستضافة الواجهة وHTTPS يتم لدى الاستضافة.</p></section><section><h2>حالة المتجر</h2><p>إيقاف المتجر يحتفظ ببياناته. المتجر الأساسي محمي من تغيير الحالة.</p>@if(s.id!=='1'){<button class="action" (click)="toggleStoreStatus(s)">{{s.status==='Active'?'إيقاف المتجر مؤقتًا':'تفعيل المتجر'}}</button>}</section></div>
-}@else{<h1>المتجر غير موجود</h1>}
-@if(supportLoginUrl();as url){<div class="support-backdrop" (click)="supportLoginUrl.set(null)"><section class="support-dialog" role="dialog" aria-modal="true" aria-labelledby="supportTitle" tabindex="-1" (click)="$event.stopPropagation()" (keydown.escape)="supportLoginUrl.set(null)"><h2 id="supportTitle">جلسة الدعم جاهزة</h2><p>الرابط يستخدم مرة واحدة خلال دقيقة، وجلسة الدعم تستمر 15 دقيقة.</p><a class="action" [href]="url" target="_blank" rel="noopener" (click)="supportLoginUrl.set(null)">فتح جلسة الدعم</a><button class="action" (click)="supportLoginUrl.set(null)" autofocus>إغلاق</button></section></div>}</main>
+<main class="store-detail-page" dir="rtl">
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb-bar" aria-label="مسار التنقل">
+    <a routerLink="/admin/stores" class="back-link">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 18l6-6-6-6"></path>
+      </svg>
+      العودة إلى سجل المتاجر
+    </a>
+  </nav>
+
+  @if (isLoading()) {
+    <div class="state-card loading-state" role="status">
+      <div class="spinner"></div>
+      <p>جارٍ تحميل بيانات المتجر…</p>
+    </div>
+  } @else if (loadError()) {
+    <div class="state-card error-state" role="alert">
+      <p>{{ loadError() }}</p>
+      <button class="btn btn-primary" (click)="loadStores()">إعادة المحاولة</button>
+    </div>
+  } @else if (store(); as s) {
+    <!-- Page Header Banner -->
+    <header class="store-header-banner">
+      <div class="header-main-info">
+        <div class="store-title-row">
+          <h1>{{ s.name }}</h1>
+          <span class="status-badge" [class.active]="s.status === 'Active'" [class.suspended]="s.status === 'Suspended'">
+            <span class="status-dot"></span>
+            {{ s.status === 'Active' ? 'متجر نشط' : s.status === 'Suspended' ? 'متجر موقوف' : 'قيد التجهيز' }}
+          </span>
+          <span class="id-badge">ID: #{{ s.id }}</span>
+        </div>
+        <p class="store-meta-line">
+          <span class="domain-pill">{{ getDomainLabel(s.businessDomain) }}</span>
+          <span class="sep">•</span>
+          <span class="plan-tag">باقة: {{ s.plan }}</span>
+          <span class="sep">•</span>
+          <span class="products-count">{{ s.productsCount }} منتج</span>
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <a class="btn btn-outline" [href]="storeUrl(s)" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+          معاينة المتجر
+        </a>
+        <a class="btn btn-outline" [href]="ownerLoginUrl(s)" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+            <polyline points="10 17 15 12 10 7"></polyline>
+            <line x1="15" y1="12" x2="3" y2="12"></line>
+          </svg>
+          دخول المالك
+        </a>
+        @if (s.id !== '1' && s.status === 'Active') {
+          <button class="btn btn-primary" (click)="openSupport(s)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            جلسة دعم مؤقتة
+          </button>
+        }
+      </div>
+    </header>
+
+    <!-- Cards Grid -->
+    <div class="cards-grid">
+
+      <!-- Card 1: Store Registry & Identity -->
+      <section class="admin-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <h2>بيانات وهوية سجل المتجر</h2>
+          </div>
+          @if (!editing) {
+            <button class="btn btn-sm btn-outline" (click)="editDetails()">
+              تعديل البيانات
+            </button>
+          }
+        </div>
+
+        @if (editing) {
+          <form class="edit-details-form" (ngSubmit)="saveDetails()">
+            <div class="form-group">
+              <label for="storeNameInput">اسم المتجر</label>
+              <input id="storeNameInput" name="name" [(ngModel)]="draft.name" required maxlength="150">
+            </div>
+
+            <div class="form-group">
+              <label for="storePlanSelect">الباقة</label>
+              <select id="storePlanSelect" name="plan" [(ngModel)]="draft.plan">
+                <option value="Trial">Trial (تجريبية)</option>
+                <option value="Growth">Growth (النمو)</option>
+                <option value="Pro">Pro (المحترفين)</option>
+                <option value="Enterprise">Enterprise (المؤسسات)</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ownerPhoneInput">هاتف المالك</label>
+                <input id="ownerPhoneInput" name="phone" [(ngModel)]="draft.ownerPhone" maxlength="40" dir="ltr" placeholder="+20...">
+              </div>
+              <div class="form-group">
+                <label for="ownerEmailInput">بريد المالك</label>
+                <input id="ownerEmailInput" type="email" name="email" [(ngModel)]="draft.ownerEmail" maxlength="254" dir="ltr" placeholder="owner@example.com">
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit" [disabled]="saving">
+                {{ saving ? 'جارٍ الحفظ…' : 'حفظ التعديلات' }}
+              </button>
+              <button class="btn btn-outline" type="button" (click)="editing = false" [disabled]="saving">
+                إلغاء
+              </button>
+            </div>
+          </form>
+        } @else {
+          <dl class="details-list">
+            <div class="detail-item">
+              <dt>اسم المتجر</dt>
+              <dd><strong>{{ s.name }}</strong></dd>
+            </div>
+            <div class="detail-item">
+              <dt>نوع النشاط</dt>
+              <dd>{{ getDomainLabel(s.businessDomain) }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>الباقة الحالية</dt>
+              <dd><span class="badge-plan">{{ s.plan }}</span></dd>
+            </div>
+            <div class="detail-item">
+              <dt>إجمالي المنتجات</dt>
+              <dd>{{ s.productsCount }} منتج</dd>
+            </div>
+            <div class="detail-item">
+              <dt>تاريخ الإنشاء</dt>
+              <dd>{{ s.createdAt | date:'yyyy/MM/dd - hh:mm a' }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>هاتف المالك</dt>
+              <dd dir="ltr">{{ s.ownerPhone || 'غير مسجل' }}</dd>
+            </div>
+            <div class="detail-item">
+              <dt>بريد المالك</dt>
+              <dd dir="ltr">{{ s.ownerEmail || 'غير مسجل' }}</dd>
+            </div>
+          </dl>
+        }
+      </section>
+
+      <!-- Card 2: Domains & Subdomain Management -->
+      <section class="admin-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <h2>إدارة النطاقات والدومين</h2>
+          </div>
+        </div>
+
+        <!-- 2.1 Subdomain Management -->
+        <div class="domain-sub-section">
+          <div class="section-badge-title">
+            <span class="sub-num">1</span>
+            <h3>النطاق الفرعي للمتجر (Subdomain)</h3>
+          </div>
+          <p class="section-desc">
+            الرابط السريع للمتجر على منصة مي كارت. يمكنك تغييره في أي وقت، وسيتم تحديث رابط المتجر ولوحة تحكم المالك فوراً.
+          </p>
+
+          <div class="subdomain-change-box">
+            <div class="input-with-affix" dir="ltr">
+              <input
+                type="text"
+                [(ngModel)]="subdomainInput"
+                placeholder="slug"
+                [disabled]="subdomainBusy || s.id === '1'"
+                class="subdomain-input"
+              >
+              <span class="affix-suffix">.mecart.app</span>
+            </div>
+            @if (s.id !== '1') {
+              <button
+                class="btn btn-primary"
+                (click)="updateSubdomain()"
+                [disabled]="subdomainBusy || !subdomainInput.trim() || subdomainInput.trim() === s.subdomain"
+              >
+                {{ subdomainBusy ? 'جارٍ التحديث…' : 'تحديث النطاق الفرعي' }}
+              </button>
+            } @else {
+              <span class="protected-hint">النطاق الأساسي محمي.</span>
+            }
+          </div>
+          <div class="current-url-display">
+            <span>الرابط الحالي:</span>
+            <a [href]="storeUrl(s)" target="_blank" rel="noopener" dir="ltr">
+              https://{{ s.subdomain }}.mecart.app
+            </a>
+          </div>
+        </div>
+
+        <hr class="card-divider">
+
+        <!-- 2.2 Custom Domain Management -->
+        <div class="domain-sub-section">
+          <div class="section-badge-title">
+            <span class="sub-num">2</span>
+            <h3>الدومين المخصص (Custom Domain)</h3>
+          </div>
+          <p class="section-desc">
+            ربط دومين خاص بالمتجر (مثل <code>shop.example.com</code>). يمكنك ربطه مباشرة أو فحصه عبر سجلات DNS TXT.
+          </p>
+
+          <div class="custom-domain-status-row">
+            <span>الدومين المربوط حالياً:</span>
+            @if (s.customDomain) {
+              <strong class="domain-tag active-domain" dir="ltr">{{ s.customDomain }}</strong>
+              <button class="btn btn-sm btn-danger-outline" (click)="unlinkCustomDomain()" [disabled]="domainDirectBusy">
+                إلغاء ربط الدومين
+              </button>
+            } @else {
+              <span class="domain-tag inactive-domain">غير مربوط بدومين خاص</span>
+            }
+          </div>
+
+          <div class="custom-domain-input-box">
+            <label for="customDomainDirectInput">اسم الدومين الجديد</label>
+            <div class="input-action-row">
+              <input
+                id="customDomainDirectInput"
+                type="text"
+                [(ngModel)]="customDomainInput"
+                placeholder="مثال: store.mybrand.com"
+                dir="ltr"
+                [disabled]="domainDirectBusy"
+              >
+              <button
+                class="btn btn-primary"
+                (click)="saveCustomDomainDirect()"
+                [disabled]="domainDirectBusy || !customDomainInput.trim()"
+              >
+                {{ domainDirectBusy ? 'جارٍ الربط…' : 'حفظ وربط الدومين مباشرة' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- DNS Verification Collapsible Toggle -->
+          <div class="dns-advanced-box">
+            <button type="button" class="btn-toggle-dns" (click)="showDnsVerify = !showDnsVerify">
+              <span>{{ showDnsVerify ? '▼ إخفاء فحص وإثبات الملكية عبر DNS TXT' : '► فحص وإثبات الملكية عبر سجلات DNS TXT (اختياري)' }}</span>
+            </button>
+
+            @if (showDnsVerify) {
+              <div class="dns-verify-panel">
+                <p>يمكنك التحقق من توجيه DNS الخاص بالدومين وإثبات ملكيته عبر سجل TXT قبل اعتماده:</p>
+                <button
+                  class="btn btn-outline btn-sm"
+                  (click)="prepareDomain()"
+                  [disabled]="domainBusy || !customDomainInput.trim()"
+                >
+                  {{ domainBusy ? 'جارٍ التجهيز…' : 'توليد سجل التحقق TXT' }}
+                </button>
+
+                @if (domainProof; as proof) {
+                  <div class="proof-records-box">
+                    <div class="proof-item">
+                      <label>اسم السجل (Host / Name)</label>
+                      <input readonly dir="ltr" [value]="proof.recordName">
+                    </div>
+                    <div class="proof-item">
+                      <label>قيمة السجل (Value / TXT)</label>
+                      <textarea readonly dir="ltr" rows="3" [value]="proof.recordValue"></textarea>
+                    </div>
+                    <button class="btn btn-primary btn-sm" (click)="verifyDomain()" [disabled]="domainBusy">
+                      {{ domainBusy ? 'جارٍ الفحص…' : 'التحقق الآن من سجل DNS' }}
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 3: Store Access & Support -->
+      <section class="admin-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <h2>الوصول والتحكم بالمتجر</h2>
+          </div>
+        </div>
+
+        <p class="section-desc">
+          يمكنك كإدارة للمنصة فتح جلسة دعم مؤقتة (آمنة ومسجلة لمدة 15 دقيقة) للدخول المباشر إلى أي قسم في لوحة تحكم المتجر.
+        </p>
+
+        @if (s.id !== '1' && s.status === 'Active') {
+          <div class="support-action-banner">
+            <div>
+              <strong>فتح جلسة دعم فورية</strong>
+              <p>رابط الدخول يستخدم مرة واحدة خلال 60 ثانية.</p>
+            </div>
+            <button class="btn btn-primary" (click)="openSupport(s)">
+              بدء جلسة الدعم
+            </button>
+          </div>
+
+          <div class="shortcuts-group">
+            <label>الانتقال المباشر إلى قسم داخل المتجر:</label>
+            <div class="section-actions-grid">
+              @for (item of sections; track item.path) {
+                <button class="btn btn-outline btn-sm shortcut-btn" (click)="openSection(item.path)">
+                  {{ item.label }}
+                </button>
+              }
+            </div>
+          </div>
+        } @else {
+          <div class="info-alert">
+            جلسات الدعم متاحة فقط للمتاجر النشطة.
+          </div>
+        }
+      </section>
+
+      <!-- Card 4: Backup, Templates & Export -->
+      <section class="admin-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <svg class="card-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <h2>النسخ الاحتياطي والبيانات</h2>
+          </div>
+        </div>
+
+        <p class="section-desc">
+          تصدير نسخة كاملة من بيانات المتجر، المنتجات، والكتالوج كحزمة مضغوطة ZIP، أو إدارة استيراد القوالب.
+        </p>
+
+        <div class="packages-actions-row">
+          <button class="btn btn-outline" (click)="exportStoreZip(s)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            تنزيل حزمة المتجر ZIP
+          </button>
+
+          <a class="btn btn-outline" routerLink="/admin/packages" [queryParams]="{ store: s.id }" queryParamsHandling="merge">
+            فتح إدارة الاستيراد والتصدير
+          </a>
+
+          <a class="btn btn-outline" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md">
+            دليل تجهيز البيانات
+          </a>
+        </div>
+      </section>
+
+      <!-- Card 5: Danger Zone (منطقة العمليات الحساسة) -->
+      <section class="admin-card danger-zone-card">
+        <div class="card-header danger-header">
+          <div class="card-title-group">
+            <svg class="card-icon danger-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            <h2>منطقة العمليات الحساسة (Danger Zone)</h2>
+          </div>
+          <span class="danger-pill">تحذير</span>
+        </div>
+
+        <!-- 5.1 Suspend / Activate Store -->
+        <div class="danger-row">
+          <div class="danger-info">
+            <strong>{{ s.status === 'Active' ? 'إيقاف المتجر مؤقتاً' : 'تفعيل المتجر' }}</strong>
+            <p>
+              @if (s.status === 'Active') {
+                عند إيقاف المتجر، لن يتمكن العملاء من التصفح أو الطلب، وسيظهر للزوار شاشة "المتجر غير متاح حالياً" مع الاحتفاظ بجميع البيانات.
+              } @else {
+                المتجر موقوف حالياً. عند تفعيله، سيتمكن العملاء من تصفح المنتجات والطلب فوراً.
+              }
+            </p>
+          </div>
+          @if (s.id !== '1') {
+            <button
+              class="btn"
+              [class.btn-warning]="s.status === 'Active'"
+              [class.btn-success]="s.status !== 'Active'"
+              (click)="toggleStoreStatus(s)"
+              [disabled]="statusBusy"
+            >
+              {{ statusBusy ? 'جارٍ التغيير…' : (s.status === 'Active' ? 'إيقاف المتجر مؤقتاً' : 'تفعيل المتجر الآن') }}
+            </button>
+          } @else {
+            <span class="protected-hint">المتجر الأساسي محمي من الإيقاف.</span>
+          }
+        </div>
+
+        <hr class="danger-divider">
+
+        <!-- 5.2 Delete Store Permanently -->
+        <div class="danger-row">
+          <div class="danger-info">
+            <strong class="text-danger">حذف المتجر نهائياً</strong>
+            <p>
+              سيتم حذف متجر <strong>{{ s.name }}</strong> نهائياً ومسح جميع المنتجات، الأقسام، الطلبات، وسجلات الكتالوج الخاصة به. هذا الإجراء نهائي ولا يمكن التراجع عنه.
+            </p>
+          </div>
+          @if (s.id !== '1') {
+            <button class="btn btn-danger" (click)="openDeleteModal()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+              </svg>
+              حذف المتجر نهائياً
+            </button>
+          } @else {
+            <span class="protected-hint">المتجر الأساسي محمي من الحذف.</span>
+          }
+        </div>
+      </section>
+
+    </div>
+  } @else {
+    <div class="state-card not-found-state">
+      <h1>المتجر غير موجود</h1>
+      <p>تعذر العثور على المتجر المطلوب. ربما تم حذفه أو أن الرابط غير صحيح.</p>
+      <a routerLink="/admin/stores" class="btn btn-primary">العودة لسجل المتاجر</a>
+    </div>
+  }
+
+  <!-- Delete Store Confirmation Modal -->
+  @if (isDeleteModalOpen && store(); as s) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+      <div class="modal-card danger-modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="danger-icon-circle">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </div>
+          <div>
+            <h2 id="deleteModalTitle">تأكيد حذف متجر [{{ s.name }}]</h2>
+            <p class="modal-subtitle">عملية حساسة ولا يمكن التراجع عنها إطلاقاً</p>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <div class="danger-callout">
+            <p>
+              أنت على وشك حذف المتجر نهائياً. سيتم حذف جميع المنتجات، الطلبات، الكتالوج، وإعدادات المتجر من قاعدة البيانات.
+            </p>
+          </div>
+
+          <div class="confirm-prompt">
+            <label for="confirmSlugInput">
+              لتأكيد الحذف، اكتب اسم النطاق الفرعي للمتجر <strong dir="ltr">[{{ s.subdomain }}]</strong> في الحقل التالي:
+            </label>
+            <input
+              id="confirmSlugInput"
+              type="text"
+              [(ngModel)]="deleteConfirmSlug"
+              [placeholder]="s.subdomain"
+              dir="ltr"
+              [disabled]="deleteBusy"
+              class="confirm-input"
+            >
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button
+            class="btn btn-danger"
+            (click)="confirmDeleteStore()"
+            [disabled]="deleteBusy || deleteConfirmSlug.trim().toLowerCase() !== s.subdomain.toLowerCase()"
+          >
+            {{ deleteBusy ? 'جارٍ مسح المتجر وبياناته…' : 'نعم، احذف المتجر نهائياً' }}
+          </button>
+          <button class="btn btn-outline" (click)="closeDeleteModal()" [disabled]="deleteBusy">
+            إلغاء
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Support Session Modal -->
+  @if (supportLoginUrl(); as url) {
+    <div class="modal-backdrop" (click)="supportLoginUrl.set(null)">
+      <div class="modal-card support-dialog" role="dialog" aria-modal="true" aria-labelledby="supportTitle" tabindex="-1" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>جلسة الدعم جاهزة</h2>
+        </div>
+        <div class="modal-body">
+          <p>تم توليد رابط تسجيل دخول آمن لمرة واحدة. الرابط صالح لمدة 60 ثانية، وجلسة الدعم تستمر 15 دقيقة.</p>
+        </div>
+        <div class="modal-actions">
+          <a class="btn btn-primary" [href]="url" target="_blank" rel="noopener" (click)="supportLoginUrl.set(null)">
+            فتح جلسة الدعم الآن
+          </a>
+          <button class="btn btn-outline" (click)="supportLoginUrl.set(null)" autofocus>
+            إغلاق
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</main>

@@ -54,6 +54,17 @@ export class SettingsService {
 
   settings = signal<StorefrontSettings>(this.defaultSettings);
   isLoading = signal<boolean>(false);
+  isStoreUnavailable = signal<boolean>(false);
+  storeUnavailableReason = signal<'suspended' | 'not_found' | null>(null);
+  storeUnavailableMessage = signal<string>('');
+  storeUnavailableName = signal<string>('');
+
+  setStoreUnavailable(reason: 'suspended' | 'not_found', message?: string, storeName?: string) {
+    this.isStoreUnavailable.set(true);
+    this.storeUnavailableReason.set(reason);
+    if (message) this.storeUnavailableMessage.set(message);
+    if (storeName) this.storeUnavailableName.set(storeName);
+  }
 
   loadSettings() {
     this.isLoading.set(true);
@@ -82,15 +93,27 @@ export class SettingsService {
       }),
       tap(data => {
         if (data) {
+          this.isStoreUnavailable.set(false);
+          this.storeUnavailableReason.set(null);
           this.settings.set(data);
           this.applyCssThemeVariables(data);
         }
         this.isLoading.set(false);
       }),
       catchError(err => {
-        console.warn('Could not load remote storefront settings, using default branding.', err);
         this.isLoading.set(false);
-        this.applyCssThemeVariables(this.defaultSettings);
+        const isPlatform = isPlatformContext();
+        if (!isPlatform && (err?.status === 403 || err?.status === 404)) {
+          const isSusp = err.status === 403 || err.error?.isSuspended;
+          this.setStoreUnavailable(
+            isSusp ? 'suspended' : 'not_found',
+            err.error?.message || (isSusp ? 'هذا المتجر موقوف حالياً من قِبل إدارة المنصة.' : 'عذراً، هذا المتجر غير متاح أو تم حذفه.'),
+            err.error?.storeName || ''
+          );
+        } else {
+          console.warn('Could not load remote storefront settings, using default branding.', err);
+          this.applyCssThemeVariables(this.defaultSettings);
+        }
         return of(this.defaultSettings);
       })
     );

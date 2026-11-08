@@ -1,12 +1,16 @@
 import { inject } from '@angular/core';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { StoreDomainResolver } from './store-domain-resolver.service';
 import { adminSessionKey, customerSessionKey } from './tenant-session';
-import { HttpInterceptorFn } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { SettingsService } from './settings.service';
+import { isPlatformContext } from './store-context';
 
 export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
   if (!request.url.startsWith(environment.apiUrl) || typeof window === 'undefined') return next(request);
+  const settingsService = inject(SettingsService);
   const headers: Record<string, string> = {};
   const query = new URLSearchParams(window.location.search).get('tenant');
   const host = window.location.hostname;
@@ -20,6 +24,27 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
     if (session?.token) headers['Authorization'] = `Bearer ${session.token}`;
   } catch { /* Invalid stored session is handled by the login flow. */ }
   const customHost = !['localhost','127.0.0.1','mecart.app','www.mecart.app','supermarket1.runasp.net'].includes(host) && !host.endsWith('.mecart.app');
-  if (!environment.standalone && !slug && customHost) return inject(StoreDomainResolver).slug.pipe(switchMap(resolved => next(request.clone({setHeaders:{...headers,'X-Tenant-Slug':resolved}}))));
-  return next(request.clone({ setHeaders: headers }));
+
+  const handleResponse = (req: typeof request) => next(req).pipe(
+    catchError((err: unknown) => {
+      if (err instanceof HttpErrorResponse && (err.status === 403 || err.status === 404)) {
+        if (!isPlatformContext() && !request.url.includes('/admin/')) {
+          const isSusp = err.status === 403 || err.error?.isSuspended;
+          settingsService.setStoreUnavailable(
+            isSusp ? 'suspended' : 'not_found',
+            err.error?.message,
+            err.error?.storeName
+          );
+        }
+      }
+      return throwError(() => err);
+    })
+  );
+
+  if (!environment.standalone && !slug && customHost) {
+    return inject(StoreDomainResolver).slug.pipe(
+      switchMap(resolved => handleResponse(request.clone({ setHeaders: { ...headers, 'X-Tenant-Slug': resolved } })))
+    );
+  }
+  return handleResponse(request.clone({ setHeaders: headers }));
 };
