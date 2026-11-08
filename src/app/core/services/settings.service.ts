@@ -151,8 +151,14 @@ export class SettingsService {
     else root.style.removeProperty('--footer-logo-width');
     if (layout?.footerLogoHeight) root.style.setProperty('--footer-logo-height', layout.footerLogoHeight + 'px');
     else root.style.removeProperty('--footer-logo-height');
-    if (layout?.modalImageHeight) root.style.setProperty('--modal-image-height', layout.modalImageHeight + 'px');
-    else root.style.removeProperty('--modal-image-height');
+    const modalImgH = Number(layout?.modalImageHeight);
+    if (modalImgH > 0) {
+      root.style.setProperty('--modal-image-height', modalImgH + 'px');
+      root.style.setProperty('--modal-image-aspect', 'auto');
+    } else {
+      root.style.removeProperty('--modal-image-height');
+      root.style.removeProperty('--modal-image-aspect');
+    }
     root.style.setProperty('--detail-image-fit',layout?.detailImageFit||'contain');
     if (settings.primaryColor) {
       const primary = this.sanitizeHexColor(settings.primaryColor, '#0a3d62');

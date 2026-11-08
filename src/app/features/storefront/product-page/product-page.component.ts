@@ -378,7 +378,6 @@ export class ProductPageComponent implements OnInit, OnDestroy {
 
     for(const group of p.modifierGroups||[]){const count=group.options.filter(o=>this.modifierSelected(group,o)).length;if(count<(group.isRequired?Math.max(1,group.minSelection):group.minSelection)||count>group.maxSelection){this.toast.error('راجع اختيارات '+group.nameAr);return;}}
     if(p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===this.selectedPrepOption?.id))){this.toast.error('اختر طريقة التجهيز المطلوبة');return;}
-    this.isSuccess.set(true);
 
     const mods: ModifierOption[] = [...this.multiSelectedModifiers];
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
@@ -389,7 +388,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     const qty = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
     const customGrams = this.isWeighedProduct ? this.calculatedEstimatedWeightGrams : undefined;
 
-    if (!await this.cartService.addItem(
+    const added = await this.cartService.addItem(
       p,
       qty,
       this.selectedPrepOption ?? undefined,
@@ -398,8 +397,14 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       this.specialInstructions,
       this.isWeighedProduct ? this.orderMode : 'pieces',
       undefined, this.selectedVariant ?? undefined, this.booking ?? undefined
-    )) return;
+    );
 
+    if (!added) {
+      this.isSuccess.set(false);
+      return;
+    }
+
+    this.isSuccess.set(true);
     this.toast.success(`تمت إضافة "${p.nameAr}" إلى السلة 🛒`);
 
     setTimeout(() => {

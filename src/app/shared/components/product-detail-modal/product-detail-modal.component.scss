@@ -1812,8 +1812,8 @@
 
 .modal-body .stepper-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.modal-body .stepper-sub-title{display:none}.modal-body .stepper-main-title{font-size:13px}.modal-body .stepper-box{display:flex;align-items:center;min-height:44px;gap:10px}.modal-footer-lux{display:flex;align-items:center;gap:12px}.modal-footer-lux .footer-price-summary{flex:none}.modal-footer-lux .btn-add-to-basket{flex:1;min-width:0;min-height:48px;font-size:14px;padding:10px 16px}
 
-.product-gallery-hero .hero-image-container { height: var(--modal-image-height, 200px); max-height: 55dvh; }
-@media(min-width:768px) { .product-gallery-hero .hero-image-container { height: var(--modal-image-height, 250px); } }
+.product-gallery-hero .hero-image-container { height: var(--modal-image-height, 200px); max-height: var(--modal-image-height, 55dvh); }
+@media(min-width:768px) { .product-gallery-hero .hero-image-container { height: var(--modal-image-height, 250px); max-height: var(--modal-image-height, none); } }
 
 .modal-body .fixed-quantity {
   padding: 4px 0;

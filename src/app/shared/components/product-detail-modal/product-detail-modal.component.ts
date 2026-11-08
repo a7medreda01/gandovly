@@ -551,7 +551,6 @@ export class ProductDetailModalComponent implements OnInit {
     }
 
     if (this.isSuccess) return;
-    this.isSuccess = true;
 
     const qty = this.orderMode === 'pieces'
       ? this.piecesCount
@@ -561,7 +560,7 @@ export class ProductDetailModalComponent implements OnInit {
       ? this.customWeightGrams
       : (this.product.pricingType === 'ByWeight' ? this.piecesCount * (this.product.averageUnitWeightGrams || 500) : undefined);
 
-    if (!await this.cartService.addItem(
+    const added = await this.cartService.addItem(
       this.product,
       qty,
       this.selectedPrepOption ?? undefined,
@@ -571,8 +570,14 @@ export class ProductDetailModalComponent implements OnInit {
       this.orderMode,
       this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
       this.selectedVariant ?? undefined, this.booking ?? undefined
-    )) return;
+    );
 
+    if (!added) {
+      this.isSuccess = false;
+      return;
+    }
+
+    this.isSuccess = true;
     this.toast.success(
       'تمت الإضافة إلى السلة بنجاح',
       'عرض السلة',

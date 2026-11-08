@@ -92,9 +92,26 @@ export class CartService {
         variantId: variant?.id
       }));
       return true;
-    } catch (error) {
-      const response = error as { error?: { message?: string } };
-      this.toast.error(response.error?.message || 'تعذر التحقق من المخزون. حاول مرة أخرى.');
+    } catch (error: any) {
+      let msg = '';
+      if (typeof error === 'string') {
+        msg = error;
+      } else if (error?.error) {
+        if (typeof error.error === 'string') {
+          try {
+            const parsed = JSON.parse(error.error);
+            msg = parsed.message || (Array.isArray(parsed.errors) ? parsed.errors.join(' - ') : '') || parsed.title || error.error;
+          } catch {
+            msg = error.error;
+          }
+        } else if (typeof error.error === 'object') {
+          msg = error.error.message || (Array.isArray(error.error.errors) ? error.error.errors.join(' - ') : '') || error.error.title;
+        }
+      }
+      if (!msg && error?.message && !error.message.includes('Http failure response')) {
+        msg = error.message;
+      }
+      this.toast.error(msg || 'الكمية المطلوبة غير متوفرة في المخزون.');
       return false;
     } finally {
       this.pendingStock.delete(product.id);
