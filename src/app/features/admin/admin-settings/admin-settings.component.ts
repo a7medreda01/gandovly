@@ -188,6 +188,17 @@ export class AdminSettingsComponent implements OnInit {
         if ((s as any).whatsApp && !normalized.whatsapp) {
           normalized.whatsapp = (s as any).whatsApp;
         }
+        const colorFields = [
+          'primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor',
+          'navbarBgColor', 'navbarTextColor', 'footerBgColor', 'footerTextColor',
+          'cardBgColor', 'borderColor', 'btnPrimaryBg', 'btnPrimaryText',
+          'btnAccentBg', 'btnAccentText', 'successColor', 'errorColor', 'warningColor'
+        ] as const;
+        for (const k of colorFields) {
+          if ((normalized as any)[k]) {
+            (normalized as any)[k] = this.settingsService.sanitizeHexColor((normalized as any)[k], (normalized as any)[k]);
+          }
+        }
         this.settings.set(normalized);
         this.isLoading.set(false);
       },
@@ -232,6 +243,18 @@ export class AdminSettingsComponent implements OnInit {
       WhatsApp: current.whatsapp || (current as any).whatsApp || '',
       whatsapp: current.whatsapp || (current as any).whatsApp || ''
     };
+
+    const colorFields = [
+      'primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor',
+      'navbarBgColor', 'navbarTextColor', 'footerBgColor', 'footerTextColor',
+      'cardBgColor', 'borderColor', 'btnPrimaryBg', 'btnPrimaryText',
+      'btnAccentBg', 'btnAccentText', 'successColor', 'errorColor', 'warningColor'
+    ] as const;
+    for (const k of colorFields) {
+      if ((payload as any)[k]) {
+        (payload as any)[k] = this.settingsService.sanitizeHexColor((payload as any)[k], (payload as any)[k]);
+      }
+    }
 
     this.isSaving.set(true);
     this.adminService.updateSettings(payload).subscribe({

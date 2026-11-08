@@ -946,3 +946,54 @@
 
 img.image-pending { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) { img[appImageReveal] { transition: opacity .22s ease-out; } }
+
+/* Scroll-triggered staggered animations for luxury hero card */
+.luxury-hero-card.scroll-animated:not(.in-view) {
+  .hero-title { opacity: 0; transform: translate3d(50px, 0, 0); }
+  .hero-subtitle { opacity: 0; transform: translate3d(36px, 0, 0); }
+  .btn-hero-cta { opacity: 0; transform: translate3d(28px, 10px, 0) scale(0.96); }
+  .hero-bg-img { transform: scale(1.08); }
+}
+
+.luxury-hero-card.scroll-animated.in-view {
+  .hero-title {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: 0.12s;
+  }
+  .hero-subtitle {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: 0.22s;
+  }
+  .btn-hero-cta {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+    transition-delay: 0.32s;
+  }
+  .hero-bg-img {
+    transform: scale(1);
+    transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+:host-context([dir="ltr"]) .luxury-hero-card.scroll-animated:not(.in-view),
+[dir="ltr"] .luxury-hero-card.scroll-animated:not(.in-view) {
+  .hero-title { transform: translate3d(-50px, 0, 0); }
+  .hero-subtitle { transform: translate3d(-36px, 0, 0); }
+  .btn-hero-cta { transform: translate3d(-28px, 10px, 0) scale(0.96); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .luxury-hero-card.scroll-animated:not(.in-view) {
+    .hero-title, .hero-subtitle, .btn-hero-cta { opacity: 1; transform: none !important; }
+    .hero-bg-img { transform: none !important; }
+  }
+  .luxury-hero-card.scroll-animated.in-view {
+    .hero-title, .hero-subtitle, .btn-hero-cta { transition: none !important; transform: none !important; }
+    .hero-bg-img { transition: none !important; transform: none !important; }
+  }
+}

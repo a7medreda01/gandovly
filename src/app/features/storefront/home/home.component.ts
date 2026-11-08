@@ -1,4 +1,5 @@
 import { ImageRevealDirective } from '../../../shared/directives/image-reveal.directive';
+import { ScrollAnimateDirective } from '../../../shared/directives/scroll-animate.directive';
 import { HomeSkeletonComponent } from './home-skeleton.component';
 import { NotificationService } from '../../../core/services/notification.service';
 import { HomeSectionsComponent } from './home-sections.component';
@@ -21,7 +22,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [ImageRevealDirective, HomeSkeletonComponent, HomeSectionsComponent,CommonModule, RouterLink, RouterModule, FormsModule, ProductCardComponent, ProductCardSkeletonComponent, ProductDetailModalComponent, ImageUrlPipe],
+  imports: [ImageRevealDirective, ScrollAnimateDirective, HomeSkeletonComponent, HomeSectionsComponent,CommonModule, RouterLink, RouterModule, FormsModule, ProductCardComponent, ProductCardSkeletonComponent, ProductDetailModalComponent, ImageUrlPipe],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })

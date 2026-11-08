@@ -1,5 +1,6 @@
 import { LanguageService } from '../../../core/services/language.service';
 import { ImageRevealDirective } from '../../../shared/directives/image-reveal.directive';
+import { ScrollAnimateDirective } from '../../../shared/directives/scroll-animate.directive';
 import { HomeSkeletonComponent } from './home-skeleton.component';
 import { Subscription } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -16,7 +17,7 @@ import { Product } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { ProductDetailModalComponent } from '../../../shared/components/product-detail-modal/product-detail-modal.component';
-@Component({ selector: 'app-home-sections', standalone: true, imports: [ImageRevealDirective, HomeSkeletonComponent, CommonModule, FormsModule, RouterLink, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent], templateUrl: './home-sections.component.html', styleUrl: './home-sections.component.scss' })
+@Component({ selector: 'app-home-sections', standalone: true, imports: [ImageRevealDirective, ScrollAnimateDirective, HomeSkeletonComponent, CommonModule, FormsModule, RouterLink, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent], templateUrl: './home-sections.component.html', styleUrl: './home-sections.component.scss' })
 export class HomeSectionsComponent {
     readonly language = inject(LanguageService);
     readonly settings = inject(SettingsService);

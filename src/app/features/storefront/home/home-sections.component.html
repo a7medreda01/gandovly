@@ -11,10 +11,10 @@
     @let eyebrow = language.text(s.eyebrow, s.eyebrowEn);
     @let buttonText = language.text(s.buttonText, s.buttonTextEn);
     @if(s.kind==='hero'||s.kind==='banner'){
-      <section class="promo" [class.hero]="s.kind==='hero'" [class.overlay]="s.layout==='overlay'" [class.no-image]="!s.imageUrl&&!s.mobileImageUrl&&!row.products.length" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)" [style.--overlay]="s.overlayOpacity/100">
+      <section class="promo" appScrollAnimate [class.hero]="s.kind==='hero'" [class.overlay]="s.layout==='overlay'" [class.no-image]="!s.imageUrl&&!s.mobileImageUrl&&!row.products.length" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)" [style.--overlay]="s.overlayOpacity/100">
         @if(s.imageUrl||s.mobileImageUrl){<picture class="promo-media">@if(s.mobileImageUrl){<source media="(max-width:767px)" [srcset]="s.mobileImageUrl|imageUrl:'banner'">}<img appImageReveal [src]="(s.imageUrl||s.mobileImageUrl)|imageUrl:'banner'" [alt]="title" [attr.loading]="$first?'eager':'lazy'" [attr.fetchpriority]="$first?'high':'auto'" decoding="async"></picture>}
         @else if(row.products.length){<div class="spotlight"><app-product-card [product]="row.products[0]" (selectProduct)="open($event)"></app-product-card></div>}
-        <div class="promo-copy">@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}@if(buttonText){<a class="primary-action" [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge">{{ buttonText }} <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</div>
+        <div class="promo-copy">@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}@if(buttonText){<a class="primary-action" [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge"><span>{{ buttonText }}</span> <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</div>
       </section>
     }
     @if(s.kind==='products'&&row.products.length){

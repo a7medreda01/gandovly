@@ -67,6 +67,17 @@ export class SettingsService {
           for (const key of ['facebookUrl', 'instagramUrl'] as const) {
             if (/^https?:\/\/(www\.)?facebook\.com\/runxtech\/?$/i.test(clean[key] || '')) clean[key] = '';
           }
+        const colorKeys = [
+          'primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor',
+          'navbarBgColor', 'navbarTextColor', 'footerBgColor', 'footerTextColor',
+          'cardBgColor', 'borderColor', 'btnPrimaryBg', 'btnPrimaryText',
+          'btnAccentBg', 'btnAccentText', 'successColor', 'errorColor', 'warningColor'
+        ] as const;
+        for (const k of colorKeys) {
+          if ((clean as any)[k]) {
+            (clean as any)[k] = this.sanitizeHexColor((clean as any)[k], (clean as any)[k]);
+          }
+        }
         return clean;
       }),
       tap(data => {
@@ -85,15 +96,29 @@ export class SettingsService {
     );
   }
 
-  private hexToRgb(hex: string): string {
-    const clean = hex.replace('#', '');
-    if (clean.length === 3) {
-      const r = parseInt(clean[0] + clean[0], 16);
-      const g = parseInt(clean[1] + clean[1], 16);
-      const b = parseInt(clean[2] + clean[2], 16);
-      return `${r}, ${g}, ${b}`;
+  /**
+   * Sanitizes any hex color string to valid #rrggbb format.
+   * Gracefully fixes duplicated inputs like "#684C3A#684C3A", missing "#", etc.
+   */
+  sanitizeHexColor(color?: string | null, fallback = ''): string {
+    if (!color) return fallback;
+    const str = String(color).trim();
+    if (!str) return fallback;
+    const match = str.match(/#?([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/);
+    if (match) {
+      const hex = match[1];
+      if (hex.length === 3) {
+        return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toLowerCase();
+      }
+      return `#${hex}`.toLowerCase();
     }
-    if (clean.length >= 6) {
+    if (/^(rgb|hsl)/i.test(str)) return str;
+    return fallback;
+  }
+
+  private hexToRgb(hex: string): string {
+    const clean = this.sanitizeHexColor(hex, '#12263F').replace('#', '');
+    if (clean.length === 6) {
       const r = parseInt(clean.substring(0, 2), 16);
       const g = parseInt(clean.substring(2, 4), 16);
       const b = parseInt(clean.substring(4, 6), 16);
@@ -130,52 +155,58 @@ export class SettingsService {
     else root.style.removeProperty('--modal-image-height');
     root.style.setProperty('--detail-image-fit',layout?.detailImageFit||'contain');
     if (settings.primaryColor) {
-      root.style.setProperty('--primary-color', settings.primaryColor);
-      root.style.setProperty('--color-primary', settings.primaryColor);
-      root.style.setProperty('--bs-primary', settings.primaryColor);
-      root.style.setProperty('--primary-rgb', this.hexToRgb(settings.primaryColor));
+      const primary = this.sanitizeHexColor(settings.primaryColor, '#0a3d62');
+      root.style.setProperty('--primary-color', primary);
+      root.style.setProperty('--color-primary', primary);
+      root.style.setProperty('--bs-primary', primary);
+      root.style.setProperty('--primary-rgb', this.hexToRgb(primary));
     }
     // Main text color should remain a clean neutral dark unless explicitly customized
     const textColor = settings.textColor || '#0f172a';
     root.style.setProperty('--ink', textColor);
     root.style.setProperty('--text-main', textColor);
     if (settings.secondaryColor) {
-      root.style.setProperty('--secondary-color', settings.secondaryColor);
-      root.style.setProperty('--text-2', settings.secondaryColor);
+      const secondary = this.sanitizeHexColor(settings.secondaryColor, '#A26F47');
+      root.style.setProperty('--secondary-color', secondary);
+      root.style.setProperty('--text-2', secondary);
     }
     if (settings.accentColor) {
-      root.style.setProperty('--accent-color', settings.accentColor);
-      root.style.setProperty('--color-accent', settings.accentColor);
-      root.style.setProperty('--brand-orange', settings.accentColor);
-      root.style.setProperty('--brand-orange-hover', settings.accentColor);
-      root.style.setProperty('--accent-rgb', this.hexToRgb(settings.accentColor));
+      const accent = this.sanitizeHexColor(settings.accentColor, '#e67e22');
+      root.style.setProperty('--accent-color', accent);
+      root.style.setProperty('--color-accent', accent);
+      root.style.setProperty('--brand-orange', accent);
+      root.style.setProperty('--brand-orange-hover', accent);
+      root.style.setProperty('--accent-rgb', this.hexToRgb(accent));
     }
     if (settings.surfaceColor) {
-      root.style.setProperty('--surface-color', settings.surfaceColor);
-      root.style.setProperty('--surface', settings.surfaceColor);
-      root.style.setProperty('--page-bg', settings.surfaceColor);
+      const surface = this.sanitizeHexColor(settings.surfaceColor, '#f8fafd');
+      root.style.setProperty('--surface-color', surface);
+      root.style.setProperty('--surface', surface);
+      root.style.setProperty('--page-bg', surface);
     }
 
     // Extended UI Colors
-    if (settings.navbarBgColor) root.style.setProperty('--navbar-bg', settings.navbarBgColor);
-    if (settings.navbarTextColor) root.style.setProperty('--navbar-text', settings.navbarTextColor);
-    if (settings.footerBgColor) root.style.setProperty('--footer-bg', settings.footerBgColor);
-    if (settings.footerTextColor) root.style.setProperty('--footer-text', settings.footerTextColor);
+    if (settings.navbarBgColor) root.style.setProperty('--navbar-bg', this.sanitizeHexColor(settings.navbarBgColor, '#ffffff'));
+    if (settings.navbarTextColor) root.style.setProperty('--navbar-text', this.sanitizeHexColor(settings.navbarTextColor, '#12263F'));
+    if (settings.footerBgColor) root.style.setProperty('--footer-bg', this.sanitizeHexColor(settings.footerBgColor, '#fbf4e9'));
+    if (settings.footerTextColor) root.style.setProperty('--footer-text', this.sanitizeHexColor(settings.footerTextColor, '#63412c'));
     if (settings.cardBgColor) {
-      root.style.setProperty('--card-bg', settings.cardBgColor);
-      root.style.setProperty('--surface-white', settings.cardBgColor);
+      const card = this.sanitizeHexColor(settings.cardBgColor, '#ffffff');
+      root.style.setProperty('--card-bg', card);
+      root.style.setProperty('--surface-white', card);
     }
     if (settings.borderColor) {
-      root.style.setProperty('--border-color', settings.borderColor);
-      root.style.setProperty('--line', settings.borderColor);
+      const border = this.sanitizeHexColor(settings.borderColor, '#E1E6EE');
+      root.style.setProperty('--border-color', border);
+      root.style.setProperty('--line', border);
     }
-    if (settings.btnPrimaryBg) root.style.setProperty('--btn-primary-bg', settings.btnPrimaryBg);
-    if (settings.btnPrimaryText) root.style.setProperty('--btn-primary-text', settings.btnPrimaryText);
-    if (settings.btnAccentBg) root.style.setProperty('--btn-accent-bg', settings.btnAccentBg);
-    if (settings.btnAccentText) root.style.setProperty('--btn-accent-text', settings.btnAccentText);
-    if (settings.successColor) root.style.setProperty('--success-color', settings.successColor);
-    if (settings.errorColor) root.style.setProperty('--error-color', settings.errorColor);
-    if (settings.warningColor) root.style.setProperty('--warning-color', settings.warningColor);
+    if (settings.btnPrimaryBg) root.style.setProperty('--btn-primary-bg', this.sanitizeHexColor(settings.btnPrimaryBg, '#12263F'));
+    if (settings.btnPrimaryText) root.style.setProperty('--btn-primary-text', this.sanitizeHexColor(settings.btnPrimaryText, '#ffffff'));
+    if (settings.btnAccentBg) root.style.setProperty('--btn-accent-bg', this.sanitizeHexColor(settings.btnAccentBg, '#F4A261'));
+    if (settings.btnAccentText) root.style.setProperty('--btn-accent-text', this.sanitizeHexColor(settings.btnAccentText, '#ffffff'));
+    if (settings.successColor) root.style.setProperty('--success-color', this.sanitizeHexColor(settings.successColor, '#00875A'));
+    if (settings.errorColor) root.style.setProperty('--error-color', this.sanitizeHexColor(settings.errorColor, '#DC2626'));
+    if (settings.warningColor) root.style.setProperty('--warning-color', this.sanitizeHexColor(settings.warningColor, '#D97706'));
 
     // Shapes & Border Radius
     root.style.setProperty('--radius-navbar', settings.navbarBorderRadius || '0px');
