@@ -66,6 +66,70 @@
   margin-top: 0.5rem;
 }
 
+.btn-forgot-link {
+  background: none;
+  border: none;
+  color: var(--login-accent, #2563eb);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.modal-backdrop-custom {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  text-align: right;
+
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f1f5f9;
+
+    .modal-title {
+      font-size: 1.15rem;
+      color: #0f172a;
+    }
+
+    .btn-close-custom {
+      background: none;
+      border: none;
+      font-size: 1.75rem;
+      line-height: 1;
+      color: #94a3b8;
+      cursor: pointer;
+
+      &:hover {
+        color: #334155;
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+}
+
 .login-brand-mark { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 16px; margin: 0 auto 20px; background: #eeebff; color: #6555d9; font-size: 27px; font-weight: 800; overflow: hidden; }.login-brand-mark img { width: 100%; height: 100%; object-fit: contain; background: #fff; }.admin-login-page { background: #f5f6fa; }.login-card { border: 1px solid #e5e8f0; box-shadow: 0 15px 60px #24305809; border-radius: 20px; }.login-card h2 { color: #29324b; font-size: 23px; }.login-card p { color: #99a1b2; font-size: 11px; margin-top: 12px; line-height: 1.9; }.login-card label { font-size: 11px; color: #717c93; }.login-card input { border-radius: 9px; border: 1px solid #e3e7ef; background: #fbfcfe; font-size: 13px; }.login-card .btn-primary { background: #6555d9; border-radius: 9px; border: 0; font-size: 12px; padding: 13px; box-shadow: 0 4px 10px #6555d918; }
 
 .admin-login-page { --login-accent: var(--primary-color, #147d72); --login-soft: color-mix(in srgb, var(--primary-color, #147d72) 9%, white); }.platform-login { --login-accent: #6555d9; --login-soft: #eeebff; }.login-brand-mark { background: var(--login-soft); color: var(--login-accent); }.login-card .btn-primary { background: var(--login-accent); }

@@ -484,15 +484,31 @@ export interface AuthResponse {
   tenantId?: number;
   isSupportSession?: boolean;
   isPlatformAdmin?: boolean;
+  canDeleteStore?: boolean;
+  canManageUsers?: boolean;
   expiresAt?: string;
   success: boolean;
   token: string;
   refreshToken?: string;
   message: string;
   role?: string;
+  roleName?: string;
   usernameOrPhone?: string;
   fullName?: string;
+  email?: string;
   userId?: number;
+}
+
+export interface AdminUserItem {
+  id: number;
+  username: string;
+  fullName: string;
+  email?: string;
+  role: 'SuperAdmin' | 'Manager' | 'Staff' | 'KitchenStaff' | string;
+  roleName: string;
+  isActive: boolean;
+  createdAt: string;
+  hasInvitePending?: boolean;
 }
 
 export interface CustomerAddress {

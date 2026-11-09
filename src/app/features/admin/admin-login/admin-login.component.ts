@@ -26,8 +26,58 @@ export class AdminLoginComponent {
   showPassword = signal<boolean>(false);
   isLoading = signal<boolean>(false);
 
+  // Forgot password
+  showForgotModal = signal<boolean>(false);
+  forgotInput = signal<string>('');
+  isForgotSubmitting = signal<boolean>(false);
+  forgotResult = signal<{ sent: boolean; resetLink?: string; message?: string } | null>(null);
+
   toggleShowPassword() {
     this.showPassword.update(v => !v);
+  }
+
+  openForgotModal() {
+    this.forgotInput.set(this.username || '');
+    this.forgotResult.set(null);
+    this.showForgotModal.set(true);
+  }
+
+  closeForgotModal() {
+    this.showForgotModal.set(false);
+  }
+
+  submitForgotPassword() {
+    const val = this.forgotInput().trim();
+    if (!val) {
+      this.toast.error('أدخل اسم المستخدم أو البريد الإلكتروني.');
+      return;
+    }
+
+    this.isForgotSubmitting.set(true);
+    this.authService.forgotPassword(val).subscribe({
+      next: (res) => {
+        this.isForgotSubmitting.set(false);
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        const fullLink = res.resetLink ? (origin + (res.resetLink.startsWith('/') ? res.resetLink : '/' + res.resetLink)) : undefined;
+
+        this.forgotResult.set({
+          sent: true,
+          resetLink: fullLink,
+          message: 'تم توليد رابط استعادة كلمة المرور بنجاح.'
+        });
+        this.toast.success('تم إنشاء رابط الاستعادة.');
+      },
+      error: (err) => {
+        this.isForgotSubmitting.set(false);
+        this.toast.error(err?.error?.message || 'تعذر معالجة الطلب.');
+      }
+    });
+  }
+
+  copyLink(link: string) {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(link).then(() => this.toast.success('تم نسخ الرابط.')).catch(() => {});
+    }
   }
 
   login() {

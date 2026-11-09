@@ -6,6 +6,7 @@ import { ApiService } from '../../../core/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface StoreTenant {
   id: string;
@@ -34,6 +35,8 @@ export class AdminStoresComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly api = inject(ApiService);
   private readonly http = inject(HttpClient);
+  protected readonly authService = inject(AuthService);
+  readonly canDeleteStore = computed(() => this.authService.currentAdmin()?.canDeleteStore === true || this.authService.currentAdmin()?.role === 'SuperAdmin');
   supportLoginUrl = signal<string | null>(null);
   createdOwnerAccess = signal<{ username: string; password: string; url: string } | null>(null);
   loadError = signal<string>('');

@@ -16,10 +16,17 @@
         <a routerLink="/admin/dashboard" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-columns-gap"></i><span>نظرة عامة</span></a>
         <a routerLink="/admin/stores" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-shop"></i><span>المتاجر والعملاء</span></a>
         <a routerLink="/admin/packages" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-box-seam"></i><span>القوالب والبيانات</span></a>
+        @if (authService.currentAdmin()?.canManageUsers) {
+          <a routerLink="/admin/users" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i class="bi bi-people"></i><span>المستخدمين والصلاحيات</span></a>
+        }
         <div class="nav-group-title secondary-group">الواجهة العامة</div>
         <a routerLink="/projects" class="nav-item"><i class="bi bi-grid-1x2"></i><span>معرض المتاجر</span><i class="bi bi-arrow-up-left nav-external"></i></a>
       } @else {
-        @for (link of storeLinks; track link.path) { <a [routerLink]="'/admin/' + link.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i [class]="'bi bi-' + link.icon"></i><span>{{ link.label }}</span></a> }
+        @for (link of storeLinks; track link.path) {
+          @if (link.path !== 'users' || authService.currentAdmin()?.canManageUsers) {
+            <a [routerLink]="'/admin/' + link.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i [class]="'bi bi-' + link.icon"></i><span>{{ link.label }}</span></a>
+          }
+        }
       }
     </nav>
     <div class="sidebar-footer">
@@ -31,7 +38,7 @@
   <main class="admin-main">
     <header class="admin-topbar">
       <div class="topbar-context"><button class="btn-mobile-nav-toggle" (click)="toggleSidebar()" aria-label="فتح القائمة"><i class="bi bi-list"></i></button><span class="breadcrumb-root">{{ isPlatform() ? 'Mecart' : storeName() }}</span><i class="bi bi-chevron-left breadcrumb-separator"></i><span class="breadcrumb-current">{{ pageTitle }}</span></div>
-      <div class="topbar-user"><span class="topbar-date">{{ todayDate | date:'d MMMM yyyy' }}</span><a routerLink="/" class="btn-store-link" [attr.aria-label]="isPlatform() ? 'عرض الموقع الرئيسي' : 'عرض المتجر'"><i class="bi bi-box-arrow-up-right"></i></a><div class="user-pill"><div class="admin-avatar-circle"><i class="bi bi-person"></i></div><div class="user-caption"><strong>{{ authService.currentAdmin()?.isSupportSession ? 'فريق الدعم' : (authService.currentAdmin()?.fullName || 'المدير') }}</strong><small>{{ isPlatform() ? 'مدير المنصة' : 'إدارة المتجر' }}</small></div></div></div>
+      <div class="topbar-user"><span class="topbar-date">{{ todayDate | date:'d MMMM yyyy' }}</span><a routerLink="/" class="btn-store-link" [attr.aria-label]="isPlatform() ? 'عرض الموقع الرئيسي' : 'عرض المتجر'"><i class="bi bi-box-arrow-up-right"></i></a><div class="user-pill"><div class="admin-avatar-circle" [class.staff]="authService.currentAdmin()?.role === 'Staff'"><i class="bi" [class.bi-person-badge-fill]="authService.currentAdmin()?.role !== 'Staff'" [class.bi-person]="authService.currentAdmin()?.role === 'Staff'"></i></div><div class="user-caption"><strong>{{ authService.currentAdmin()?.isSupportSession ? 'فريق الدعم' : (authService.currentAdmin()?.fullName || 'المدير') }}</strong><small class="role-pill-text" [class.role-staff]="authService.currentAdmin()?.role === 'Staff'">{{ authService.currentAdmin()?.roleName || (authService.currentAdmin()?.role === 'Staff' ? 'موظف' : 'المدير') }}</small></div></div></div>
     </header>
     @if (authService.currentAdmin()?.isSupportSession) { <div class="support-session-banner" role="status"><i class="bi bi-headset"></i> جلسة دعم مؤقتة — تنتهي {{ authService.currentAdmin()?.expiresAt | date:'shortTime' }}</div> }
     <div class="admin-content"><router-outlet></router-outlet></div>

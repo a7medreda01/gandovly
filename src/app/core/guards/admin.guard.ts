@@ -17,3 +17,7 @@ export const storeGuard: CanActivateFn = () => {
   const auth = inject(AuthService), router = inject(Router);
   return auth.currentAdmin()?.role !== 'KitchenStaff' || router.createUrlTree(['/'], { queryParamsHandling: 'preserve' });
 };
+export const managerGuard: CanActivateFn = () => {
+  const auth = inject(AuthService), router = inject(Router);
+  return auth.currentAdmin()?.canManageUsers === true || router.createUrlTree(['/admin/orders'], { queryParamsHandling: 'preserve' });
+};

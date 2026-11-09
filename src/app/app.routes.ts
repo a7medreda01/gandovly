@@ -53,6 +53,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
   },
   {
+    path: 'admin/reset-password',
+    loadComponent: () => import('./features/admin/admin-reset-password/admin-reset-password.component').then(m => m.AdminResetPasswordComponent)
+  },
+  {
+    path: 'admin/setup-account',
+    loadComponent: () => import('./features/admin/admin-reset-password/admin-reset-password.component').then(m => m.AdminResetPasswordComponent)
+  },
+  {
     path: 'admin',
     component: AdminLayoutComponent,
     canActivate: [adminGuard],
@@ -67,6 +75,7 @@ export const routes: Routes = [
       { path: 'analytics', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent) },
       { path: 'notifications', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent) },
       { path: 'whatsapp', redirectTo: 'notifications', pathMatch: 'full' },
+      { path: 'users', loadComponent: () => import('./features/admin/admin-users/admin-users.component').then(m => m.AdminUsersComponent) },
       { path: '', pathMatch: 'full', redirectTo: platformAdminRoutes.length ? 'stores' : 'orders' },
       ...platformAdminRoutes
     ]

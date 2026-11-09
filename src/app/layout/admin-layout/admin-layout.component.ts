@@ -27,11 +27,12 @@ export class AdminLayoutComponent {
     { path: 'reports', icon: 'bar-chart', label: 'التقارير' },
     { path: 'analytics', icon: 'graph-up', label: 'الزيارات والتحليلات' },
     { path: 'notifications', icon: 'bell', label: 'الإشعارات وواتساب' },
-    { path: 'settings', icon: 'sliders', label: 'إعدادات المتجر' }
+    { path: 'settings', icon: 'sliders', label: 'إعدادات المتجر' },
+    { path: 'users', icon: 'people', label: 'المستخدمين والصلاحيات' }
   ];
   get pageTitle(): string {
     const path = this.router.url.split('?')[0].split('/').pop();
-    return ({ stores: 'المتاجر', dashboard: 'نظرة عامة', packages: 'القوالب والبيانات' } as Record<string, string>)[path || '']
+    return ({ stores: 'المتاجر', dashboard: 'نظرة عامة', packages: 'القوالب والبيانات', users: 'المستخدمين والصلاحيات' } as Record<string, string>)[path || '']
       || this.storeLinks.find(link => link.path === path)?.label || 'لوحة الإدارة';
   }
 

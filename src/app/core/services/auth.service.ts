@@ -43,7 +43,7 @@ export class AuthService {
       if (storedAdmin) {
         const adminUser: AuthResponse = JSON.parse(storedAdmin);
         this.currentAdmin.set(adminUser);
-        this.isAdminLoggedIn.set(adminUser.role === 'SuperAdmin' || adminUser.role === 'Manager' || adminUser.role === 'KitchenStaff');
+        this.isAdminLoggedIn.set(adminUser.role === 'SuperAdmin' || adminUser.role === 'Manager' || adminUser.role === 'Staff' || adminUser.role === 'KitchenStaff');
       }
     } catch (e) {
       console.warn('Session parsing failed', e);
@@ -163,5 +163,59 @@ export class AuthService {
       return this.api.delete<boolean>(`auth/customer/by-phone/${encodeURIComponent(customerIdOrPhone)}/addresses/${addressId}`);
     }
     return this.api.delete<boolean>(`auth/customer/${customerIdOrPhone}/addresses/${addressId}`);
+  }
+
+  // Password Recovery & Reset
+  forgotPassword(emailOrUsername: string) {
+    return this.api.post<{ sent: boolean; resetToken?: string; resetLink?: string; username?: string; email?: string }>(
+      'auth/admin/forgot-password',
+      { emailOrUsername }
+    );
+  }
+
+  verifyResetToken(token: string) {
+    return this.api.post<{ valid: boolean; username: string; fullName: string; email?: string; isInvite: boolean }>(
+      'auth/admin/verify-reset-token',
+      { token }
+    );
+  }
+
+  resetPassword(token: string, newPassword: string) {
+    return this.api.post<{ success: boolean }>(
+      'auth/admin/reset-password',
+      { token, newPassword }
+    );
+  }
+
+  // Admin Users & Roles Management
+  getAdminUsers() {
+    return this.api.get<import('../models/models').AdminUserItem[]>('admin/users');
+  }
+
+  createAdminUser(data: { fullName: string; email: string; username?: string; role: string; password?: string }) {
+    return this.api.post<{
+      id: number;
+      username: string;
+      fullName: string;
+      email: string;
+      role: string;
+      roleName: string;
+      isActive: boolean;
+      inviteToken: string;
+      inviteLink: string;
+      generatedPassword?: string;
+    }>('admin/users', data);
+  }
+
+  updateAdminUser(id: number, data: { fullName: string; email?: string; role: string; isActive: boolean }) {
+    return this.api.put<any>(`admin/users/${id}`, data);
+  }
+
+  deleteAdminUser(id: number) {
+    return this.api.delete<boolean>(`admin/users/${id}`);
+  }
+
+  resendUserInvite(id: number) {
+    return this.api.post<{ inviteToken: string; inviteLink: string }>(`admin/users/${id}/resend-invite`, {});
   }
 }
