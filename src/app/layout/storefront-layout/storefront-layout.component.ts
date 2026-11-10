@@ -5,6 +5,7 @@ import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { HeaderComponent } from '../../shared/components/header/header.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { CartDrawerComponent } from '../../shared/components/cart-drawer/cart-drawer.component';
+import { MobileNavDrawerComponent } from '../../shared/components/mobile-nav-drawer/mobile-nav-drawer.component';
 import { MobileBottomNavComponent } from '../../shared/components/mobile-bottom-nav/mobile-bottom-nav.component';
 import { WhatsAppFabComponent } from '../../shared/components/whatsapp-fab/whatsapp-fab.component';
 import { SettingsService } from '../../core/services/settings.service';
@@ -12,7 +13,7 @@ import { SettingsService } from '../../core/services/settings.service';
 @Component({
   selector: 'app-storefront-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterModule, HeaderComponent, FooterComponent, CartDrawerComponent, MobileBottomNavComponent, WhatsAppFabComponent],
+  imports: [CommonModule, RouterOutlet, RouterModule, HeaderComponent, FooterComponent, CartDrawerComponent, MobileNavDrawerComponent, MobileBottomNavComponent, WhatsAppFabComponent],
   template: `
     @if (settingsService.isStoreUnavailable()) {
       <div class="store-unavailable-container" dir="rtl">
@@ -87,6 +88,7 @@ import { SettingsService } from '../../core/services/settings.service';
         </main>
         <app-footer></app-footer>
         <app-cart-drawer></app-cart-drawer>
+        <app-mobile-nav-drawer></app-mobile-nav-drawer>
         <app-whatsapp-fab></app-whatsapp-fab>
         <app-mobile-bottom-nav></app-mobile-bottom-nav>
         @if(pixels.configured()){@if(pixels.consent()===null){<aside class="marketing-consent" aria-label="تفضيلات التتبع"><p>نستخدم أدوات قياس من منصات التواصل لتحسين الإعلانات وقياس الزيارات والطلبات. هل توافق على تشغيلها؟</p><button type="button" (click)="pixels.choose('accepted')">أوافق</button><button type="button" (click)="pixels.choose('rejected')">لا أوافق</button></aside>}@else{<button type="button" class="marketing-preferences" (click)="pixels.preferences()">تفضيلات التتبع</button>}}

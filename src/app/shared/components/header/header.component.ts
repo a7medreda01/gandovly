@@ -6,14 +6,13 @@ import { CartService } from '../../../core/services/cart.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { WishlistService } from '../../../core/services/wishlist.service';
-
+import { MobileNavService } from '../../../core/services/mobile-nav.service';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
-import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, ImageUrlPipe, StoreDialogDirective],
+  imports: [CommonModule, RouterLink, RouterLinkActive, ImageUrlPipe],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
@@ -23,16 +22,22 @@ export class HeaderComponent {
   readonly authService = inject(AuthService);
   readonly languageService = inject(LanguageService);
   readonly wishlistService = inject(WishlistService);
+  readonly mobileNavService = inject(MobileNavService);
 
-  isMobileMenuOpen = false;
-  get whatsappUrl() { return 'https://wa.me/' + (this.settingsService.settings().whatsapp || '').replace(/\D/g, ''); }
+  get isMobileMenuOpen(): boolean {
+    return this.mobileNavService.isOpen();
+  }
+
+  get whatsappUrl() {
+    return 'https://wa.me/' + (this.settingsService.settings().whatsapp || '').replace(/\D/g, '');
+  }
 
   toggleMobileMenu() {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+    this.mobileNavService.toggle();
   }
 
   closeMobileMenu() {
-    this.isMobileMenuOpen = false;
+    this.mobileNavService.close();
   }
 
   get isKitchenAllowed(): boolean {

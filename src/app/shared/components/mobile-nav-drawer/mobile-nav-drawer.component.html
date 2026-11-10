@@ -1,0 +1,158 @@
+@if (navService.isOpen()) {
+<div class="mobile-menu-overlay" (click)="close()">
+  <div
+    class="mobile-menu-content"
+    id="store-mobile-menu"
+    appStoreDialog
+    aria-label="قائمة المتجر"
+    (dialogDismiss)="close()"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Drawer Header -->
+    <div class="mobile-menu-header flex-between">
+      <div class="drawer-brand flex-center gap-2">
+        @if (settingsService.settings().logoUrl) {
+          <img
+            [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+            [alt]="settingsService.settings().restaurantName"
+            class="drawer-logo-img"
+          />
+        } @else {
+          <div class="drawer-logo-icon">
+            <i class="bi bi-shop"></i>
+          </div>
+        }
+        <div class="drawer-titles">
+          <span class="drawer-restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+          @if (settingsService.settings().tagline) {
+            <span class="drawer-tagline">{{ settingsService.settings().tagline }}</span>
+          }
+        </div>
+      </div>
+      <button class="drawer-close-btn" (click)="close()" aria-label="إغلاق">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Language Switcher in Side Toolbar Only -->
+    @if (languageService.canSwitchLanguage()) {
+      <div class="drawer-lang-strip">
+        <div class="drawer-lang-card flex-between">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-globe2 text-primary fs-5"></i>
+            <span class="drawer-lang-title">لغة العرض / Language</span>
+          </div>
+          <button
+            type="button"
+            class="btn-drawer-lang"
+            (click)="languageService.toggleLanguage()"
+            [title]="languageService.currentLang() === 'ar' ? 'Switch to English' : 'التحويل للعربية'"
+          >
+            <span>{{ languageService.currentLang() === 'ar' ? 'English' : 'عربي' }}</span>
+            <i class="bi bi-arrow-left-right ms-1"></i>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Nav Links Container -->
+    <div class="mobile-links-container">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{exact: true}"
+        (click)="close()"
+        class="mobile-link-item"
+      >
+        <div class="link-left">
+          <div class="link-icon-box icon-home"><i class="bi bi-house-door"></i></div>
+          <span class="link-title">الرئيسية</span>
+        </div>
+        <i class="bi bi-chevron-left link-arrow"></i>
+      </a>
+
+      <a
+        routerLink="/menu"
+        routerLinkActive="active"
+        (click)="close()"
+        class="mobile-link-item"
+      >
+        <div class="link-left">
+          <div class="link-icon-box icon-menu"><i class="bi bi-grid"></i></div>
+          <span class="link-title">{{ settingsService.settings().labelProducts || 'كتالوج وتصنيفات المنتجات' }}</span>
+        </div>
+        <i class="bi bi-chevron-left link-arrow"></i>
+      </a>
+
+      <!-- Wishlist Link in Side Toolbar Only -->
+      @if (settingsService.settings().enableWishlist && settingsService.settings().showWishlistInSidebar !== false) {
+        <a
+          routerLink="/wishlist"
+          routerLinkActive="active"
+          (click)="close()"
+          class="mobile-link-item wishlist-drawer-item"
+        >
+          <div class="link-left">
+            <div class="link-icon-box icon-wishlist"><i class="bi bi-heart-fill"></i></div>
+            <span class="link-title">{{ settingsService.settings().labelWishlist || 'قائمة المفضلة' }}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            @if (wishlistService.count() > 0) {
+              <span class="wishlist-counter-pill">{{ wishlistService.count() }}</span>
+            }
+            <i class="bi bi-chevron-left link-arrow"></i>
+          </div>
+        </a>
+      }
+
+      <div class="drawer-divider"></div>
+
+      <a
+        routerLink="/account"
+        routerLinkActive="active"
+        (click)="close()"
+        class="mobile-link-item"
+      >
+        <div class="link-left">
+          <div class="link-icon-box icon-account"><i class="bi bi-person"></i></div>
+          <span class="link-title">{{ settingsService.settings().labelOrders || 'حسابي وطلباتي' }}</span>
+        </div>
+        <i class="bi bi-chevron-left link-arrow"></i>
+      </a>
+
+      @if (isKitchenAllowed) {
+        <div class="drawer-divider"></div>
+
+        <a
+          routerLink="/admin/orders"
+          routerLinkActive="active"
+          (click)="close()"
+          class="mobile-link-item"
+        >
+          <div class="link-left">
+            <div class="link-icon-box icon-kitchen"><i class="bi bi-gear-wide-connected"></i></div>
+            <span class="link-title">إدارة الطلبات</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+      }
+
+      @if (isAdminAllowed) {
+        <a
+          routerLink="/admin"
+          routerLinkActive="active"
+          (click)="close()"
+          class="mobile-link-item"
+        >
+          <div class="link-left">
+            <div class="link-icon-box icon-admin"><i class="bi bi-gear"></i></div>
+            <span class="link-title">لوحة الإدارة</span>
+          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
+        </a>
+      }
+    </div>
+  </div>
+</div>
+}
+
