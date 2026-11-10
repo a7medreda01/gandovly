@@ -48,6 +48,7 @@ export class AdminLoginComponent implements OnInit {
   password: string = '';
   showPassword = signal<boolean>(false);
   isLoading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
 
   // Forgot password
   showForgotModal = signal<boolean>(false);
@@ -106,6 +107,7 @@ export class AdminLoginComponent implements OnInit {
       return;
     }
 
+    this.errorMessage.set(null);
     this.isLoading.set(true);
     this.authService.adminLogin(this.username.trim(), this.password).subscribe({
       next: res => {
@@ -126,9 +128,11 @@ export class AdminLoginComponent implements OnInit {
           }
         }
       },
-      error: () => {
+      error: (err) => {
         this.isLoading.set(false);
-        this.toast.error('اسم المستخدم أو كلمة المرور غير صحيحة.');
+        const msg = err?.error?.message || err?.message || 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+        this.errorMessage.set(msg);
+        this.toast.error(msg);
       }
     });
   }

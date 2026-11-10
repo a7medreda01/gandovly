@@ -5,6 +5,13 @@
     <p>{{ platformLogin ? 'أهلاً بعودتك. سجل الدخول إلى مساحة إدارة متاجرك.' : 'سجل الدخول لإدارة طلبات متجرك ومنتجاته.' }}</p>
 
     <div class="form-box text-right">
+      @if (errorMessage()) {
+        <div class="login-error-alert" role="alert">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          <span>{{ errorMessage() }}</span>
+        </div>
+      }
+
       <div class="form-group">
         <label for="admUser">اسم المستخدم أو البريد الإلكتروني:</label>
         <input
