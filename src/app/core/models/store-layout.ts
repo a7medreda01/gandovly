@@ -62,7 +62,7 @@ export interface StoreLayout {
     useCustomHome: boolean;
     sections: HomeSection[];
 }
-export const defaultStoreLayout = (): StoreLayout => ({ mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', useCustomHome: false, sections: [] });
+export const defaultStoreLayout = (): StoreLayout => ({ mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, useCustomHome: false, sections: [] });
 export function newHomeSection(kind: HomeSection['kind']): HomeSection {
     return { id: crypto.randomUUID().replaceAll('-', ''), kind, enabled: true, title: ({ hero: 'اكتشف مجموعتنا', products: 'منتجات مختارة', banner: 'اختيارات تناسبك', features: 'لماذا تختارنا؟', brands: 'العلامات التجارية', categories: 'تسوق حسب القسم' })[kind], subtitle: '', eyebrow: '', imageUrl: '', mobileImageUrl: '', layout: 'split', backgroundColor: '', textColor: '', overlayOpacity: 20, buttonText: 'تسوق الآن', link: '/menu', source: 'featured', categoryId: null, productIds: [], limit: 8, items: [] };
 }
