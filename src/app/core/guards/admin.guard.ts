@@ -9,24 +9,28 @@ export const adminGuard: CanActivateFn = (route, state) => {
   if (!auth.currentAdmin()?.token) return login();
   return auth.validateAdminSession().pipe(map(() => true), catchError(error => { if (error.status === 401 || error.status === 403) auth.logoutAdmin(); return of(login()); }));
 };
-export const platformGuard: CanActivateFn = () => {
+export const platformGuard: CanActivateFn = (route, state) => {
   const auth = inject(AuthService), router = inject(Router);
-  return isPlatformContext() && auth.currentAdmin()?.isPlatformAdmin === true || router.createUrlTree(['/admin/orders'], { queryParamsHandling: 'preserve' });
+  if (isPlatformContext()) {
+    if (auth.currentAdmin()?.isPlatformAdmin === true) {
+      return true;
+    }
+    // If on mecart.app but logged in as a store-specific user, log out and redirect to platform login
+    auth.logoutAdmin();
+    return router.createUrlTree(['/admin/login'], { queryParams: { returnUrl: state.url } });
+  }
+  // On a store subdomain (e.g. super.mecart.app), redirect to store orders
+  return router.createUrlTree(['/admin/orders'], { queryParamsHandling: 'preserve' });
 };
+
 export const storeGuard: CanActivateFn = () => {
   const auth = inject(AuthService), router = inject(Router);
   if (auth.currentAdmin()?.role === 'KitchenStaff') {
     return router.createUrlTree(['/'], { queryParamsHandling: 'preserve' });
   }
+  // On apex platform domain (mecart.app) without a tenant parameter, redirect to platform stores
   if (isPlatformContext()) {
-    if (auth.currentAdmin()?.isPlatformAdmin === true) {
-      return router.createUrlTree(['/admin/stores']);
-    }
-    const slug = auth.currentAdmin()?.tenantSlug || 'super';
-    if (typeof window !== 'undefined' && (window.location.hostname === 'mecart.app' || window.location.hostname === 'www.mecart.app')) {
-      window.location.href = `https://${slug}.mecart.app/admin/orders`;
-      return false;
-    }
+    return router.createUrlTree(['/admin/stores']);
   }
   return true;
 };

@@ -92,7 +92,7 @@ export class AdminLoginComponent {
           this.router.navigate(['/admin/stores']);
         } else {
           const host = window.location.hostname.toLowerCase();
-          const targetSlug = res.tenantSlug || (res.role === 'Staff' ? 'super' : '');
+          const targetSlug = res.tenantSlug;
           if ((host === 'mecart.app' || host === 'www.mecart.app') && targetSlug) {
             window.location.href = `https://${targetSlug}.mecart.app/admin/orders`;
           } else if (targetSlug && !host.includes(targetSlug) && (host === 'localhost' || host === '127.0.0.1')) {

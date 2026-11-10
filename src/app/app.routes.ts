@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { StorefrontLayoutComponent } from './layout/storefront-layout/storefront-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { adminGuard, storeGuard } from './core/guards/admin.guard';
-import { isTenantSubdomain } from './core/services/store-context';
+import { isTenantSubdomain, isPlatformContext } from './core/services/store-context';
 import { platformAdminRoutes, platformRoutes } from './platform.routes';
 
 export const routes: Routes = [
@@ -76,7 +76,7 @@ export const routes: Routes = [
       { path: 'notifications', canActivate: [storeGuard], loadComponent: () => import('./features/admin/admin-whatsapp/admin-whatsapp.component').then(m => m.AdminWhatsAppComponent) },
       { path: 'whatsapp', redirectTo: 'notifications', pathMatch: 'full' },
       { path: 'users', loadComponent: () => import('./features/admin/admin-users/admin-users.component').then(m => m.AdminUsersComponent) },
-      { path: '', pathMatch: 'full', redirectTo: platformAdminRoutes.length ? 'stores' : 'orders' },
+      { path: '', pathMatch: 'full', redirectTo: isPlatformContext() ? 'stores' : 'orders' },
       ...platformAdminRoutes
     ]
   },
