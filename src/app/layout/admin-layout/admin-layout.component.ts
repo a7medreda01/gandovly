@@ -17,6 +17,12 @@ export class AdminLayoutComponent {
   readonly settingsService = inject(SettingsService);
   private readonly router = inject(Router);
   readonly isPlatform = computed(() => isPlatformContext() && this.authService.currentAdmin()?.isPlatformAdmin === true);
+  readonly canManageUsers = computed(() => {
+    const admin = this.authService.currentAdmin();
+    if (!admin) return false;
+    if (admin.canManageUsers === true) return true;
+    return admin.role === 'SuperAdmin' || admin.role === 'Manager' || admin.role === 'Admin' || !admin.role;
+  });
   readonly storeName = computed(() => this.settingsService.settings().restaurantName || 'المتجر');
   readonly storeLogo = computed(() => this.settingsService.settings().logoUrl || '');
   readonly storeLinks = [

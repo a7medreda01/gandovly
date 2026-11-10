@@ -98,3 +98,4 @@ export class AdminResetPasswordComponent implements OnInit {
     this.router.navigate(['/admin/login']);
   }
 }
+

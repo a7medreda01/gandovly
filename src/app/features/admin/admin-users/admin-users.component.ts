@@ -245,3 +245,4 @@ export class AdminUsersComponent implements OnInit {
     window.open(url, '_blank');
   }
 }
+

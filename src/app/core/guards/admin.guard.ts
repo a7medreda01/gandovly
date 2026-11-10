@@ -19,5 +19,7 @@ export const storeGuard: CanActivateFn = () => {
 };
 export const managerGuard: CanActivateFn = () => {
   const auth = inject(AuthService), router = inject(Router);
-  return auth.currentAdmin()?.canManageUsers === true || router.createUrlTree(['/admin/orders'], { queryParamsHandling: 'preserve' });
+  const admin = auth.currentAdmin();
+  const can = admin?.canManageUsers === true || admin?.role === 'SuperAdmin' || admin?.role === 'Manager' || admin?.role === 'Admin' || !admin?.role;
+  return can || router.createUrlTree(['/admin/orders'], { queryParamsHandling: 'preserve' });
 };
