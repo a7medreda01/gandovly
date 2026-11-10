@@ -30,7 +30,7 @@ export class AdminLoginComponent {
   showForgotModal = signal<boolean>(false);
   forgotInput = signal<string>('');
   isForgotSubmitting = signal<boolean>(false);
-  forgotResult = signal<{ sent: boolean; resetLink?: string; message?: string } | null>(null);
+  forgotResult = signal<{ sent: boolean; resetLink?: string; maskedEmail?: string; message?: string } | null>(null);
 
   toggleShowPassword() {
     this.showPassword.update(v => !v);
@@ -55,17 +55,14 @@ export class AdminLoginComponent {
 
     this.isForgotSubmitting.set(true);
     this.authService.forgotPassword(val).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         this.isForgotSubmitting.set(false);
-        const origin = typeof window !== 'undefined' ? window.location.origin : '';
-        const fullLink = res.resetLink ? (origin + (res.resetLink.startsWith('/') ? res.resetLink : '/' + res.resetLink)) : undefined;
-
         this.forgotResult.set({
           sent: true,
-          resetLink: fullLink,
-          message: 'تم توليد رابط استعادة كلمة المرور بنجاح.'
+          maskedEmail: res?.data?.maskedEmail || res?.maskedEmail,
+          message: 'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني بنجاح.'
         });
-        this.toast.success('تم إنشاء رابط الاستعادة.');
+        this.toast.success('تم إرسال رابط الاستعادة إلى بريدك الإلكتروني.');
       },
       error: (err) => {
         this.isForgotSubmitting.set(false);
