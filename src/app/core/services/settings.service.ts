@@ -54,6 +54,7 @@ export class SettingsService {
 
   settings = signal<StorefrontSettings>(this.defaultSettings);
   isLoading = signal<boolean>(false);
+  isLoaded = signal<boolean>(false);
   isStoreUnavailable = signal<boolean>(false);
   storeUnavailableReason = signal<'suspended' | 'not_found' | null>(null);
   storeUnavailableMessage = signal<string>('');
@@ -98,9 +99,11 @@ export class SettingsService {
           this.settings.set(data);
           this.applyCssThemeVariables(data);
         }
+        this.isLoaded.set(true);
         this.isLoading.set(false);
       }),
       catchError(err => {
+        this.isLoaded.set(true);
         this.isLoading.set(false);
         const isPlatform = isPlatformContext();
         if (!isPlatform && (err?.status === 403 || err?.status === 404)) {

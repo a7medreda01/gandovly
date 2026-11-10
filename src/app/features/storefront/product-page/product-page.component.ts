@@ -46,11 +46,9 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   isSuccess = signal<boolean>(false);
   isCopied = signal<boolean>(false);
 
-  // Entrance Animation & Price Counter State
+  // Entrance Animation State
   entranceAnimationActive = signal<boolean>(false);
   entranceAnimationDone = signal<boolean>(false);
-  displayPrice = signal<number>(0);
-  private priceRafId: number | null = null;
   private hasAnimatedForProduct = false;
 
   get targetUnitPrice(): number {
@@ -281,10 +279,6 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   }
 
   private initEntranceAnimation(): void {
-    if (this.priceRafId) {
-      cancelAnimationFrame(this.priceRafId);
-      this.priceRafId = null;
-    }
     const allowAnimations = this.settingsService.settings().storeLayout?.enableProductPageAnimations !== false;
     const prefersReduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isBackNav = typeof window !== 'undefined' && (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'back_forward';
@@ -293,7 +287,6 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       this.hasAnimatedForProduct = true;
       this.entranceAnimationActive.set(true);
       this.entranceAnimationDone.set(false);
-      this.startPriceCounterAnimation();
       setTimeout(() => {
         this.entranceAnimationActive.set(false);
         this.entranceAnimationDone.set(true);
@@ -301,41 +294,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     } else {
       this.entranceAnimationActive.set(false);
       this.entranceAnimationDone.set(true);
-      this.displayPrice.set(this.targetUnitPrice);
     }
-  }
-
-  private startPriceCounterAnimation(): void {
-    if (typeof window === 'undefined') {
-      this.displayPrice.set(this.targetUnitPrice);
-      return;
-    }
-    const target = this.targetUnitPrice;
-    if (target <= 0) {
-      this.displayPrice.set(0);
-      return;
-    }
-    this.displayPrice.set(0);
-    const startTime = performance.now() + 850; // starts at 0.85s delay
-    const duration = 1100;
-
-    const step = (now: number) => {
-      if (now < startTime) {
-        this.priceRafId = requestAnimationFrame(step);
-        return;
-      }
-      const elapsed = now - startTime;
-      const progress = Math.min(1, Math.max(0, elapsed / duration));
-      const eased = 1 - Math.pow(1 - progress, 3);
-      const current = Math.round(target * eased * 100) / 100;
-      this.displayPrice.set(current);
-      if (progress < 1) {
-        this.priceRafId = requestAnimationFrame(step);
-      } else {
-        this.displayPrice.set(target);
-      }
-    };
-    this.priceRafId = requestAnimationFrame(step);
   }
 
   private initProductState(p: Product): void {
@@ -585,10 +544,6 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.priceRafId) {
-      cancelAnimationFrame(this.priceRafId);
-      this.priceRafId = null;
-    }
     this.productRequest?.unsubscribe();
     this.relatedRequest?.unsubscribe();
     this.routeSubscription?.unsubscribe();

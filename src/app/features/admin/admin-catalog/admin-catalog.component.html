@@ -689,7 +689,30 @@
           <button class="btn-close-modal" (click)="showProductModal.set(false)"><i class="bi bi-x-lg"></i></button>
         </div>
 
+        <!-- Segmented Navigation Tabs -->
+        <div class="product-modal-tabs">
+          <button type="button" class="tab-btn" [class.active]="productModalTab() === 'basic'" (click)="setProductTab('basic')">
+            <i class="bi bi-info-circle me-1"></i> البيانات الأساسية والسعر
+          </button>
+          <button type="button" class="tab-btn" [class.active]="productModalTab() === 'variants'" (click)="setProductTab('variants')">
+            <i class="bi bi-palette me-1"></i> المقاسات والألوان
+            @if (variantRows.length > 0) {
+              <span class="tab-badge">{{ variantRows.length }}</span>
+            }
+          </button>
+          <button type="button" class="tab-btn" [class.active]="productModalTab() === 'modifiers'" (click)="setProductTab('modifiers')">
+            <i class="bi bi-ui-checks-grid me-1"></i> الخيارات والإضافات
+            @if (productForm.modifierGroupIds.length > 0) {
+              <span class="tab-badge">{{ productForm.modifierGroupIds.length }}</span>
+            }
+          </button>
+          <button type="button" class="tab-btn" [class.active]="productModalTab() === 'specs'" (click)="setProductTab('specs')">
+            <i class="bi bi-sliders me-1"></i> تشغيل الصنف والمواصفات
+          </button>
+        </div>
+
         <div class="modal-body">
+          @if (productModalTab() === 'basic') {
           <!-- Product Multi-Image Gallery Section -->
           <div class="product-gallery-section mb-4">
             <div class="gallery-header-row mb-2">
@@ -936,10 +959,233 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Domain-Specific Specifications Dynamic Panel -->
-          <div class="domain-specs-panel p-3 mb-3 bg-light rounded-3 border">
+            <div class="form-group mt-3">
+              <label>وصف الصنف والتفاصيل التسويقية بالعربي</label>
+              <textarea class="form-control" rows="2" [(ngModel)]="productForm.description" placeholder="اكتب وصفاً جذاباً للصنف ومواصفاته الفنية..."></textarea>
+            </div>
+
+            @if (isEnglishEnabled()) {
+              <div class="form-group animate-fade-in">
+                <label class="d-flex align-items-center justify-content-between">
+                  <span>وصف وتفاصيل الصنف بالإنجليزي <small class="text-muted">(اختياري - يظهر العربي لو تركته فارغاً)</small></span>
+                  <span class="badge bg-secondary-subtle text-secondary">EN</span>
+                </label>
+                <textarea dir="ltr" class="form-control" rows="2" [(ngModel)]="productForm.descriptionEn" placeholder="Product marketing description & specs in English (Optional)..."></textarea>
+              </div>
+            }
+          </div>
+          } <!-- End of Tab 1: basic -->
+
+          @if (productModalTab() === 'variants') {
+            <div class="variants-tab-content animate-fade-in">
+              <div class="tab-header-box d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <h5 class="fw-bold mb-1 text-dark"><i class="bi bi-palette text-primary me-2"></i> المقاسات والألوان والمخزون</h5>
+                  <p class="text-muted small mb-0">أضف تركيبة لكل لون ومقاس (يمكن إضافة لون فقط بدون مقاس). اختر صور كل لون من الصور المرفوعة مسبقاً في تبويب المعرض.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm px-3" (click)="addVariant()">
+                  <i class="bi bi-plus-lg me-1"></i> إضافة تركيبة (لون / مقاس)
+                </button>
+              </div>
+
+              @if (variantRows.length === 0) {
+                <div class="empty-variants-card text-center p-4 border rounded-3 bg-light my-3">
+                  <i class="bi bi-palette2 text-muted fs-1 d-block mb-2"></i>
+                  <h6 class="fw-bold">لم تتم إضافة أي مقاسات أو ألوان بعد</h6>
+                  <p class="text-muted small mb-3">إذا كان الصنف يحتوي على ألوان أو مقاسات متعددة بأسعار أو مخزون مختلف، يمكنك إضافتها هنا بسهولة.</p>
+                  <button type="button" class="btn btn-outline-primary btn-sm" (click)="addVariant()">
+                    <i class="bi bi-plus-lg me-1"></i> إضافة أول تركيبة الآن
+                  </button>
+                </div>
+              } @else {
+                <div class="variants-list">
+                  @for (v of variantRows; track v.id; let j = $index) {
+                    <div class="variant-item-card p-3 mb-3 border rounded-3 bg-white shadow-sm">
+                      <div class="variant-card-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                          <span class="color-preview-circle" [style.background-color]="v.colorHex || '#ccc'"></span>
+                          <span class="fw-bold text-dark">{{ v.color || 'لون غير مسمى' }} {{ v.size ? '(' + v.size + ')' : '' }}</span>
+                          <span class="badge bg-secondary-subtle text-secondary">تركيبة #{{ j + 1 }}</span>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2" (click)="variantRows.splice(j, 1)" title="حذف التركيبة">
+                          <i class="bi bi-trash me-1"></i> حذف
+                        </button>
+                      </div>
+
+                      <div class="row g-2 mb-3">
+                        <div class="col-md-3">
+                          <label class="form-label small fw-bold">اسم اللون</label>
+                          <input class="form-control form-control-sm" [(ngModel)]="v.color" (change)="syncVariantColor(v)" placeholder="مثال: أحمر، أسود، كحلي" maxlength="80">
+                        </div>
+                        <div class="col-md-2">
+                          <label class="form-label small fw-bold">درجة اللون</label>
+                          <input type="color" class="form-control form-control-color form-control-sm w-100" [(ngModel)]="v.colorHex" (change)="updateVariantColor(v)">
+                        </div>
+                        <div class="col-md-2">
+                          <label class="form-label small fw-bold">المقاس (اختياري)</label>
+                          <input class="form-control form-control-sm" [(ngModel)]="v.size" placeholder="S, M, L, 42..." maxlength="40">
+                        </div>
+                        <div class="col-md-2">
+                          <label class="form-label small fw-bold">السعر المخصص</label>
+                          <input type="number" class="form-control form-control-sm" [(ngModel)]="v.price" placeholder="سعر المنتج" min="0">
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label small fw-bold">المخزون المتوفر</label>
+                          <input type="number" class="form-control form-control-sm" [(ngModel)]="v.stockQuantity" placeholder="غير محدود" min="0" step="1">
+                        </div>
+                      </div>
+
+                      <div class="row g-2 align-items-center mb-2">
+                        <div class="col-md-6">
+                          <label class="form-label small fw-bold">رمز SKU المخصص</label>
+                          <input class="form-control form-control-sm" [(ngModel)]="v.sku" placeholder="SKU-RED-XL" maxlength="100" dir="ltr">
+                        </div>
+                        <div class="col-md-6 pt-md-3">
+                          <label class="checkbox-label d-flex align-items-center gap-2 cursor-pointer mb-0">
+                            <input type="checkbox" [(ngModel)]="v.isAvailable">
+                            <span class="small fw-bold">هذه التركيبة متاحة للطلب في المتجر</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <!-- Variant Image Picker -->
+                      <div class="variant-images-picker mt-3 pt-2 border-top">
+                        <label class="form-label small fw-bold text-muted mb-2">
+                          <i class="bi bi-images text-primary me-1"></i> صور هذا اللون (اضغط لاختيار الصور الخاصة به):
+                        </label>
+                        @if (productImages.length === 0) {
+                          <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> ارفع صور الصنف أولاً من تبويب "البيانات الأساسية والسعر" لتتمكن من ربطها هنا بألوانها.</p>
+                        } @else {
+                          <div class="variant-image-choices d-flex flex-wrap gap-2">
+                            @for (img of productImages; track img.imageUrl) {
+                              <button type="button" class="variant-thumb-select-btn" [class.chosen]="v.images.includes(img.imageUrl)" [attr.aria-pressed]="v.images.includes(img.imageUrl)" (click)="toggleVariantImage(v, img.imageUrl)" title="ربط/فصل هذه الصورة">
+                                <img [src]="img.imageUrl | imageUrl" alt="صورة الصنف">
+                                @if (v.images.includes(img.imageUrl)) {
+                                  <span class="chosen-badge"><i class="bi bi-check-lg"></i></span>
+                                }
+                              </button>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } <!-- End of Tab 2: variants -->
+
+          @if (productModalTab() === 'specs') {
+            <div class="specs-tab-content animate-fade-in">
+              <!-- Activity Preset & Commerce Operation Mode -->
+              <div class="p-3 mb-3 bg-light rounded-3 border">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold text-dark mb-0 d-flex align-items-center">
+                    <i class="bi bi-gear-wide-connected text-primary me-2 fs-5"></i>
+                    تخصص الصنف ونمط التشغيل التجاري
+                  </h6>
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                    {{ productCommerce.mode || 'Physical' }}
+                  </span>
+                </div>
+
+                <div class="row g-2 mb-3">
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold">القالب الجاهز للنشاط</label>
+                    <select class="form-control form-control-sm" [ngModel]="productActivityPreset" (ngModelChange)="applyPreset($event)">
+                      <option value="">بدون قالب (افتراضي)</option>
+                      @for (preset of activityPresets; track preset.id) {
+                        <option [value]="preset.id">{{ preset.name }}</option>
+                      }
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label small fw-bold">طريقة ونمط التشغيل</label>
+                    <select class="form-control form-control-sm" [(ngModel)]="productCommerce.mode">
+                      <option value="Physical">منتج عادي ملموس (شحن / استلام)</option>
+                      <option value="Prescription">صيدلية (أدوية وروشتات)</option>
+                      <option value="Vehicle">معاينة وعرض سيارة / مركبة</option>
+                      <option value="Booking">حجز موعد أو خدمة أو تأجير</option>
+                      <option value="Digital">منتج رقمي (ملفات / أكواد)</option>
+                      <option value="Subscription">اشتراك دوري متجدد</option>
+                      <option value="Perishable">تشغيلات وتواريخ صلاحية</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="commerce-details-box p-2 bg-white rounded-2 border">
+                  @if (productCommerce.mode === 'Prescription') {
+                    <label class="checkbox-label d-flex align-items-center gap-2 cursor-pointer mb-0">
+                      <input type="checkbox" [(ngModel)]="productCommerce.prescriptionRequired">
+                      <span class="small fw-bold">يشترط رفع ومراجعة روشتة طبية قبل إتمام الطلب</span>
+                    </label>
+                  }
+                  @if (productCommerce.mode === 'Booking' || productCommerce.mode === 'Vehicle') {
+                    <div class="row g-2 mt-1">
+                      <div class="col-md-6">
+                        <label class="form-label small fw-bold">مورد الموعد / الخدمة</label>
+                        <select class="form-control form-control-sm" [(ngModel)]="productCommerce.resourceId">
+                          <option [ngValue]="null">اختر المورد من تشغيل النشاط</option>
+                          @for (r of commerceResources; track r.id) {
+                            <option [ngValue]="r.id">{{ r.name }}</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small fw-bold">مدة الموعد بالدقائق</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="productCommerce.durationMinutes" min="15" max="43200">
+                      </div>
+                    </div>
+                  }
+                  @if (productCommerce.mode === 'Booking') {
+                    <div class="row g-2 mt-2">
+                      <div class="col-md-6">
+                        <label class="checkbox-label d-flex align-items-center gap-2 cursor-pointer">
+                          <input type="checkbox" [(ngModel)]="productCommerce.flexibleDuration">
+                          <span class="small">يحدد العميل بداية ونهاية التأجير (حساب السعر حسب المدة)</span>
+                        </label>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="form-label small fw-bold">أقصى مدة بالدقائق</label>
+                        <input type="number" class="form-control form-control-sm" [(ngModel)]="productCommerce.maxDurationMinutes" min="15" max="525600">
+                      </div>
+                    </div>
+                  }
+                  @if (productCommerce.mode === 'Subscription') {
+                    <div class="mt-1">
+                      <label class="form-label small fw-bold">مدة الاشتراك بالأيام</label>
+                      <input type="number" class="form-control form-control-sm w-50" [(ngModel)]="productCommerce.subscriptionDays" min="1" max="3660">
+                      <small class="text-muted d-block mt-1">التجديد يتم بعد تأكيد دفع يدوي وبدون خصم تلقائي.</small>
+                    </div>
+                  }
+                  @if (productCommerce.mode === 'Digital') {
+                    <div class="mt-1">
+                      <label class="form-label small fw-bold">نوع التسليم الرقمي</label>
+                      <select class="form-control form-control-sm w-50" [(ngModel)]="productCommerce.digitalDelivery">
+                        <option value="File">ملف تنزيل خاص</option>
+                        <option value="Code">كود / سريال من المخزون</option>
+                      </select>
+                      <small class="text-muted d-block mt-1">بعد حفظ المنتج يمكنك رفع الملف أو إضافة الأكواد من تشغيل النشاط.</small>
+                    </div>
+                  }
+                  @if (productCommerce.mode === 'Vehicle') {
+                    <div class="mt-1">
+                      <label class="form-label small fw-bold">مقدم الحجز المقترح</label>
+                      <input type="number" class="form-control form-control-sm w-50" [(ngModel)]="productCommerce.depositAmount" min="0">
+                    </div>
+                  }
+                  @if (productCommerce.mode === 'Perishable') {
+                    <small class="text-muted d-block">أضف التشغيلات من تشغيل النشاط بعد حفظ المنتج. مخزونها بالقطع أو الجرام ولا تستخدم معها تركيبات الألوان.</small>
+                  }
+                  @if (productCommerce.mode === 'Physical') {
+                    <small class="text-muted d-block">منتج تجاري قياسي يمر بمراحل الشحن والتوصيل والاستلام المعتادة.</small>
+                  }
+                </div>
+              </div>
+
+              <!-- Domain-Specific Specifications Dynamic Panel -->
+              <div class="domain-specs-panel p-3 mb-3 bg-light rounded-3 border">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="fw-bold text-dark mb-0 d-flex align-items-center">
                 <i class="bi bi-sliders2-vertical text-primary me-2 fs-5"></i>
@@ -1074,13 +1320,6 @@
                 </button>
               </div>
 
-              <section class="variant-editor"><h3>تخصص المنتج وطريقة تشغيله</h3><label>القالب الجاهز<select class="form-control" [ngModel]="productActivityPreset" (ngModelChange)="applyPreset($event)"><option value="">بدون قالب</option>@for(preset of activityPresets;track preset.id){<option [value]="preset.id">{{preset.name}}</option>}</select></label><label>طريقة التشغيل<select class="form-control" [(ngModel)]="productCommerce.mode"><option value="Physical">منتج عادي</option><option value="Prescription">صيدلية</option><option value="Vehicle">معاينة وعرض سيارة</option><option value="Booking">حجز أو خدمة أو تأجير</option><option value="Digital">منتج رقمي</option><option value="Subscription">اشتراك</option><option value="Perishable">تشغيلات وصلاحية</option></select></label><label><input type="checkbox" [(ngModel)]="productCommerce.prescriptionRequired"> يشترط رفع ومراجعة روشتة</label>
-@if(productCommerce.mode==='Booking'||productCommerce.mode==='Vehicle'){<label>مورد الموعد<select class="form-control" [(ngModel)]="productCommerce.resourceId"><option [ngValue]="null">اختر المورد من تشغيل النشاط</option>@for(r of commerceResources;track r.id){<option [ngValue]="r.id">{{r.name}}</option>}</select></label><label>مدة الموعد أو وحدة التسعير بالدقائق<input type="number" class="form-control" [(ngModel)]="productCommerce.durationMinutes" min="15" max="43200"></label>}
-@if(productCommerce.mode==='Booking'){<label><input type="checkbox" [(ngModel)]="productCommerce.flexibleDuration"> يحدد العميل بداية ونهاية التأجير — السعر لكل مدة</label><label>أقصى مدة بالدقائق<input type="number" class="form-control" [(ngModel)]="productCommerce.maxDurationMinutes" min="15" max="525600"></label>}
-@if(productCommerce.mode==='Subscription'){<label>مدة الاشتراك بالأيام<input type="number" class="form-control" [(ngModel)]="productCommerce.subscriptionDays" min="1" max="3660"></label><p>التجديد بعد تأكيد دفع يدوي، بدون خصم تلقائي.</p>}
-@if(productCommerce.mode==='Digital'){<label>نوع التسليم<select class="form-control" [(ngModel)]="productCommerce.digitalDelivery"><option value="File">ملف خاص</option><option value="Code">كود من المخزون</option></select></label><p>بعد حفظ المنتج أضف الملف أو الأكواد من تشغيل النشاط.</p>}
-@if(productCommerce.mode==='Vehicle'){<label>مقدم الحجز المقترح<input type="number" class="form-control" [(ngModel)]="productCommerce.depositAmount" min="0"></label>}
-@if(productCommerce.mode==='Perishable'){<p>أضف التشغيلات من تشغيل النشاط بعد حفظ المنتج. مخزونها بالقطع أو الجرام، ولا تستخدم معها متغيرات الألوان.</p>}</section><section class="variant-editor"><h3>المقاسات والألوان والمخزون</h3><p>أضف تركيبة لكل لون ومقاس (يمكن إضافة لون فقط بدون مقاس). ارفع الصور في صور المنتج، ثم اختر صور اللون. السعر الفارغ يستخدم سعر المنتج، والمخزون الفارغ غير محدد.</p><button type="button" class="btn-outline" (click)="addVariant()">إضافة تركيبة (لون / مقاس)</button>@for(v of variantRows;track v.id){<div class="variant-editor-row"><label>اللون<input class="form-control" [(ngModel)]="v.color" (change)="syncVariantColor(v)" maxlength="80"></label><label>عينة اللون<input type="color" class="form-control" [(ngModel)]="v.colorHex" (change)="updateVariantColor(v)"></label><label>المقاس (اختياري)<input class="form-control" [(ngModel)]="v.size" placeholder="اختياري" maxlength="40"></label><label>SKU<input class="form-control" [(ngModel)]="v.sku" maxlength="100" dir="ltr"></label><label>السعر<input type="number" class="form-control" [(ngModel)]="v.price" min="0"></label><label>المخزون<input type="number" class="form-control" [(ngModel)]="v.stockQuantity" min="0" step="1"></label><div class="variant-images"><span>صور اللون</span><div class="variant-image-choices">@for(img of productImages;track img.imageUrl){<button type="button" [class.chosen]="v.images.includes(img.imageUrl)" [attr.aria-pressed]="v.images.includes(img.imageUrl)" aria-label="تحديد صورة للون" (click)="toggleVariantImage(v,img.imageUrl)"><img [src]="img.imageUrl|imageUrl" alt="صورة المنتج"></button>}</div></div><label><input type="checkbox" [(ngModel)]="v.isAvailable"> متاح</label><button type="button" class="btn-outline" (click)="variantRows.splice($index,1)">حذف التركيبة</button></div>}</section>
               @if (productForm.customSpecs.length > 0) {
                 <div class="custom-specs-list">
                   @for (spec of productForm.customSpecs; track $index) {
@@ -1100,22 +1339,11 @@
               }
             </div>
           </div>
+        </div>
+      } <!-- End of Tab 4: specs -->
 
-          <div class="form-group">
-            <label>وصف الصنف والتفاصيل التسويقية بالعربي</label>
-            <textarea class="form-control" rows="2" [(ngModel)]="productForm.description" placeholder="اكتب وصفاً جذاباً للصنف ومواصفاته الفنية..."></textarea>
-          </div>
-
-          @if (isEnglishEnabled()) {
-            <div class="form-group animate-fade-in">
-              <label class="d-flex align-items-center justify-content-between">
-                <span>وصف وتفاصيل الصنف بالإنجليزي <small class="text-muted">(اختياري - يظهر العربي لو تركته فارغاً)</small></span>
-                <span class="badge bg-secondary-subtle text-secondary">EN</span>
-              </label>
-              <textarea dir="ltr" class="form-control" rows="2" [(ngModel)]="productForm.descriptionEn" placeholder="Product marketing description & specs in English (Optional)..."></textarea>
-            </div>
-          }
-
+      @if (productModalTab() === 'modifiers') {
+        <div class="modifiers-tab-content animate-fade-in">
           <!-- Modifiers & Options Section with INLINE QUICK-ADD -->
           <div class="domain-specs-panel p-3 mb-3 bg-light rounded-3 border">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1283,10 +1511,26 @@
             </div>
           }
         </div>
+      } <!-- End of Tab 3: modifiers -->
+        </div>
 
         <div class="modal-footer flex-between">
-          <button class="btn-outline" (click)="showProductModal.set(false)">إلغاء</button>
-          <button class="btn-primary" (click)="saveProduct()"><i class="bi bi-floppy me-1"></i> حفظ الصنف</button>
+          <div class="footer-nav-left d-flex gap-2">
+            <button type="button" class="btn-outline" (click)="showProductModal.set(false)">إلغاء</button>
+            @if (productModalTab() !== 'basic') {
+              <button type="button" class="btn-outline" (click)="prevProductTab()">
+                <i class="bi bi-chevron-right me-1"></i> السابق
+              </button>
+            }
+          </div>
+          <div class="footer-nav-right d-flex gap-2">
+            @if (productModalTab() !== 'specs') {
+              <button type="button" class="btn-outline" (click)="nextProductTab()">
+                التالي <i class="bi bi-chevron-left ms-1"></i>
+              </button>
+            }
+            <button class="btn-primary" (click)="saveProduct()"><i class="bi bi-floppy me-1"></i> حفظ الصنف</button>
+          </div>
         </div>
       </div>
     </div>

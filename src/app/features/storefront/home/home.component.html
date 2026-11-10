@@ -51,7 +51,7 @@
 
   <!-- 3. Horizontal Categories Row -->
   @if (settingsService.settings().showCategoriesRow) {
-  <section class="categories-row-section container">
+  <section class="categories-row-section container" appScrollAnimate [class.has-fade-in-up]="settingsService.settings().storeLayout?.enableHomeSectionAnimations !== false">
     <div class="categories-header-mini">
       <span class="categories-mini-title"><i class="bi bi-grid-3x3-gap-fill text-primary me-1"></i> {{ languageService.text('تسوق حسب القسم', layout?.homeCategoriesTitleEn || 'Shop by category') }}</span>
       <a routerLink="/menu" class="categories-see-all">{{ languageService.text('عرض الكل', 'View all') }} ({{ catalogService.categories().length }})</a>
@@ -95,7 +95,7 @@
   }
 
   <!-- 4. "الأكثر طلباً" Section (2-Column Grid Matching Screenshot) -->
-  <section class="popular-section container">
+  <section class="popular-section container" appScrollAnimate [class.has-fade-in-up]="settingsService.settings().storeLayout?.enableHomeSectionAnimations !== false">
     <div class="section-heading-row">
       <h2 class="section-title">{{ searchQuery() ? languageService.text('نتائج البحث', 'Search results') : languageService.text('منتجات مختارة', layout?.homeFeaturedTitleEn || 'Featured products') }}</h2>
       <a routerLink="/menu" class="see-all-btn">
@@ -135,7 +135,7 @@
 
   <!-- 5. Visual Categories Grid -->
   @if (settingsService.settings().showCategoriesGrid) {
-  <section class="categories-visual-section container">
+  <section class="categories-visual-section container" appScrollAnimate [class.has-fade-in-up]="settingsService.settings().storeLayout?.enableHomeSectionAnimations !== false">
     <div class="section-heading-row">
       <div class="header-titles">
         <span class="sub-label">{{ languageService.text('تصفح الكتالوج', 'Browse the catalog') }}</span>
@@ -177,7 +177,7 @@
 
 <!-- Customer Support Call Banner -->
 @if (!loadingSettings() && (settingsService.settings().showCustomerServiceBar ?? true) && settingsService.settings().phone) {
-  <section class="hotline-card-section container mb-4">
+  <section class="hotline-card-section container mb-4" appScrollAnimate [class.has-fade-in-up]="settingsService.settings().storeLayout?.enableHomeSectionAnimations !== false">
     <div class="hotline-card">
       <div class="hotline-texts">
         <div class="hotline-title-row">

@@ -17,43 +17,53 @@
 
       <!-- Brand Info -->
       <a routerLink="/" class="brand-logo flex-center" (click)="closeMobileMenu()">
-        @if (settingsService.settings().navbarBrandMode === 'logo_only' && settingsService.settings().logoUrl) {
-          <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
-            [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img logo-only-mode" />
-        } @else if (settingsService.settings().navbarBrandMode === 'name_only') {
-          <div class="brand-texts name-only-mode">
-            <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
-            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
-              <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
-            }
-          </div>
-        } @else if (settingsService.settings().navbarBrandMode === 'icon_name') {
-          <div class="logo-icon">
-            <i class="bi bi-shop"></i>
-          </div>
-          <div class="brand-texts">
-            <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
-            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
-              <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
-            }
+        @if (!settingsService.isLoaded()) {
+          <div class="brand-skeleton-loader flex-center" aria-hidden="true">
+            <div class="skeleton-circle shimmer"></div>
+            <div class="skeleton-texts">
+              <div class="skeleton-line shimmer line-title"></div>
+              <div class="skeleton-line shimmer line-subtitle"></div>
+            </div>
           </div>
         } @else {
-          @if (settingsService.settings().logoUrl) {
-            <div class="logo-circle-badge">
-              <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
-                [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img" />
+          @if (settingsService.settings().navbarBrandMode === 'logo_only' && settingsService.settings().logoUrl) {
+            <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+              [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img logo-only-mode" />
+          } @else if (settingsService.settings().navbarBrandMode === 'name_only') {
+            <div class="brand-texts name-only-mode">
+              <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+              @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+                <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+              }
             </div>
-          } @else {
+          } @else if (settingsService.settings().navbarBrandMode === 'icon_name') {
             <div class="logo-icon">
               <i class="bi bi-shop"></i>
             </div>
-          }
-          <div class="brand-texts">
-            <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
-            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
-              <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+            <div class="brand-texts">
+              <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+              @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+                <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+              }
+            </div>
+          } @else {
+            @if (settingsService.settings().logoUrl) {
+              <div class="logo-circle-badge">
+                <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+                  [alt]="settingsService.settings().restaurantName" class="restaurant-logo-img" />
+              </div>
+            } @else {
+              <div class="logo-icon">
+                <i class="bi bi-shop"></i>
+              </div>
             }
-          </div>
+            <div class="brand-texts">
+              <span class="restaurant-name">{{ settingsService.settings().restaurantName }}</span>
+              @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+                <span class="restaurant-tagline">{{ settingsService.settings().tagline }}</span>
+              }
+            </div>
+          }
         }
       </a>
     </div>

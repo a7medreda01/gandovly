@@ -57,4 +57,32 @@
 img.image-pending { opacity: 0; }
 @media (prefers-reduced-motion: no-preference) { img[appImageReveal] { transition: opacity .22s ease-out; } }
 
+.has-reveal-anim {
+  img[appImageReveal]:not(.image-pending) {
+    animation: cardImgFocusReveal 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    will-change: filter, transform, opacity;
+  }
+}
+
+@keyframes cardImgFocusReveal {
+  from {
+    filter: blur(8px);
+    opacity: 0.2;
+    transform: scale(1.05);
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .has-reveal-anim img[appImageReveal] {
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+}
+
 .product-card .product-img-wrapper { background: color-mix(in srgb, var(--primary-color, #52697e) 6%, var(--card-bg, #fff)); }

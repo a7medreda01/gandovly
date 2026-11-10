@@ -1544,3 +1544,128 @@
 .variant-editor{margin:20px 0;padding:16px;border:1px solid var(--border-color,#ddd);border-radius:14px}.variant-editor h3{font-size:17px}.variant-editor p{font-size:13px;line-height:1.8}.variant-editor-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px;padding:14px;background:var(--surface-color,#f6f9fb);border-radius:12px}.variant-editor-row label{min-width:0;font-size:13px}.variant-editor-row input,.variant-editor-row select{width:100%;min-height:44px;box-sizing:border-box}@media(max-width:600px){.variant-editor-row{grid-template-columns:repeat(2,minmax(0,1fr))}.variant-editor-row label:nth-child(6){grid-column:1/-1}}
 
 .variant-images{min-width:0;grid-column:1/-1}.variant-image-choices{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.variant-image-choices button{width:64px;height:64px;padding:3px;border:1px solid var(--border-color,#ddd);border-radius:10px;background:white}.variant-image-choices button.chosen{border:2px solid var(--primary-color)}.variant-image-choices img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+
+/* ==========================================================================
+   Product Modal Tabs & Organized Variants Styling
+   ========================================================================== */
+.product-modal-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #0f172a;
+      background: #e2e8f0;
+    }
+
+    &.active {
+      color: var(--primary-color, #2563eb);
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .tab-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      background: var(--primary-color, #2563eb);
+      border-radius: 999px;
+    }
+  }
+}
+
+.variant-item-card {
+  transition: all 0.2s ease;
+  &:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+  }
+
+  .color-preview-circle {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #cbd5e1;
+    flex-shrink: 0;
+  }
+}
+
+.variant-images-picker {
+  .variant-image-choices {
+    .variant-thumb-select-btn {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      padding: 2px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      overflow: hidden;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 5px;
+      }
+
+      &:hover {
+        border-color: #94a3b8;
+      }
+
+      &.chosen {
+        border-color: var(--primary-color, #2563eb);
+        box-shadow: 0 0 0 1px var(--primary-color, #2563eb);
+
+        .chosen-badge {
+          position: absolute;
+          top: 2px;
+          right: 2px;
+          width: 18px;
+          height: 18px;
+          background: var(--primary-color, #2563eb);
+          color: #ffffff;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11px;
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}
+

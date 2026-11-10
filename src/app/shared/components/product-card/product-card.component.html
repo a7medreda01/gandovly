@@ -1,4 +1,4 @@
-<article class="product-card" [class.is-out-of-stock]="!product.isAvailable">
+<article class="product-card" [class.is-out-of-stock]="!product.isAvailable" [class.has-reveal-anim]="settingsService.settings().storeLayout?.enableProductCardAnimations !== false">
   <button type="button" class="card-media" (click)="onSelect()" [attr.aria-label]="'عرض تفاصيل ' + languageService.getLocalizedName(product)">
     <span class="product-img-wrapper"><img appImageReveal [src]="product.imageUrl | imageUrl:'product':(product.updatedAt || product.id)" [alt]="languageService.getLocalizedName(product)" class="product-real-img" loading="lazy" decoding="async" (error)="onImageError($event)" /></span>
     @if (hasDiscount) { <span class="card-badges"><span class="badge-discount">خصم {{ discountPercent }}%</span></span> }

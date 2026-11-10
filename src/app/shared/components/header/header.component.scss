@@ -81,6 +81,62 @@
   flex-shrink: 0;
 }
 
+.brand-skeleton-loader {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  .skeleton-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(148, 163, 184, 0.2);
+    flex-shrink: 0;
+  }
+
+  .skeleton-texts {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    .skeleton-line {
+      height: 12px;
+      border-radius: 6px;
+      background: rgba(148, 163, 184, 0.2);
+
+      &.line-title {
+        width: 95px;
+        height: 14px;
+      }
+
+      &.line-subtitle {
+        width: 55px;
+        height: 10px;
+      }
+    }
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(226, 232, 240, 0.25) 0%,
+      rgba(203, 213, 225, 0.55) 50%,
+      rgba(226, 232, 240, 0.25) 100%
+    );
+    background-size: 200% 100%;
+    animation: brandShimmer 1.5s infinite linear;
+  }
+}
+
+@keyframes brandShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .brand-logo {
   gap: 0.55rem;
   text-decoration: none;

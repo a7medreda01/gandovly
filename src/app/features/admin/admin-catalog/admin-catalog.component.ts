@@ -134,6 +134,24 @@ export class AdminCatalogComponent implements OnInit {
   // Product Form Modal
   showProductModal = signal<boolean>(false);
   isEditingProduct = signal<boolean>(false);
+  productModalTab = signal<'basic' | 'variants' | 'modifiers' | 'specs'>('basic');
+
+  setProductTab(tab: 'basic' | 'variants' | 'modifiers' | 'specs') {
+    this.productModalTab.set(tab);
+  }
+
+  nextProductTab() {
+    const tabs: ('basic' | 'variants' | 'modifiers' | 'specs')[] = ['basic', 'variants', 'modifiers', 'specs'];
+    const idx = tabs.indexOf(this.productModalTab());
+    if (idx < tabs.length - 1) this.productModalTab.set(tabs[idx + 1]);
+  }
+
+  prevProductTab() {
+    const tabs: ('basic' | 'variants' | 'modifiers' | 'specs')[] = ['basic', 'variants', 'modifiers', 'specs'];
+    const idx = tabs.indexOf(this.productModalTab());
+    if (idx > 0) this.productModalTab.set(tabs[idx - 1]);
+  }
+
   productForm = {
     id: 0,
     categoryId: 1,
@@ -330,6 +348,7 @@ export class AdminCatalogComponent implements OnInit {
     };
     if(this.productActivityPreset)this.applyPreset(this.productActivityPreset);
     this.showQuickModifierPanel.set(false);
+    this.productModalTab.set('basic');
     this.showProductModal.set(true);
   }
 
@@ -428,6 +447,7 @@ export class AdminCatalogComponent implements OnInit {
     this.parseSpecificationsJson(prod.specificationsJson);
     this.syncProductImagesToForm();
     this.showQuickModifierPanel.set(false);
+    this.productModalTab.set('basic');
     this.showProductModal.set(true);
   }
 

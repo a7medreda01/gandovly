@@ -171,7 +171,7 @@
         @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
           <div class="summary-price-row">
             <div class="price-banner-box">
-              <span class="price-val">{{ (entranceAnimationActive() ? displayPrice() : (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice)) | number:'1.0-2' }}</span>
+              <span class="price-val">{{ (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice) | number:'1.0-2' }}</span>
               <span class="price-curr">{{currencySymbol}}</span>
               @if(isWeighedProduct){<span class="unit-label">لكل كجم</span>}
               @if(product()!.originalPrice && product()!.originalPrice! > (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice)){

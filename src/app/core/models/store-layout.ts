@@ -55,6 +55,8 @@ export interface StoreLayout {
     footerLogoHeight?: number;
     modalImageHeight?: number;
     enableProductPageAnimations?: boolean;
+    enableProductCardAnimations?: boolean;
+    enableHomeSectionAnimations?: boolean;
     orderNumberMode?: 'random' | 'continuous' | 'daily' | 'weekly' | 'monthly' | null;
     orderNumberStart?: number;
     useCustomHome: boolean;
