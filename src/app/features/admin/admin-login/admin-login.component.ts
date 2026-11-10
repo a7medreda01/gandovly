@@ -116,7 +116,7 @@ export class AdminLoginComponent implements OnInit {
         } else {
           const host = window.location.hostname.toLowerCase();
           const targetSlug = res.tenantSlug;
-          if ((host === 'mecart.app' || host === 'www.mecart.app') && targetSlug) {
+          if ((host === 'mecart.app' || host === 'www.mecart.app' || host.endsWith('.vercel.app')) && targetSlug) {
             const sessionData = encodeURIComponent(JSON.stringify(res));
             window.location.href = `https://${targetSlug}.mecart.app/admin/orders#session=${sessionData}`;
           } else if (targetSlug && !host.includes(targetSlug) && (host === 'localhost' || host === '127.0.0.1')) {

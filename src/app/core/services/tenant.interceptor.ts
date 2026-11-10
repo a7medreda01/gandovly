@@ -23,7 +23,7 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
     const session = JSON.parse(stored || 'null');
     if (session?.token) headers['Authorization'] = `Bearer ${session.token}`;
   } catch { /* Invalid stored session is handled by the login flow. */ }
-  const customHost = !['localhost','127.0.0.1','mecart.app','www.mecart.app','supermarket1.runasp.net'].includes(host) && !host.endsWith('.mecart.app');
+  const customHost = !['localhost','127.0.0.1','mecart.app','www.mecart.app','supermarket1.runasp.net'].includes(host) && !host.endsWith('.mecart.app') && !host.endsWith('.vercel.app') && !host.includes('vercel.app');
 
   const handleResponse = (req: typeof request) => next(req).pipe(
     catchError((err: unknown) => {
