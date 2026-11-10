@@ -999,32 +999,76 @@ img.image-pending { opacity: 0; }
 }
 
 /* ==========================================================================
-   Fade In Up Animation for Sections (Categories, Popular, Visual, Hotline)
+   Fade In Up Animation for Sections (Categories, Visual, Hotline)
    ========================================================================== */
+.popular-section {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 .categories-row-section,
-.popular-section,
 .categories-visual-section,
 .hotline-card-section {
   &.has-fade-in-up.scroll-animated:not(.in-view) {
     opacity: 0;
-    transform: translate3d(0, 24px, 0);
+    transform: translate3d(0, 36px, 0);
+
+    .categories-header-mini,
+    .section-heading-row,
+    .category-scroll-item,
+    .cat-compact-card,
+    .hotline-card {
+      opacity: 0;
+      transform: translate3d(0, 24px, 0);
+    }
   }
 
   &.has-fade-in-up.scroll-animated.in-view {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .categories-header-mini,
+    .section-heading-row {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: 0.05s;
+    }
+
+    .category-scroll-item,
+    .cat-compact-card,
+    .hotline-card {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @for $i from 1 through 16 {
+      .category-scroll-item:nth-child(#{$i}),
+      .cat-compact-card:nth-child(#{$i}) {
+        transition-delay: #{0.04s * $i};
+      }
+    }
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .categories-row-section,
-  .popular-section,
   .categories-visual-section,
   .hotline-card-section {
     &.has-fade-in-up.scroll-animated:not(.in-view) {
       opacity: 1 !important;
       transform: none !important;
+
+      .categories-header-mini,
+      .section-heading-row,
+      .category-scroll-item,
+      .cat-compact-card,
+      .hotline-card {
+        opacity: 1 !important;
+        transform: none !important;
+      }
     }
   }
 }

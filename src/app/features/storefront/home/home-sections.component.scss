@@ -688,17 +688,60 @@ img.image-pending {
 /* ==========================================================================
    Fade In Up Animation for Sections (Features, Brands, Categories, Collection)
    ========================================================================== */
+.collection.first-collection {
+  opacity: 1 !important;
+  transform: none !important;
+
+  header,
+  app-product-card {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
 .content-section,
-.collection {
+.collection:not(.first-collection) {
   &.has-fade-in-up.scroll-animated:not(.in-view) {
     opacity: 0;
-    transform: translate3d(0, 24px, 0);
+    transform: translate3d(0, 36px, 0);
+
+    header {
+      opacity: 0;
+      transform: translate3d(0, 20px, 0);
+    }
+
+    .info-card,
+    app-product-card {
+      opacity: 0;
+      transform: translate3d(0, 28px, 0);
+    }
   }
 
   &.has-fade-in-up.scroll-animated.in-view {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+
+    header {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: 0.05s;
+    }
+
+    .info-card,
+    app-product-card {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @for $i from 1 through 12 {
+      .info-card:nth-child(#{$i}),
+      app-product-card:nth-child(#{$i}) {
+        transition-delay: #{0.05s * $i};
+      }
+    }
   }
 }
 
@@ -708,6 +751,13 @@ img.image-pending {
     &.has-fade-in-up.scroll-animated:not(.in-view) {
       opacity: 1 !important;
       transform: none !important;
+
+      header,
+      .info-card,
+      app-product-card {
+        opacity: 1 !important;
+        transform: none !important;
+      }
     }
   }
 }

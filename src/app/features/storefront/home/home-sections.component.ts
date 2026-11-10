@@ -4,7 +4,7 @@ import { ScrollAnimateDirective } from '../../../shared/directives/scroll-animat
 import { HomeSkeletonComponent } from './home-skeleton.component';
 import { Subscription } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
@@ -32,6 +32,9 @@ export class HomeSectionsComponent {
         config: HomeSection;
         products: Product[];
     }[]>([]);
+    readonly firstProductSectionId = computed(() => {
+        return this.sections().find(s => s.config.kind === 'products' && s.products.length > 0)?.config.id;
+    });
     loading = signal(true);
     error = signal(false);
     selected = signal<Product | null>(null);
