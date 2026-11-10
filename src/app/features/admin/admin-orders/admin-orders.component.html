@@ -498,13 +498,16 @@
             }
           </div>
 
-          <!-- WhatsApp & Print Actions -->
+          <!-- WhatsApp & Invoice Actions -->
           <div class="quick-tools-row flex-between flex-wrap gap-2 mb-3">
-            <button class="btn-tool-wa" (click)="resendNotification(selectedOrder()!.id)">
+            <button type="button" class="btn-tool-wa" (click)="resendNotification(selectedOrder()!.id)">
               <i class="bi bi-whatsapp me-1 text-success"></i> إعادة إرسال إشعار واتساب
             </button>
-            <button class="btn-tool-print" (click)="printOrder(selectedOrder()!)">
-              <i class="bi bi-printer me-1 text-primary"></i> طباعة الفاتورة / البون
+            <button type="button" class="btn-tool-share" (click)="openInvoiceModal(selectedOrder()!)">
+              <i class="bi bi-share me-1 text-primary"></i> مشاركة الفاتورة
+            </button>
+            <button type="button" class="btn-tool-print" (click)="printOrder(selectedOrder()!)" title="طباعة فورية للبون">
+              <i class="bi bi-printer me-1"></i> طباعة
             </button>
           </div>
 
@@ -523,5 +526,9 @@
         </div>
       </div>
     </div>
+  }
+
+  @if (invoiceOrder()) {
+    <app-invoice-modal [order]="invoiceOrder()" (close)="closeInvoiceModal()"></app-invoice-modal>
   }
 </div>

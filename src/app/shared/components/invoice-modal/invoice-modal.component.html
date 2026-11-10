@@ -1,0 +1,215 @@
+@if (order) {
+<div class="invoice-modal-backdrop" (click)="onClose()">
+  <div
+    class="invoice-modal-dialog"
+    appStoreDialog
+    aria-label="مشاركة وطباعة الفاتورة"
+    (dialogDismiss)="onClose()"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="invoice-modal-header flex-between">
+      <div class="d-flex align-items-center gap-2">
+        <div class="invoice-header-icon">
+          <i class="bi bi-receipt-cutoff"></i>
+        </div>
+        <div>
+          <h3 class="invoice-title mb-0">فاتورة ومشاركة طلب #{{ order.orderNumber }}</h3>
+          <span class="invoice-subtitle text-muted small">متجر: {{ invoiceService.storeName }}</span>
+        </div>
+      </div>
+      <button class="btn-close-modal" (click)="onClose()" type="button" aria-label="إغلاق">✕</button>
+    </div>
+
+    <!-- Quick Action Toolbar -->
+    <div class="invoice-actions-bar">
+      <!-- 1. WhatsApp Share -->
+      <button type="button" class="btn-inv-action btn-wa" (click)="onWhatsApp()" title="مشاركة الفاتورة للعميل على واتساب">
+        <i class="bi bi-whatsapp"></i>
+        <span>مشاركة واتساب</span>
+      </button>
+
+      <!-- 2. Native Share Image / File -->
+      <button type="button" class="btn-inv-action btn-share" (click)="onShare()" title="مشاركة صورة الفاتورة للتطبيقات">
+        <i class="bi bi-share-fill"></i>
+        <span>مشاركة الصورة</span>
+      </button>
+
+      <!-- 3. Download Image -->
+      <button type="button" class="btn-inv-action btn-download" (click)="onDownload()" title="تحميل صورة الفاتورة كـ PNG">
+        <i class="bi bi-download"></i>
+        <span>حفظ الصورة (PNG)</span>
+      </button>
+
+      <!-- 4. Thermal Print -->
+      <button type="button" class="btn-inv-action btn-print" (click)="onPrint()" title="طباعة بون الفاتورة مباشرة">
+        <i class="bi bi-printer-fill"></i>
+        <span>طباعة البون</span>
+      </button>
+
+      <!-- 5. Copy Text -->
+      <button type="button" class="btn-inv-action btn-copy" (click)="onCopyText()" title="نسخ تفاصيل الفاتورة كنص">
+        <i class="bi" [class.bi-clipboard-check]="copied()" [class.bi-clipboard]="!copied()"></i>
+        <span>{{ copied() ? 'تم النسخ!' : 'نسخ النص' }}</span>
+      </button>
+    </div>
+
+    <!-- View Mode Switcher -->
+    <div class="view-mode-tabs">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'card'"
+        (click)="activeTab.set('card')"
+      >
+        <i class="bi bi-file-earmark-text me-1"></i> بون الفاتورة
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'image'"
+        (click)="activeTab.set('image')"
+      >
+        <i class="bi bi-image me-1"></i> صورة الفاتورة المصممة
+      </button>
+    </div>
+
+    <!-- Modal Body: Receipt Paper Preview -->
+    <div class="invoice-modal-body">
+      @if (activeTab() === 'image') {
+        <div class="image-preview-wrapper flex-center">
+          @if (isGeneratingImage()) {
+            <div class="loading-spinner-box flex-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <span class="ms-2">جارٍ توليد صورة الفاتورة عالية الدقة...</span>
+            </div>
+          } @else if (imageDataUrl()) {
+            <img [src]="imageDataUrl()!" [alt]="'فاتورة طلب #' + order.orderNumber" class="invoice-generated-img" />
+          }
+        </div>
+      } @else {
+        <!-- Thermal Receipt Styled Paper Card -->
+        <div class="thermal-receipt-card">
+          <!-- Store Header -->
+          <div class="receipt-head text-center">
+            <h4 class="store-name mb-1">{{ invoiceService.storeName }}</h4>
+            @if (invoiceService.storeTagline) {
+              <p class="store-tagline mb-1">{{ invoiceService.storeTagline }}</p>
+            }
+            @if (invoiceService.storePhone || invoiceService.storeAddress) {
+              <div class="store-meta text-muted small">
+                @if (invoiceService.storePhone) { <span>هاتف: {{ invoiceService.storePhone }}</span> }
+                @if (invoiceService.storeAddress) { <span> | {{ invoiceService.storeAddress }}</span> }
+              </div>
+            }
+          </div>
+
+          <div class="receipt-dashed-line"></div>
+
+          <!-- Order Tag & Status -->
+          <div class="order-badge-row flex-between">
+            <span class="order-badge-tag">طلب #{{ order.orderNumber }}</span>
+            <span class="order-status-pill">{{ invoiceService.getStatusLabel(order.status) }}</span>
+          </div>
+
+          <div class="order-meta-info small">
+            <div class="meta-row"><span>تاريخ الطلب:</span> <strong>{{ order.createdAt | date:'short' }}</strong></div>
+            <div class="meta-row"><span>طريقة الاستلام:</span> <strong>{{ invoiceService.getOrderTypeLabel(order.orderType) }}</strong></div>
+            <div class="meta-row"><span>طريقة الدفع:</span> <strong>{{ invoiceService.getPaymentMethodLabel(order.paymentMethod) }}</strong></div>
+          </div>
+
+          <div class="receipt-dashed-line"></div>
+
+          <!-- Customer Details -->
+          <div class="customer-info-box small">
+            <div class="meta-row"><span>العميل:</span> <strong>{{ order.customerName || 'عميل' }}</strong></div>
+            <div class="meta-row"><span>الهاتف:</span> <strong dir="ltr">{{ order.customerPhone || '-' }}</strong></div>
+            <div class="meta-row"><span>العنوان:</span> <strong>{{ order.deliveryAddress || order.deliveryZoneName || (order.orderType === 'Pickup' ? 'استلام من الفرع' : '-') }}</strong></div>
+          </div>
+
+          <div class="receipt-dashed-line"></div>
+
+          <!-- Items Table -->
+          <table class="receipt-items-table">
+            <thead>
+              <tr>
+                <th class="text-end">الصنف</th>
+                <th class="text-center">الكمية</th>
+                <th class="text-center">السعر</th>
+                <th class="text-start">الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of order.orderLines; track line.id; let idx = $index) {
+                <tr>
+                  <td class="item-name-cell">
+                    <strong>{{ line.productNameAr }}</strong>
+                    @if (line.actualWeightGrams) {
+                      <div class="sub-meta text-muted">الوزن: {{ line.actualWeightGrams }} جم</div>
+                    } @else if (line.estimatedWeightGrams) {
+                      <div class="sub-meta text-muted">الوزن: {{ line.estimatedWeightGrams }} جم</div>
+                    }
+                    @if (line.preparationOptionNameAr) {
+                      <div class="sub-meta text-muted">تجهيز: {{ line.preparationOptionNameAr }}</div>
+                    }
+                    @if (line.modifiers && line.modifiers.length > 0) {
+                      <div class="sub-meta text-primary">+ {{ line.modifiers[0].modifierOptionNameAr }}</div>
+                    }
+                  </td>
+                  <td class="text-center fw-bold">{{ line.quantityUnits }}</td>
+                  <td class="text-center">{{ line.unitPriceSnapshot | number:'1.2-2' }}</td>
+                  <td class="text-start fw-bold">{{ (line.finalLineTotal || line.estimatedLineTotal) | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="receipt-dashed-line"></div>
+
+          <!-- Financial Breakdown -->
+          <div class="receipt-totals-box">
+            <div class="total-row flex-between">
+              <span>المجموع الفرعي:</span>
+              <span>{{ invoiceService.getOrderSubtotal(order) | number:'1.2-2' }} {{ invoiceService.currencySymbol }}</span>
+            </div>
+
+            @if (order.deliveryFee > 0) {
+              <div class="total-row flex-between">
+                <span>رسوم التوصيل:</span>
+                <span>{{ order.deliveryFee | number:'1.2-2' }} {{ invoiceService.currencySymbol }}</span>
+              </div>
+            }
+
+            @if (order.discountAmount > 0) {
+              <div class="total-row flex-between text-danger">
+                <span>الخصم:</span>
+                <span>- {{ order.discountAmount | number:'1.2-2' }} {{ invoiceService.currencySymbol }}</span>
+              </div>
+            }
+
+            <div class="grand-total-row flex-between">
+              <span>الإجمالي المطلوب:</span>
+              <span class="grand-total-val">{{ invoiceService.getOrderTotal(order) | number:'1.2-2' }} {{ invoiceService.currencySymbol }}</span>
+            </div>
+          </div>
+
+          @if (order.notes) {
+            <div class="receipt-notes-box">
+              <i class="bi bi-info-circle me-1"></i>
+              <span>ملاحظات: {{ order.notes }}</span>
+            </div>
+          }
+
+          <!-- Footer Barcode & Thanks -->
+          <div class="receipt-footer text-center">
+            <div class="receipt-barcode">*MC-{{ order.orderNumber }}*</div>
+            <p class="mb-0">شكراً لتعاملكم واختياركم لنا ❤️</p>
+            <small class="text-muted">فاتورة إلكترونية معتمدة عبر منصة MeCart</small>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+}
+

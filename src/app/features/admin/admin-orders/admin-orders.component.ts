@@ -4,14 +4,16 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SettingsService } from '../../../core/services/settings.service';
+import { InvoiceService } from '../../../core/services/invoice.service';
 import { Order, OrderLine, OrderStatus } from '../../../core/models/models';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
+import { InvoiceModalComponent } from '../../../shared/components/invoice-modal/invoice-modal.component';
 import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime } from '../../../shared/utils/date-utils';
 
 @Component({
   selector: 'app-admin-orders',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoadingStateComponent],
+  imports: [CommonModule, FormsModule, LoadingStateComponent, InvoiceModalComponent],
   templateUrl: './admin-orders.component.html',
   styleUrl: './admin-orders.component.scss'
 })
@@ -19,6 +21,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
   readonly settingsService = inject(SettingsService);
+  readonly invoiceService = inject(InvoiceService);
 
   get currencySymbol(): string {
     return this.settingsService.settings().currencySymbol || 'ج.م';
@@ -56,6 +59,7 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
 
   // Selected Order for Modal
   selectedOrder = signal<Order | null>(null);
+  invoiceOrder = signal<Order | null>(null);
 
   // Bi-directional weight & price buffers
   qtyInputs: { [orderLineId: number]: number } = {};
@@ -378,6 +382,15 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
   }
 
   printOrder(order: Order) {
-    window.print();
+    this.invoiceService.printInvoice(order);
+    this.toast.info('تم إرسال أمر طباعة البون');
+  }
+
+  openInvoiceModal(order: Order) {
+    this.invoiceOrder.set(order);
+  }
+
+  closeInvoiceModal() {
+    this.invoiceOrder.set(null);
   }
 }

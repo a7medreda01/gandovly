@@ -358,6 +358,10 @@
                 </button>
               }
 
+              <button class="btn-stage btn-share" (click)="openInvoiceModal(selectedOrder()!)">
+                <i class="bi bi-share me-1"></i> مشاركة الفاتورة
+              </button>
+
               <button class="btn-stage btn-print" (click)="printOrderTicket(selectedOrder()!)">
                 <i class="bi bi-printer me-1"></i> طباعة البون
               </button>
@@ -366,5 +370,9 @@
         </div>
       </div>
     </div>
+  }
+
+  @if (invoiceOrder()) {
+    <app-invoice-modal [order]="invoiceOrder()" (close)="closeInvoiceModal()"></app-invoice-modal>
   }
 </div>
