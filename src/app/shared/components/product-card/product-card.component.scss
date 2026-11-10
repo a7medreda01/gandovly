@@ -59,7 +59,7 @@ img.image-pending { opacity: 0; }
 
 .has-reveal-anim {
   img[appImageReveal]:not(.image-pending) {
-    animation: cardImgFocusReveal 0.65s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    animation: cardImgFocusReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     will-change: filter, transform, opacity;
   }
 }

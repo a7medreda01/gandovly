@@ -720,26 +720,26 @@ img.image-pending {
   &.has-fade-in-up.scroll-animated.in-view {
     opacity: 1;
     transform: translate3d(0, 0, 0);
-    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
 
     header {
       opacity: 1;
       transform: translate3d(0, 0, 0);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      transition-delay: 0.05s;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: 0.08s;
     }
 
     .info-card,
     app-product-card {
       opacity: 1;
       transform: translate3d(0, 0, 0);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @for $i from 1 through 12 {
       .info-card:nth-child(#{$i}),
       app-product-card:nth-child(#{$i}) {
-        transition-delay: #{0.05s * $i};
+        transition-delay: #{0.07s * $i};
       }
     }
   }
