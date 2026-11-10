@@ -1,6 +1,6 @@
 import { isPlatformContext } from '../../../core/services/store-context';
 import { SettingsService } from '../../../core/services/settings.service';
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,12 +14,35 @@ import { NotificationService } from '../../../core/services/notification.service
   templateUrl: './admin-login.component.html',
   styleUrl: './admin-login.component.scss'
 })
-export class AdminLoginComponent {
+export class AdminLoginComponent implements OnInit {
   readonly platformLogin = isPlatformContext();
   readonly settingsService = inject(SettingsService);
   private readonly authService = inject(AuthService);
   private readonly toast = inject(NotificationService);
   private readonly router = inject(Router);
+
+  ngOnInit() {
+    if (typeof window !== 'undefined' && window.location.hash.includes('session=')) {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        const rawSession = hashParams.get('session');
+        if (rawSession) {
+          const session = JSON.parse(decodeURIComponent(rawSession));
+          if (session && session.token) {
+            this.authService.setAdminSession(session);
+            const returnUrl = hashParams.get('returnUrl') || '/admin/orders';
+            const cleanHash = window.location.hash.replace(/[#&]?session=[^&]*/, '').replace(/^#/, '');
+            history.replaceState(null, '', window.location.pathname + window.location.search + (cleanHash ? '#' + cleanHash : ''));
+            this.toast.success(`مرحباً بك مجدداً ${session.fullName || session.usernameOrPhone || ''}`);
+            this.router.navigateByUrl(returnUrl);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Cross-domain hash login failed', e);
+      }
+    }
+  }
 
   username: string = '';
   password: string = '';
@@ -94,7 +117,8 @@ export class AdminLoginComponent {
           const host = window.location.hostname.toLowerCase();
           const targetSlug = res.tenantSlug;
           if ((host === 'mecart.app' || host === 'www.mecart.app') && targetSlug) {
-            window.location.href = `https://${targetSlug}.mecart.app/admin/orders`;
+            const sessionData = encodeURIComponent(JSON.stringify(res));
+            window.location.href = `https://${targetSlug}.mecart.app/admin/orders#session=${sessionData}`;
           } else if (targetSlug && !host.includes(targetSlug) && (host === 'localhost' || host === '127.0.0.1')) {
             this.router.navigate(['/admin/orders'], { queryParams: { tenant: targetSlug } });
           } else {

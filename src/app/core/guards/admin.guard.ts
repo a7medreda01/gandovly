@@ -15,7 +15,16 @@ export const platformGuard: CanActivateFn = (route, state) => {
     if (auth.currentAdmin()?.isPlatformAdmin === true) {
       return true;
     }
-    // If on mecart.app but logged in as a store-specific user, log out and redirect to platform login
+    const admin = auth.currentAdmin();
+    if (admin?.tenantSlug) {
+      const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+      if (host === 'mecart.app' || host === 'www.mecart.app') {
+        const sessionData = encodeURIComponent(JSON.stringify(admin));
+        window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/orders#session=${sessionData}`;
+        return false;
+      }
+      return router.createUrlTree(['/admin/orders'], { queryParams: { tenant: admin.tenantSlug } });
+    }
     auth.logoutAdmin();
     return router.createUrlTree(['/admin/login'], { queryParams: { returnUrl: state.url } });
   }
@@ -28,8 +37,18 @@ export const storeGuard: CanActivateFn = () => {
   if (auth.currentAdmin()?.role === 'KitchenStaff') {
     return router.createUrlTree(['/'], { queryParamsHandling: 'preserve' });
   }
-  // On apex platform domain (mecart.app) without a tenant parameter, redirect to platform stores
+  // On apex platform domain (mecart.app) without a tenant parameter
   if (isPlatformContext()) {
+    const admin = auth.currentAdmin();
+    if (admin && !admin.isPlatformAdmin && admin.tenantSlug) {
+      const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
+      if (host === 'mecart.app' || host === 'www.mecart.app') {
+        const sessionData = encodeURIComponent(JSON.stringify(admin));
+        window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/orders#session=${sessionData}`;
+        return false;
+      }
+      return router.createUrlTree(['/admin/orders'], { queryParams: { tenant: admin.tenantSlug } });
+    }
     return router.createUrlTree(['/admin/stores']);
   }
   return true;

@@ -24,6 +24,25 @@ export class AuthService {
     if (typeof localStorage === 'undefined') return;
     
     try {
+      if (typeof window !== 'undefined' && window.location.hash.includes('session=')) {
+        try {
+          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+          const rawSession = hashParams.get('session');
+          if (rawSession) {
+            const adminUser: AuthResponse = JSON.parse(decodeURIComponent(rawSession));
+            if (adminUser && adminUser.token) {
+              this.currentAdmin.set(adminUser);
+              this.isAdminLoggedIn.set(true);
+              localStorage.setItem(adminSessionKey(), JSON.stringify(adminUser));
+              const cleanHash = window.location.hash.replace(/[#&]?session=[^&]*/, '').replace(/^#/, '');
+              history.replaceState(null, '', window.location.pathname + window.location.search + (cleanHash ? '#' + cleanHash : ''));
+            }
+          }
+        } catch (e) {
+          console.warn('Cross-domain session restore failed', e);
+        }
+      }
+
       const storedCustomer = localStorage.getItem(customerSessionKey('gendofly_customer_session'));
       if (storedCustomer) {
         const parsed: AuthResponse = JSON.parse(storedCustomer);
@@ -47,6 +66,16 @@ export class AuthService {
       }
     } catch (e) {
       console.warn('Session parsing failed', e);
+    }
+  }
+
+  setAdminSession(session: AuthResponse) {
+    if (!session || !session.token) return;
+    sessionStorage.removeItem(adminSessionKey());
+    this.currentAdmin.set(session);
+    this.isAdminLoggedIn.set(true);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(adminSessionKey(), JSON.stringify(session));
     }
   }
 
