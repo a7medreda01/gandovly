@@ -227,12 +227,141 @@ export class AdminCatalogComponent implements OnInit {
     isActive: true
   };
 
-  private readonly commerceApi=inject(CommerceService);
-  private readonly commerceCdr=inject(ChangeDetectorRef);
-  activityPresets:any[]=[];commerceResources:any[]=[];productActivityPreset='';
-  productCommerce:any={mode:'Physical',prescriptionRequired:false,resourceId:null,durationMinutes:60,flexibleDuration:false,maxDurationMinutes:43200,subscriptionDays:30,digitalDelivery:'File',depositAmount:0};
-  applyPreset(id:string){const preset=this.activityPresets.find(p=>p.id===id);if(!preset)return;this.productActivityPreset=id;this.productForm.domain=preset.domain;this.productCommerce={...this.productCommerce,mode:preset.mode,prescriptionRequired:id==='pharmacy',flexibleDuration:id==='rental'};if(preset.mode!=='Physical'&&preset.mode!=='Perishable'){this.productForm.pricingType='FixedPerUnit';this.variantRows=[];this.productForm.preparationOptionGroupIds=[];}
-  for(const key of preset.fields||[])if(!this.productForm.customSpecs.some((s:any)=>s.key===key))this.productForm.customSpecs.push({key,value:''});}
+  private readonly commerceApi = inject(CommerceService);
+  private readonly commerceCdr = inject(ChangeDetectorRef);
+  activityPresets: any[] = [];
+  commerceResources: any[] = [];
+  productActivityPreset = '';
+  showAllCommerceModes = signal(false);
+
+  readonly allCommerceModes = [
+    { id: 'Physical', label: 'منتج عادي ملموس (شحن / استلام)', desc: 'منتج فيزيائي يمر بمراحل الشحن والتسليم المعتادة', icon: 'bi-box-seam' },
+    { id: 'Booking', label: 'حجز موعد أو خدمة أو تأجير', desc: 'تحديد فترة وسعة الموعد أو تأجير مرن', icon: 'bi-calendar-check' },
+    { id: 'Vehicle', label: 'معاينة وعرض موديل / مركبة / تقسيط', desc: 'معاينة ميدانية، عروض أسعار، وحساب أقساط ومقدم', icon: 'bi-clipboard-check' },
+    { id: 'Digital', label: 'منتج رقمي (ملفات / أكواد تفعيل)', desc: 'تنزيل ملفات PDF أو أكواد وسيريالات ضمان بعد الدفع', icon: 'bi-file-earmark-code' },
+    { id: 'Subscription', label: 'اشتراك دوري متجدد', desc: 'تجديد دوري ومتابعة استحقاق بعد تأكيد الدفع', icon: 'bi-arrow-repeat' },
+    { id: 'Perishable', label: 'تشغيلات وتواريخ صلاحية', desc: 'مخزون بتواريخ صلاحية وسحب الأقرب انتهاءً أولاً', icon: 'bi-calendar-date' },
+    { id: 'Prescription', label: 'صيدلية (أدوية وروشتات طبية)', desc: 'يشترط مراجعة وصفة طبية معتمدة قبل الصرف', icon: 'bi-capsule' }
+  ];
+
+  readonly storeActivityPreset = computed(() => this.settingsService.settings().activityPreset || 'all');
+
+  readonly availableCommerceModes = computed(() => {
+    if (this.showAllCommerceModes()) {
+      return this.allCommerceModes;
+    }
+    const preset = this.productActivityPreset || this.storeActivityPreset();
+    const domain = this.productForm.domain || this.settingsService.settings().defaultDomain || 'GeneralRetail';
+
+    if (preset === 'all' || (!preset && !domain)) {
+      return this.allCommerceModes;
+    }
+
+    if (preset === 'furniture') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Booking', 'Vehicle', 'Digital', 'Subscription'].includes(m.id));
+    }
+    if (preset === 'clothing' || preset === 'shoes') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Digital'].includes(m.id));
+    }
+    if (preset === 'pharmacy' || domain === 'Pharmacy') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Prescription', 'Perishable', 'Subscription', 'Booking'].includes(m.id));
+    }
+    if (preset === 'grocery' || preset === 'perishable' || domain === 'Supermarket') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Perishable', 'Subscription', 'Booking'].includes(m.id));
+    }
+    if (preset === 'restaurant' || domain === 'Restaurant') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Booking', 'Subscription'].includes(m.id));
+    }
+    if (preset === 'auto-parts' || domain === 'AutoParts') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Vehicle', 'Booking'].includes(m.id));
+    }
+    if (preset === 'electronics' || domain === 'Electronics') {
+      return this.allCommerceModes.filter(m => ['Physical', 'Digital', 'Vehicle', 'Booking', 'Subscription'].includes(m.id));
+    }
+    if (preset === 'cars') {
+      return this.allCommerceModes.filter(m => ['Vehicle', 'Booking', 'Physical', 'Digital'].includes(m.id));
+    }
+    if (preset === 'services' || preset === 'rental') {
+      return this.allCommerceModes.filter(m => ['Booking', 'Subscription', 'Physical'].includes(m.id));
+    }
+    if (preset === 'digital') {
+      return this.allCommerceModes.filter(m => ['Digital', 'Subscription'].includes(m.id));
+    }
+
+    return this.allCommerceModes;
+  });
+
+  readonly suggestedSpecs = computed(() => {
+    const preset = this.productActivityPreset || this.storeActivityPreset();
+    const domain = this.productForm.domain || this.settingsService.settings().defaultDomain || 'GeneralRetail';
+
+    if (preset === 'furniture') {
+      return ['الأبعاد (العرض × الارتفاع × العمق)', 'نوع الخشب والخامة', 'فترة الضمان', 'الاستخدام (داخلي/خارجي)', 'بلد الصنع', 'الوزن التقريبي'];
+    }
+    if (preset === 'clothing') {
+      return ['الخامة', 'القصة / الموديل', 'تعليمات الغسيل والعناية', 'الموسم', 'بلد الصنع'];
+    }
+    if (preset === 'shoes') {
+      return ['خامة الجلد / القماش', 'نوع البطانة', 'الاستخدام', 'بلد المنشأ', 'مقاوم للماء'];
+    }
+    if (preset === 'pharmacy' || domain === 'Pharmacy') {
+      return ['المادة الفعالة', 'الشكل الدوائي', 'التركيز', 'حجم العبوة', 'طريقة الحفظ'];
+    }
+    if (preset === 'grocery' || preset === 'perishable' || domain === 'Supermarket') {
+      return ['حجم العبوة / الوزن', 'بلد المنشأ', 'طريقة التخزين', 'القيمة الغذائية'];
+    }
+    if (preset === 'restaurant' || domain === 'Restaurant') {
+      return ['الحجم / الحصة', 'المكونات الأساسية', 'ملاحظات الحساسية', 'درجة الحارة (سبايسي)'];
+    }
+    if (preset === 'auto-parts' || domain === 'AutoParts') {
+      return ['رقم القطعة OEM', 'الموديلات المتوافقة', 'حالة القطعة', 'بلد الصنع', 'فترة الضمان'];
+    }
+    if (preset === 'electronics' || domain === 'Electronics') {
+      return ['فترة الضمان', 'الذاكرة العشوائية (RAM)', 'سعة التخزين', 'القدرة الكهربائية والجهد', 'المعالج', 'بلد الصنع'];
+    }
+    if (preset === 'cars') {
+      return ['سنة الصنع', 'الفئة', 'ناقل الحركة', 'نوع الوقود', 'الكيلومترات', 'سعة المحرك (CC)', 'حالة الدهان والفحص'];
+    }
+    if (preset === 'beauty') {
+      return ['المكونات', 'حجم العبوة', 'التركيز', 'نوع البشرة المناسب', 'بلد المنشأ'];
+    }
+
+    return ['الأبعاد / المقاس', 'الخامة', 'فترة الضمان', 'الوزن', 'بلد المنشأ', 'ملاحظات إضافية'];
+  });
+
+  addQuickSpec(specKey: string) {
+    if (!this.productForm.customSpecs) {
+      this.productForm.customSpecs = [];
+    }
+    const existing = this.productForm.customSpecs.find((s: any) => s.key === specKey);
+    if (!existing) {
+      this.productForm.customSpecs.push({ key: specKey, value: '' });
+    }
+  }
+
+  productCommerce: any = { mode: 'Physical', prescriptionRequired: false, resourceId: null, durationMinutes: 60, flexibleDuration: false, maxDurationMinutes: 43200, subscriptionDays: 30, digitalDelivery: 'File', depositAmount: 0 };
+
+  applyPreset(id: string) {
+    if (!id) {
+      this.productActivityPreset = '';
+      return;
+    }
+    const preset = this.activityPresets.find(p => p.id === id);
+    if (!preset) return;
+    this.productActivityPreset = id;
+    this.productForm.domain = preset.domain;
+    this.productCommerce = { ...this.productCommerce, mode: preset.mode, prescriptionRequired: id === 'pharmacy', flexibleDuration: id === 'rental' };
+    if (preset.mode !== 'Physical' && preset.mode !== 'Perishable') {
+      this.productForm.pricingType = 'FixedPerUnit';
+      this.variantRows = [];
+      this.productForm.preparationOptionGroupIds = [];
+    }
+    for (const key of preset.fields || []) {
+      if (!this.productForm.customSpecs.some((s: any) => s.key === key)) {
+        this.productForm.customSpecs.push({ key, value: '' });
+      }
+    }
+  }
   ngOnInit() {
     this.commerceApi.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});this.commerceApi.resources().subscribe(rows=>{this.commerceResources=rows;this.commerceCdr.markForCheck();});
     this.loadAll();
@@ -295,15 +424,19 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   openNewProductModal() {
-    this.productActivityPreset=this.settingsService.settings().activityPreset||'';
-    this.productCommerce={mode:'Physical',prescriptionRequired:false,resourceId:null,durationMinutes:60,flexibleDuration:false,maxDurationMinutes:43200,subscriptionDays:30,digitalDelivery:'File',depositAmount:0};
+    const storePreset = this.settingsService.settings().activityPreset || '';
+    const storeDomain = this.settingsService.settings().defaultDomain || 'GeneralRetail';
+    const isAll = storePreset === 'all' || this.settingsService.settings().isMultiDomain === true;
+
+    this.productActivityPreset = isAll ? '' : storePreset;
+    this.productCommerce = { mode: 'Physical', prescriptionRequired: false, resourceId: null, durationMinutes: 60, flexibleDuration: false, maxDurationMinutes: 43200, subscriptionDays: 30, digitalDelivery: 'File', depositAmount: 0 };
     this.isEditingProduct.set(false);
-    this.variantRows=[];
-    this.editingProductVersion=undefined;
+    this.variantRows = [];
+    this.editingProductVersion = undefined;
     this.productImages = [];
     const firstCat = this.categories()[0];
     const catId = firstCat?.id || 1;
-    const catDomain = firstCat?.domain || 'Supermarket';
+    const catDomain = firstCat?.domain || storeDomain;
     this.productForm = {
       id: 0,
       categoryId: catId,
@@ -346,7 +479,9 @@ export class AdminCatalogComponent implements OnInit {
       powerVoltage: '',
       customSpecs: []
     };
-    if(this.productActivityPreset)this.applyPreset(this.productActivityPreset);
+    if (this.productActivityPreset) {
+      this.applyPreset(this.productActivityPreset);
+    }
     this.showQuickModifierPanel.set(false);
     this.productModalTab.set('basic');
     this.showProductModal.set(true);
@@ -362,10 +497,12 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   openEditProductModal(prod: Product) {
-    this.productActivityPreset=prod.activityPreset||'';
-    this.productCommerce={mode:'Physical',...prod.commerce};
+    const storePreset = this.settingsService.settings().activityPreset || '';
+    const isAll = storePreset === 'all' || this.settingsService.settings().isMultiDomain === true;
+    this.productActivityPreset = prod.activityPreset || (!isAll ? storePreset : '');
+    this.productCommerce = { mode: 'Physical', ...prod.commerce };
     this.isEditingProduct.set(true);
-    this.editingProductVersion=prod.version;
+    this.editingProductVersion = prod.version;
 
     const imgs: { id?: number; imageUrl: string; isPrimary: boolean; displayOrder: number }[] = [];
     if (prod.images && prod.images.length > 0) {

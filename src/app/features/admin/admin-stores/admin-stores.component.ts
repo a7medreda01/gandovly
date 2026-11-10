@@ -58,15 +58,52 @@ export class AdminStoresComponent implements OnInit {
     name: '',
     subdomain: '',
     customDomain: '',
-    businessDomain: 'Supermarket' as StoreTenant['businessDomain'],
+    businessDomain: 'GeneralRetail' as StoreTenant['businessDomain'],
+    activityPreset: 'all',
     plan: 'Growth' as const,
-    seedTemplate: 'supermarket-carrefour',
+    seedTemplate: 'empty',
     ownerPhone: '',
     ownerEmail: '',
     ownerUsername: 'owner',
     ownerPassword: '',
     enableInstantSSL: true
   };
+
+  activityPresetList = [
+    { id: 'all', name: 'متجر شامل — يضم كافة المجالات والخيارات (افتراضي)', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-grid-fill', desc: 'كل الأقسام والمواصفات والأدوات متاحة بدون قيود' },
+    { id: 'furniture', name: 'أثاث وديكور ومفروشات', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-shop-window', desc: 'أطقم جلوس، غرف نوم، معاينات وخطط تقسيط' },
+    { id: 'clothing', name: 'ملابس وأزياء', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-tag-fill', desc: 'مقاسات وألوان، خامات، وتوجيهات الغسيل' },
+    { id: 'shoes', name: 'أحذية وحقائب وشنط', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-bag-fill', desc: 'مقاسات، خامات، واستخدامات' },
+    { id: 'pharmacy', name: 'صيدلية ومستحضرات طبية', domain: 'Pharmacy' as StoreTenant['businessDomain'], icon: 'bi-capsule', desc: 'مراجعة روشتات، مادة فعالة، وتواريخ صلاحية' },
+    { id: 'grocery', name: 'سوبر ماركت ومواد غذائية', domain: 'Supermarket' as StoreTenant['businessDomain'], icon: 'bi-basket2-fill', desc: 'أغذية طازجة ومجمدة، بيع بالوزن والقطعة' },
+    { id: 'perishable', name: 'أغذية بصلاحية وتشغيلات', domain: 'Supermarket' as StoreTenant['businessDomain'], icon: 'bi-calendar-check-fill', desc: 'مراقبة الصلاحية، سحب الأقرب انتهاءً أولاً' },
+    { id: 'restaurant', name: 'مطاعم وكافيهات ومأكولات', domain: 'Restaurant' as StoreTenant['businessDomain'], icon: 'bi-egg-fried', desc: 'وجبات، أحجام، إضافات، وحجز طاولات' },
+    { id: 'auto-parts', name: 'قطع غيار سيارات ومستلزمات', domain: 'AutoParts' as StoreTenant['businessDomain'], icon: 'bi-gear-wide-connected', desc: 'رقم OEM، فحص التوافق، وعروض أسعار' },
+    { id: 'electronics', name: 'أجهزة وإلكترونيات وهواتف', domain: 'Electronics' as StoreTenant['businessDomain'], icon: 'bi-laptop', desc: 'مواصفات تقنية، ضمان معتمد، وسيريالات' },
+    { id: 'cars', name: 'معرض سيارات ومركبات', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-car-front-fill', desc: 'موديل، سنة، كيلومترات، فحص، وتقسيط' },
+    { id: 'beauty', name: 'تجميل وعطور ومستحضرات عناية', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-stars', desc: 'تركيز، نوع البشرة، حجم العبوة، ومكونات' },
+    { id: 'flowers', name: 'ورد وهدايا وتغليف', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-gift-fill', desc: 'باقات، بطاقات تهنئة، ومناسبات' },
+    { id: 'building', name: 'أدوات ومستلزمات بناء وتشطيب', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-hammer', desc: 'أبعاد، وحدات بيع، وقدرات تشغيل' },
+    { id: 'jewelry', name: 'مجوهرات وساعات وإكسسوارات', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-gem', desc: 'عيار، وزن، وخامات فاخرة' },
+    { id: 'books', name: 'كتب ومكتبات وقرطاسية', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-book-fill', desc: 'مؤلف، ناشر، ورقم دولي ISBN' },
+    { id: 'sports', name: 'ألعاب ومستلزمات رياضية', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-trophy-fill', desc: 'أعمار، استخدام، وتجهيزات رياضية' },
+    { id: 'services', name: 'خدمات وصيانة بمواعيد', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-clock-fill', desc: 'نطاق الخدمة، مدة التنفيذ، وفترات عمل' },
+    { id: 'digital', name: 'منتجات وكورسات رقمية', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-file-earmark-code-fill', desc: 'ملفات تحميل فورية وأكواد تفعيل' },
+    { id: 'subscription', name: 'اشتراكات وخدمات دورية', domain: 'GeneralRetail' as StoreTenant['businessDomain'], icon: 'bi-arrow-repeat', desc: 'باقات متجددة وتأكيد دفع دوري' }
+  ];
+
+  onActivityPresetChange(presetId: string): void {
+    this.newStore.activityPreset = presetId;
+    const found = this.activityPresetList.find(p => p.id === presetId);
+    if (found) {
+      this.newStore.businessDomain = found.domain;
+      if (presetId === 'grocery' || presetId === 'perishable') {
+        this.newStore.seedTemplate = 'supermarket-carrefour';
+      } else {
+        this.newStore.seedTemplate = 'empty';
+      }
+    }
+  }
 
   businessDomainList = [
     { id: 'Supermarket', label: 'سوبر ماركت وتجزئة شاملة', icon: 'bi-basket2-fill', color: '#10B981', desc: 'أصناف طازجة ومجمدة، بيع بالقطعة والوزن' },
@@ -139,13 +176,14 @@ export class AdminStoresComponent implements OnInit {
       name: '',
       subdomain: '',
       customDomain: '',
-      businessDomain: 'Supermarket',
+      businessDomain: 'GeneralRetail',
+      activityPreset: 'all',
       plan: 'Growth',
-      seedTemplate: 'supermarket-carrefour',
+      seedTemplate: 'empty',
       ownerPhone: '',
       ownerEmail: '',
-    ownerUsername: 'owner',
-    ownerPassword: '',
+      ownerUsername: 'owner',
+      ownerPassword: '',
       enableInstantSSL: true
     };
     this.isModalOpen.set(true);
@@ -206,7 +244,7 @@ export class AdminStoresComponent implements OnInit {
     const status = store.status === 'Active' ? 'Suspended' : 'Active';
     this.api.patch<boolean>('admin/tenants/' + store.id + '/status', { status }).subscribe({
       next: () => this.loadStores(),
-      error: () => this.toast.error('تعذر تغيير الحالة؛ المتجر الأساسي محمي.')
+      error: () => this.toast.error('تعذر تغيير حالة المتجر.')
     });
   }
 

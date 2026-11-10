@@ -482,6 +482,8 @@ export interface Order {
 // Auth
 export interface AuthResponse {
   tenantId?: number;
+  tenantSlug?: string;
+  storeName?: string;
   isSupportSession?: boolean;
   isPlatformAdmin?: boolean;
   canDeleteStore?: boolean;

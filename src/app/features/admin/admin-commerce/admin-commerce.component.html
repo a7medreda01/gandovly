@@ -1,9 +1,677 @@
-<main dir="rtl" class="commerce-admin"><header><h1>تشغيل النشاط</h1><p>مراجعة الطلبات المتخصصة، المواعيد، التسليم والمخزون. لا تنفّذ هذه الصفحة أي تحصيل تلقائي.</p><button type="button" (click)="load()">تحديث</button></header><nav class="commerce-tabs">@for(t of tabs;track t.id){<button type="button" [class.active]="tab===t.id" (click)="tab=t.id">{{t.name}}</button>}</nav>@if(error){<p role="alert">{{error}}</p>}@if(!data&&!error){<p role="status">جاري تحميل بيانات التشغيل...</p>}@if(data){
-@if(tab==='resources'){<section><h2>مورد أو مكان أو موظف</h2><div class="fields"><label>الاسم<input [(ngModel)]="resource.name" maxlength="120"></label><label>السعة<input type="number" min="1" max="1000" [(ngModel)]="resource.capacity"></label><label>من<input type="time" [(ngModel)]="resource.opensAt"></label><label>إلى<input type="time" [(ngModel)]="resource.closesAt"></label><label>أيام الأسبوع — الأحد 0 إلى السبت 6<input [(ngModel)]="resource.daysOfWeek" dir="ltr"></label><label>تواريخ الإغلاق — تاريخ في كل سطر<textarea [(ngModel)]="resource.blackouts" placeholder="2026-12-25" dir="ltr"></textarea></label><label><input type="checkbox" [(ngModel)]="resource.isActive"> متاح للحجوزات الجديدة</label></div><button (click)="newResource()">مورد جديد</button><button (click)="saveResource()" [disabled]="busy">حفظ المورد</button>@for(r of data.resources;track r.id){<article><strong>{{r.name}}</strong> — السعة {{r.capacity}} — {{r.opensAt}} إلى {{r.closesAt}}<button (click)="editResource(r)">تعديل</button></article>}</section><section><h2>تقويم المواعيد</h2><label>اليوم — بتوقيت جهازك<input type="date" [(ngModel)]="day"></label>@for(b of bookings;track b.id){<article><strong>{{b.productNameAr}}</strong><p>{{resourceName(b.resourceId)}} · {{b.inquiryId?"معاينة #"+b.inquiryId:"طلب #"+b.orderId}} · {{b.startsAt|date:'short'}} — {{b.endsAt|date:'short'}} · {{b.quantity}} · {{b.state}}</p></article>}@if(!bookings.length){<p>لا توجد حجوزات في الفترة المعروضة.</p>}</section>}
-@if(tab==='prescriptions'){<section><h2>مراجعة الروشتات</h2><p>الملفات خاصة بالمتجر؛ لا يبدأ تجهيز المنتج الذي يشترط روشتة قبل الموافقة.</p>@for(p of data.prescriptions;track p.id){<article><strong>طلب #{{p.orderId}} — {{p.reviewStatus}}</strong><button (click)="service.download('admin/commerce/assets/'+p.id+'/file',p.fileName)">تنزيل الروشتة للمراجعة</button><label>ملاحظة المراجعة<textarea [(ngModel)]="reviewNotes[p.id]" maxlength="500"></textarea></label><button (click)="action('prescriptions/'+p.id+'/review',{status:'Approved',note:reviewNotes[p.id]})" [disabled]="busy||p.reviewStatus!=='Pending'">موافقة</button><button (click)="action('prescriptions/'+p.id+'/review',{status:'Rejected',note:reviewNotes[p.id]})" [disabled]="busy||p.reviewStatus!=='Pending'">رفض مع السبب</button></article>}</section>}
-@if(tab==='inquiries'){<section><h2>طلبات المعاينة والعروض والتقسيط</h2>@for(i of data.inquiries;track i.id){<article><h3>#{{i.id}} — {{i.customerName}} — {{i.action}}</h3><p dir="ltr">{{i.phone}}</p><p>{{i.message}}</p><p>موعد مطلوب: {{i.preferredAt|date:'short'}} · مقدم مؤكد: {{i.depositConfirmed?'نعم':'لا'}}</p><div class="fields"><label>الحالة<select [(ngModel)]="i.status"><option>Pending</option><option>Contacted</option><option>Approved</option><option>Rejected</option><option>Cancelled</option></select></label><label>السعر المعروض<input type="number" min="0" [(ngModel)]="i.quotedPrice"></label><label>المقدم<input type="number" min="0" [(ngModel)]="i.depositAmount" [disabled]="i.depositConfirmed"></label><label>أشهر التقسيط<input type="number" min="1" max="120" [(ngModel)]="i.installmentMonths"></label><label>القسط الشهري<input type="number" min="0" [(ngModel)]="i.monthlyAmount"></label><label>الرد للعميل<textarea [(ngModel)]="i.reply" maxlength="1000"></textarea></label></div><button (click)="saveInquiry(i)" [disabled]="busy">حفظ العرض والحالة</button><label>مرجع استلام المقدم<input [(ngModel)]="reference" maxlength="120"></label><button (click)="action('inquiries/'+i.id+'/deposit',{reference:reference})" [disabled]="busy||i.depositConfirmed||!reference.trim()">تأكيد استلام المقدم يدويًا</button></article>}</section>}
-@if(tab==='digital'||tab==='batches'){<section><h2>المنتج المستهدف</h2><label>بحث في المنتجات<input [(ngModel)]="search" (change)="loadProducts()" placeholder="اكتب الاسم ثم اخرج من الخانة"></label><select [(ngModel)]="productId"><option [ngValue]="0">اختر المنتج</option>@for(p of products;track p.id){<option [ngValue]="p.id">{{p.nameAr}} (#{{p.id}})</option>}</select></section>}
-@if(tab==='digital'){<section><h2>ملفات رقمية خاصة</h2><p>PDF، ZIP، EPUB، MP3، MP4 أو صور؛ حتى 32MB. لا تُتاح قبل تأكيد الدفع.</p><input type="file" (change)="upload($event)" [disabled]="!productId||busy"><h2>مخزون أكواد</h2><textarea [(ngModel)]="codes" rows="6" placeholder="كود واحد في كل سطر — حتى 500 كود"></textarea><button (click)="action('products/'+productId+'/codes',{codes:codes})" [disabled]="busy||!productId||!codes.trim()">إضافة الأكواد المشفرة</button>@for(a of data.assets;track a.id){<article>منتج #{{a.productId}} · {{a.kind==='Code'?'كود #'+a.id:a.fileName}} · {{a.allocated?'محجوز أو مُسلّم':'غير مخصص'}}<button (click)="assetActive(a)">{{a.isActive?'إيقاف الإتاحة':'تفعيل'}}</button></article>}</section>}
-@if(tab==='subscriptions'){<section><h2>تأكيد دفع طلب</h2><p>سجّل هذا الإجراء بعد التحقق الفعلي من استلام المبلغ. يبدأ التسليم الرقمي أو مدة الاشتراك بعده.</p><label>رقم الطلب الداخلي<input type="number" [(ngModel)]="paymentOrderId"></label><label>مرجع دفع فريد<input [(ngModel)]="reference" maxlength="120"></label><button (click)="action('orders/'+paymentOrderId+'/payment',{reference:reference})" [disabled]="busy||!paymentOrderId||!reference.trim()">تأكيد استلام الدفع يدويًا</button><h2>الاشتراكات</h2>@for(s of data.subscriptions;track s.id){<article><strong>{{s.productNameAr}} — طلب #{{s.orderId}}</strong><p>{{s.state}} · البداية {{s.startsAt|date:'short'}} · النهاية {{s.endsAt|date:'short'}}</p><button (click)="action('subscriptions/'+s.id+'/renew',{reference:reference})" [disabled]="busy||!reference.trim()">تجديد بعد استلام دفعة جديدة</button><button (click)="action('subscriptions/'+s.id+'/revoke',{})" [disabled]="busy||s.state==='Revoked'">إيقاف الاستحقاق</button></article>}</section>}
-@if(tab==='batches'){<section><h2>إضافة تشغيلة</h2><p>الكمية بالقطع للمنتج العادي، وبالجرام للمنتج المباع بالوزن. تُسحب الأقرب انتهاءً أولًا، ولا يباع المنتهي.</p><div class="fields"><label>رقم التشغيلة<input [(ngModel)]="batch.lotNumber" maxlength="100"></label><label>الصلاحية حتى<input type="date" [(ngModel)]="batch.expiresOn"></label><label>الكمية<input type="number" min="1" step="1" [(ngModel)]="batch.quantity"></label></div><button (click)="saveBatch()" [disabled]="busy||!productId">إضافة للمخزون</button>@for(b of data.batches;track b.id){<article [class.warning]="b.expired||b.expiringSoon"><strong>{{b.nameAr}} — {{b.lotNumber}}</strong><p>المتبقي: {{b.remainingQuantity}} {{b.pricingType==='ByWeight'?'جرام':'قطعة'}} · {{b.expiresOn}} · {{b.expired?'منتهية':b.expiringSoon?'تنتهي خلال 7 أيام':''}}</p><button (click)="blockBatch(b)">{{b.isBlocked?'رفع الحظر':'حظر التشغيلة'}}</button></article>}</section>}
-}</main>
+<main dir="rtl" class="commerce-page">
+  <!-- Page Header -->
+  <header class="commerce-header">
+    <div class="header-main">
+      <div class="title-area">
+        <div class="badge-row">
+          <span class="domain-badge">
+            <i [class]="'bi ' + domainConfig().badgeIcon"></i>
+            {{ domainConfig().badge }}
+          </span>
+          @if (!domainConfig().isAll) {
+            <span class="tailored-badge">
+              <i class="bi bi-magic"></i> واجهة مخصصة لنشاط متجرك
+            </span>
+          } @else {
+            <span class="tailored-badge all-mode">
+              <i class="bi bi-grid-fill"></i> نمط شامل لكافة المجالات
+            </span>
+          }
+        </div>
+        <h1 class="page-title">{{ domainConfig().title }}</h1>
+        <p class="page-desc">{{ domainConfig().description }}</p>
+      </div>
+
+      <div class="header-actions">
+        @if (!domainConfig().isAll) {
+          <button type="button" class="btn-toggle-tools" [class.active]="showAllTools()" (click)="toggleToolMode()" title="التبديل بين الأدوات المخصصة وكافة أدوات التجارة المتقدمة">
+            @if (showAllTools()) {
+              <i class="bi bi-funnel-fill"></i>
+              <span>الأدوات المخصصة فقط</span>
+            } @else {
+              <i class="bi bi-grid-3x3-gap-fill"></i>
+              <span>عرض كافة الأدوات المتقدمة (6)</span>
+            }
+          </button>
+        }
+
+        <button type="button" class="btn-refresh" (click)="load()" [disabled]="busy" title="تحديث البيانات">
+          <i class="bi bi-arrow-clockwise" [class.spin]="busy"></i>
+          <span>تحديث</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Domain KPIs Row -->
+    @if (domainKpis().length > 0) {
+      <div class="kpis-grid">
+        @for (kpi of domainKpis(); track kpi.label) {
+          <div class="kpi-card" [class]="'tone-' + kpi.tone" (click)="setTab(kpi.tabId)" role="button" tabindex="0">
+            <div class="kpi-icon">
+              <i [class]="'bi ' + kpi.icon"></i>
+            </div>
+            <div class="kpi-content">
+              <span class="kpi-value">{{ kpi.value }}</span>
+              <span class="kpi-label">{{ kpi.label }}</span>
+            </div>
+            <div class="kpi-arrow">
+              <i class="bi bi-chevron-left"></i>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </header>
+
+  <!-- Error Alert -->
+  @if (error) {
+    <div class="alert alert-danger" role="alert">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>{{ error }}</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (!data && !error) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>جاري تحميل بيانات تشغيل النشاط...</p>
+    </div>
+  }
+
+  @if (data) {
+    <!-- Tabs Navigation Bar -->
+    <nav class="commerce-tabs-nav" aria-label="أقسام التشغيل">
+      @for (t of visibleTabs(); track t.id) {
+        <button type="button"
+                class="tab-pill"
+                [class.active]="tab === t.id"
+                [class.is-primary]="t.isPrimary"
+                (click)="setTab(t.id)">
+          <i [class]="'bi ' + t.icon"></i>
+          <span class="tab-label">{{ t.name }}</span>
+          @if (t.badge !== undefined && t.badge !== null) {
+            <span class="tab-badge-pill" [class.has-count]="t.badge !== 0 && t.badge !== '0'">{{ t.badge }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <!-- Tab 1: Inquiries (طلبات المعاينة والتسعير والتقسيط) -->
+    @if (tab === 'inquiries') {
+      <section class="commerce-tab-section animate-fade-in">
+        <div class="section-heading">
+          <div>
+            <h2>طلبات المعاينة وعروض الأسعار والتقسيط</h2>
+            <p>متابعة استفسارات العملاء الميدانية، طلبات المعاينة، عروض الأسعار، حساب الأقساط، وتأكيد استلام العربون.</p>
+          </div>
+          <span class="badge-count">{{ data.inquiries?.length || 0 }} طلب</span>
+        </div>
+
+        @if (!data.inquiries || data.inquiries.length === 0) {
+          <div class="empty-tab-state">
+            <i class="bi bi-clipboard2-check text-muted"></i>
+            <h3>لا توجد طلبات معاينة أو تسعير حالياً</h3>
+            <p>عندما يطلب العميل معاينة موديل أو استعلام عن تقسيط أو سعر خاص، ستظهر تفاصيل طلبه هنا مباشرة للتواصل معه.</p>
+          </div>
+        } @else {
+          <div class="inquiries-list">
+            @for (i of data.inquiries; track i.id) {
+              <article class="inquiry-card" [class.deposit-done]="i.depositConfirmed">
+                <div class="inquiry-card-header">
+                  <div class="header-right">
+                    <span class="inquiry-id">#{{ i.id }}</span>
+                    <h3 class="customer-name">{{ i.customerName || 'عميل المتجر' }}</h3>
+                    <span class="action-tag" [class]="'action-' + (i.action || 'default')">
+                      {{ i.action === 'visit' ? 'معاينة ميدانية' : i.action === 'quote' ? 'عرض سعر' : i.action === 'installment' ? 'طلب تقسيط' : (i.action || 'استفسار') }}
+                    </span>
+                    <span class="status-chip" [class]="'status-' + (i.status || 'Pending').toLowerCase()">
+                      {{ i.status || 'Pending' }}
+                    </span>
+                  </div>
+
+                  <div class="header-actions-phone">
+                    @if (i.phone) {
+                      <a [href]="'tel:' + i.phone" class="btn-phone-call" title="اتصال هاتفي">
+                        <i class="bi bi-telephone-fill"></i>
+                        <span dir="ltr">{{ i.phone }}</span>
+                      </a>
+                      <a [href]="getWhatsAppUrl(i.phone, i.customerName, i.id)" target="_blank" rel="noopener noreferrer" class="btn-whatsapp" title="محادثة واتساب سريعة">
+                        <i class="bi bi-whatsapp"></i>
+                        <span>واتساب</span>
+                      </a>
+                    }
+                  </div>
+                </div>
+
+                <!-- Customer Message & Date Info -->
+                <div class="inquiry-details-row">
+                  @if (i.message) {
+                    <div class="detail-block message-block">
+                      <span class="block-title"><i class="bi bi-chat-left-text"></i> تفاصيل الطلب من العميل:</span>
+                      <p class="customer-msg">{{ i.message }}</p>
+                    </div>
+                  }
+
+                  <div class="detail-block meta-block">
+                    @if (i.preferredAt) {
+                      <div class="meta-item">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>الموعد المطلوب للمعاينة: <strong>{{ i.preferredAt | date:'medium' }}</strong></span>
+                      </div>
+                    }
+                    <div class="meta-item">
+                      <i class="bi bi-wallet2"></i>
+                      <span>حالة العربون:
+                        @if (i.depositConfirmed) {
+                          <strong class="text-success"><i class="bi bi-check-circle-fill"></i> تم تأكيد استلام العربون ({{ i.depositAmount || 0 }} ج.م)</strong>
+                        } @else {
+                          <strong class="text-warning">بانتظار تأكيد الاستلام</strong>
+                        }
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Quote & Installment Form Grid -->
+                <div class="inquiry-edit-grid">
+                  <div class="field-item">
+                    <label>حالة الطلب</label>
+                    <select [(ngModel)]="i.status" class="form-select-sm">
+                      <option value="Pending">قيد المراجعة (Pending)</option>
+                      <option value="Contacted">تم التواصل مع العميل (Contacted)</option>
+                      <option value="Approved">تم الاعتماد والموافقة (Approved)</option>
+                      <option value="Rejected">مرفوض (Rejected)</option>
+                      <option value="Cancelled">ملغي (Cancelled)</option>
+                    </select>
+                  </div>
+
+                  <div class="field-item">
+                    <label>السعر المعروض (ج.م)</label>
+                    <input type="number" min="0" [(ngModel)]="i.quotedPrice" placeholder="0.00" class="form-input-sm">
+                  </div>
+
+                  <div class="field-item">
+                    <label>المقدم المطلوب (ج.م)</label>
+                    <input type="number" min="0" [(ngModel)]="i.depositAmount" [disabled]="i.depositConfirmed" placeholder="0.00" class="form-input-sm">
+                  </div>
+
+                  <div class="field-item">
+                    <label>أشهر التقسيط</label>
+                    <input type="number" min="1" max="120" [(ngModel)]="i.installmentMonths" placeholder="مثال: 12" class="form-input-sm">
+                  </div>
+
+                  <div class="field-item">
+                    <label>القسط الشهري (ج.م)</label>
+                    <input type="number" min="0" [(ngModel)]="i.monthlyAmount" placeholder="0.00" class="form-input-sm">
+                  </div>
+
+                  <div class="field-item full-width">
+                    <label>الرد أو ملاحظات المعاينة الميدانية</label>
+                    <textarea [(ngModel)]="i.reply" rows="2" maxlength="1000" placeholder="اكتب ملاحظات المعاينة أو تفاصيل الاتفاق مع العميل..." class="form-textarea-sm"></textarea>
+                  </div>
+                </div>
+
+                <!-- Footer Actions -->
+                <div class="inquiry-card-footer">
+                  <button type="button" class="btn-save-quote" (click)="saveInquiry(i)" [disabled]="busy">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>حفظ بيانات العرض والحالة</span>
+                  </button>
+
+                  <div class="deposit-confirm-box">
+                    <input type="text" [(ngModel)]="reference" placeholder="رقم إيصال أو مرجع الدفعة" maxlength="120" class="ref-input" [disabled]="i.depositConfirmed">
+                    <button type="button" class="btn-confirm-deposit" (click)="action('inquiries/' + i.id + '/deposit', { reference: reference })" [disabled]="busy || i.depositConfirmed || !reference.trim()">
+                      <i class="bi bi-cash-coin"></i>
+                      <span>{{ i.depositConfirmed ? 'العربون مؤكد مسبقاً' : 'تأكيد استلام العربون يدويًا' }}</span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Tab 2: Resources & Calendar (المواعيد والموارد وجدول العمل) -->
+    @if (tab === 'resources') {
+      <section class="commerce-tab-section animate-fade-in">
+        <div class="section-heading">
+          <div>
+            <h2>المواعيد وجدول المعاينات والتسليم الميداني</h2>
+            <p>إدارة فرق العمل، مواعيد وسعة المعاينة الميدانية أو التسليم والتجميع، ومتابعة جدول الحجوزات اليومية.</p>
+          </div>
+        </div>
+
+        <div class="resources-layout-grid">
+          <!-- Add / Edit Resource Form Card -->
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <h3 class="sub-title"><i class="bi bi-person-workspace text-primary"></i> مورد أو فريق عمل / سيارة تسليم</h3>
+              <button type="button" class="btn-link-action" (click)="newResource()">
+                <i class="bi bi-plus-circle"></i> مورد جديد
+              </button>
+            </div>
+
+            <div class="form-fields-stack">
+              <label class="form-field">
+                <span>اسم المورد أو الفريق</span>
+                <input [(ngModel)]="resource.name" maxlength="120" placeholder="مثال: فريق المعاينات 1، فني التركيب، سيارة التوصيل">
+              </label>
+
+              <div class="fields-row-2">
+                <label class="form-field">
+                  <span>السعة لكل فترة</span>
+                  <input type="number" min="1" max="1000" [(ngModel)]="resource.capacity">
+                </label>
+                <label class="form-field">
+                  <span>ساعات العمل</span>
+                  <div class="time-range-row">
+                    <input type="time" [(ngModel)]="resource.opensAt">
+                    <span>إلى</span>
+                    <input type="time" [(ngModel)]="resource.closesAt">
+                  </div>
+                </label>
+              </div>
+
+              <label class="form-field">
+                <span>أيام العمل الأسبوعية (الأحد 0 إلى السبت 6)</span>
+                <input [(ngModel)]="resource.daysOfWeek" dir="ltr" placeholder="0,1,2,3,4,5,6">
+              </label>
+
+              <label class="form-field">
+                <span>تواريخ الإجازات والإغلاق (تاريخ في كل سطر: YYYY-MM-DD)</span>
+                <textarea [(ngModel)]="resource.blackouts" rows="2" placeholder="2026-12-25" dir="ltr"></textarea>
+              </label>
+
+              <label class="checkbox-inline">
+                <input type="checkbox" [(ngModel)]="resource.isActive">
+                <span>متاح للمواعيد والحجوزات الجديدة</span>
+              </label>
+
+              <button type="button" class="btn-primary-action" (click)="saveResource()" [disabled]="busy || !resource.name?.trim()">
+                <i class="bi bi-save"></i>
+                <span>حفظ المورد / الفريق</span>
+              </button>
+            </div>
+
+            <!-- Existing Resources List -->
+            @if (data.resources?.length) {
+              <div class="resources-chips-list">
+                <h4 class="chips-title">الموارد المسجلة:</h4>
+                @for (r of data.resources; track r.id) {
+                  <div class="resource-chip-card">
+                    <div class="chip-info">
+                      <strong>{{ r.name }}</strong>
+                      <span class="chip-meta">سعة: {{ r.capacity }} · من {{ r.opensAt }} إلى {{ r.closesAt }}</span>
+                    </div>
+                    <button type="button" class="btn-chip-edit" (click)="editResource(r)">
+                      <i class="bi bi-pencil-square"></i> تعديل
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Calendar & Bookings Schedule -->
+          <div class="sub-card">
+            <div class="sub-card-header">
+              <h3 class="sub-title"><i class="bi bi-calendar3 text-primary"></i> تقويم المواعيد والحجوزات</h3>
+              <div class="date-filter">
+                <label>تصفية بيوم:</label>
+                <input type="date" [(ngModel)]="day" class="date-picker-sm">
+                @if (day) {
+                  <button type="button" class="btn-clear-date" (click)="day = ''" title="عرض الكل">
+                    <i class="bi bi-x-circle-fill"></i>
+                  </button>
+                }
+              </div>
+            </div>
+
+            @if (bookings.length === 0) {
+              <div class="empty-bookings">
+                <i class="bi bi-calendar-x text-muted"></i>
+                <p>لا توجد مواعيد أو حجوزات مسجلة في هذا التاريخ.</p>
+              </div>
+            } @else {
+              <div class="bookings-stream">
+                @for (b of bookings; track b.id) {
+                  <div class="booking-entry-card">
+                    <div class="booking-top">
+                      <span class="booking-title">{{ b.productNameAr || 'معاينة ميدانية' }}</span>
+                      <span class="badge bg-primary-subtle text-primary">{{ b.state }}</span>
+                    </div>
+                    <div class="booking-meta">
+                      <span><i class="bi bi-person-badge"></i> {{ resourceName(b.resourceId) }}</span>
+                      <span><i class="bi bi-file-text"></i> {{ b.inquiryId ? "معاينة طلب #" + b.inquiryId : "طلب #" + b.orderId }}</span>
+                      <span><i class="bi bi-clock"></i> {{ b.startsAt | date:'short' }} — {{ b.endsAt | date:'short' }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- Tab 3: Digital & Catalogs (الكتالوجات والملفات والضمانات) -->
+    @if (tab === 'digital') {
+      <section class="commerce-tab-section animate-fade-in">
+        <div class="section-heading">
+          <div>
+            <h2>الكتالوجات والملفات الرقمية والأكواد المشفرة</h2>
+            <p>إدارة ملفات PDF لكتالوجات المنتجات، شهادات الضمان، أدلة التجميع، وأكواد التفعيل الرقمية.</p>
+          </div>
+        </div>
+
+        <!-- Product Selector Row -->
+        <div class="product-target-bar">
+          <div class="bar-item search-box">
+            <label>بحث في منتجات المتجر:</label>
+            <div class="search-input-wrap">
+              <i class="bi bi-search"></i>
+              <input [(ngModel)]="search" (change)="loadProducts()" placeholder="اكتب اسم الصنف واضغط Enter...">
+            </div>
+          </div>
+          <div class="bar-item select-box">
+            <label>المنتج المستهدف:</label>
+            <select [(ngModel)]="productId">
+              <option [ngValue]="0">-- اختر المنتج لربط الملف أو الأكواد --</option>
+              @for (p of products; track p.id) {
+                <option [ngValue]="p.id">{{ p.nameAr }} (#{{ p.id }})</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="digital-layout-grid">
+          <!-- Upload File Box -->
+          <div class="sub-card">
+            <h3 class="sub-title"><i class="bi bi-file-earmark-pdf-fill text-danger"></i> رفع ملف / كتالوج / دليل استخدام</h3>
+            <p class="sub-desc">صيغ مدعومة: PDF، ZIP، EPUB، صور بجودة عالية حتى 32MB. لا يُتاح تنزيل الملف للعميل إلا بعد اعتماد طلبه.</p>
+            <div class="upload-dropzone">
+              <input type="file" (change)="upload($event)" [disabled]="!productId || busy" id="fileUploadInput">
+              <label for="fileUploadInput" class="dropzone-label" [class.disabled]="!productId || busy">
+                <i class="bi bi-cloud-arrow-up-fill fs-2"></i>
+                <span>{{ productId ? 'اختر ملف PDF أو الكتالوج لرفعه للمنتج المختار' : 'يرجى اختيار المنتج أولاً من القائمة أعلاه' }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Codes Generator Box -->
+          <div class="sub-card">
+            <h3 class="sub-title"><i class="bi bi-key-fill text-primary"></i> مخزون أكواد وسيريالات تفعيل أو ضمان</h3>
+            <p class="sub-desc">أضف كوداً أو رقم سريال واحداً في كل سطر (حتى 500 كود). يتم صرف كود فريد تلقائياً لكل عميل.</p>
+            <textarea [(ngModel)]="codes" rows="4" placeholder="CODE-ABC-123&#10;CODE-DEF-456" dir="ltr" class="codes-textarea"></textarea>
+            <button type="button" class="btn-primary-action" (click)="action('products/' + productId + '/codes', { codes: codes })" [disabled]="busy || !productId || !codes.trim()">
+              <i class="bi bi-shield-lock-fill"></i>
+              <span>إضافة الأكواد المشفرة إلى المخزون</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Registered Assets List -->
+        @if (data.assets?.length) {
+          <div class="assets-history-card">
+            <h3 class="sub-title"><i class="bi bi-collection-fill text-primary"></i> الملفات والأكواد المرتبطة بمنتجات المتجر</h3>
+            <div class="assets-table-wrap">
+              <table class="modern-table">
+                <thead>
+                  <tr>
+                    <th>رقم الصنف</th>
+                    <th>نوع الأصل</th>
+                    <th>اسم الملف / الكود</th>
+                    <th>حالة التخصيص</th>
+                    <th>إجراء</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (a of data.assets; track a.id) {
+                    <tr>
+                      <td>#{{ a.productId }}</td>
+                      <td>
+                        <span class="badge" [class.bg-danger-subtle]="a.kind !== 'Code'" [class.bg-primary-subtle]="a.kind === 'Code'">
+                          {{ a.kind === 'Code' ? 'سريال / كود' : 'ملف رقمي' }}
+                        </span>
+                      </td>
+                      <td><strong>{{ a.kind === 'Code' ? 'كود #' + a.id : a.fileName }}</strong></td>
+                      <td>
+                        <span class="badge" [class.bg-success-subtle]="!a.allocated" [class.bg-secondary-subtle]="a.allocated">
+                          {{ a.allocated ? 'محجوز / مُسلّم لعميل' : 'متاح في المخزون' }}
+                        </span>
+                      </td>
+                      <td>
+                        <button type="button" class="btn-table-action" (click)="assetActive(a)">
+                          {{ a.isActive ? 'إيقاف الإتاحة' : 'تفعيل' }}
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Tab 4: Subscriptions & Deposits (الدفعات وتأكيد العربون) -->
+    @if (tab === 'subscriptions') {
+      <section class="commerce-tab-section animate-fade-in">
+        <div class="section-heading">
+          <div>
+            <h2>الدفعات والتحويلات اليدوية والاشتراكات الدورية</h2>
+            <p>تسجيل وتأكيد استلام التحويلات البنكية ومقدمات الحجز يدويًا بعد مراجعة إيصال التحويل الفعلي.</p>
+          </div>
+        </div>
+
+        <!-- Manual Payment Confirmation Card -->
+        <div class="manual-pay-card">
+          <h3 class="sub-title"><i class="bi bi-receipt-cutoff text-success"></i> تأكيد استلام دفعة أو تحويل يدوي</h3>
+          <p class="sub-desc">سجّل هذا الإجراء بعد التحقق من استلام المبلغ بحسابك البنكي أو فودافون كاش / إنستاباي. يتم تفعيل الطلب بعده مباشرة.</p>
+          <div class="pay-inputs-row">
+            <div class="input-cell">
+              <label>رقم الطلب الداخلي</label>
+              <input type="number" [(ngModel)]="paymentOrderId" placeholder="مثال: 1042">
+            </div>
+            <div class="input-cell">
+              <label>رقم مرجع التحويل الفريد (Ref / Transaction ID)</label>
+              <input type="text" [(ngModel)]="reference" maxlength="120" placeholder="مثال: INSTA-8941209">
+            </div>
+            <button type="button" class="btn-success-action" (click)="action('orders/' + paymentOrderId + '/payment', { reference: reference })" [disabled]="busy || !paymentOrderId || !reference.trim()">
+              <i class="bi bi-check2-circle"></i>
+              <span>تأكيد استلام الدفع وتفعيل الطلب</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Subscriptions List -->
+        <div class="subs-history-card">
+          <h3 class="sub-title"><i class="bi bi-arrow-repeat text-primary"></i> سجل الاشتراكات والدفعات المتجددة</h3>
+          @if (!data.subscriptions?.length) {
+            <div class="empty-state-p">
+              <p>لا توجد اشتراكات نشطة حالياً.</p>
+            </div>
+          } @else {
+            <div class="subs-grid">
+              @for (s of data.subscriptions; track s.id) {
+                <div class="sub-item-card">
+                  <div class="sub-item-top">
+                    <strong>{{ s.productNameAr }}</strong>
+                    <span class="badge" [class.bg-success-subtle]="s.state === 'Active'" [class.bg-danger-subtle]="s.state === 'Revoked'">
+                      {{ s.state }}
+                    </span>
+                  </div>
+                  <div class="sub-item-meta">
+                    <span>طلب #{{ s.orderId }}</span>
+                    <span>من: {{ s.startsAt | date:'shortDate' }}</span>
+                    <span>إلى: {{ s.endsAt | date:'shortDate' }}</span>
+                  </div>
+                  <div class="sub-item-actions">
+                    <button type="button" class="btn-renew" (click)="action('subscriptions/' + s.id + '/renew', { reference: reference })" [disabled]="busy || !reference.trim()">
+                      تجديد بعد دفعة جديدة
+                    </button>
+                    <button type="button" class="btn-revoke" (click)="action('subscriptions/' + s.id + '/revoke', {})" [disabled]="busy || s.state === 'Revoked'">
+                      إيقاف الاستحقاق
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Tab 5: Batches & Perishable (التشغيلات والصلاحية) -->
+    @if (tab === 'batches') {
+      <section class="commerce-tab-section animate-fade-in">
+        <div class="section-heading">
+          <div>
+            <h2>التشغيلات والشحنات وتواريخ الصلاحية</h2>
+            <p>إدارة دفعات وتواريخ انتهاء الصلاحية للمنتجات. الكمية بالقطع أو بالجرام، وتُسحب الأقرب انتهاءً أولاً تلقائياً.</p>
+          </div>
+        </div>
+
+        <!-- Product Selector Row -->
+        <div class="product-target-bar">
+          <div class="bar-item search-box">
+            <label>بحث في منتجات المتجر:</label>
+            <div class="search-input-wrap">
+              <i class="bi bi-search"></i>
+              <input [(ngModel)]="search" (change)="loadProducts()" placeholder="اكتب اسم الصنف واضغط Enter...">
+            </div>
+          </div>
+          <div class="bar-item select-box">
+            <label>المنتج المستهدف:</label>
+            <select [(ngModel)]="productId">
+              <option [ngValue]="0">-- اختر المنتج لإضافة تشغيلة --</option>
+              @for (p of products; track p.id) {
+                <option [ngValue]="p.id">{{ p.nameAr }} (#{{ p.id }})</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Add Batch Form -->
+        <div class="sub-card">
+          <h3 class="sub-title"><i class="bi bi-boxes text-primary"></i> إضافة دفعة / تشغيلة جديدة للمخزون</h3>
+          <div class="batch-form-row">
+            <div class="cell">
+              <label>رقم التشغيلة / شحنة البضاعة (Lot Number)</label>
+              <input type="text" [(ngModel)]="batch.lotNumber" maxlength="100" placeholder="مثال: LOT-2026-NOV-01">
+            </div>
+            <div class="cell">
+              <label>تاريخ انتهاء الصلاحية</label>
+              <input type="date" [(ngModel)]="batch.expiresOn">
+            </div>
+            <div class="cell">
+              <label>الكمية المستلمة (قطع أو جرام)</label>
+              <input type="number" min="1" step="1" [(ngModel)]="batch.quantity">
+            </div>
+            <button type="button" class="btn-primary-action btn-add-batch" (click)="saveBatch()" [disabled]="busy || !productId">
+              <i class="bi bi-plus-circle"></i>
+              <span>إضافة للمخزون</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Batches List -->
+        @if (data.batches?.length) {
+          <div class="batches-list-card">
+            <h3 class="sub-title"><i class="bi bi-list-check text-primary"></i> سجل التشغيلات المتاحة بالمخزون</h3>
+            <div class="batches-grid">
+              @for (b of data.batches; track b.id) {
+                <div class="batch-item-card" [class.warning-batch]="b.expiringSoon" [class.expired-batch]="b.expired">
+                  <div class="batch-top">
+                    <strong>{{ b.nameAr }}</strong>
+                    <span class="lot-badge">{{ b.lotNumber }}</span>
+                  </div>
+                  <div class="batch-status-row">
+                    @if (b.expired) {
+                      <span class="status-pill pill-danger"><i class="bi bi-x-circle-fill"></i> منتهية الصلاحية (محظورة من البيع)</span>
+                    } @else if (b.expiringSoon) {
+                      <span class="status-pill pill-warning"><i class="bi bi-exclamation-triangle-fill"></i> تنتهي خلال 7 أيام</span>
+                    } @else {
+                      <span class="status-pill pill-success"><i class="bi bi-check-circle-fill"></i> سارية وصالحة</span>
+                    }
+                  </div>
+                  <div class="batch-meta">
+                    <span>المتبقي: <strong>{{ b.remainingQuantity }}</strong> {{ b.pricingType === 'ByWeight' ? 'جرام' : 'قطعة' }}</span>
+                    <span>الصلاحية: <strong>{{ b.expiresOn }}</strong></span>
+                  </div>
+                  <div class="batch-action-row">
+                    <button type="button" class="btn-block-batch" [class.blocked]="b.isBlocked" (click)="blockBatch(b)">
+                      <i [class]="b.isBlocked ? 'bi bi-unlock-fill' : 'bi bi-slash-circle-fill'"></i>
+                      <span>{{ b.isBlocked ? 'رفع الحظر عن التشغيلة' : 'حظر التشغيلة يدوياً' }}</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </section>
+    }
+
+    <!-- Tab 6: Prescriptions (الروشتات الطبية) -->
+    @if (tab === 'prescriptions') {
+      <section class="commerce-tab-section animate-fade-in">
+        <div class="section-heading">
+          <div>
+            <h2>مراجعة الروشتات والوصفات الطبية</h2>
+            <p>مراجعة صور الروشتات والوصفات الطبية الخاصة بطلبات العملاء. لا يبدأ تجهيز وصرف الدواء قبل موافقة الصيدلي.</p>
+          </div>
+          <span class="badge-count">{{ data.prescriptions?.length || 0 }} روشتة</span>
+        </div>
+
+        @if (!data.prescriptions || data.prescriptions.length === 0) {
+          <div class="empty-tab-state">
+            <i class="bi bi-file-earmark-medical text-muted"></i>
+            <h3>لا توجد روشتات بانتظار المراجعة</h3>
+            <p>عندما يطلب العميل صنفاً دوائياً يشترط وصفة طبية، ستظهر الروشتة المرفوعة هنا لفحصها قبل الصرف.</p>
+          </div>
+        } @else {
+          <div class="prescriptions-grid">
+            @for (p of data.prescriptions; track p.id) {
+              <div class="prescription-card">
+                <div class="pres-top">
+                  <span class="order-num">طلب رقم #{{ p.orderId }}</span>
+                  <span class="status-chip" [class]="'status-' + (p.reviewStatus || 'Pending').toLowerCase()">
+                    {{ p.reviewStatus }}
+                  </span>
+                </div>
+
+                <div class="pres-file-actions">
+                  <button type="button" class="btn-download-file" (click)="service.download('admin/commerce/assets/' + p.id + '/file', p.fileName)">
+                    <i class="bi bi-file-earmark-arrow-down-fill text-primary"></i>
+                    <span>تنزيل وفحص ملف الروشتة</span>
+                  </button>
+                </div>
+
+                <div class="pres-notes-box">
+                  <label>ملاحظة الصيدلي للمراجعة:</label>
+                  <textarea [(ngModel)]="reviewNotes[p.id]" maxlength="500" placeholder="اكتب ملاحظاتك على الروشتة (سبب الرفض أو تعليمات الصرف)..."></textarea>
+                </div>
+
+                <div class="pres-action-buttons">
+                  <button type="button" class="btn-approve" (click)="action('prescriptions/' + p.id + '/review', { status: 'Approved', note: reviewNotes[p.id] })" [disabled]="busy || p.reviewStatus !== 'Pending'">
+                    <i class="bi bi-check-lg"></i>
+                    <span>موافقة وصرف الدواء</span>
+                  </button>
+                  <button type="button" class="btn-reject" (click)="action('prescriptions/' + p.id + '/review', { status: 'Rejected', note: reviewNotes[p.id] })" [disabled]="busy || p.reviewStatus !== 'Pending'">
+                    <i class="bi bi-x-lg"></i>
+                    <span>رفض مع ذكر السبب</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</main>

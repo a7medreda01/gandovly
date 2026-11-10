@@ -224,7 +224,7 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
       },
       error: (e) => {
         this.statusBusy = false;
-        this.notice.error(e.error?.message || 'تعذر تغيير حالة المتجر؛ المتجر الأساسي محمي.');
+        this.notice.error(e.error?.message || 'تعذر تغيير حالة المتجر.');
       }
     });
   }
@@ -244,10 +244,6 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
   confirmDeleteStore(): void {
     const s = this.store();
     if (!s || this.deleteBusy) return;
-    if (s.id === '1') {
-      this.notice.error('لا يمكن حذف المتجر الأساسي للمنصة.');
-      return;
-    }
     if (this.deleteConfirmSlug.trim().toLowerCase() !== s.subdomain.toLowerCase()) {
       this.notice.error('اسم النطاق المدخل غير مطابق.');
       return;

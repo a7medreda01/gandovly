@@ -88,7 +88,19 @@ export class AdminLoginComponent {
       next: res => {
         this.isLoading.set(false);
         this.toast.success('تم تسجيل الدخول بنجاح إلى لوحة الإدارة.');
-        this.router.navigate([res.isPlatformAdmin ? '/admin/stores' : '/admin/orders']);
+        if (res.isPlatformAdmin) {
+          this.router.navigate(['/admin/stores']);
+        } else {
+          const host = window.location.hostname.toLowerCase();
+          const targetSlug = res.tenantSlug || (res.role === 'Staff' ? 'super' : '');
+          if ((host === 'mecart.app' || host === 'www.mecart.app') && targetSlug) {
+            window.location.href = `https://${targetSlug}.mecart.app/admin/orders`;
+          } else if (targetSlug && !host.includes(targetSlug) && (host === 'localhost' || host === '127.0.0.1')) {
+            this.router.navigate(['/admin/orders'], { queryParams: { tenant: targetSlug } });
+          } else {
+            this.router.navigate(['/admin/orders']);
+          }
+        }
       },
       error: () => {
         this.isLoading.set(false);

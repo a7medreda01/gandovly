@@ -22,7 +22,7 @@
         <div class="nav-group-title secondary-group">الواجهة العامة</div>
         <a routerLink="/projects" class="nav-item"><i class="bi bi-grid-1x2"></i><span>معرض المتاجر</span><i class="bi bi-arrow-up-left nav-external"></i></a>
       } @else {
-        @for (link of storeLinks; track link.path) {
+        @for (link of storeLinks(); track link.path) {
           @if (link.path !== 'users' || canManageUsers()) {
             <a [routerLink]="'/admin/' + link.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i [class]="'bi bi-' + link.icon"></i><span>{{ link.label }}</span></a>
           }

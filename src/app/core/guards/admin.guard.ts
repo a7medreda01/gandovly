@@ -15,7 +15,20 @@ export const platformGuard: CanActivateFn = () => {
 };
 export const storeGuard: CanActivateFn = () => {
   const auth = inject(AuthService), router = inject(Router);
-  return auth.currentAdmin()?.role !== 'KitchenStaff' || router.createUrlTree(['/'], { queryParamsHandling: 'preserve' });
+  if (auth.currentAdmin()?.role === 'KitchenStaff') {
+    return router.createUrlTree(['/'], { queryParamsHandling: 'preserve' });
+  }
+  if (isPlatformContext()) {
+    if (auth.currentAdmin()?.isPlatformAdmin === true) {
+      return router.createUrlTree(['/admin/stores']);
+    }
+    const slug = auth.currentAdmin()?.tenantSlug || 'super';
+    if (typeof window !== 'undefined' && (window.location.hostname === 'mecart.app' || window.location.hostname === 'www.mecart.app')) {
+      window.location.href = `https://${slug}.mecart.app/admin/orders`;
+      return false;
+    }
+  }
+  return true;
 };
 export const managerGuard: CanActivateFn = () => {
   const auth = inject(AuthService), router = inject(Router);
