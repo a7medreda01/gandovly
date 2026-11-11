@@ -71,6 +71,82 @@ export class LanguageService {
     return item.description || '';
   }
 
+  get currencySymbol(): string {
+    return this.getCurrencySymbol();
+  }
+
+  getCurrencySymbol(): string {
+    const s = this.settingsService.settings();
+    if (this.currentLang() === 'en') {
+      const en = s.currencySymbolEn || s.storeLayout?.currencySymbolEn;
+      if (en && en.trim()) return en.trim();
+      if (s.currencyCode && s.currencyCode.trim()) return s.currencyCode.trim();
+      const sym = s.currencySymbol || 'ج.م';
+      if (sym === 'ج.م' || sym === 'جنيه') return 'EGP';
+      if (sym === 'ر.س' || sym === 'ريال') return 'SAR';
+      if (sym === 'د.إ' || sym === 'درهم') return 'AED';
+      if (sym === 'د.ك' || sym === 'دينار') return 'KWD';
+      return sym;
+    }
+    return s.currencySymbol || 'ج.م';
+  }
+
+  getStoreName(): string {
+    const s = this.settingsService.settings();
+    const en = s.restaurantNameEn || s.storeLayout?.restaurantNameEn;
+    return this.text(s.restaurantName, en);
+  }
+
+  getStoreTagline(): string {
+    const s = this.settingsService.settings();
+    const en = s.taglineEn || s.storeLayout?.taglineEn;
+    return this.text(s.tagline, en);
+  }
+
+  getStoreDesc(): string {
+    const s = this.settingsService.settings();
+    const en = s.descriptionEn || s.storeLayout?.descriptionEn;
+    return this.text(s.description, en);
+  }
+
+  getStoreAddress(): string {
+    const s = this.settingsService.settings();
+    const en = s.addressEn || s.storeLayout?.addressEn;
+    return this.text(s.address, en);
+  }
+
+  getStoreCity(): string {
+    const s = this.settingsService.settings();
+    const en = s.cityEn || s.storeLayout?.cityEn;
+    return this.text(s.city, en);
+  }
+
+  getQualityDisclaimer(): string {
+    const s = this.settingsService.settings();
+    const en = s.estimatedWeightDisclaimerEn || s.storeLayout?.estimatedWeightDisclaimerEn;
+    return this.text(s.estimatedWeightDisclaimer, en);
+  }
+
+  getPromotionBanner(): string {
+    const s = this.settingsService.settings();
+    const en = s.activePromotionBannerEn || s.storeLayout?.activePromotionBannerEn;
+    return this.text(s.activePromotionBanner, en);
+  }
+
+  getWeightUnit(grams?: number): string {
+    if (this.currentLang() === 'en') {
+      return (grams && grams < 1000) ? 'g' : 'kg';
+    }
+    return (grams && grams < 1000) ? 'جم' : 'كجم';
+  }
+
+  formatWeight(grams: number): string {
+    if (this.currentLang() === 'en') {
+      return grams >= 1000 ? `${grams / 1000} kg` : `${grams} g`;
+    }
+    return grams >= 1000 ? `${grams / 1000} كجم` : `${grams} جم`;
+  }
+
   private getInitialLanguage(): SupportedLanguage {
     if (typeof localStorage !== 'undefined') {
       const saved = localStorage.getItem(this.STORAGE_KEY) as SupportedLanguage | null;

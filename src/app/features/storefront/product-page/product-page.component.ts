@@ -78,7 +78,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   touchCurrentX = 0;
 
   get currencySymbol(): string {
-    return this.settingsService.settings()?.currencySymbol || 'ج.م';
+    return this.languageService.currencySymbol;
   }
 
   get isWeighedProduct(): boolean {

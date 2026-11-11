@@ -12,6 +12,7 @@ import { OrderService } from '../../core/services/order.service';
 import { SettingsService } from '../../core/services/settings.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { LanguageService } from '../../core/services/language.service';
 import {
   CreateOrderRequest,
   CustomerAddress,
@@ -35,12 +36,13 @@ export class CheckoutComponent implements OnInit {
   readonly cartService = inject(CartService);
   readonly orderService = inject(OrderService);
   readonly settingsService = inject(SettingsService);
+  readonly languageService = inject(LanguageService);
   readonly authService = inject(AuthService);
   private readonly toast = inject(NotificationService);
   private readonly router = inject(Router);
 
   get currencySymbol(): string {
-    return this.settingsService.settings().currencySymbol || 'ج.م';
+    return this.languageService.currencySymbol;
   }
 
   // Form Fields

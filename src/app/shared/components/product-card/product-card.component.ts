@@ -27,7 +27,7 @@ export class ProductCardComponent {
   isFavorite = false;
 
   get currencySymbol(): string {
-    return this.settingsService.settings()?.currencySymbol || 'ج.م';
+    return this.languageService.currencySymbol;
   }
 
   get isWeightBased(): boolean {

@@ -6,18 +6,18 @@
         <a routerLink="/" class="brand-link">
           @if (settingsService.settings().logoUrl) {
           <img [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
-            [alt]="settingsService.settings().restaurantName" class="footer-logo-img" />
+            [alt]="languageService.getStoreName()" class="footer-logo-img" />
           }
           <div class="brand-texts">
-            @if(settingsService.settings().storeLayout?.showFooterStoreName !== false){<h3 class="restaurant-name">{{ settingsService.settings().restaurantName }}</h3>}
-            <p class="brand-sub">{{ settingsService.settings().tagline || 'منصة التجارة الشاملة - كافة المنتجات والطلبات بأعلى جودة' }}</p>
+            @if(settingsService.settings().storeLayout?.showFooterStoreName !== false){<h3 class="restaurant-name">{{ languageService.getStoreName() }}</h3>}
+            <p class="brand-sub">{{ languageService.getStoreTagline() || languageService.text('منصة التجارة الشاملة - كافة المنتجات والطلبات بأعلى جودة', 'All products & orders delivered with highest quality') }}</p>
           </div>
         </a>
       </div>
 
       <!-- Col 2: Social Media Links -->
       <div class="footer-social-box">
-        <span class="social-label">تابعونا وتواصلوا معنا</span>
+        <span class="social-label">{{ languageService.text('تابعونا وتواصلوا معنا', 'Follow & Contact Us') }}</span>
         <div class="social-icons-group">
           @if (settingsService.settings().facebookUrl) {
           <a [href]="settingsService.settings().facebookUrl" target="_blank" rel="noopener noreferrer"
@@ -72,14 +72,14 @@
 
       <!-- Col 3: Address & Working Hours -->
       <div class="footer-info-box">
-        @if (settingsService.settings().address) { <p class="info-item"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> {{ settingsService.settings().address }}</p> }
+        @if (languageService.getStoreAddress()) { <p class="info-item"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i> {{ languageService.getStoreAddress() }}</p> }
         @if (settingsService.settings().pickupWorkingHours) { <p class="info-item"><i class="bi bi-clock" aria-hidden="true"></i> {{ settingsService.settings().pickupWorkingHours }}</p> }
       </div>
     </div>
 
     <!-- Bottom Copyright & Developer Credit -->
     <div class="footer-bottom-row">
-      <p class="copyright-text">© {{ currentYear }} {{ settingsService.settings().restaurantName }}. جميع الحقوق محفوظة.</p>
+      <p class="copyright-text">© {{ currentYear }} {{ languageService.getStoreName() }}. {{ languageService.text('جميع الحقوق محفوظة.', 'All rights reserved.') }}</p>
       <a href="https://runxtech.com" target="_blank" rel="noopener noreferrer" class="developer-credit">Developed by RunX</a>
     </div>
   </div>

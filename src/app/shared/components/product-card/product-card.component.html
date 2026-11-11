@@ -1,7 +1,7 @@
 <article class="product-card" [class.is-out-of-stock]="!product.isAvailable" [class.has-reveal-anim]="settingsService.settings().storeLayout?.enableProductCardAnimations !== false">
   <button type="button" class="card-media" (click)="onSelect()" [attr.aria-label]="'عرض تفاصيل ' + languageService.getLocalizedName(product)">
     <span class="product-img-wrapper"><img appImageReveal [src]="product.imageUrl | imageUrl:'product':(product.updatedAt || product.id)" [alt]="languageService.getLocalizedName(product)" class="product-real-img" loading="lazy" decoding="async" (error)="onImageError($event)" /></span>
-    @if (hasDiscount) { <span class="card-badges"><span class="badge-discount">خصم {{ discountPercent }}%</span></span> }
+    @if (hasDiscount) { <span class="card-badges"><span class="badge-discount">{{ languageService.text('خصم', 'Save') }} {{ discountPercent }}%</span></span> }
     @if (!product.isAvailable) { <span class="unavailable-label">{{ languageService.text('غير متاح حاليًا', 'Out of stock') }}</span> }
   </button>
   <div class="card-body">
@@ -9,13 +9,13 @@
     <h3 class="product-heading"><button type="button" class="product-name" (click)="onSelect()" [title]="languageService.getLocalizedName(product)">{{ languageService.getLocalizedName(product) }}</button></h3>
     <div class="pricing-row">
       <div class="price-box">
-        <div class="current-price">@if(product.variantStartingPrice != null || product.variants?.length){<small>يبدأ من </small>}<bdi class="amount">{{ displayPrice | number:'1.0-2' }}</bdi><span class="currency">{{ currencySymbol }}</span></div>
+        <div class="current-price">@if(product.variantStartingPrice != null || product.variants?.length){<small>{{ languageService.text('يبدأ من ', 'From ') }}</small>}<bdi class="amount">{{ displayPrice | number:'1.0-2' }}</bdi><span class="currency">{{ currencySymbol }}</span></div>
         @if (isWeightBased || hasDiscount) { <div class="price-details">
-          @if (isWeightBased) { <span class="unit-label">لكل كجم</span> }
+          @if (isWeightBased) { <span class="unit-label">{{ languageService.text('لكل كجم', '/ kg') }}</span> }
           @if (hasDiscount && product.originalPrice) { <del class="old-price"><bdi>{{ product.originalPrice | number:'1.2-2' }}</bdi> {{ currencySymbol }}</del> }
         </div> }
       </div>
-      @if(settingsService.settings().storeLayout?.onlineOrdering !== false){<button type="button" class="btn-cart-square" (click)="onSelect()" [disabled]="!product.isAvailable" [attr.aria-label]="'إضافة للسلة: ' + languageService.getLocalizedName(product)" title="إضافة للسلة"><i class="bi bi-cart-plus" aria-hidden="true"></i></button>}
+      @if(settingsService.settings().storeLayout?.onlineOrdering !== false){<button type="button" class="btn-cart-square" (click)="onSelect()" [disabled]="!product.isAvailable" [attr.aria-label]="languageService.text('إضافة للسلة: ', 'Add to cart: ') + languageService.getLocalizedName(product)" [title]="languageService.text('إضافة للسلة', 'Add to cart')"><i class="bi bi-cart-plus" aria-hidden="true"></i></button>}
     </div>
   </div>
 </article>

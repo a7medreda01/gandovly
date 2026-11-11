@@ -49,7 +49,7 @@ export class ProductDetailModalComponent implements OnInit {
   }
 
   get currencySymbol(): string {
-    return this.settingsService.settings()?.currencySymbol || 'ج.م';
+    return this.languageService.currencySymbol;
   }
 
   // Order mode for weighed items: 'pieces' or 'weight'

@@ -71,6 +71,15 @@ export interface StorefrontSettings {
   cashierWhatsAppNumber?: string;
   currencyCode: string;
   currencySymbol: string;
+  currencySymbolEn?: string;
+  restaurantNameEn?: string;
+  taglineEn?: string;
+  descriptionEn?: string;
+  addressEn?: string;
+  cityEn?: string;
+  activePromotionBannerEn?: string;
+  estimatedWeightDisclaimerEn?: string;
+  pauseMessageEn?: string;
   timeZone: string;
   locale: string;
   isOrdersOpen: boolean;

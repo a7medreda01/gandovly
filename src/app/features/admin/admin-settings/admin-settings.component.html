@@ -1014,16 +1014,30 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="setDiscl">نص إقرار وضمان الجودة وسياسة المتجر:</label>
-            <textarea
-              id="setDiscl"
-              class="form-control"
-              rows="3"
-              placeholder="جميع المنتجات أصلية وتخضع لأعلى معايير الجودة والسلامة والتغليف الصحي السليم مع إمكانية الفحص عند الاستلام..."
-              [(ngModel)]="settings()!.estimatedWeightDisclaimer"
-            ></textarea>
-            <small class="text-muted">يظهر هذا النص التوضيحي للعملاء في السلة وصفحة الدفع لبيان ضمان الجودة.</small>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setDiscl">نص إقرار وضمان الجودة وسياسة المتجر (بالعربية):</label>
+              <textarea
+                id="setDiscl"
+                class="form-control"
+                rows="2"
+                placeholder="جميع المنتجات أصلية وتخضع لأعلى معايير الجودة والسلامة..."
+                [(ngModel)]="settings()!.estimatedWeightDisclaimer"
+              ></textarea>
+              <small class="text-muted">يظهر للعملاء في السلة وصفحة الدفع (بالعربية).</small>
+            </div>
+            <div class="form-group flex-1">
+              <label for="setDisclEn">Quality & Store Policy Notice (English):</label>
+              <textarea
+                id="setDisclEn"
+                dir="ltr"
+                class="form-control"
+                rows="2"
+                placeholder="All items meet strict quality & safety standards..."
+                [(ngModel)]="layoutOptions.estimatedWeightDisclaimerEn"
+              ></textarea>
+              <small class="text-muted">Shown to customers on cart & checkout (English).</small>
+            </div>
           </div>
         </div>
 
@@ -1278,30 +1292,46 @@
           <div class="col-12 col-lg-6">
 
         <div class="settings-card glass-panel h-100">
-              <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المؤسسة الأساسية</h3>
+              <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المؤسسة الأساسية (عربي / English)</h3>
 
-              <div class="form-group">
-                <label for="setRestName">اسم المؤسسة / المتجر *</label>
-                <input id="setRestName" type="text" class="form-control" [(ngModel)]="settings()!.restaurantName" />
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="setRestName"><i class="bi bi-translate text-primary me-1"></i> اسم المؤسسة / المتجر (بالعربية) *</label>
+                  <input id="setRestName" type="text" class="form-control" [(ngModel)]="settings()!.restaurantName" placeholder="مثال: متجر السعادة" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="setRestNameEn"><i class="bi bi-globe text-primary me-1"></i> اسم المتجر (English)</label>
+                  <input id="setRestNameEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Happiness Store" [(ngModel)]="layoutOptions.restaurantNameEn" />
+                </div>
               </div>
 
-              <div class="form-group">
-                <label for="setTagline">الشعار اللفظي (Tagline)</label>
-                <input id="setTagline" type="text" class="form-control" placeholder="مثال: منصة التجارة الشاملة - تسوق لكافة المجالات والأنشطة بأفضل الأسعار" [(ngModel)]="settings()!.tagline" />
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="setTagline">الشعار اللفظي (بالعربية)</label>
+                  <input id="setTagline" type="text" class="form-control" placeholder="مثال: تسوق أفضل المنتجات بأعلى جودة" [(ngModel)]="settings()!.tagline" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="setTaglineEn">الشعار اللفظي (English)</label>
+                  <input id="setTaglineEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Best products, highest quality" [(ngModel)]="layoutOptions.taglineEn" />
+                </div>
               </div>
 
-              <div class="form-group mb-0">
-                <label for="setDesc">وصف تعريفي للمؤسسة</label>
-                <textarea id="setDesc" class="form-control" rows="4" placeholder="منصة تجارة شاملة ومتكاملة تقدم أفضل المنتجات والماركات المتنوعة بتوصيل فوري لباب المنزل..." [(ngModel)]="settings()!.description"></textarea>
+              <div class="form-row mb-0">
+                <div class="form-group flex-1">
+                  <label for="setDesc">وصف تعريفي للمؤسسة (بالعربية)</label>
+                  <textarea id="setDesc" class="form-control" rows="3" placeholder="منصة تجارة شاملة ومتكاملة تقدم أفضل المنتجات..." [(ngModel)]="settings()!.description"></textarea>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="setDescEn">وصف تعريفي (English)</label>
+                  <textarea id="setDescEn" dir="ltr" class="form-control" rows="3" placeholder="A comprehensive e-commerce platform..." [(ngModel)]="layoutOptions.descriptionEn"></textarea>
+                </div>
               </div>
             </div>
           </div>
 
-
-
           <div class="col-12 col-lg-6">
             <div class="settings-card glass-panel h-100 contact-settings-card">
-              <h3 class="card-title"><i class="bi bi-telephone-fill text-primary me-2"></i> وسائل الاتصال والعنوان</h3>
+              <h3 class="card-title"><i class="bi bi-telephone-fill text-primary me-2"></i> وسائل الاتصال والعنوان (عربي / English)</h3>
 
               <div class="form-row">
                 <div class="form-group flex-1">
@@ -1316,12 +1346,23 @@
 
               <div class="form-row">
                 <div class="form-group flex-1">
-                  <label for="setCity">المدينة / المحافظة *</label>
+                  <label for="setCity">المدينة / المحافظة (بالعربية) *</label>
                   <input id="setCity" type="text" class="form-control" [(ngModel)]="settings()!.city" />
                 </div>
                 <div class="form-group flex-1">
-                  <label for="setAddr">العنوان بالتفصيل *</label>
+                  <label for="setCityEn">City (English)</label>
+                  <input id="setCityEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Cairo" [(ngModel)]="layoutOptions.cityEn" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="setAddr">العنوان بالتفصيل (بالعربية) *</label>
                   <input id="setAddr" type="text" class="form-control" [(ngModel)]="settings()!.address" />
+                </div>
+                <div class="form-group flex-1">
+                  <label for="setAddrEn">Address (English)</label>
+                  <input id="setAddrEn" type="text" dir="ltr" class="form-control" placeholder="e.g. 123 Main St" [(ngModel)]="layoutOptions.addressEn" />
                 </div>
               </div>
             </div>
@@ -1485,9 +1526,15 @@
             </div>
 
             <div class="form-group">
-              <label for="setCurrSym" class="form-label fw-bold"><i class="bi bi-cash me-1 text-success"></i> رمز العملة المعروضة:</label>
+              <label for="setCurrSym" class="form-label fw-bold"><i class="bi bi-cash me-1 text-success"></i> رمز العملة بالعربية:</label>
               <input id="setCurrSym" type="text" class="form-control fw-bold" placeholder="مثال: ج.م أو ر.س أو $" [(ngModel)]="settings()!.currencySymbol" />
-              <small class="text-muted">يظهر بجانب جميع الأسعار والفواتير</small>
+              <small class="text-muted">يظهر بجانب الأسعار في النسخة العربية</small>
+            </div>
+
+            <div class="form-group">
+              <label for="setCurrSymEn" class="form-label fw-bold"><i class="bi bi-globe me-1 text-success"></i> رمز العملة بالإنجليزية (Currency En):</label>
+              <input id="setCurrSymEn" type="text" dir="ltr" class="form-control fw-bold" placeholder="e.g. EGP, SAR, AED, $" [(ngModel)]="layoutOptions.currencySymbolEn" />
+              <small class="text-muted">يظهر للعميل عند تصفح المتجر بالإنجليزية</small>
             </div>
 
             <div class="form-group">

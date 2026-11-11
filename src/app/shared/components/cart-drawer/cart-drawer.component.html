@@ -11,11 +11,11 @@
             <i class="bi bi-bag-check-fill"></i>
           </div>
           <div>
-            <h2 class="title-text mb-0">سلة طلباتك</h2>
-            <span class="items-count">{{ cartService.totalItemsCount() }} صنف مضاف</span>
+            <h2 class="title-text mb-0">{{ languageService.text('سلة طلباتك', 'Your Cart') }}</h2>
+            <span class="items-count">{{ cartService.totalItemsCount() }} {{ languageService.text('صنف مضاف', 'items added') }}</span>
           </div>
         </div>
-        <button class="btn-close" (click)="cartService.closeDrawer()" aria-label="إغلاق">
+        <button class="btn-close" (click)="cartService.closeDrawer()" [attr.aria-label]="languageService.text('إغلاق', 'Close')">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
@@ -27,10 +27,10 @@
             <div class="empty-cart-icon-ring">
               <i class="bi bi-cart-x"></i>
             </div>
-            <h3>السلة فارغة حالياً</h3>
-            <p>تصفح كتالوج المنتجات وأضف ما ترغب به إلى سلتك!</p>
+            <h3>{{ languageService.text('السلة فارغة حالياً', 'Your cart is empty') }}</h3>
+            <p>{{ languageService.text('تصفح كتالوج المنتجات وأضف ما ترغب به إلى سلتك!', 'Browse our catalog and add items to your cart!') }}</p>
             <button class="btn-browse-menu" (click)="goToMenu()" type="button">
-              <span>تصفح المنتجات الآن</span>
+              <span>{{ languageService.text('تصفح المنتجات الآن', 'Browse Products Now') }}</span>
             </button>
           </div>
         } @else {
@@ -169,7 +169,7 @@
                       <!-- Item Total Price -->
                       <div class="item-price">
                         <span class="amount">{{ item.estimatedLineTotal }}</span>
-                        <span class="currency">{{ settingsService.settings().currencySymbol || 'ج.م' }}</span>
+                        <span class="currency">{{ languageService.currencySymbol }}</span>
                       </div>
                     </div>
                   </div>
@@ -187,23 +187,23 @@
             <div class="total-row flex-between">
               <span class="label">
                 @if (cartService.hasWeightedItems()) {
-                  الإجمالي التقديري للأصناف:
+                  {{ languageService.text('الإجمالي التقديري للأصناف:', 'Estimated subtotal:') }}
                 } @else {
-                  إجمالي الأصناف:
+                  {{ languageService.text('إجمالي الأصناف:', 'Items subtotal:') }}
                 }
               </span>
-              <span class="val">{{ cartService.estimatedSubtotal() }} {{ settingsService.settings().currencySymbol || 'ج.م' }}</span>
+              <span class="val">{{ cartService.estimatedSubtotal() }} {{ languageService.currencySymbol }}</span>
             </div>
           </div>
 
           @if (cartService.hasWeightedItems()) {
             <div class="disclaimer-mini">
-              <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ settingsService.settings().estimatedWeightDisclaimer || 'السعر تقريبي ويعتمد على الوزن الفعلي للمنتجات بعد الوزن' }}</small>
+              <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ languageService.getQualityDisclaimer() || languageService.text('السعر تقريبي ويعتمد على الوزن الفعلي للمنتجات بعد الوزن', 'Price is approximate and depends on final weight') }}</small>
             </div>
           }
 
           <button class="btn-checkout w-100" (click)="onCheckout()">
-            <span>المتابعة لإتمام الطلب</span>
+            <span>{{ languageService.text('المتابعة لإتمام الطلب', 'Proceed to Checkout') }}</span>
             <i class="bi bi-arrow-left"></i>
           </button>
         </div>

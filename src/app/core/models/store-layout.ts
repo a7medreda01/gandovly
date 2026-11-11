@@ -39,6 +39,15 @@ export interface StoreLayout {
     homeCategoriesTitleEn?: string;
     homeFeaturedTitleEn?: string;
     homeCategoryGridTitleEn?: string;
+    restaurantNameEn?: string;
+    taglineEn?: string;
+    descriptionEn?: string;
+    currencySymbolEn?: string;
+    addressEn?: string;
+    cityEn?: string;
+    activePromotionBannerEn?: string;
+    estimatedWeightDisclaimerEn?: string;
+    pauseMessageEn?: string;
     mobileColumns: number;
     cardImageFit: 'cover' | 'contain';
     cardImagePadding: number;

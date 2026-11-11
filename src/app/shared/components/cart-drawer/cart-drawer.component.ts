@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CartService } from '../../../core/services/cart.service';
 import { SettingsService } from '../../../core/services/settings.service';
+import { LanguageService } from '../../../core/services/language.service';
 import { ImageUrlPipe } from '../../pipes/image-url.pipe';
 import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 
@@ -17,20 +18,23 @@ import { StoreDialogDirective } from '../../directives/store-dialog.directive';
 export class CartDrawerComponent {
   readonly cartService = inject(CartService);
   readonly settingsService = inject(SettingsService);
+  readonly languageService = inject(LanguageService);
   private readonly router = inject(Router);
 
   displayName(item: CartItem): string {
+    const name = this.languageService.getLocalizedName(item.product);
     const suffix = item.selectedVariant ? ' — ' + item.selectedVariant.color + ' / ' + item.selectedVariant.size : '';
-    return suffix && item.product.nameAr.endsWith(suffix) ? item.product.nameAr.slice(0, -suffix.length) : item.product.nameAr;
+    return suffix && name.endsWith(suffix) ? name.slice(0, -suffix.length) : name;
   }
 
   formatWeight(grams?: number | null): string {
-    if (!grams || grams <= 0) return '0 جم';
+    if (!grams || grams <= 0) return this.languageService.text('0 جم', '0 g');
     if (grams >= 1000) {
       const kg = grams / 1000;
-      return Number.isInteger(kg) ? `${kg} كجم` : `${kg.toFixed(1)} كجم`;
+      const unit = this.languageService.text('كجم', 'kg');
+      return Number.isInteger(kg) ? `${kg} ${unit}` : `${kg.toFixed(1)} ${unit}`;
     }
-    return `${grams} جم`;
+    return `${grams} ${this.languageService.text('جم', 'g')}`;
   }
 
   goToMenu() {

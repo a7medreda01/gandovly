@@ -359,8 +359,17 @@ export class AdminSettingsComponent implements OnInit {
     const current = this.settings();
     if (!current) return;
 
+    const layout = this.layoutOptions;
     const payload = {
       ...current,
+      storeLayout: layout,
+      restaurantNameEn: layout.restaurantNameEn || current.restaurantNameEn || '',
+      taglineEn: layout.taglineEn || current.taglineEn || '',
+      descriptionEn: layout.descriptionEn || current.descriptionEn || '',
+      currencySymbolEn: layout.currencySymbolEn || current.currencySymbolEn || '',
+      addressEn: layout.addressEn || current.addressEn || '',
+      cityEn: layout.cityEn || current.cityEn || '',
+      estimatedWeightDisclaimerEn: layout.estimatedWeightDisclaimerEn || current.estimatedWeightDisclaimerEn || '',
       timeZone: current.timeZone || 'Africa/Cairo',
       locale: current.locale || 'ar-EG',
       countryCode: current.countryCode || 'EG',
