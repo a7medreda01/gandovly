@@ -41,10 +41,25 @@ export class HomeSectionsComponent {
     search = '';
     ngOnInit() { this.load(); }
     load() { this.loading.set(true); this.error.set(false); this.api.get<any>('storefront/home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: r => { this.sections.set(r.sections || []); this.loading.set(false); }, error: () => { this.error.set(true); this.loading.set(false); } }); }
-    open(product: Product) { this.productRequest?.unsubscribe(); this.loadingProduct.set(true); this.productRequest = this.catalog.getProductById(product.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: p => { this.loadingProduct.set(false); if (p)
-            this.selected.set(p);
-        else
-            this.toast.error('المنتج غير متاح حاليًا'); }, error: () => { this.loadingProduct.set(false); this.toast.error('تعذر تحميل تفاصيل المنتج'); } }); }
+    open(product: Product) {
+        if (product) {
+            this.selected.set(product);
+            this.loadingProduct.set(false);
+        } else {
+            this.loadingProduct.set(true);
+        }
+        this.productRequest?.unsubscribe();
+        this.productRequest = this.catalog.getProductById(product.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: p => {
+                this.loadingProduct.set(false);
+                if (p) this.selected.set(p);
+            },
+            error: () => {
+                this.loadingProduct.set(false);
+                if (!this.selected()) this.toast.error('تعذر تحميل تفاصيل المنتج');
+            }
+        });
+    }
     goSearch() { this.router.navigate(['/menu'], { queryParams: { search: this.search.trim() || null, page: null, category: null, sort: null }, queryParamsHandling: 'merge' }); }
     colorFor(s: HomeSection) { if (s.textColor)
         return s.textColor; if (s.layout === 'overlay' && (s.kind === 'hero' || s.kind === 'banner'))

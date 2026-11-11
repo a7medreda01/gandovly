@@ -321,15 +321,16 @@
 
 /* Modal Body */
 .modal-body {
-  padding: 1.25rem 1.25rem 2rem;
+  padding: 0.85rem 1rem 1.35rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.65rem;
   background: #fdfdfd;
 
   @media (min-width: 768px) {
-    padding: 1.5rem;
+    padding: 1.15rem 1.25rem;
+    gap: 0.75rem;
   }
 }
 
@@ -449,12 +450,12 @@
   border: 1px solid #e2e8f0;
   border-right: 3.5px solid #00875a;
   border-radius: 14px;
-  padding: 0.85rem 1rem;
-  margin-bottom: 0.65rem;
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.45rem;
 
   .specs-written-text {
     font-size: 0.84rem;
@@ -515,12 +516,12 @@
 .config-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  padding: 0.7rem 0.85rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 
   .config-card-header {
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.45rem;
 
     .card-title {
       font-size: 0.86rem;
@@ -1797,8 +1798,28 @@
 
 .luxury-modal .stepper-box .btn-step { min-width: 44px; width: 44px; min-height: 44px; height: 44px; }
 .luxury-modal .stepper-row { flex-wrap: wrap; gap: 12px; }
-.luxury-modal .mode-toggle-group { grid-template-columns: repeat(2,minmax(0,1fr)); }
-.luxury-modal .mode-btn { min-height: 54px; }
+.luxury-modal .mode-toggle-group {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.luxury-modal .mode-btn {
+  min-height: 38px;
+  height: 38px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 9px;
+
+  i {
+    font-size: 0.88rem;
+    margin: 0 !important;
+  }
+}
 
 .luxury-modal { border-radius: var(--radius-modal, 22px); background: var(--card-bg, #fff); color: var(--text-main); }
 /* Keep scrolling inside the sheet, including when reaching either edge. */
@@ -1860,9 +1881,9 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border: 1px solid var(--border-color, #e2e8f0);
-  border-radius: var(--radius-card, 16px);
+  border-radius: var(--radius-card, 12px);
   background: var(--card-bg, #fff);
 }
 .modal-unit-price { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px; color: var(--primary-color); }

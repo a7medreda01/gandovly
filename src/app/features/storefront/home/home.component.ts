@@ -139,16 +139,25 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   openProductModal(product: Product) {
+    if (product) {
+      this.selectedProductForModal.set(product);
+      this.loadingProductDetail.set(false);
+    } else {
+      this.loadingProductDetail.set(true);
+    }
     this.productDetailRequest?.unsubscribe();
-    this.loadingProductDetail.set(true);
     this.productDetailRequest = this.catalogService.getProductById(product.id).subscribe({
       next: details => {
         this.loadingProductDetail.set(false);
-        this.selectedProductForModal.set(details);
+        if (details) {
+          this.selectedProductForModal.set(details);
+        }
       },
       error: () => {
         this.loadingProductDetail.set(false);
-        this.productNotice.error('تعذر تحميل تفاصيل المنتج. حاول مرة أخرى.');
+        if (!this.selectedProductForModal()) {
+          this.productNotice.error('تعذر تحميل تفاصيل المنتج. حاول مرة أخرى.');
+        }
       }
     });
   }
