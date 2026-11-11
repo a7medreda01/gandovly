@@ -374,13 +374,13 @@
       <!-- Special Order Notes -->
       <div class="config-card">
         <label class="card-title mb-2 d-block" for="modalNotes">
-          <i class="bi bi-chat-left-text text-primary me-1"></i> ملاحظات
+          <i class="bi bi-chat-left-text text-primary me-1"></i> {{ languageService.text('ملاحظات', 'Notes') }}
         </label>
         <textarea
           id="modalNotes"
           class="notes-textarea"
           rows="2"
-          placeholder="مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة تود إضافتها..."
+          [placeholder]="languageService.text('مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة تود إضافتها...', 'e.g. Preparation instructions, preferred substitutes, or special requests...')"
           [(ngModel)]="specialInstructions"
         ></textarea>
       </div>
@@ -391,7 +391,7 @@
           <i class="bi bi-patch-check-fill text-success fs-3"></i>
         </div>
         <div class="disclaimer-body">
-          <h4 class="disclaimer-head">قبل الإضافة إلى السلة</h4>
+          <h4 class="disclaimer-head">{{ languageService.text('قبل الإضافة إلى السلة', 'Before adding to cart') }}</h4>
           <p class="disclaimer-msg">
             راجع الكمية والخيارات المطلوبة، وأضف أي ملاحظات لتجهيز طلبك.
           </p>

@@ -383,10 +383,10 @@
           </button>
         </div></div>}
 @if(languageService.getLocalizedDesc(product()!)){<section class="description-panel"><h2>{{ languageService.text('الوصف', 'Description') }}</h2><p class="product-description">{{languageService.getLocalizedDesc(product()!)}}</p></section>}
-<details class="product-disclosure"><summary>ملاحظات للطلب <span>اختياري</span></summary>          <textarea
+<details class="product-disclosure"><summary>{{ languageService.text('ملاحظات للطلب', 'Order notes') }} <span>{{ languageService.text('اختياري', 'Optional') }}</span></summary>          <textarea
             class="product-notes-textarea"
             rows="2"
-            placeholder="مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة..."
+            [placeholder]="languageService.text('مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة...', 'e.g. Preparation instructions, preferred substitutes, or special requests...')"
             [(ngModel)]="specialInstructions"
           ></textarea></details>        <!-- Specifications Table (if any) -->
         @if (parsedKeySpecs.length > 0) {

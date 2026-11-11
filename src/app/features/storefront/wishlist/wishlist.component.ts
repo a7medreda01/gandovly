@@ -56,7 +56,7 @@ import { Product, PagedResult } from '../../../core/models/models';
           </div>
           <h3 class="fw-bold mb-2">{{ languageService.text('قائمة المفضلة فارغة حالياً', 'Your wishlist is currently empty') }}</h3>
           <p class="text-muted mb-4 max-w-md mx-auto">
-            {{ languageService.text('لم تقم بحفظ أي منتجات بعد. تصفح تشكيلة منتجاتنا المتنوعة وأضف ما يعجبك للمفضلة بالضغط على علامة القلب!', 'You haven\'t saved any products yet. Browse our selection and add your favorites by tapping the heart icon!') }}
+            {{ emptyWishlistDesc }}
           </p>
           <a routerLink="/menu" class="btn-browse-shop">
             <i class="bi bi-grid me-2"></i>
@@ -261,6 +261,13 @@ export class WishlistComponent implements OnInit {
   catalogService = inject(CatalogService);
   settingsService = inject(SettingsService);
   languageService = inject(LanguageService);
+
+  get emptyWishlistDesc(): string {
+    return this.languageService.text(
+      'لم تقم بحفظ أي منتجات بعد. تصفح تشكيلة منتجاتنا المتنوعة وأضف ما يعجبك للمفضلة بالضغط على علامة القلب!',
+      'You have not saved any products yet. Browse our selection and add your favorites by tapping the heart icon!'
+    );
+  }
 
   allProducts = signal<Product[]>([]);
   isLoading = signal<boolean>(true);

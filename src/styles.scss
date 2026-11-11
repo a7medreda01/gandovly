@@ -15,11 +15,27 @@
 html {
   font-family: var(--font-family-base);
   direction: rtl;
-  text-align: right;
+  text-align: start;
   background-color: var(--page-bg);
   color: var(--ink);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+}
+
+html[dir="ltr"],
+html.lang-en,
+body[dir="ltr"],
+body.lang-en {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+html[dir="rtl"],
+html.lang-ar,
+body[dir="rtl"],
+body.lang-ar {
+  direction: rtl !important;
+  text-align: right !important;
 }
 
 @media (hover: hover) and (pointer: fine) {

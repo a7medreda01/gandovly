@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { SettingsService } from './core/services/settings.service';
 import { ApiService } from './core/services/api.service';
+import { LanguageService } from './core/services/language.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class App implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private apiService = inject(ApiService);
+  readonly languageService = inject(LanguageService);
 
   constructor(
     private settingsService: SettingsService,

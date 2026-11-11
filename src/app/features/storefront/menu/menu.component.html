@@ -6,14 +6,14 @@
         <i class="bi bi-search search-icon"></i>
         <input
           type="search"
-          aria-label="البحث في المنتجات"
+          [attr.aria-label]="language.text('البحث في المنتجات', 'Search products')"
           class="search-input"
-          placeholder="ابحث عن منتج، ماركة، صنف أو تصنيف..."
+          [placeholder]="language.text('ابحث عن منتج، ماركة، صنف أو تصنيف...', 'Search by product, brand, item or category...')"
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchChange($event)"
         />
         @if (searchTerm) {
-          <button type="button" class="btn-clear-search" (click)="clearSearch()" aria-label="مسح">
+          <button type="button" class="btn-clear-search" (click)="clearSearch()" [attr.aria-label]="language.text('مسح', 'Clear')">
             <i class="bi bi-x-circle-fill"></i>
           </button>
         }
@@ -23,7 +23,7 @@
     <!-- 2. Horizontal Categories Row (Matching Home Exactly) -->
     <section class="menu-categories-section">
       <div class="categories-scroll-wrapper">
-        <button type="button" class="btn-cat-nav prev" (click)="scrollCategories(-240)" aria-label="السابق" title="السابق">
+        <button type="button" class="btn-cat-nav prev" (click)="scrollCategories(-240)" [attr.aria-label]="language.text('السابق', 'Previous')" [title]="language.text('السابق', 'Previous')">
           <i class="bi bi-chevron-right"></i>
         </button>
         <div class="categories-scroll" [dir]="language.isRtl() ? 'rtl' : 'ltr'" #catScrollContainer>
@@ -60,7 +60,7 @@
             </button>
           }
         </div>
-        <button type="button" class="btn-cat-nav next" (click)="scrollCategories(240)" aria-label="التالي" title="التالي">
+        <button type="button" class="btn-cat-nav next" (click)="scrollCategories(240)" [attr.aria-label]="language.text('التالي', 'Next')" [title]="language.text('التالي', 'Next')">
           <i class="bi bi-chevron-left"></i>
         </button>
       </div>
@@ -76,7 +76,7 @@
             <span>{{ selectedCategoryName }}</span>
           }
         </h1>
-        <span class="results-count">{{ totalCount() }} {{ language.text('منتج متاح', 'products available') }}</span>@if(sortBy){<a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">إزالة فلتر المجموعة</a>}
+        <span class="results-count">{{ totalCount() }} {{ language.text('منتج متاح', 'products available') }}</span>@if(sortBy){<a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">{{ language.text('إزالة فلتر المجموعة', 'Clear group filter') }}</a>}
       </div>
 
     </div>
@@ -89,7 +89,7 @@
         }
       </div>
     } @else if (loadError() && products().length === 0) {
-      <div class="store-load-error" role="alert"><h2>تعذر تحميل المنتجات</h2><p>تحقق من اتصالك بالإنترنت وحاول مرة أخرى.</p><button type="button" class="btn btn-primary" (click)="fetchProducts(true)">إعادة المحاولة</button></div>
+      <div class="store-load-error" role="alert"><h2>{{ language.text('تعذر تحميل المنتجات', 'Failed to load products') }}</h2><p>{{ language.text('تحقق من اتصالك بالإنترنت وحاول مرة أخرى.', 'Check your internet connection and try again.') }}</p><button type="button" class="btn btn-primary" (click)="fetchProducts(true)">{{ language.text('إعادة المحاولة', 'Retry') }}</button></div>
     } @else if (products().length === 0) {
       <div class="empty-results-card animate-fade-in">
         <div class="empty-icon-bubble">
@@ -112,7 +112,7 @@
         }
       </div>
 
-      @if (loadError()) { <div class="store-load-error" role="alert"><p>تعذر تحميل بقية المنتجات. أصنافك الحالية ما زالت ظاهرة.</p><button type="button" class="btn btn-primary" (click)="loadError.set(false); loadNextPage()">إعادة المحاولة</button></div> }
+      @if (loadError()) { <div class="store-load-error" role="alert"><p>{{ language.text('تعذر تحميل بقية المنتجات. أصنافك الحالية ما زالت ظاهرة.', 'Could not load remaining products. Current items are still shown.') }}</p><button type="button" class="btn btn-primary" (click)="loadError.set(false); loadNextPage()">{{ language.text('إعادة المحاولة', 'Retry') }}</button></div> }
 
       <!-- Infinite Scroll Loading Spinner -->
       @if (isLoadingMore()) {

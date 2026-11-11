@@ -25,32 +25,48 @@ export class LanguageService {
   });
 
   constructor() {
+    this.applyDomLanguage(this.currentLang());
     effect(() => {
       const lang = this.currentLang();
-      if (typeof document !== 'undefined') {
-        document.documentElement.lang = lang;
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        if (lang === 'en') {
-          document.body.classList.add('lang-en');
-          document.body.classList.remove('lang-ar');
-        } else {
-          document.body.classList.add('lang-ar');
-          document.body.classList.remove('lang-en');
-        }
-      }
+      this.applyDomLanguage(lang);
       if (this.canSwitchLanguage() && typeof localStorage !== 'undefined') {
         localStorage.setItem(this.STORAGE_KEY, lang);
       }
     });
   }
 
+  applyDomLanguage(lang: SupportedLanguage): void {
+    if (typeof document === 'undefined') return;
+    const dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+    document.documentElement.dir = dir;
+    document.documentElement.setAttribute('dir', dir);
+    if (document.body) {
+      document.body.dir = dir;
+      document.body.setAttribute('dir', dir);
+      if (lang === 'en') {
+        document.documentElement.classList.add('lang-en');
+        document.documentElement.classList.remove('lang-ar');
+        document.body.classList.add('lang-en');
+        document.body.classList.remove('lang-ar');
+      } else {
+        document.documentElement.classList.add('lang-ar');
+        document.documentElement.classList.remove('lang-en');
+        document.body.classList.add('lang-ar');
+        document.body.classList.remove('lang-en');
+      }
+    }
+  }
+
   toggleLanguage(): void {
     const nextLang: SupportedLanguage = this.currentLang() === 'ar' ? 'en' : 'ar';
     this.preferredLanguage.set(nextLang);
+    this.applyDomLanguage(nextLang);
   }
 
   setLanguage(lang: SupportedLanguage): void {
     this.preferredLanguage.set(lang);
+    this.applyDomLanguage(lang);
   }
 
   text(ar: string | null | undefined, en?: string | null): string {
