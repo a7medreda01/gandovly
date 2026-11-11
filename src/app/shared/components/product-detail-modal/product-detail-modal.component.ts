@@ -63,6 +63,36 @@ export class ProductDetailModalComponent implements OnInit {
   specialInstructions: string = '';
   activeImageIndex: number = 0;
   showSpecsModal: boolean = false;
+  collapsedGroups: Record<string, boolean> = {};
+
+  isPrepGroupExpanded(grpId: number, index: number): boolean {
+    if (this.collapsedGroups['prep-' + grpId] !== undefined) {
+      return this.collapsedGroups['prep-' + grpId];
+    }
+    return index === 0;
+  }
+
+  togglePrepGroup(grpId: number, index: number): void {
+    const current = this.isPrepGroupExpanded(grpId, index);
+    this.collapsedGroups['prep-' + grpId] = !current;
+  }
+
+  isModGroupExpanded(modId: number, index: number): boolean {
+    if (this.collapsedGroups['mod-' + modId] !== undefined) {
+      return this.collapsedGroups['mod-' + modId];
+    }
+    const defaultOpen = (this.product?.preparationGroups?.length || 0) + index === 0;
+    return defaultOpen;
+  }
+
+  toggleModGroup(modId: number, index: number): void {
+    const current = this.isModGroupExpanded(modId, index);
+    this.collapsedGroups['mod-' + modId] = !current;
+  }
+
+  isMultiModifierSelectedForGroup(group: ModifierGroup): number {
+    return this.multiSelectedModifiers.filter(m => group.options?.some(o => o.id === m.id)).length;
+  }
 
   get previewDescription(): string {
     if (!this.product.description) return '';

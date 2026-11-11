@@ -31,9 +31,37 @@ export class AdminSettingsComponent implements OnInit {
 
   private readonly domainHttp = inject(HttpClient);
   customDomain = signal('');
+  storeUrl = signal('');
   domainInput = '';
   domainBusy = signal(false);
   dnsConfigured = signal(false);
+
+  get effectiveDomain(): string {
+    return (this.domainInput || this.customDomain() || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  }
+
+  get isSubdomain(): boolean {
+    const d = this.effectiveDomain;
+    if (!d) return false;
+    const parts = d.split('.').filter(Boolean);
+    return parts.length > 2 && parts[0] !== 'www';
+  }
+
+  get subdomainHost(): string {
+    const d = this.effectiveDomain;
+    if (!d) return 'shop';
+    const parts = d.split('.').filter(Boolean);
+    return parts.length > 2 ? parts[0] : '@';
+  }
+
+  get defaultStoreUrl(): string {
+    if (this.storeUrl()) return this.storeUrl();
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host.endsWith('.mecart.app') && host !== 'www.mecart.app') return 'https://' + host;
+    }
+    return '';
+  }
 
   loadDomain() {
     this.domainHttp.get<any>(environment.apiUrl + '/admin/settings/custom-domain').subscribe({
@@ -41,6 +69,7 @@ export class AdminSettingsComponent implements OnInit {
         this.customDomain.set(r.data.customDomain || '');
         this.domainInput = r.data.customDomain || '';
         this.dnsConfigured.set(!!r.data.dnsConfigured);
+        if (r.data.storeUrl) this.storeUrl.set(r.data.storeUrl);
       }
     });
   }

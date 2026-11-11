@@ -218,79 +218,168 @@
             <h3>الدومين المخصص (Custom Domain)</h3>
           </div>
           <p class="section-desc">
-            ربط دومين خاص بالمتجر (مثل <code>shop.example.com</code>). يمكنك ربطه مباشرة أو فحصه عبر سجلات DNS TXT.
+            ربط دومين مدفوع خاص بالمتجر (مثل <code>{{ effectiveDomain || 'gandovly.com' }}</code>). يعمل الدومين المخصص ورابط مي كارت الأساسي معاً في نفس الوقت بتزامن كامل ودون أي تعارض.
           </p>
 
-          <div class="custom-domain-status-row">
-            <span>الدومين المربوط حالياً:</span>
-            @if (s.customDomain) {
-              <strong class="domain-tag active-domain" dir="ltr">{{ s.customDomain }}</strong>
-              <button class="btn btn-sm btn-danger-outline" (click)="unlinkCustomDomain()" [disabled]="domainDirectBusy">
-                إلغاء ربط الدومين
-              </button>
-            } @else {
-              <span class="domain-tag inactive-domain">غير مربوط بدومين خاص</span>
-            }
-          </div>
+          <!-- Dual Active Links Card -->
+          <div class="dual-urls-card p-3 mb-3 bg-light border rounded">
+            <div class="fw-bold mb-2 text-dark"><i class="bi bi-link-45deg text-primary me-1"></i> روابط المتجر النشطة:</div>
+            <div class="d-flex flex-column gap-2">
+              <div class="d-flex align-items-center justify-content-between bg-white p-2 px-3 rounded border flex-wrap gap-2">
+                <div>
+                  <span class="badge bg-secondary me-2">رابط مي كارت السريع</span>
+                  <a [href]="storeUrl(s)" target="_blank" rel="noopener" class="font-monospace fw-bold text-decoration-none" dir="ltr">
+                    https://{{ s.subdomain }}.mecart.app
+                  </a>
+                </div>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copyText('https://' + s.subdomain + '.mecart.app', 'رابط مي كارت')">
+                    <i class="bi bi-copy me-1"></i> نسخ
+                  </button>
+                  <a [href]="storeUrl(s)" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right"></i>
+                  </a>
+                </div>
+              </div>
 
-          <div class="custom-domain-input-box">
-            <label for="customDomainDirectInput">اسم الدومين الجديد</label>
-            <div class="input-action-row">
-              <input
-                id="customDomainDirectInput"
-                type="text"
-                [(ngModel)]="customDomainInput"
-                placeholder="مثال: store.mybrand.com"
-                dir="ltr"
-                [disabled]="domainDirectBusy"
-              >
-              <button
-                class="btn btn-primary"
-                (click)="saveCustomDomainDirect()"
-                [disabled]="domainDirectBusy || !customDomainInput.trim()"
-              >
-                {{ domainDirectBusy ? 'جارٍ الربط…' : 'حفظ وربط الدومين مباشرة' }}
-              </button>
-            </div>
-          </div>
-
-          <!-- DNS Verification Collapsible Toggle -->
-          <div class="dns-advanced-box">
-            <button type="button" class="btn-toggle-dns" (click)="showDnsVerify = !showDnsVerify">
-              <span>{{ showDnsVerify ? '▼ إخفاء فحص وإثبات الملكية عبر DNS TXT' : '► فحص وإثبات الملكية عبر سجلات DNS TXT (اختياري)' }}</span>
-            </button>
-
-            @if (showDnsVerify) {
-              <div class="dns-verify-panel">
-                <p>يمكنك التحقق من توجيه DNS الخاص بالدومين وإثبات ملكيته عبر سجل TXT قبل اعتماده:</p>
-                <button
-                  class="btn btn-outline btn-sm"
-                  (click)="prepareDomain()"
-                  [disabled]="domainBusy || !customDomainInput.trim()"
-                >
-                  {{ domainBusy ? 'جارٍ التجهيز…' : 'توليد سجل التحقق TXT' }}
-                </button>
-
-                @if (domainProof; as proof) {
-                  <div class="proof-records-box">
-                    <div class="alert alert-warning py-1 px-2 mb-2 small">
-                      <strong>نوع السجل: TXT</strong> (تأكد من اختيار نوع السجل TXT وليس A Record لتجنب خطأ IPv4 address).
-                    </div>
-                    <div class="proof-item">
-                      <label>اسم السجل (Host / Name)</label>
-                      <input readonly dir="ltr" [value]="proof.recordName">
-                    </div>
-                    <div class="proof-item">
-                      <label>قيمة السجل (Value / TXT)</label>
-                      <textarea readonly dir="ltr" rows="3" [value]="proof.recordValue"></textarea>
-                    </div>
-                    <button class="btn btn-primary btn-sm" (click)="verifyDomain()" [disabled]="domainBusy">
-                      {{ domainBusy ? 'جارٍ الفحص…' : 'التحقق الآن من سجل DNS' }}
+              @if (s.customDomain) {
+                <div class="d-flex align-items-center justify-content-between bg-white p-2 px-3 rounded border border-success flex-wrap gap-2">
+                  <div>
+                    <span class="badge bg-success me-2">الدومين المخصص</span>
+                    <a [href]="'https://' + s.customDomain" target="_blank" rel="noopener" class="font-monospace fw-bold text-success text-decoration-none" dir="ltr">
+                      https://{{ s.customDomain }}
+                    </a>
+                    <span class="ms-2">
+                      @if (dnsConfigured() === true) {
+                        <span class="badge bg-success-subtle text-success border border-success"><i class="bi bi-check-circle-fill me-1"></i> متصل ويعمل بنجاح</span>
+                      } @else if (dnsConfigured() === false) {
+                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning"><i class="bi bi-hourglass-split me-1"></i> في انتظار انتشار DNS</span>
+                      }
+                    </span>
+                  </div>
+                  <div class="d-flex gap-2 align-items-center">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copyText('https://' + s.customDomain, 'رابط الدومين المخصص')">
+                      <i class="bi bi-copy me-1"></i> نسخ
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-primary" (click)="checkDns(s.customDomain)" [disabled]="dnsChecking()">
+                      <i class="bi bi-arrow-repeat me-1" [class.spin]="dnsChecking()"></i> فحص الاتصال
+                    </button>
+                    <a [href]="'https://' + s.customDomain" target="_blank" rel="noopener" class="btn btn-sm btn-success">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="unlinkCustomDomain()" [disabled]="domainDirectBusy">
+                      إلغاء الربط
                     </button>
                   </div>
+                </div>
+              }
+            </div>
+            <small class="text-muted d-block mt-2">
+              <i class="bi bi-info-circle me-1"></i> كلا الرابطين يعملان معاً ويصلان لنفس المنتجات والطلبات بدون أي تعارض.
+            </small>
+          </div>
+
+          <!-- Dynamic Hostinger DNS Records Table -->
+          <div class="card p-3 my-3 bg-white border rounded">
+            <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+              <h5 class="fw-bold text-dark m-0">
+                <i class="bi bi-hdd-network text-primary me-2"></i>
+                سجلات الربط في Hostinger (DNS Records)
+              </h5>
+              <span class="badge bg-primary-subtle text-primary border border-primary-subtle">توليد تلقائي فوري</span>
+            </div>
+            <p class="text-muted small mb-3">
+              أضف هذه السجلات البسيطة في لوحة تحكم الدومين في <strong>Hostinger (قسم DNS / Nameservers)</strong>:
+            </p>
+
+            <div class="table-responsive mb-3">
+              <table class="table table-bordered table-hover mb-0 align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 15%;">النوع (Type)</th>
+                    <th style="width: 20%;">الاسم (Name / Host)</th>
+                    <th style="width: 35%;">يشير إلى (Points to / Value)</th>
+                    <th style="width: 15%;">TTL</th>
+                    <th style="width: 15%;">نسخ سريع</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @if (!isSubdomain) {
+                    <tr>
+                      <td><span class="badge bg-primary fs-6 px-3 py-1">A Record</span></td>
+                      <td><code class="fs-6 fw-bold">@</code></td>
+                      <td><code class="fs-6 fw-bold text-success" dir="ltr">76.76.21.21</code></td>
+                      <td><span class="text-muted small">افتراضي (أو 300)</span></td>
+                      <td>
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="copyText('76.76.21.21', 'قيمة سجل A')">
+                          <i class="bi bi-copy me-1"></i> نسخ
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><span class="badge bg-secondary fs-6 px-3 py-1">CNAME</span></td>
+                      <td><code class="fs-6 fw-bold">www</code></td>
+                      <td><code class="fs-6 fw-bold text-primary" dir="ltr">cname.vercel-dns.com</code></td>
+                      <td><span class="text-muted small">افتراضي (أو 300)</span></td>
+                      <td>
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="copyText('cname.vercel-dns.com', 'قيمة سجل CNAME')">
+                          <i class="bi bi-copy me-1"></i> نسخ
+                        </button>
+                      </td>
+                    </tr>
+                  } @else {
+                    <tr>
+                      <td><span class="badge bg-secondary fs-6 px-3 py-1">CNAME</span></td>
+                      <td><code class="fs-6 fw-bold">{{ subdomainHost }}</code></td>
+                      <td><code class="fs-6 fw-bold text-primary" dir="ltr">cname.vercel-dns.com</code></td>
+                      <td><span class="text-muted small">افتراضي (أو 300)</span></td>
+                      <td>
+                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" (click)="copyText('cname.vercel-dns.com', 'قيمة سجل CNAME')">
+                          <i class="bi bi-copy me-1"></i> نسخ
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Custom Domain Input Form -->
+            <div class="custom-domain-input-box">
+              <label for="customDomainDirectInput" class="fw-bold mb-1">اسم الدومين الخاص بك</label>
+              <div class="input-action-row">
+                <input
+                  id="customDomainDirectInput"
+                  type="text"
+                  [(ngModel)]="customDomainInput"
+                  placeholder="مثال: gandovly.com"
+                  dir="ltr"
+                  [disabled]="domainDirectBusy"
+                >
+                <button
+                  class="btn btn-primary"
+                  (click)="saveCustomDomainDirect()"
+                  [disabled]="domainDirectBusy || !customDomainInput.trim()"
+                >
+                  <i class="bi bi-link-45deg me-1"></i>
+                  {{ domainDirectBusy ? 'جارٍ الحفظ والربط…' : 'حفظ وتفعيل ربط الدومين الآن' }}
+                </button>
+                @if (customDomainInput.trim()) {
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    (click)="checkDns(customDomainInput.trim())"
+                    [disabled]="dnsChecking()"
+                  >
+                    <i class="bi bi-arrow-repeat me-1" [class.spin]="dnsChecking()"></i>
+                    فحص توجيه DNS
+                  </button>
                 }
               </div>
-            }
+              <small class="text-muted mt-2 d-block">
+                بمجرد إضافة السجلين في Hostinger والضغط على «حفظ وتفعيل ربط الدومين الآن»، يعمل المتجر مباشرة مع إصدار شهادة الأمان SSL تلقائياً.
+              </small>
+            </div>
           </div>
         </div>
       </section>

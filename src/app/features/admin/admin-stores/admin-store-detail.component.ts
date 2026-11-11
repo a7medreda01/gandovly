@@ -35,6 +35,8 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
   showDnsVerify = false;
   domainBusy = false;
   domainProof: any = null;
+  dnsConfigured = signal<boolean | null>(null);
+  dnsChecking = signal<boolean>(false);
 
   // Store Status
   statusBusy = false;
@@ -63,6 +65,9 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
       if (s) {
         this.subdomainInput = s.subdomain;
         this.customDomainInput = s.customDomain || '';
+        if (s.customDomain && this.dnsConfigured() === null && !this.dnsChecking()) {
+          this.checkDns(s.customDomain, false);
+        }
       }
     });
   }
@@ -128,21 +133,93 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
   }
 
   // --- Custom Domain Management ---
+  get effectiveDomain(): string {
+    return (this.customDomainInput || this.store()?.customDomain || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  }
+
+  get isSubdomain(): boolean {
+    const d = this.effectiveDomain;
+    if (!d) return false;
+    const parts = d.split('.').filter(Boolean);
+    return parts.length > 2 && parts[0] !== 'www';
+  }
+
+  get subdomainHost(): string {
+    const d = this.effectiveDomain;
+    if (!d) return 'shop';
+    const parts = d.split('.').filter(Boolean);
+    return parts.length > 2 ? parts[0] : '@';
+  }
+
+  copyText(text: string, label: string): void {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.notice.success(`تم نسخ ${label}`);
+      }).catch(() => {
+        this.fallbackCopy(text, label);
+      });
+    } else {
+      this.fallbackCopy(text, label);
+    }
+  }
+
+  private fallbackCopy(text: string, label: string): void {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+    this.notice.success(`تم نسخ ${label}`);
+  }
+
+  checkDns(domainToCheck?: string, showToast = true): void {
+    const s = this.store();
+    const dom = (domainToCheck || s?.customDomain || this.customDomainInput || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    if (!dom) {
+      if (showToast) this.notice.error('أدخل اسم الدومين أولاً لفحصه.');
+      return;
+    }
+    this.dnsChecking.set(true);
+    this.detailApi.get<{ domain: string; dnsConfigured: boolean }>(`admin/settings/custom-domain/check-dns?domain=${encodeURIComponent(dom)}`).subscribe({
+      next: (res) => {
+        this.dnsChecking.set(false);
+        this.dnsConfigured.set(res?.dnsConfigured ?? false);
+        if (showToast) {
+          if (res?.dnsConfigured) {
+            this.notice.success(`ممتاز! تم التحقق بنجاح من توجيه DNS لـ ${dom} ويعمل الآن.`);
+          } else {
+            this.notice.info(`لم تكتمل مزامنة DNS لـ ${dom} بعد في Hostinger. انتظر دقائق ثم أعد الفحص.`);
+          }
+        }
+      },
+      error: () => {
+        this.dnsChecking.set(false);
+        if (showToast) this.notice.error('تعذر فحص سجلات DNS حالياً.');
+      }
+    });
+  }
+
   saveCustomDomainDirect(): void {
     const s = this.store();
     if (!s || this.domainDirectBusy) return;
-    const clean = (this.customDomainInput || '').trim().toLowerCase();
+    const clean = (this.customDomainInput || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
     if (!clean) {
       this.unlinkCustomDomain();
       return;
     }
     this.domainDirectBusy = true;
-    this.detailApi.put<{ customDomain: string }>('admin/tenants/' + s.id + '/custom-domain', { customDomain: clean }).subscribe({
+    this.detailApi.put<{ customDomain: string; dnsConfigured?: boolean }>('admin/tenants/' + s.id + '/custom-domain', { customDomain: clean }).subscribe({
       next: (res) => {
         this.domainDirectBusy = false;
         const dom = res?.customDomain || clean;
         this.stores.update(list => list.map(item => item.id === s.id ? { ...item, customDomain: dom } : item));
-        this.notice.success('تم ربط وتحديث الدومين المخصص بنجاح.');
+        if (res?.dnsConfigured !== undefined) {
+          this.dnsConfigured.set(res.dnsConfigured);
+        } else {
+          this.checkDns(dom, false);
+        }
+        this.notice.success('تم حفظ وربط الدومين بنجاح!');
       },
       error: (e) => {
         this.domainDirectBusy = false;
@@ -160,6 +237,7 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
       next: () => {
         this.domainDirectBusy = false;
         this.customDomainInput = '';
+        this.dnsConfigured.set(null);
         this.stores.update(list => list.map(item => item.id === s.id ? { ...item, customDomain: undefined } : item));
         this.notice.success('تم إلغاء ربط الدومين المخصص.');
       },
