@@ -71,21 +71,25 @@
     <!-- Desktop Navigation -->
     <nav class="desktop-nav">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
-        <i class="bi bi-house-door me-1"></i> الرئيسية
+        <i class="bi bi-house-door me-1"></i> {{ languageService.text('الرئيسية', 'Home') }}
       </a>
       <a routerLink="/menu" routerLinkActive="active" class="nav-link">
-        <i class="bi bi-grid me-1"></i> كافة المنتجات
+        <i class="bi bi-grid me-1"></i> {{ languageService.text('كافة المنتجات', 'All Products') }}
       </a>
-      @if (settingsService.settings().enableWishlist) { <a routerLink="/wishlist" routerLinkActive="active" class="nav-link"><i class="bi bi-heart me-1" aria-hidden="true"></i> {{ settingsService.settings().labelWishlist || 'المفضلة' }}</a> }
+      @if (settingsService.settings().enableWishlist) {
+        <a routerLink="/wishlist" routerLinkActive="active" class="nav-link">
+          <i class="bi bi-heart me-1" aria-hidden="true"></i> {{ languageService.text(settingsService.settings().labelWishlist || 'المفضلة', 'Wishlist') }}
+        </a>
+      }
 
       @if (isKitchenAllowed) {
       <a routerLink="/admin/orders" class="nav-badge-link">
-        <span class="badge badge-weight"><i class="bi bi-box-seam me-1"></i> إدارة الطلبات</span>
+        <span class="badge badge-weight"><i class="bi bi-box-seam me-1"></i> {{ languageService.text('إدارة الطلبات', 'Orders') }}</span>
       </a>
       }
       @if (isAdminAllowed) {
       <a routerLink="/admin" class="nav-badge-link">
-        <span class="badge badge-prep"><i class="bi bi-shield-lock me-1"></i> الإدارة</span>
+        <span class="badge badge-prep"><i class="bi bi-shield-lock me-1"></i> {{ languageService.text('الإدارة', 'Admin') }}</span>
       </a>
       }
     </nav>
@@ -101,23 +105,23 @@
       <!-- WhatsApp CTA -->
       @if (settingsService.settings().showWhatsAppInNavbar && settingsService.settings().whatsapp) {
       <a [href]="whatsappUrl" target="_blank" rel="noopener noreferrer"
-        class="btn-whatsapp flex-center" title="تواصل عبر واتساب">
+        class="btn-whatsapp flex-center" [title]="languageService.text('تواصل عبر واتساب', 'WhatsApp')">
         <i class="bi bi-whatsapp"></i>
-        <span class="btn-text">واتساب</span>
+        <span class="btn-text">{{ languageService.text('واتساب', 'WhatsApp') }}</span>
       </a>
       }
 
       <!-- Phone CTA -->
       @if (settingsService.settings().showPhoneInNavbar && settingsService.settings().phone) {
       <a [href]="'tel:' + settingsService.settings().phone"
-        class="btn-whatsapp flex-center" title="اتصال هاتفي">
+        class="btn-whatsapp flex-center" [title]="languageService.text('اتصال هاتفي', 'Call us')">
         <i class="bi bi-telephone-fill"></i>
-        <span class="btn-text">اتصال</span>
+        <span class="btn-text">{{ languageService.text('اتصال', 'Call') }}</span>
       </a>
       }
 
       <!-- Account Button -->
-      <a routerLink="/account" class="account-btn flex-center" title="حسابي" aria-label="حسابي">
+      <a routerLink="/account" class="account-btn flex-center" [title]="languageService.text('حسابي', 'My Account')" [attr.aria-label]="languageService.text('حسابي', 'My Account')">
         <i class="bi bi-person"></i>
       </a>
 
@@ -130,8 +134,8 @@
         [class.is-empty]="cartService.totalItemsCount() === 0"
         [class.cart-bump]="cartService.cartBumped()"
         (click)="cartService.toggleDrawer()"
-        title="سلة الطلبات"
-        [attr.aria-label]="'سلة الطلبات، ' + cartService.totalItemsCount() + ' منتج'"
+        [title]="languageService.text('سلة الطلبات', 'Shopping Cart')"
+        [attr.aria-label]="languageService.text('سلة الطلبات، ' + cartService.totalItemsCount() + ' منتج', 'Shopping cart, ' + cartService.totalItemsCount() + ' items')"
       >
         <div class="cart-icon-wrapper">
           <i class="bi bi-cart3 cart-icon"></i>
@@ -139,7 +143,7 @@
             <span class="cart-badge">{{ cartService.totalItemsCount() }}</span>
           }
         </div>
-        <span class="cart-text">السلة</span>
+        <span class="cart-text">{{ languageService.text(settingsService.settings().labelCart || 'السلة', 'Cart') }}</span>
       </button>
       }
     </div>

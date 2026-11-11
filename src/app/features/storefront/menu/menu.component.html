@@ -95,11 +95,11 @@
         <div class="empty-icon-bubble">
           <i class="bi bi-search"></i>
         </div>
-        <h3 class="empty-title">لم نجد أصنافاً مطابقة لبحثك</h3>
-        <p class="empty-subtitle">جرّب البحث باسم صنف آخر أو اختر قسماً آخر من القائمة أعلاه لتصفح المنتجات المتوفرة.</p>
+        <h3 class="empty-title">{{ language.text('لم نجد أصنافاً مطابقة لبحثك', 'No matching products found') }}</h3>
+        <p class="empty-subtitle">{{ language.text('جرّب البحث باسم صنف آخر أو اختر قسماً آخر من القائمة أعلاه لتصفح المنتجات المتوفرة.', 'Try searching with another keyword or pick a category from above to browse products.') }}</p>
         <button type="button" class="btn-clear-search-action" (click)="clearSearch(); selectCategory(null)">
           <i class="bi bi-arrow-clockwise me-2"></i>
-          <span>عرض جميع الأصناف</span>
+          <span>{{ language.text('عرض جميع الأصناف', 'View All Products') }}</span>
         </button>
       </div>
     } @else {

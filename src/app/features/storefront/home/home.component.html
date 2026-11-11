@@ -123,11 +123,11 @@
       <div class="empty-icon-bubble">
         <i class="bi bi-search"></i>
       </div>
-      <h3 class="empty-title">لم نجد أصنافاً مطابقة لبحثك</h3>
-      <p class="empty-subtitle">جرّب البحث باسم صنف آخر أو تصفح الأقسام المميزة أعلاه.</p>
+      <h3 class="empty-title">{{ languageService.text('لم نجد أصنافاً مطابقة لبحثك', 'No matching products found') }}</h3>
+      <p class="empty-subtitle">{{ languageService.text('جرّب البحث باسم صنف آخر أو تصفح الأقسام المميزة أعلاه.', 'Try searching with another keyword or browse featured categories above.') }}</p>
       <button type="button" class="btn-clear-search-action" (click)="searchQuery.set(''); onSearchChange(''); selectCategory(null)">
         <i class="bi bi-arrow-clockwise me-2"></i>
-        <span>عرض كل المنتجات</span>
+        <span>{{ languageService.text('عرض كل المنتجات', 'View All Products') }}</span>
       </button>
     </div>
     }

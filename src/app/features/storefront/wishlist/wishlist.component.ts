@@ -23,19 +23,19 @@ import { Product, PagedResult } from '../../../core/models/models';
               <i class="bi bi-heart-fill"></i>
             </div>
             <h1 class="page-title mb-0">
-              {{ settingsService.settings().labelWishlist || 'قائمة المفضلة' }}
+              {{ languageService.text(settingsService.settings().labelWishlist || 'قائمة المفضلة', 'Wishlist') }}
             </h1>
-            <span class="count-badge">{{ wishlistService.count() }} {{ wishlistService.count() === 1 ? 'منتج' : 'منتجات' }}</span>
+            <span class="count-badge">{{ wishlistService.count() }} {{ wishlistService.count() === 1 ? languageService.text('منتج', 'item') : languageService.text('منتجات', 'items') }}</span>
           </div>
           <p class="page-subtitle text-muted mb-0 mt-1">
-            الأصناف والمنتجات المحفوظة لتسهيل العودة إليها وطلبها لاحقاً
+            {{ languageService.text('الأصناف والمنتجات المحفوظة لتسهيل العودة إليها وطلبها لاحقاً', 'Saved products to easily find and order them later') }}
           </p>
         </div>
 
         @if (wishlistService.hasItems()) {
-          <button type="button" class="btn-clear-wishlist flex-center" (click)="clearAll()" title="إفراغ المفضلة">
+          <button type="button" class="btn-clear-wishlist flex-center" (click)="clearAll()" [title]="languageService.text('إفراغ المفضلة', 'Clear Wishlist')">
             <i class="bi bi-trash3 me-1"></i>
-            <span>مسح الكل</span>
+            <span>{{ languageService.text('مسح الكل', 'Clear All') }}</span>
           </button>
         }
       </div>
@@ -44,7 +44,7 @@ import { Product, PagedResult } from '../../../core/models/models';
       @if (isLoading()) {
         <div class="loading-state text-center py-5">
           <div class="spinner-border text-primary mb-3" role="status"></div>
-          <p class="text-muted fw-bold">جاري تحميل أصناف المفضلة...</p>
+          <p class="text-muted fw-bold">{{ languageService.text('جاري تحميل أصناف المفضلة...', 'Loading wishlist items...') }}</p>
         </div>
       }
 
@@ -54,13 +54,13 @@ import { Product, PagedResult } from '../../../core/models/models';
           <div class="empty-icon-wrap mb-3 flex-center">
             <i class="bi bi-heart"></i>
           </div>
-          <h3 class="fw-bold mb-2">قائمة المفضلة فارغة حالياً</h3>
+          <h3 class="fw-bold mb-2">{{ languageService.text('قائمة المفضلة فارغة حالياً', 'Your wishlist is currently empty') }}</h3>
           <p class="text-muted mb-4 max-w-md mx-auto">
-            لم تقم بحفظ أي منتجات بعد. تصفح تشكيلة منتجاتنا المتنوعة وأضف ما يعجبك للمفضلة بالضغط على علامة القلب!
+            {{ languageService.text('لم تقم بحفظ أي منتجات بعد. تصفح تشكيلة منتجاتنا المتنوعة وأضف ما يعجبك للمفضلة بالضغط على علامة القلب!', 'You haven\'t saved any products yet. Browse our selection and add your favorites by tapping the heart icon!') }}
           </p>
           <a routerLink="/menu" class="btn-browse-shop">
             <i class="bi bi-grid me-2"></i>
-            <span>تصفح المنتجات الآن</span>
+            <span>{{ languageService.text('تصفح المنتجات الآن', 'Browse Products Now') }}</span>
           </a>
         </div>
       }
