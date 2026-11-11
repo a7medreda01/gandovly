@@ -102,7 +102,7 @@
                   </button>
 
                   <a [href]="ownerLoginUrl(store)" target="_blank" rel="noopener" class="btn btn-sm" title="دخول مالك المتجر"><i class="bi bi-person-lock"></i></a>
-                  <button class="btn btn-sm" (click)="openSupport(store)" title="دخول دعم مؤقت لمدة 15 دقيقة"><i class="bi bi-headset"></i></button>
+                  <button class="btn btn-sm" (click)="openSupport(store)" title="دخول دعم مؤقت لمدة ساعة"><i class="bi bi-headset"></i></button>
                   <!-- Export ZIP -->
                   <button class="btn btn-sm btn-outline-primary" (click)="exportStoreZip(store)" title="تنزيل حزمة المتجر ZIP">
                     <i class="bi bi-download"></i>
@@ -287,7 +287,7 @@
 
 @if (supportLoginUrl(); as url) {
   <div class="modal-backdrop-custom flex-center"><div class="modal-box-custom p-4" role="dialog" aria-modal="true" aria-label="دخول دعم المتجر">
-    <h2 class="mb-3">دخول دعم مؤقت</h2><p class="mb-3">الرابط صالح لمرة واحدة خلال دقيقة. جلسة الدعم مسجلة وتستمر 15 دقيقة، ولا تغير كلمة مرور المالك.</p>
+    <h2 class="mb-3">دخول دعم مؤقت</h2><p class="mb-3">الرابط صالح لمرة واحدة خلال دقيقة. جلسة الدعم مسجلة وتستمر لمدة ساعة كاملة، ولا تغير كلمة مرور المالك.</p>
     <div class="d-flex gap-2"><a class="btn btn-success" [href]="url" target="_blank" rel="noopener noreferrer" (click)="supportLoginUrl.set(null)">فتح جلسة الدعم</a><button class="btn" (click)="supportLoginUrl.set(null)">إغلاق</button></div>
   </div></div>
 }

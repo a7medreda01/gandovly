@@ -32,18 +32,106 @@ export class AdminSettingsComponent implements OnInit {
   private readonly domainHttp = inject(HttpClient);
   customDomain = signal('');
   domainInput = '';
-  domainChallenge = signal<{domain:string;token:string;recordName:string;recordValue:string}|null>(null);
   domainBusy = signal(false);
-  loadDomain() { this.domainHttp.get<any>(environment.apiUrl+'/admin/settings/custom-domain').subscribe({next:r=>{this.customDomain.set(r.data.customDomain||'');this.domainInput=r.data.customDomain||'';}}); }
-  prepareDomain() {
-    this.domainBusy.set(true); this.domainChallenge.set(null);
-    this.domainHttp.post<any>(environment.apiUrl+'/admin/settings/custom-domain/challenge',{domain:this.domainInput}).subscribe({next:r=>{this.domainBusy.set(false);this.domainChallenge.set(r.data);this.domainInput=r.data.domain;},error:e=>{this.domainBusy.set(false);this.toast.error(e.error?.message||'تعذر إنشاء بيانات التحقق.');}});
+  dnsConfigured = signal(false);
+
+  loadDomain() {
+    this.domainHttp.get<any>(environment.apiUrl + '/admin/settings/custom-domain').subscribe({
+      next: r => {
+        this.customDomain.set(r.data.customDomain || '');
+        this.domainInput = r.data.customDomain || '';
+        this.dnsConfigured.set(!!r.data.dnsConfigured);
+      }
+    });
   }
-  verifyDomain() {
-    const challenge=this.domainChallenge(); if(!challenge)return;
+
+  saveCustomDomain() {
+    const clean = (this.domainInput || '').trim().toLowerCase();
+    if (!clean) {
+      this.toast.error('يرجى إدخال اسم الدومين أولاً.');
+      return;
+    }
     this.domainBusy.set(true);
-    this.domainHttp.post<any>(environment.apiUrl+'/admin/settings/custom-domain/verify',challenge).subscribe({next:r=>{this.domainBusy.set(false);this.customDomain.set(r.data.customDomain);this.domainChallenge.set(null);this.toast.success(r.message);},error:e=>{this.domainBusy.set(false);this.toast.error(e.error?.message||'تعذر التحقق من الدومين.');}});
+    this.domainHttp.put<any>(environment.apiUrl + '/admin/settings/custom-domain', { domain: clean }).subscribe({
+      next: r => {
+        this.domainBusy.set(false);
+        this.customDomain.set(r.data.customDomain || '');
+        this.dnsConfigured.set(!!r.data.dnsConfigured);
+        this.toast.success(r.message || 'تم حفظ وربط الدومين بنجاح!');
+      },
+      error: e => {
+        this.domainBusy.set(false);
+        this.toast.error(e.error?.message || 'تعذر حفظ الدومين.');
+      }
+    });
   }
+
+  unlinkCustomDomain() {
+    if (!confirm('هل تريد بالتأكيد إلغاء ربط هذا الدومين من المتجر؟')) return;
+    this.domainBusy.set(true);
+    this.domainHttp.put<any>(environment.apiUrl + '/admin/settings/custom-domain', { domain: '' }).subscribe({
+      next: r => {
+        this.domainBusy.set(false);
+        this.customDomain.set('');
+        this.domainInput = '';
+        this.dnsConfigured.set(false);
+        this.toast.success(r.message || 'تم إلغاء ربط الدومين.');
+      },
+      error: e => {
+        this.domainBusy.set(false);
+        this.toast.error(e.error?.message || 'تعذر إلغاء ربط الدومين.');
+      }
+    });
+  }
+
+  checkDnsStatus() {
+    const d = this.customDomain() || this.domainInput;
+    if (!d) return;
+    this.domainBusy.set(true);
+    this.domainHttp.get<any>(environment.apiUrl + '/admin/settings/custom-domain/check-dns?domain=' + encodeURIComponent(d)).subscribe({
+      next: r => {
+        this.domainBusy.set(false);
+        this.dnsConfigured.set(!!r.data.dnsConfigured);
+        if (r.data.dnsConfigured) {
+          this.toast.success('سجل DNS متصل بنجاح! متجرك يعمل الآن على الدومين.');
+        } else {
+          this.toast.info('سجل DNS لم ينتشر بعد في Hostinger. انتظر بضع دقائق وأعد الفحص.');
+        }
+      },
+      error: () => {
+        this.domainBusy.set(false);
+        this.toast.error('تعذر فحص سجلات DNS حالياً.');
+      }
+    });
+  }
+  copyText(text: string, label: string = 'النص') {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(text).then(() => {
+        this.toast.success(`تم نسخ ${label} بنجاح إلى الحافظة.`);
+      }).catch(() => {
+        this.fallbackCopy(text, label);
+      });
+    } else {
+      this.fallbackCopy(text, label);
+    }
+  }
+
+  private fallbackCopy(text: string, label: string) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      this.toast.success(`تم نسخ ${label} بنجاح.`);
+    } catch {
+      this.toast.info(`انسخ النص يدوياً: ${text}`);
+    }
+  }
+
   activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);

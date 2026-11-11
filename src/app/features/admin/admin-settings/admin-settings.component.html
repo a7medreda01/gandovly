@@ -1058,18 +1058,94 @@
           </select>
           <p class="small text-muted mb-4">اختيار "متجر شامل" يتيح لك كافة الأدوات والخصائص بدون أي قيود.</p>
           
-          <h3 class="card-title">الدومين الخاص</h3>
-          @if (customDomain()) {<p>الدومين المسجل: <strong dir="ltr">{{customDomain()}}</strong></p>}
-          <p class="text-muted">اربط متجرك بدومين تملكه. تحقق من الملكية هنا، وأضف نفس الدومين إلى استضافة الواجهة مع DNS وHTTPS. حفظه هنا وحده لا يضبط الاستضافة.</p>
-          <div class="form-group"><label for="customStoreDomain">اسم الدومين</label><input id="customStoreDomain" class="form-control" dir="ltr" placeholder="shop.example.com" [(ngModel)]="domainInput" (ngModelChange)="domainChallenge.set(null)" /></div>
-          <button type="button" class="btn btn-primary" (click)="prepareDomain()" [disabled]="domainBusy() || !domainInput.trim()">{{domainBusy() ? 'جارٍ الفحص...' : 'إنشاء بيانات التحقق'}}</button>
-          @if(domainChallenge(); as challenge) {
-            <p>أضف سجل TXT التالي في إعدادات DNS للدومين، ثم اضغط التحقق:</p>
-            <label for="domainTxtName">اسم السجل</label><input id="domainTxtName" class="form-control" dir="ltr" readonly [value]="challenge.recordName" />
-            <label for="domainTxtValue">قيمة السجل</label><textarea id="domainTxtValue" class="form-control" dir="ltr" readonly rows="4" [value]="challenge.recordValue"></textarea>
-            <button type="button" class="btn btn-primary" (click)="verifyDomain()" [disabled]="domainBusy()">التحقق وربط الدومين</button>
-            <small class="text-muted">قد يستغرق انتشار سجل DNS بعض الوقت. الدومين الحالي يظل كما هو حتى نجاح التحقق.</small>
+          <h3 class="card-title"><i class="bi bi-globe2 text-primary me-2"></i> ربط دومين المتجر المخصص (Custom Domain)</h3>
+          
+          @if (customDomain()) {
+            <div class="alert alert-success d-flex align-items-center justify-content-between mb-3 py-3 px-3 rounded shadow-sm flex-wrap gap-2">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-patch-check-fill text-success fs-3"></i>
+                <div>
+                  <div class="fw-bold fs-6">الدومين المرتبط حالياً: <span dir="ltr" class="text-primary">{{customDomain()}}</span></div>
+                  <small class="text-muted d-block mt-1">
+                    حالة الاتصال: 
+                    @if (dnsConfigured()) {
+                      <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> متصل ويعمل بنجاح</span>
+                    } @else {
+                      <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split me-1"></i> جاري انتظار انتشار DNS في Hostinger</span>
+                    }
+                  </small>
+                </div>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="checkDnsStatus()" [disabled]="domainBusy()">
+                  <i class="bi bi-arrow-repeat me-1"></i> فحص الاتصال
+                </button>
+                <a [href]="'https://' + customDomain()" target="_blank" rel="noopener" class="btn btn-sm btn-success">
+                  <i class="bi bi-box-arrow-up-right me-1"></i> فتح المتجر
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-danger" (click)="unlinkCustomDomain()" [disabled]="domainBusy()">
+                  إلغاء الربط
+                </button>
+              </div>
+            </div>
           }
+
+          <div class="card p-3 my-3 bg-white border rounded">
+            <h5 class="fw-bold text-dark mb-2">
+              <i class="bi bi-hdd-network text-primary me-2"></i> 
+              سجلات ربط الدومين في Hostinger (أو أي شركة مسجل دومينات)
+            </h5>
+            <p class="text-muted small mb-3">
+              لربط متجرك بالدومين الخاص بك مباشرة من إعدادات المتجر، قم بإضافة السجلين البسيطين التاليين في لوحة تحكم الدومين في <strong>Hostinger (DNS / Nameservers)</strong>:
+            </p>
+
+            <div class="table-responsive mb-3">
+              <table class="table table-bordered table-hover mb-0 align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width: 15%;">النوع (Type)</th>
+                    <th style="width: 20%;">الاسم (Name / Host)</th>
+                    <th style="width: 35%;">يشير إلى (Points to / Value)</th>
+                    <th style="width: 30%;">نسخ سريع</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="badge bg-primary fs-6 px-3 py-1">A Record</span></td>
+                    <td><code class="fs-6 fw-bold">@</code></td>
+                    <td><code class="fs-6 fw-bold text-success" dir="ltr">76.76.21.21</code></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copyText('76.76.21.21', 'قيمة سجل A')">
+                        <i class="bi bi-copy me-1"></i> نسخ 76.76.21.21
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><span class="badge bg-secondary fs-6 px-3 py-1">CNAME</span></td>
+                    <td><code class="fs-6 fw-bold">www</code></td>
+                    <td><code class="fs-6 fw-bold text-primary" dir="ltr">cname.vercel-dns.com</code></td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="copyText('cname.vercel-dns.com', 'قيمة سجل CNAME')">
+                        <i class="bi bi-copy me-1"></i> نسخ cname.vercel-dns.com
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="form-group mb-2">
+              <label for="customStoreDomain" class="fw-bold mb-1">اسم الدومين الخاص بك</label>
+              <div class="input-group">
+                <input id="customStoreDomain" class="form-control form-control-lg font-monospace" dir="ltr" placeholder="مثال: gandovly.com" [(ngModel)]="domainInput" />
+                <button type="button" class="btn btn-primary px-4 fw-bold" (click)="saveCustomDomain()" [disabled]="domainBusy() || !domainInput.trim()">
+                  <i class="bi bi-link-45deg fs-5 me-1"></i>
+                  {{ domainBusy() ? 'جارٍ الحفظ والربط...' : 'حفظ وتفعيل ربط الدومين الآن' }}
+                </button>
+              </div>
+              <small class="text-muted mt-1 d-block">بمجرد الضغط على «حفظ وتفعيل ربط الدومين الآن»، يتم تسجيل وربط الدومين في المتجر فوراً.</small>
+            </div>
+          </div>
         </section>
         <div class="row g-4">
           <div class="col-12 col-lg-6">

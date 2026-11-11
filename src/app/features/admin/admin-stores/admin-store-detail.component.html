@@ -273,6 +273,9 @@
 
                 @if (domainProof; as proof) {
                   <div class="proof-records-box">
+                    <div class="alert alert-warning py-1 px-2 mb-2 small">
+                      <strong>نوع السجل: TXT</strong> (تأكد من اختيار نوع السجل TXT وليس A Record لتجنب خطأ IPv4 address).
+                    </div>
                     <div class="proof-item">
                       <label>اسم السجل (Host / Name)</label>
                       <input readonly dir="ltr" [value]="proof.recordName">
@@ -305,7 +308,7 @@
         </div>
 
         <p class="section-desc">
-          يمكنك كإدارة للمنصة فتح جلسة دعم مؤقتة (آمنة ومسجلة لمدة 15 دقيقة) للدخول المباشر إلى أي قسم في لوحة تحكم المتجر.
+          يمكنك كإدارة للمنصة فتح جلسة دعم مؤقتة (آمنة ومسجلة لمدة ساعة كاملة) للدخول المباشر إلى أي قسم في لوحة تحكم المتجر.
         </p>
 
         @if (s.id !== '1' && s.status === 'Active') {
@@ -513,7 +516,7 @@
           <h2>جلسة الدعم جاهزة</h2>
         </div>
         <div class="modal-body">
-          <p>تم توليد رابط تسجيل دخول آمن لمرة واحدة. الرابط صالح لمدة 60 ثانية، وجلسة الدعم تستمر 15 دقيقة.</p>
+          <p>تم توليد رابط تسجيل دخول آمن لمرة واحدة. الرابط صالح لمدة 60 ثانية، وجلسة الدعم تستمر لمدة ساعة كاملة.</p>
         </div>
         <div class="modal-actions">
           <a class="btn btn-primary" [href]="url" target="_blank" rel="noopener" (click)="supportLoginUrl.set(null)">
