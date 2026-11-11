@@ -71,6 +71,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   selectedModifiersByGroup: { [groupId: number]: ModifierOption | null } = {};
   multiSelectedModifiers: ModifierOption[] = [];
   specialInstructions: string = '';
+  collapsedGroups = signal<Record<string, boolean>>({});
 
   // Swipe gesture state
   touchStartX = 0;
@@ -258,7 +259,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.showImageViewer.set(false);
     this.activeImageIndex = 0;
-    this.selectedVariant=null;this.variantImages=[];this.booking=null;this.selectedPrepOption=null;this.selectedModifiersByGroup={};this.multiSelectedModifiers=[];this.specialInstructions='';
+    this.selectedVariant=null;this.variantImages=[];this.booking=null;this.selectedPrepOption=null;this.selectedModifiersByGroup={};this.multiSelectedModifiers=[];this.specialInstructions='';this.collapsedGroups.set({});
     this.piecesCount = 1;
     this.productRequest = this.catalogService.getProductById(id).subscribe({
       next: prod => {
@@ -365,6 +366,47 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     if(count>=group.maxSelection){this.toast.info('الحد الأقصى لهذه المجموعة '+group.maxSelection);return;}
     this.multiSelectedModifiers.push(opt);
   }
+  isGroupExpanded(groupKey: string, defaultExpanded: boolean): boolean {
+    const state = this.collapsedGroups();
+    if (state[groupKey] !== undefined) {
+      return state[groupKey];
+    }
+    return defaultExpanded;
+  }
+
+  toggleGroupExpanded(groupKey: string, defaultExpanded: boolean): void {
+    const currentlyExpanded = this.isGroupExpanded(groupKey, defaultExpanded);
+    this.collapsedGroups.update(map => ({
+      ...map,
+      [groupKey]: !currentlyExpanded
+    }));
+  }
+
+  isPrepGroupExpanded(grpId: number, index: number): boolean {
+    return this.isGroupExpanded('prep-' + grpId, index === 0);
+  }
+
+  togglePrepGroup(grpId: number, index: number): void {
+    this.toggleGroupExpanded('prep-' + grpId, index === 0);
+  }
+
+  isModGroupExpanded(modId: number, index: number): boolean {
+    const defaultOpen = (this.product()?.preparationGroups?.length || 0) + index === 0;
+    return this.isGroupExpanded('mod-' + modId, defaultOpen);
+  }
+
+  toggleModGroup(modId: number, index: number): void {
+    const defaultOpen = (this.product()?.preparationGroups?.length || 0) + index === 0;
+    this.toggleGroupExpanded('mod-' + modId, defaultOpen);
+  }
+
+  getSelectedCountForGroup(group: ModifierGroup): number {
+    if (group.maxSelection === 1) {
+      return this.selectedModifiersByGroup[group.id] ? 1 : 0;
+    }
+    return this.multiSelectedModifiers.filter(m => group.options?.some(o => o.id === m.id)).length;
+  }
+
   toggleWishlist(): void {
     const p = this.product();
     if (!p) return;

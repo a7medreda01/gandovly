@@ -7,7 +7,7 @@
 .badge-discount { display: inline-block; background: var(--error-color, #b91c32); color: #fff; padding: 4px 8px; border-radius: 7px; font-size: 11px; font-weight: 700; line-height: 1.5; }
 .unavailable-label { position: absolute; bottom: 10px; background: #334155; color: #fff; font-size: .8rem; padding: 4px 8px; border-radius: 6px; }
 .card-body { display: flex; flex-direction: column; flex: 1; min-width: 0; padding: 12px; }
-.brand-line { min-height: 20px; color: var(--store-muted, #586879); font-size: .8rem; line-height: 20px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.brand-line { color: var(--store-muted, #586879); font-size: .8rem; line-height: 18px; margin-bottom: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .product-heading { margin: 3px 0 12px; min-width: 0; }
 .product-name { width: 100%; color: var(--text-main, #182b38); font-size: 1rem; font-weight: 700; line-height: 1.6; text-align: start; padding: 0; border: 0; background: transparent; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; height: 3.2em; overflow-wrap: anywhere; }
 .pricing-row { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
@@ -35,7 +35,7 @@
 .product-card { border-radius: var(--radius-product-card, 18px); }
 .card-media { border-radius: var(--radius-product-card, 18px) var(--radius-product-card, 18px) 0 0; padding: 12px; }
 .card-body { padding: 10px; }
-.brand-line { min-height: 18px; line-height: 18px; }
+.brand-line { line-height: 18px; margin-bottom: 4px; }
 .brand-line span { display: inline-block; background: color-mix(in srgb,var(--primary-color) 8%,var(--card-bg,#fff)); color: var(--primary-color); padding-inline: 5px; border-radius: 5px; font-weight: 600; }
 .product-heading { margin-block: 2px 8px; }
 .product-name { font-size: .933rem; line-height: 1.5; height: 3em; }

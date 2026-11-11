@@ -5,7 +5,7 @@
     @if (!product.isAvailable) { <span class="unavailable-label">{{ languageService.text('غير متاح حاليًا', 'Out of stock') }}</span> }
   </button>
   <div class="card-body">
-    <div class="brand-line">@if (product.brand) { <span>{{ product.brand }}</span> }</div>
+    @if (product.brand?.trim()) { <div class="brand-line"><span>{{ product.brand }}</span></div> }
     <h3 class="product-heading"><button type="button" class="product-name" (click)="onSelect()" [title]="languageService.getLocalizedName(product)">{{ languageService.getLocalizedName(product) }}</button></h3>
     <div class="pricing-row">
       <div class="price-box">

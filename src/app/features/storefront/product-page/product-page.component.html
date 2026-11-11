@@ -192,35 +192,95 @@
         </div>
 
         @if(product()!.commerce?.mode && product()!.commerce?.mode!=='Physical' || product()!.commerce?.prescriptionRequired){<app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>}
-        <!-- Preparation Options -->
+        <!-- Preparation Options (Collapsible Dropdown / Accordion) -->
         @if (product()!.preparationGroups && product()!.preparationGroups!.length > 0) {
-          @for (grp of product()!.preparationGroups; track grp.id) {
-            <div class="detail-card glass-panel mb-3">
-              <h4 class="card-sec-title"><i class="bi bi-gear-wide-connected text-primary me-2"></i> {{ grp.nameAr }} (إلزامي):</h4>
-              <div class="options-radio-grid mt-2">
-                @for (opt of grp.options; track opt.id) {
-                  <button type="button"
-                    class="option-radio-card"
-                    [class.active]="selectedPrepOption?.id === opt.id"
-                    [attr.aria-pressed]="selectedPrepOption?.id === opt.id"
-                    (click)="selectPrep(opt)"
-                  >
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="bi" [class.bi-check-circle-fill]="selectedPrepOption?.id === opt.id" [class.bi-circle]="selectedPrepOption?.id !== opt.id"></i>
-                      <span class="opt-name">{{ opt.nameAr }}</span>
-                    </div>
-                    @if (opt.price) {
-                      <span class="opt-price">+ {{ opt.price }} {{ currencySymbol }}</span>
-                    }
-                  </button>
-                }
-              </div>
+          @for (grp of product()!.preparationGroups; track grp.id; let i = $index) {
+            <div class="detail-card glass-panel option-accordion-panel mb-3" [class.is-collapsed]="!isPrepGroupExpanded(grp.id, i)">
+              <button
+                type="button"
+                class="option-accordion-header"
+                (click)="togglePrepGroup(grp.id, i)"
+                [attr.aria-expanded]="isPrepGroupExpanded(grp.id, i)"
+              >
+                <div class="header-main-info">
+                  <i class="bi bi-gear-wide-connected text-primary header-icon"></i>
+                  <span class="group-title">{{ grp.nameAr }}</span>
+                  <span class="badge-req text-primary">(إلزامي)</span>
+                </div>
+                <div class="header-end-info">
+                  @if (!isPrepGroupExpanded(grp.id, i) && selectedPrepOption) {
+                    <span class="selected-pill">{{ selectedPrepOption.nameAr }}</span>
+                  }
+                  <i class="bi bi-chevron-down accordion-arrow" [class.rotated]="isPrepGroupExpanded(grp.id, i)"></i>
+                </div>
+              </button>
+
+              @if (isPrepGroupExpanded(grp.id, i)) {
+                <div class="options-radio-grid mt-2" role="radiogroup">
+                  @for (opt of grp.options; track opt.id) {
+                    <button type="button"
+                      class="option-radio-card"
+                      [class.active]="selectedPrepOption?.id === opt.id"
+                      [attr.aria-pressed]="selectedPrepOption?.id === opt.id"
+                      (click)="selectPrep(opt)"
+                    >
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi" [class.bi-check-circle-fill]="selectedPrepOption?.id === opt.id" [class.bi-circle]="selectedPrepOption?.id !== opt.id"></i>
+                        <span class="opt-name">{{ opt.nameAr }}</span>
+                      </div>
+                      @if (opt.price) {
+                        <span class="opt-price">+ {{ opt.price }} {{ currencySymbol }}</span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
             </div>
           }
         }
 
+        <!-- Modifier Options (Collapsible Dropdown / Accordion) -->
+        @for (group of product()!.modifierGroups || []; track group.id; let j = $index) {
+          <div class="detail-card glass-panel option-accordion-panel mb-3 product-option-group" [class.is-collapsed]="!isModGroupExpanded(group.id, j)">
+            <button
+              type="button"
+              class="option-accordion-header"
+              (click)="toggleModGroup(group.id, j)"
+              [attr.aria-expanded]="isModGroupExpanded(group.id, j)"
+            >
+              <div class="header-main-info">
+                <i class="bi bi-plus-circle-dotted text-primary header-icon"></i>
+                <span class="group-title">{{ group.nameAr }}</span>
+                <small class="group-subtitle">{{ group.isRequired ? 'مطلوب' : 'اختياري' }} · حتى {{ group.maxSelection }}</small>
+              </div>
+              <div class="header-end-info">
+                @if (getSelectedCountForGroup(group) > 0) {
+                  <span class="selected-pill">تم اختيار {{ getSelectedCountForGroup(group) }}</span>
+                }
+                <i class="bi bi-chevron-down accordion-arrow" [class.rotated]="isModGroupExpanded(group.id, j)"></i>
+              </div>
+            </button>
 
-@for(group of product()!.modifierGroups||[];track group.id){<section class="product-option-group"><header><h3>{{group.nameAr}}</h3><small>{{group.isRequired?'مطلوب':'اختياري'}} · حتى {{group.maxSelection}}</small></header><div class="product-option-list">@for(opt of group.options;track opt.id){<button type="button" [class.selected]="modifierSelected(group,opt)" [disabled]="!opt.isAvailable" [attr.aria-pressed]="modifierSelected(group,opt)" (click)="toggleModifier(group,opt)"><span>{{opt.nameAr}}</span>@if(opt.price){<bdi>+{{opt.price|number:'1.0-2'}} {{currencySymbol}}</bdi>}<i class="bi" [class.bi-check-circle-fill]="modifierSelected(group,opt)" [class.bi-circle]="!modifierSelected(group,opt)" aria-hidden="true"></i></button>}</div></section>}
+            @if (isModGroupExpanded(group.id, j)) {
+              <div class="product-option-list mt-2">
+                @for (opt of group.options; track opt.id) {
+                  <button type="button"
+                    [class.selected]="modifierSelected(group, opt)"
+                    [disabled]="!opt.isAvailable"
+                    [attr.aria-pressed]="modifierSelected(group, opt)"
+                    (click)="toggleModifier(group, opt)"
+                  >
+                    <span>{{ opt.nameAr }}</span>
+                    @if (opt.price) {
+                      <bdi>+{{ opt.price | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                    }
+                    <i class="bi" [class.bi-check-circle-fill]="modifierSelected(group, opt)" [class.bi-circle]="!modifierSelected(group, opt)" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
 @if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
         <div class="quantity-panel">
           <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> الكمية</h4>

@@ -1089,3 +1089,106 @@
     stroke-dashoffset: 0 !important;
   }
 }
+
+/* Option Group Accordion / Collapsible Dropdowns */
+.option-accordion-panel {
+  padding: 14px 16px;
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: var(--radius-card, 16px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+
+  &.is-collapsed {
+    padding-bottom: 14px;
+  }
+}
+
+.option-accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: start;
+  color: inherit;
+  font: inherit;
+  user-select: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color, #124b89);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  .header-main-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .header-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .group-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+  }
+
+  .badge-req {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .group-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-muted, #64748b);
+    background: color-mix(in srgb, var(--text-muted, #64748b) 10%, transparent);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .header-end-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .selected-pill {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--primary-color, #124b89) 10%, #fff);
+    color: var(--primary-color, #124b89);
+    border: 1px solid color-mix(in srgb, var(--primary-color, #124b89) 25%, transparent);
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .accordion-arrow {
+    font-size: 0.85rem;
+    color: var(--text-muted, #64748b);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+
+    &.rotated {
+      transform: rotate(180deg);
+      color: var(--primary-color, #124b89);
+    }
+  }
+}
