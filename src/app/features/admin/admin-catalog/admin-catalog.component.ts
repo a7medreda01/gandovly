@@ -854,7 +854,9 @@ export class AdminCatalogComponent implements OnInit {
       description: this.productForm.description?.trim() || null,
       descriptionEn: this.productForm.descriptionEn?.trim() || null,
       imageUrl: this.productForm.imageUrl,
-      secondaryImageUrl: this.productForm.secondaryImageUrl,
+      secondaryImageUrl: this.productForm.secondaryImageUrl && this.productForm.secondaryImageUrl.length > 500
+        ? this.productForm.secondaryImageUrl.substring(0, 500)
+        : this.productForm.secondaryImageUrl,
       images: this.productForm.images,
       brand: this.productForm.brand?.trim() || null,
       sku: this.productForm.sku?.trim() || null,

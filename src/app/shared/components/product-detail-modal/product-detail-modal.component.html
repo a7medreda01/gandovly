@@ -266,15 +266,15 @@
         <div class="config-card fixed-quantity">
           <div class="stepper-row flex-between">
             <div class="stepper-title-wrap">
-              <span class="stepper-main-title">الكمية المطلوبة</span>
-              <span class="stepper-sub-title">اختر عدد الوحدات المراد طلبها</span>
+              <span class="stepper-main-title">{{ languageService.text('الكمية المطلوبة', 'Quantity required') }}</span>
+              <span class="stepper-sub-title">{{ languageService.text('اختر عدد الوحدات المراد طلبها', 'Select quantity to order') }}</span>
             </div>
             <div class="stepper-box">
-              <button type="button" class="btn-step" aria-label="تقليل الكمية" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
+              <button type="button" class="btn-step" [attr.aria-label]="languageService.text('تقليل الكمية', 'Decrease')" (click)="changePieces(-1)" [disabled]="piecesCount <= 1">
                 <i class="bi bi-dash-lg"></i>
               </button>
               <span class="step-value">{{ piecesCount }}</span>
-              <button type="button" class="btn-step" aria-label="زيادة الكمية" (click)="changePieces(1)">
+              <button type="button" class="btn-step" [attr.aria-label]="languageService.text('زيادة الكمية', 'Increase')" (click)="changePieces(1)">
                 <i class="bi bi-plus-lg"></i>
               </button>
             </div>

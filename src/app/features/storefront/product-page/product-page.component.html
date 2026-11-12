@@ -283,7 +283,7 @@
         }
 @if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
         <div class="quantity-panel">
-          <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> الكمية</h4>
+          <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> {{ languageService.text('الكمية', 'Quantity') }}</h4>
 
           @if (isWeighedProduct) {
             @if (product()!.allowOrderByPieces && product()!.allowOrderByWeight) {
@@ -345,11 +345,11 @@
           } @else {
             <div class="stepper-unit-control">
               <div class="stepper-header-row flex-between">
-                <span class="stepper-title fw-bold text-dark">العدد:</span>
+                <span class="stepper-title fw-bold text-dark">{{ languageService.text('العدد:', 'Quantity:') }}</span>
                 <div class="stepper-box">
-                  <button type="button" class="btn-step" (click)="changePieces(-1)" aria-label="تقليل الكمية" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
+                  <button type="button" class="btn-step" (click)="changePieces(-1)" [attr.aria-label]="languageService.text('تقليل الكمية', 'Decrease')" [disabled]="piecesCount <= 1"><i class="bi bi-dash-lg"></i></button>
                   <span class="step-value">{{ piecesCount }}</span>
-                  <button type="button" class="btn-step" (click)="changePieces(1)" aria-label="زيادة الكمية"><i class="bi bi-plus-lg"></i></button>
+                  <button type="button" class="btn-step" (click)="changePieces(1)" [attr.aria-label]="languageService.text('زيادة الكمية', 'Increase')"><i class="bi bi-plus-lg"></i></button>
                 </div>
               </div>
             </div>
@@ -359,7 +359,7 @@
         <!-- Sticky Bottom CTA Purchase Bar -->
         <div class="page-purchase-bar">
           <div class="total-summary-col">
-            <span class="caption text-muted small d-block">الإجمالي:</span>
+            <span class="caption text-muted small d-block">{{ languageService.text('الإجمالي:', 'Total:') }}</span>
             <div class="amount-wrap d-flex align-items-baseline gap-1">
               <span class="amount-val fw-bold">{{ calculatedEstimatedTotal|number:'1.0-2' }}</span>
               <span class="amount-curr fw-bold small text-primary">{{ currencySymbol }}</span>
@@ -375,7 +375,7 @@
           >
             @if (isSuccess()) {
               <i class="bi bi-check2-circle me-2"></i>
-              <span>تمت الإضافة بنجاح!</span>
+              <span>{{ languageService.text('تمت الإضافة بنجاح!', 'Added successfully!') }}</span>
             } @else {
               <i class="bi bi-cart-plus me-2"></i>
               <span>{{ languageService.text('إضافة إلى السلة', 'Add to cart') }}</span>
@@ -411,8 +411,8 @@
     @if (relatedProducts().length > 0) {
       <div class="related-products-section mt-4 pt-3 border-top">
         <div class="section-heading mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <h3 class="heading-title mb-0"><i class="bi bi-grid-fill text-primary me-2"></i> قد يعجبك أيضًا</h3>
-          <a [routerLink]="['/menu']" [queryParams]="{category: product()!.categoryId}" class="btn-view-all-link">عرض المزيد من هذا القسم ←</a>
+          <h3 class="heading-title mb-0"><i class="bi bi-grid-fill text-primary me-2"></i> {{ languageService.text('قد يعجبك أيضًا', 'You may also like') }}</h3>
+          <a [routerLink]="['/menu']" [queryParams]="{category: product()!.categoryId}" class="btn-view-all-link">{{ languageService.text('عرض المزيد من هذا القسم ←', 'View more from this category →') }}</a>
         </div>
         <div class="related-grid">
           @for (rel of relatedProducts(); track rel.id) {
