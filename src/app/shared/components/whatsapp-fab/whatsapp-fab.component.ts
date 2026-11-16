@@ -7,6 +7,11 @@ import { SettingsService } from '../../../core/services/settings.service';
   standalone: true,
   imports: [CommonModule],
   template: `
+    @if (settings().showPhoneFab && callPhone) {
+      <a [href]="'tel:' + callPhone" class="whatsapp-fab phone-fab" [class.above-whatsapp]="isVisible"
+        [class.pos-left]="settings().fabPosition === 'bottom-left'" [class.pos-right]="settings().fabPosition !== 'bottom-left'"
+        title="اتصل بالمتجر" aria-label="اتصل بالمتجر"><i class="bi bi-phone-fill"></i></a>
+    }
     @if (isVisible) {
       <a
         [href]="'https://wa.me/' + targetPhone"
@@ -26,7 +31,7 @@ import { SettingsService } from '../../../core/services/settings.service';
   styles: [`
     .whatsapp-fab {
       position: fixed;
-      bottom: 96px;
+      bottom: calc(96px + env(safe-area-inset-bottom));
       z-index: 1045;
       width: 52px;
       height: 52px;
@@ -72,6 +77,9 @@ import { SettingsService } from '../../../core/services/settings.service';
       }
     }
 
+    .phone-fab { background: var(--primary-color, #0a3d62); box-shadow: 0 8px 24px #0a3d6240; }
+    .phone-fab.above-whatsapp { bottom: calc(158px + env(safe-area-inset-bottom)); }
+    @media (min-width: 992px) { .phone-fab.above-whatsapp { bottom: 100px; } }
     @keyframes pulse-ring {
       0% {
         transform: scale(0.95);
@@ -100,6 +108,16 @@ import { SettingsService } from '../../../core/services/settings.service';
 export class WhatsAppFabComponent {
   private settingsService = inject(SettingsService);
   settings = this.settingsService.settings;
+
+  get callPhone(): string {
+    const raw = (this.settings().phone || '').trim();
+    const digits = raw.replace(/[^0-9]/g, '');
+    if (!digits) return '';
+    if (raw.startsWith('+')) return '+' + digits;
+    if (digits.startsWith('00')) return '+' + digits.slice(2);
+    const country = (this.settings().phoneCountryCode || '').replace(/[^0-9]/g, '');
+    return digits.startsWith('0') && country ? '+' + country + digits.replace(/^0+/, '') : digits;
+  }
 
   get targetPhone(): string {
     const raw = (this.settings().whatsapp || this.settings().phone || '').trim();

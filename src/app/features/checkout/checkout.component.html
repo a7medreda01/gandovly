@@ -224,7 +224,7 @@
         </h3>
 
         <div class="payment-methods-grid">
-          @if (settingsService.settings().paymentEnableCOD !== false || isDigitalOnly) {
+          @if (settingsService.settings().paymentEnableCOD !== false) {
           <label class="payment-option-card" [class.active]="paymentMethod === 'CashOnDelivery'">
             <input type="radio" name="paymentMethodRadio" value="CashOnDelivery" [(ngModel)]="paymentMethod" class="payment-radio" />
             <div class="pay-icon-box">
@@ -262,7 +262,11 @@
           <div class="wallet-transfer-box mt-3 p-2.5 rounded-3 border">
             <div class="alert alert-warning d-flex align-items-center mb-2.5 p-2 small rounded-2">
               <i class="bi bi-info-circle-fill text-warning me-2 flex-shrink-0 fs-5"></i>
+              @if (settingsService.settings().onlinePaymentInstructions?.trim()) {
+                <span class="transfer-instructions">{{ settingsService.settings().onlinePaymentInstructions }}</span>
+              } @else {
               <span>يرجى تحويل <strong>({{ serverQuote()?.estimatedTotal || cartService.estimatedSubtotal() }} {{ currencySymbol }})</strong> وكتابة رقم المحفظة أو اسم المحول في الملاحظات أدناه.</span>
+              }
             </div>
 
             <div class="transfer-accounts-list d-flex flex-column gap-2">

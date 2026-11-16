@@ -1,10 +1,15 @@
+:host { display: block; min-width: 0; }
+
 .analytics-page {
+  min-width: 0;
+  width: 100%;
   padding: 1.5rem;
   max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  > * { min-width: 0; max-width: 100%; }
 }
 
 /* Glass panel */
@@ -26,12 +31,14 @@
   gap: 1rem;
 
   .header-main-info {
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 1rem;
   }
 
   .header-icon-badge {
+    flex-shrink: 0;
     width: 48px;
     height: 48px;
     border-radius: 12px;
@@ -281,11 +288,12 @@
 /* 2. Charts Section Grid */
 .charts-section-grid {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 1.25rem;
 }
 
 .chart-card {
+  min-width: 0;
   padding: 1.4rem;
   display: flex;
   flex-direction: column;
@@ -339,12 +347,16 @@
 
 /* Visual Bar Chart */
 .visual-bars-container {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
   height: 220px;
   display: flex;
   align-items: flex-end;
   padding-top: 2rem;
 
   .bars-grid {
+    min-width: 700px;
+    flex-shrink: 0;
     display: flex;
     width: 100%;
     height: 100%;
@@ -438,12 +450,16 @@
 
 /* Hourly Traffic Bars */
 .hourly-bars-container {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
   height: 180px;
   display: flex;
   align-items: flex-end;
   padding-top: 1rem;
 
   .hourly-grid {
+    min-width: 480px;
+    flex-shrink: 0;
     display: flex;
     width: 100%;
     height: 100%;
@@ -505,11 +521,12 @@
 /* 3. Bottom Grid: Top Pages & Devices */
 .bottom-analytics-grid {
   display: grid;
-  grid-template-columns: 3fr 2fr;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   gap: 1.25rem;
 }
 
 .sub-analytics-card {
+  min-width: 0;
   padding: 1.4rem;
 
   .card-head-row {
@@ -711,34 +728,76 @@
 @media (max-width: 1024px) {
   .charts-section-grid,
   .bottom-analytics-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .analytics-page {
-    padding: 1rem;
+    padding: 0;
     gap: 1rem;
   }
 
   .page-header-card {
-    flex-direction: column;
-    align-items: stretch;
+    padding: 1rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+
+    .header-main-info {
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr);
+      align-items: start;
+      gap: 0.65rem;
+    }
+
+    .header-icon-badge { width: 40px; height: 40px; }
+    .page-heading { font-size: 1.15rem; line-height: 1.6; }
+    .page-sub { line-height: 1.7; overflow-wrap: anywhere; }
 
     .header-controls {
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.5rem;
+      min-width: 0;
+
+      .btn-clear-sim { justify-self: start; }
+      .btn-refresh { grid-column: 2; justify-self: end; }
     }
   }
 
+  .tab-pill-group {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    min-width: 0;
+
+    .tab-pill-btn {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 0.5rem 0.25rem;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      span { overflow-wrap: anywhere; }
+    }
+  }
+
+  .chart-card, .sub-analytics-card, .kpi-card { padding: 1rem; }
+  .header-main-info > div:last-child { min-width: 0; }
+  .top-pages-list .page-stat-row { flex-wrap: wrap; }
+  .top-pages-list .page-path { overflow-wrap: anywhere; }
+
   .kpi-cards-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .top-pages-list .progress-track {
     display: none;
   }
 
-  .device-legends-row {
+  .device-stats-box .device-legends-row {
     grid-template-columns: 1fr;
   }
 }

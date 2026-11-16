@@ -1,3 +1,5 @@
+:host { display: block; min-width: 0; }
+
 .commerce-page {
   max-width: 1300px;
   margin: 0 auto;
@@ -644,17 +646,20 @@
 // Sub Cards Layout Grid
 .resources-layout-grid, .digital-layout-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 20px;
 }
 
 .sub-card {
+  min-width: 0;
   background: #f8fafc;
   border-radius: 14px;
   border: 1px solid #e2e8f0;
   padding: 20px;
 
   .sub-card-header {
+    flex-wrap: wrap;
+    gap: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -685,6 +690,7 @@
   gap: 12px;
 
   .form-field {
+    min-width: 0;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -696,6 +702,8 @@
     }
 
     input, textarea {
+      min-width: 0;
+      width: 100%;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
       padding: 8px 10px;
@@ -707,7 +715,7 @@
 
   .fields-row-2 {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
   }
 
@@ -715,7 +723,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    input { flex: 1; }
+    input { flex: 1 1 0; min-width: 0; width: 0; }
     span { font-size: 12px; color: #64748b; }
   }
 
@@ -1435,8 +1443,17 @@
 // Responsiveness
 @media (max-width: 768px) {
   .commerce-page {
-    padding: 16px 12px;
+    padding: 0;
   }
+
+  .commerce-tab-section, .sub-card { padding: 14px; }
+  .form-fields-stack .fields-row-2 { grid-template-columns: minmax(0, 1fr); }
+  .form-fields-stack .form-field input,
+  .form-fields-stack .form-field textarea { font-size: 16px; }
+  .resources-layout-grid { grid-template-columns: minmax(0, 1fr); }
+  .resources-chips-list .resource-chip-card { flex-wrap: wrap; gap: 8px; }
+  .resources-chips-list .chip-info { min-width: 0; overflow-wrap: anywhere; }
+  .date-filter { flex-wrap: wrap; max-width: 100%; }
 
   .commerce-header {
     .header-main {

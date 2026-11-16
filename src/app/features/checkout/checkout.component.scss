@@ -2051,3 +2051,5 @@
 .order-review-edit, .order-review-close { color: inherit; background: transparent; border: 1px solid var(--border-color, #e2e8f0); }
 .order-review-confirm { flex: 1; color: var(--btn-primary-text, #fff); background: var(--btn-primary-bg, var(--primary-color)); border: 1px solid transparent; font-weight: 700; }
 .order-review-actions button:disabled, .order-review-close:disabled { opacity: .55; cursor: not-allowed; }
+
+.transfer-instructions { white-space: pre-wrap; overflow-wrap: anywhere; }

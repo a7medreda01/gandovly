@@ -710,7 +710,7 @@
               <p class="small text-muted mb-2">زر دائري عائم أسفل الشاشة بنبضة تفاعلية لتسهيل التواصل الفوري.</p>
               <div class="d-flex align-items-center gap-2 mt-2">
                 <label class="small text-muted mb-0">موقع الزر:</label>
-                <select class="form-control form-control-sm w-auto" [(ngModel)]="settings()!.fabPosition" [disabled]="!settings()!.showWhatsAppFab">
+                <select class="form-control form-control-sm w-auto" [(ngModel)]="settings()!.fabPosition" [disabled]="!settings()!.showWhatsAppFab && !settings()!.showPhoneFab">
                   @for (pos of fabPositions; track pos.id) {
                     <option [value]="pos.id">{{ pos.label }}</option>
                   }
@@ -719,6 +719,16 @@
             </div>
           </div>
 
+          <div class="form-row mb-3">
+            <label class="checkbox-label flex-1 p-3 border rounded-3 bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.showPhoneFab" />
+              <span><strong><i class="bi bi-phone"></i> تفعيل زر الاتصال العائم</strong><small class="text-muted d-block">يظهر فوق واتساب ويتصل برقم هاتف المتجر المسجل في بيانات التواصل، ويمكن تفعيله بشكل مستقل.</small></span>
+            </label>
+            <label class="checkbox-label flex-1 p-3 border rounded-3 bg-light">
+              <input type="checkbox" [(ngModel)]="settings()!.enableBuyNow" />
+              <span><strong><i class="bi bi-lightning-charge-fill"></i> تفعيل زر شراء الآن</strong><small class="text-muted d-block">يظهر بجوار الإضافة للسلة في نافذة المنتج وصفحته، وينقل العميل لإتمام الطلب باختياراته.</small></span>
+            </label>
+          </div>
           <!-- Customer Support Hotline Toggle -->
           <div class="form-row mb-3">
             <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
@@ -818,10 +828,15 @@
               </label>
               <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-white">
                 <input type="checkbox" [(ngModel)]="settings()!.paymentEnableWalletTransfer" />
-                <span class="ms-2">تحويل إلكتروني ومحافظ (فودافون كاش / إنستاباي)</span>
+                <span class="ms-2">تفعيل الدفع أونلاين بالتحويل (فودافون كاش / إنستاباي)</span>
               </label>
             </div>
 
+            <div class="form-group mt-3">
+              <label for="online-payment-instructions">ملاحظة الدفع الأونلاين للعميل</label>
+              <textarea id="online-payment-instructions" class="form-control" rows="3" maxlength="1000" [(ngModel)]="settings()!.onlinePaymentInstructions" placeholder="مثال: برجاء تحويل عربون 50 ج وكتابة رقم المرسل في ملاحظات الطلب."></textarea>
+              <small class="text-muted">تظهر عند اختيار التحويل. يمكنك طلب عربون أو تحويل المبلغ كاملًا وكتابة رقم المرسل في الملاحظات. اتركها فارغة لعرض التعليمات الافتراضية بإجمالي الطلب.</small>
+            </div>
             <!-- Electronic Wallet Accounts Inputs -->
             <div class="mt-3 p-3 bg-white rounded-3 border">
               <div class="fw-bold mb-2 text-primary small">

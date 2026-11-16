@@ -10,7 +10,8 @@
     "serve:ssr:TngProject": "node dist/TngProject/server/server.mjs",
     "postbuild": "node scripts/prepare-hosting.mjs",
     "test:commerce": "node tests/commerce-services.mjs",
-    "build:standalone": "ng build --configuration standalone"
+    "build:standalone": "ng build --configuration standalone",
+    "test:purchase": "node tests/purchase-options.mjs"
   },
   "prettier": {
     "printWidth": 100,

@@ -281,7 +281,7 @@
             }
           </div>
         }
-@if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
+@if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.has-buy-now]="settingsService.settings().enableBuyNow" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
         <div class="quantity-panel">
           <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> {{ languageService.text('الكمية', 'Quantity') }}</h4>
 
@@ -357,7 +357,7 @@
         </div>
 
         <!-- Sticky Bottom CTA Purchase Bar -->
-        <div class="page-purchase-bar">
+        <div class="page-purchase-bar" [class.has-buy-now]="settingsService.settings().enableBuyNow">
           <div class="total-summary-col">
             <span class="caption text-muted small d-block">{{ languageService.text('الإجمالي:', 'Total:') }}</span>
             <div class="amount-wrap d-flex align-items-baseline gap-1">
@@ -371,7 +371,7 @@
             class="btn-add-to-cart flex-center"
             [class.btn-success-state]="isSuccess()"
             (click)="onAddToCart($event)"
-            [disabled]="isSuccess() || !product()!.isAvailable || product()!.commerce?.mode==='Vehicle'"
+            [disabled]="isAdding || isSuccess() || !product()!.isAvailable || product()!.commerce?.mode==='Vehicle'"
           >
             @if (isSuccess()) {
               <i class="bi bi-check2-circle me-2"></i>
@@ -381,6 +381,11 @@
               <span>{{ languageService.text('إضافة إلى السلة', 'Add to cart') }}</span>
             }
           </button>
+          @if (settingsService.settings().enableBuyNow && product()!.commerce?.mode !== 'Vehicle') {
+            <button type="button" class="btn-buy-now" (click)="onAddToCart($event, true)" [disabled]="isAdding || isSuccess() || !product()!.isAvailable">
+              <i class="bi bi-lightning-charge-fill"></i>{{ languageService.text('شراء الآن', 'Buy now') }}
+            </button>
+          }
         </div></div>}
 @if(languageService.getLocalizedDesc(product()!)){<section class="description-panel"><h2>{{ languageService.text('الوصف', 'Description') }}</h2><p class="product-description">{{languageService.getLocalizedDesc(product()!)}}</p></section>}
 <details class="product-disclosure"><summary>{{ languageService.text('ملاحظات للطلب', 'Order notes') }} <span>{{ languageService.text('اختياري', 'Optional') }}</span></summary>          <textarea

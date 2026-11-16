@@ -138,6 +138,9 @@ export interface StorefrontSettings {
   showCartBadge?: boolean;
 
   // FAB
+  enableBuyNow?: boolean;
+  showPhoneFab?: boolean;
+  onlinePaymentInstructions?: string;
   showWhatsAppFab?: boolean;
   fabPosition?: string;
 

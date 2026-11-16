@@ -66,7 +66,7 @@ export class CheckoutComponent implements OnInit {
     const settings = this.settingsService.settings();
     return settings.paymentEnableWalletTransfer !== false && Boolean(settings.vodafoneCashNumber?.trim() || settings.instaPayAccount?.trim());
   }
-  get hasPaymentMethod(): boolean { return this.isDigitalOnly || this.settingsService.settings().paymentEnableCOD !== false || this.canPayByTransfer; }
+  get hasPaymentMethod(): boolean { return this.settingsService.settings().paymentEnableCOD !== false || this.canPayByTransfer; }
   constructor() {
     effect(() => {
       const settings = this.settingsService.settings();
@@ -678,7 +678,7 @@ export class CheckoutComponent implements OnInit {
     if (this.isSubmitting() || this.settingsService.settings().storeLayout?.onlineOrdering === false) return;
     if (!this.authService.currentCustomer() && this.settingsService.settings().storeLayout?.guestCheckout === false) return;
     if(this.requiresPrescription&&!this.prescriptionToken){this.toast.error('ارفع الروشتة أولًا.');return;}
-    if (!this.hasPaymentMethod || (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer)) { this.toast.error('وسيلة الدفع المختارة غير متاحة.'); return; }
+    if (!this.hasPaymentMethod || (this.paymentMethod === 'CashOnDelivery' && this.settingsService.settings().paymentEnableCOD === false) || (this.paymentMethod === 'WalletTransfer' && !this.canPayByTransfer)) { this.toast.error('وسيلة الدفع المختارة غير متاحة.'); return; }
     this.isSubmitting.set(true);
 
     const isSched = this.prepTimingType() === 'Scheduled' && !!this.scheduledForDate();

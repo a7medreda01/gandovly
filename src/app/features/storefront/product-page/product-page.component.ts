@@ -438,7 +438,11 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onAddToCart(event?: MouseEvent) {
+  isAdding = false;
+  async onAddToCart(event?: MouseEvent, buyNow = false) {
+    if (this.isAdding || this.isSuccess() || !this.product()?.isAvailable) return;
+    if (buyNow && !this.settingsService.settings().enableBuyNow) return;
+    if (this.settingsService.settings().storeLayout?.onlineOrdering === false) return;
     const p = this.product();
     if (!p) return;
     if(p.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
@@ -464,16 +468,24 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     const qty = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
     const customGrams = this.isWeighedProduct ? this.calculatedEstimatedWeightGrams : undefined;
 
-    const added = await this.cartService.addItem(
-      p,
-      qty,
-      this.selectedPrepOption ?? undefined,
-      mods,
-      customGrams,
-      this.specialInstructions,
-      this.isWeighedProduct ? this.orderMode : 'pieces',
-      undefined, this.selectedVariant ?? undefined, this.booking ?? undefined
-    );
+    this.isAdding = true;
+    let added: boolean;
+    try {
+      added = await this.cartService.addItem(
+        p,
+        qty,
+        this.selectedPrepOption ?? undefined,
+        mods,
+        customGrams,
+        this.specialInstructions,
+        this.isWeighedProduct ? this.orderMode : 'pieces',
+        undefined, this.selectedVariant ?? undefined, this.booking ?? undefined
+      );
+
+    } catch {
+      this.toast.error('تعذر إضافة المنتج. حاول مرة أخرى.');
+      return;
+    } finally { this.isAdding = false; }
 
     if (!added) {
       this.isSuccess.set(false);
@@ -481,6 +493,10 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     }
 
     this.isSuccess.set(true);
+    if (buyNow) {
+      await this.router.navigate(['/checkout'], { queryParamsHandling: 'preserve' });
+      return;
+    }
     this.toast.success(`تمت إضافة "${p.nameAr}" إلى السلة 🛒`);
 
     setTimeout(() => {

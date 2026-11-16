@@ -1894,3 +1894,12 @@
 .modal-stock.available { color: var(--success-color, #008b65); }
 .luxury-modal .footer-price-summary .amount-val,
 .luxury-modal .footer-price-summary .amount-curr { color: var(--primary-color); }
+
+.modal-footer-lux.has-buy-now { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.modal-footer-lux.has-buy-now .footer-price-summary { grid-column: 1 / -1; }
+.modal-footer-lux.has-buy-now button { min-width: 0; width: 100%; min-height: 48px; padding: 10px; font-size: .9rem; white-space: normal; }
+.btn-buy-now { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--primary-color); border-radius: 12px; background: var(--primary-color); color: white; font: inherit; font-weight: 800; cursor: pointer; }
+.btn-buy-now:disabled { opacity: .55; cursor: not-allowed; }
+
+.luxury-modal .modal-footer-lux.has-buy-now .btn-add-to-basket { min-height: 48px; height: auto; max-width: none; background: transparent; color: var(--primary-color); border: 1px solid var(--primary-color); box-shadow: none; }
+.modal-footer-lux.has-buy-now .footer-price-summary { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }

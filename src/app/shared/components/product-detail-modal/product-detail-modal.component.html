@@ -401,7 +401,7 @@
 
     <!-- Sticky Luxury Modal Footer -->
     @if (settingsService.settings().storeLayout?.onlineOrdering !== false) {
-<div class="modal-footer-lux">
+<div class="modal-footer-lux" [class.has-buy-now]="settingsService.settings().enableBuyNow">
       <div class="footer-price-summary">
         <span class="summary-caption">{{ languageService.text('الإجمالي:', 'Total:') }}</span>
         <div class="summary-amount">
@@ -414,7 +414,7 @@
         class="btn-add-to-basket" 
         [class.btn-added]="isSuccess" 
         (click)="onAddToCart()"
-        [disabled]="isSuccess || product.commerce?.mode==='Vehicle'"
+        [disabled]="isAdding || !product.isAvailable || isSuccess || product.commerce?.mode==='Vehicle'"
       >
         @if (isSuccess) {
           <span class="basket-txt">{{ languageService.text('تمت الإضافة بنجاح!', 'Added successfully!') }}</span>
@@ -424,6 +424,11 @@
           <i class="bi bi-bag-check-fill me-2"></i>
         }
       </button>
+      @if (settingsService.settings().enableBuyNow && product.commerce?.mode !== 'Vehicle') {
+        <button type="button" class="btn-buy-now" (click)="onAddToCart(true)" [disabled]="isAdding || isSuccess || !product.isAvailable">
+          <i class="bi bi-lightning-charge-fill"></i>{{ languageService.text('شراء الآن', 'Buy now') }}
+        </button>
+      }
     </div>
     }
   </div>

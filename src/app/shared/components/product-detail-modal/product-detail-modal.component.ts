@@ -559,7 +559,11 @@ export class ProductDetailModalComponent implements OnInit {
 
   isSuccess = false;
 
-  async onAddToCart() {
+  isAdding = false;
+  async onAddToCart(buyNow = false) {
+    if (this.isAdding || this.isSuccess || !this.product?.isAvailable) return;
+    if (buyNow && !this.settingsService.settings().enableBuyNow) return;
+    if (this.settingsService.settings().storeLayout?.onlineOrdering === false) return;
     if(this.product.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
     if(this.product.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
     if(this.product.variants?.length&&!this.selectedVariant){
@@ -590,17 +594,25 @@ export class ProductDetailModalComponent implements OnInit {
       ? this.customWeightGrams
       : (this.product.pricingType === 'ByWeight' ? this.piecesCount * (this.product.averageUnitWeightGrams || 500) : undefined);
 
-    const added = await this.cartService.addItem(
-      this.product,
-      qty,
-      this.selectedPrepOption ?? undefined,
-      this.allSelectedModifiers,
-      customGrams,
-      this.specialInstructions,
-      this.orderMode,
-      this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
-      this.selectedVariant ?? undefined, this.booking ?? undefined
-    );
+    this.isAdding = true;
+    let added: boolean;
+    try {
+      added = await this.cartService.addItem(
+        this.product,
+        qty,
+        this.selectedPrepOption ?? undefined,
+        this.allSelectedModifiers,
+        customGrams,
+        this.specialInstructions,
+        this.orderMode,
+        this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
+        this.selectedVariant ?? undefined, this.booking ?? undefined
+      );
+
+    } catch {
+      this.toast.error('تعذر إضافة المنتج. حاول مرة أخرى.');
+      return;
+    } finally { this.isAdding = false; }
 
     if (!added) {
       this.isSuccess = false;
@@ -608,6 +620,11 @@ export class ProductDetailModalComponent implements OnInit {
     }
 
     this.isSuccess = true;
+    if (buyNow) {
+      this.closeModal.emit();
+      await this.router.navigate(['/checkout'], { queryParamsHandling: 'preserve' });
+      return;
+    }
     this.toast.success(
       'تمت الإضافة إلى السلة بنجاح',
       'عرض السلة',
