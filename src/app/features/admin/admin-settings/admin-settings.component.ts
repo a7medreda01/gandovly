@@ -1,4 +1,4 @@
-import { defaultStoreLayout } from '../../../core/models/store-layout';
+import { defaultStoreLayout, newHomeSection } from '../../../core/models/store-layout';
 import { StoreLayoutEditorComponent } from './store-layout-editor.component';
 import { ChangeDetectorRef } from '@angular/core';
 import { CommerceService } from '../../../core/services/commerce.service';
@@ -28,8 +28,8 @@ export class AdminSettingsComponent implements OnInit {
   readonly homeThemeOptions = [
     { id: 'classic' as const, name: 'الشكل العادي', description: 'واجهة المتجر الحالية بتوازنها البسيط.', icon: 'bi bi-layout-text-window-reverse' },
     { id: 'cards' as const, name: 'شكل الكروت', description: 'أقسام ومنتجات داخل بطاقات بارزة.', icon: 'bi bi-grid-1x2' },
-    { id: 'editorial' as const, name: 'مجلة تحريرية', description: 'صور وعناوين بارزة بطابع مطبوع هادئ.', icon: 'bi bi-journal-richtext' },
-    { id: 'discovery' as const, name: 'لوحة اكتشاف', description: 'ألوان ومسارات تصفح سريعة للأقسام.', icon: 'bi bi-compass' }
+    { id: 'editorial' as const, name: 'مجلة تحريرية', description: 'للعلامات والمجموعات: قصة مصورة ومساحات عرض واسعة.', icon: 'bi bi-journal-richtext' },
+    { id: 'discovery' as const, name: 'لوحة اكتشاف', description: 'للمتاجر المتنوعة: بحث سريع وأقسام وعروض واكتشاف منتجات.', icon: 'bi bi-compass' }
   ];
   private readonly adminService = inject(AdminService);
   readonly settingsService = inject(SettingsService);
@@ -364,7 +364,29 @@ export class AdminSettingsComponent implements OnInit {
   get selectedHomeThemeName() { return this.homeThemeOptions.find(t => t.id === (this.layoutOptions.homeTheme || 'classic'))?.name || ''; }
 
   selectHomeTheme(theme: 'classic' | 'cards' | 'editorial' | 'discovery') {
-    this.layoutOptions.homeTheme = theme;
+    const layout = this.layoutOptions;
+    const previous = layout.homeTheme || 'classic';
+    if (previous === theme && layout.sections.length) {
+      if (theme === 'editorial' || theme === 'discovery') layout.useCustomHome = true;
+      return;
+    }
+    layout.homeProfiles ??= {};
+    if (previous !== theme) layout.homeProfiles[previous] = structuredClone({useCustomHome: layout.useCustomHome, sections: layout.sections});
+    const saved = layout.homeProfiles[theme];
+    if (saved) {
+      layout.useCustomHome = saved.useCustomHome;
+      layout.sections = structuredClone(saved.sections);
+    } else if (theme === 'editorial' || theme === 'discovery') {
+      const hero = newHomeSection('hero'); hero.title = this.settings()!.restaurantName; hero.subtitle = this.settings()!.description; hero.imageUrl = this.settings()!.heroBannerDesktopUrl; hero.mobileImageUrl = this.settings()!.heroBannerMobileUrl;
+      const categories = newHomeSection('categories');
+      const products = newHomeSection('products'); products.title = theme === 'editorial' ? 'اختياراتنا لك' : 'اكتشف الجديد'; products.source = 'latest';
+      const banner = newHomeSection('banner'); banner.title = theme === 'editorial' ? 'قصة مجموعتنا' : 'اختيارات تستحق التجربة';
+      layout.sections = theme === 'editorial' ? [hero, products, banner, categories] : [categories, hero, products, banner];
+      layout.useCustomHome = true;
+    } else { layout.sections = []; layout.useCustomHome = false; }
+    delete layout.homeProfiles[theme];
+    if (theme === 'editorial' || theme === 'discovery') layout.useCustomHome = true;
+    layout.homeTheme = theme;
     this.onColorChange();
   }
 

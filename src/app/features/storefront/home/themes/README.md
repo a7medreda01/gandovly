@@ -1,13 +1,7 @@
-# Storefront home themes
+# Storefront themes
 
-Each visual preset owns its standalone Angular component and SCSS in its own folder. Theme components project the same home content; product fetching, section order, navigation, and checkout remain shared.
+HomeComponent dispatches by StoreLayout.homeTheme. Each theme owns a standalone component and styles. Editorial and discovery also own their HTML templates and inherit the shared data/actions from HomeSectionsComponent. Classic and cards retain HomeContentComponent.
 
-## Add a theme
+Active content lives in StoreLayout.sections. Admin switching snapshots sections/useCustomHome into homeProfiles keyed by theme, and restores the target profile. Identity colors and fonts are shared. Backend validates profile content and includes it in package reference remapping.
 
-1. Add a `HomeThemeId` value in `home-theme-frame.component.ts` and create a folder with a standalone wrapper component and its SCSS.
-2. Import that component in the frame and add a `@case` that projects `<ng-content />` into it.
-3. Add an option and preview in `AdminSettingsComponent.homeThemeOptions`.
-4. Add the identifier to `StoreLayout.homeTheme` in the frontend and to the backend allowlist in `AppDAL/Entities/StoreLayout.cs`.
-5. Document the new option in the backend `wwwroot/docs/store-seeding-guide-ar.txt` and the root `STORE_SEEDING_GUIDE_AR.md`.
-
-Avoid product/data requests in a theme component. Keep each theme focused on its visual structure and responsive styles.
+To add a theme: create its folder/component, register it in home.component.ts, add its ID to the frontend model and backend allowlists, and add an admin option/default content. Keep catalog access and product interactions shared; keep presentation in theme files.

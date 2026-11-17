@@ -33,6 +33,7 @@ export interface HomeSection {
     items: HomeSectionItem[];
 }
 export interface StoreLayout {
+    homeProfiles?: Record<string, { useCustomHome: boolean; sections: HomeSection[] }>;
     /** Presentation is deliberately separate from homepage section configuration. */
     homeTheme?: 'classic' | 'cards' | 'editorial' | 'discovery';
     homeTitleEn?: string;

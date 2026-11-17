@@ -1,0 +1,40 @@
+@if (loading()) {
+  <app-home-skeleton />
+} @else {
+<div class="home-builder container">
+  <header class="theme-masthead"><span>{{language.text('اكتشف ما يناسبك', 'Find your next favourite')}}</span><h1>{{settings.settings().restaurantName}}</h1><p>{{settings.settings().tagline}}</p></header>
+  <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()"><input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج', 'Search products')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')"><a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')"><i class="bi bi-search" aria-hidden="true"></i></a></form>
+  <nav class="discovery-shortcuts" [attr.aria-label]="language.text('تصفح سريع', 'Quick browse')">
+    <a routerLink="/menu" [queryParams]="{sort:'latest'}"><i class="bi bi-stars"></i>{{language.text('وصل حديثًا','New arrivals')}}</a>
+    <a routerLink="/menu" [queryParams]="{sort:'offers'}"><i class="bi bi-lightning-charge"></i>{{language.text('العروض','Offers')}}</a>
+    <a routerLink="/menu" [queryParams]="{sort:'bestsellers'}"><i class="bi bi-graph-up-arrow"></i>{{language.text('الأكثر مبيعًا','Bestsellers')}}</a>
+  </nav>
+  @if(error()){<div class="home-error" role="alert">{{ language.text('تعذر تحميل الرئيسية.', 'Could not load the homepage.') }} <button type="button" (click)="load()">{{ language.text('إعادة المحاولة', 'Try again') }}</button></div>}
+  @for(row of sections();track row.config.id){@let s=row.config;
+    @let title = language.text(s.title, s.titleEn);
+    @let subtitle = language.text(s.subtitle, s.subtitleEn);
+    @let eyebrow = language.text(s.eyebrow, s.eyebrowEn);
+    @let buttonText = language.text(s.buttonText, s.buttonTextEn);
+    @if(s.kind==='hero'||s.kind==='banner'){
+      <section class="promo" appScrollAnimate [class.hero]="s.kind==='hero'" [class.overlay]="s.layout==='overlay'" [class.no-image]="!s.imageUrl&&!s.mobileImageUrl&&!row.products.length" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)" [style.--overlay]="s.overlayOpacity/100">
+        @if(s.imageUrl||s.mobileImageUrl){<picture class="promo-media">@if(s.mobileImageUrl){<source media="(max-width:767px)" [srcset]="s.mobileImageUrl|imageUrl:'banner'">}<img appImageReveal [src]="(s.imageUrl||s.mobileImageUrl)|imageUrl:'banner'" [alt]="title" [attr.loading]="$first?'eager':'lazy'" [attr.fetchpriority]="$first?'high':'auto'" decoding="async"></picture>}
+        @else if(row.products.length){<div class="spotlight"><app-product-card [product]="row.products[0]" (selectProduct)="open($event)"></app-product-card></div>}
+        <div class="promo-copy">@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}@if(buttonText){<a class="primary-action" [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge" [style.background]="buttonBgColor(s)" [style.color]="buttonTextColor(s)"><span>{{ buttonText }}</span> <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</div>
+      </section>
+    }
+    @if(s.kind==='products'&&row.products.length){
+      @let isFirstProd = s.id === firstProductSectionId();
+      <section class="collection" [class.first-collection]="isFirstProd" [class.has-fade-in-up]="!isFirstProd && settings.settings().storeLayout?.enableHomeSectionAnimations !== false" [attr.appScrollAnimate]="!isFirstProd ? '' : null"><header><div>@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}</div>@if(buttonText){<a [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge">{{ buttonText }} <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</header><div class="collection-grid">@for(p of row.products;track p.id){<app-product-card [product]="p" (selectProduct)="open($event)"></app-product-card>}</div></section>
+    }
+    @if((s.kind==='features'||s.kind==='brands')&&s.items.length){
+      <section class="content-section" appScrollAnimate [class.has-fade-in-up]="settings.settings().storeLayout?.enableHomeSectionAnimations !== false" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)"><header>@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}</header><div class="items-grid" [class.brands]="s.kind==='brands'">@for(item of s.items;track $index){<a class="info-card" [routerLink]="path(item)" [queryParams]="query(item)" queryParamsHandling="merge">@if(item.imageUrl){<img appImageReveal [src]="item.imageUrl|imageUrl:'category'" [alt]="language.text(item.title, item.titleEn)" loading="lazy" decoding="async">}@else{<span class="info-icon"><i class="bi" [ngClass]="item.icon" aria-hidden="true"></i></span>}<div><h3>{{language.text(item.title, item.titleEn)}}</h3>@if(language.text(item.text, item.textEn)){<p>{{language.text(item.text, item.textEn)}}</p>}</div></a>}</div></section>
+    }
+    @if(s.kind==='categories'){
+      <section class="content-section" appScrollAnimate [class.has-fade-in-up]="settings.settings().storeLayout?.enableHomeSectionAnimations !== false"><header><h2>{{ title }}</h2><p>{{ subtitle }}</p></header><div class="items-grid categories">@for(cat of catalog.categories().slice(0,s.limit);track cat.id){<a class="info-card" routerLink="/menu" [queryParams]="{category:cat.id,page:null,search:null,sort:null}" queryParamsHandling="merge"><img appImageReveal [src]="cat.imageUrl|imageUrl:'category'" [alt]="language.getLocalizedName(cat)" loading="lazy"><h3>{{language.getLocalizedName(cat)}}</h3></a>}</div></section>
+    }
+  }
+  @if(loadingProduct()){<div class="product-opening" role="status">جاري تحميل تفاصيل المنتج...</div>}
+  @if(selected()){<app-product-detail-modal [product]="selected()!" (closeModal)="selected.set(null)"></app-product-detail-modal>}
+</div>
+
+}
