@@ -10,6 +10,7 @@ import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 import { compressImage } from '../../../core/utils/image-compressor.util';
 @Component({ selector: 'app-store-layout-editor', standalone: true, imports: [CommonModule, FormsModule, ImageUrlPipe], templateUrl: './store-layout-editor.component.html', styleUrl: './store-layout-editor.component.scss' })
 export class StoreLayoutEditorComponent {
+    @Input() mode: "home" | "cards" | "all" = "all";
     private value = defaultStoreLayout();
     @Input()
     set layout(v: StoreLayout | undefined) { this.value = v || defaultStoreLayout(); }

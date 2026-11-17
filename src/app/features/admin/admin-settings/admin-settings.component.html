@@ -10,17 +10,17 @@
   <!-- Settings Navigation Tabs -->
 
   <nav class="settings-tabs-bar settings-page-nav" aria-label="إعدادات صفحات المتجر">
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='layout'" (click)="activeTab.set('layout')"><i class="bi bi-house-door"></i><span>الرئيسية</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='menu'" (click)="activeTab.set('menu')"><i class="bi bi-grid"></i><span>المنيو والمنتجات</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='cart'" (click)="activeTab.set('cart')"><i class="bi bi-bag"></i><span>السلة</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='checkout'" (click)="activeTab.set('checkout')"><i class="bi bi-credit-card"></i><span>إتمام الطلب</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='account'" (click)="activeTab.set('account')"><i class="bi bi-person"></i><span>الحساب وطلباتي</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='policies'" (click)="activeTab.set('policies')"><i class="bi bi-shield-check"></i><span>الطلبات والسياسات</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='branding'" (click)="activeTab.set('branding')"><i class="bi bi-palette"></i><span>الهوية والتصميم</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='info'" (click)="activeTab.set('info')"><i class="bi bi-shop"></i><span>بيانات المتجر</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='discounts'" (click)="activeTab.set('discounts')"><i class="bi bi-tags"></i><span>العروض والتوصيل</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='integrations'" (click)="activeTab.set('integrations')"><i class="bi bi-graph-up"></i><span>التكاملات والقياس</span></button>
-    <button type="button" class="tab-btn" [class.active]="activeTab()==='packages'" (click)="activeTab.set('packages');loadPackageStats()"><i class="bi bi-box-seam"></i><span>النسخ والاستيراد</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='layout'" [attr.aria-current]="activeTab()==='layout' ? 'true' : null" (click)="activeTab.set('layout')"><i class="bi bi-house-door"></i><span>الرئيسية</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='menu'" [attr.aria-current]="activeTab()==='menu' ? 'true' : null" (click)="activeTab.set('menu')"><i class="bi bi-grid"></i><span>المنيو والمنتجات</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='cart'" [attr.aria-current]="activeTab()==='cart' ? 'true' : null" (click)="activeTab.set('cart')"><i class="bi bi-bag"></i><span>السلة</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='checkout'" [attr.aria-current]="activeTab()==='checkout' ? 'true' : null" (click)="activeTab.set('checkout')"><i class="bi bi-credit-card"></i><span>إتمام الطلب</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='account'" [attr.aria-current]="activeTab()==='account' ? 'true' : null" (click)="activeTab.set('account')"><i class="bi bi-person"></i><span>الحساب وطلباتي</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='policies'" [attr.aria-current]="activeTab()==='policies' ? 'true' : null" (click)="activeTab.set('policies')"><i class="bi bi-shield-check"></i><span>الطلبات والسياسات</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='branding'" [attr.aria-current]="activeTab()==='branding' ? 'true' : null" (click)="activeTab.set('branding')"><i class="bi bi-palette"></i><span>الهوية والتصميم</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='info'" [attr.aria-current]="activeTab()==='info' ? 'true' : null" (click)="activeTab.set('info')"><i class="bi bi-shop"></i><span>بيانات المتجر</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='discounts'" [attr.aria-current]="activeTab()==='discounts' ? 'true' : null" (click)="activeTab.set('discounts')"><i class="bi bi-tags"></i><span>العروض والتوصيل</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='integrations'" [attr.aria-current]="activeTab()==='integrations' ? 'true' : null" (click)="activeTab.set('integrations')"><i class="bi bi-graph-up"></i><span>التكاملات والقياس</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='packages'" [attr.aria-current]="activeTab()==='packages' ? 'true' : null" (click)="activeTab.set('packages');loadPackageStats()"><i class="bi bi-box-seam"></i><span>النسخ والاستيراد</span></button>
   </nav>
 
   @if (isLoading()) {
@@ -48,27 +48,62 @@
     }
   </div>
 </details>
-<details class="settings-card selected-theme-controls settings-disclosure" open>
-  <summary>ألوان وهوية {{ selectedHomeThemeName }} <small>تخصيص الهوية والخط</small></summary>
-  <p>الألوان والخط هوية مشتركة للمتجر. محتوى الرئيسية والبنرات والأقسام محفوظ بشكل مستقل لكل قالب؛ عدّل محتوى القالب المختار من المحرر أدناه ثم احفظ الإعدادات.</p>
-  <label class="brand-color-toggle"><input type="checkbox" [checked]="layoutOptions.useBrandColors !== false" (change)="setBrandColors($any($event.target).checked)"> استخدام ألوان الهوية البصرية</label>
-  @if (layoutOptions.useBrandColors === false) {
-  <div class="row g-3">
-    <label class="col-md-4">اللون الأساسي<input class="form-control" type="color" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()"></label>
-    <label class="col-md-4">لون البطاقات<input class="form-control" type="color" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()"></label>
-    <label class="col-md-4">لون الخلفية<input class="form-control" type="color" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()"></label>
-  </div>
-  }
-  <label>خط المتجر<select class="form-control" [(ngModel)]="settings()!.fontFamily" (ngModelChange)="onColorChange()"><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option></select></label>
-  @if (!layoutOptions.useCustomHome) {
-    <label><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي</label>
-    <div class="row g-3"><label class="col-md-6">بانر الكمبيوتر<input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onBannerDesktopUpload($event)" [disabled]="isUploading()"></label><label class="col-md-6">بانر الموبايل<input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onBannerMobileUpload($event)" [disabled]="isUploading()"></label></div>
-    <label>عنوان الرئيسية<input class="form-control" [(ngModel)]="settings()!.restaurantName"></label>
-    <label>وصف الرئيسية<textarea class="form-control" [(ngModel)]="settings()!.description"></textarea></label>
-  }
-  <label><input type="checkbox" [(ngModel)]="settings()!.showPromotionStrip"> إظهار الشريط الترويجي</label>
-  <label>نص العرض الترويجي<input class="form-control" [(ngModel)]="settings()!.activePromotionBanner"></label>
-</details>
+<details class="settings-card settings-disclosure"><summary>بانر الرئيسية</summary><label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام في الرئيسية</label><div class="form-grid home-banner-fields"><label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي</label>            <!-- Desktop & Mobile Hero Banners -->
+            <div class="home-banner-media">
+              <div class="p-3 border rounded-3 bg-light h-100">
+                <label class="form-label font-bold mb-2">بانر الواجهة الرئيسية (Desktop & Mobile):</label>
+
+                <div class="banner-preview-box mb-2">
+                  <img
+                    [src]="(settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
+                    alt="Main Hero Banner"
+                    class="preview-banner-img"
+                  />
+                  <div class="banner-overlay-tag">معاينة البانر النشط</div>
+                </div>
+
+                <div class="upload-controls-row flex-between">
+                  <input
+                    #bannerFileInput
+                    type="file"
+                    accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
+                    (change)="onBannerDesktopUpload($event)"
+                    style="display: none;"
+                  />
+                  <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
+                    <i class="bi bi-image-fill me-1"></i> تغيير صورة البانر (كمبيوتر)
+                  </button>
+
+                  <input
+                    #bannerMobileFileInput
+                    type="file"
+                    accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
+                    (change)="onBannerMobileUpload($event)"
+                    style="display: none;"
+                  />
+                  <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
+                    <i class="bi bi-phone-fill me-1"></i> تغيير صورة البانر (موبايل)
+                  </button>
+
+                  @if (settings()!.heroBannerDesktopUrl) {
+                    <button type="button" class="btn-remove-link text-danger" (click)="removeBannerDesktop()">
+                      <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
+                    </button>
+                  }
+                </div>
+
+                <div class="input-url-wrap mt-2">
+                  <span class="url-label">رابط صورة البانر:</span>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    placeholder="/uploads/banners/hero-desktop.jpg"
+                    [(ngModel)]="settings()!.heroBannerDesktopUrl"
+                  />
+                </div>
+              </div>
+            </div>
+          </div></details>
 @if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
 <details class="settings-card settings-disclosure" open><summary>نصوص الرئيسية بالإنجليزية</summary><div class="form-row">
 <label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
@@ -79,8 +114,8 @@
 <label class="form-group">عنوان شبكة الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoryGridTitleEn"></label>
 </div></details>
 }
-<details class="settings-card settings-disclosure"><summary>الكروت ونافذة تفاصيل المنتج</summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></details><app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
-    @if(activeTab()==='integrations' || activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section>}
+<app-store-layout-editor mode="home" #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية'}}</button>}
+    @if(activeTab()==='integrations' || activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section><button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="isSaving()">حفظ إعدادات القياس</button>}
     @if (activeTab() === 'discounts') {
       <div class="tab-content animate-fade-in">
         <div class="settings-card glass-panel highlight-border">
@@ -211,11 +246,12 @@
     <!-- ========================================================= -->
     <!-- TAB 2: BRANDING, VISUAL MEDIA & FULL UI CUSTOMIZATION 🎨✨ -->
     <!-- ========================================================= -->
-    @if (activeTab() === 'branding' || activeTab() === 'menu' || activeTab() === 'checkout' || activeTab() === 'cart' || activeTab() === 'account') {
+    @if (activeTab() === 'branding' || activeTab() === 'menu' || activeTab() === 'checkout' || activeTab() === 'cart') {
       <div class="tab-content animate-fade-in">
-        
+
+@if (activeTab() === 'branding') {
         <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
-        <details class="settings-card settings-disclosure" open><summary>1. شعار المؤسسة والبانرات الرئيسية والميديا</summary>
+        <details class="settings-card settings-disclosure" open><summary>شعار المتجر وأيقونته</summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في الشعار الرسمي وبانرات الواجهة الرئيسية على أجهزة الكمبيوتر والموبايل.</p>
           </div>
@@ -300,66 +336,11 @@
             </div>
 
             <div class="form-group"><label for="heroTextColor">لون نص البانر الرئيسي (العنوان والوصف)</label><input id="heroTextColor" type="color" [ngModel]="settings()!.heroTextColor || '#FFFFFF'" (ngModelChange)="settings()!.heroTextColor=$event" /><p class="text-muted">اختر لونًا واضحًا فوق صورة البانر، ثم احفظ الإعدادات.</p></div>
-            <!-- Desktop & Mobile Hero Banners -->
-            <div class="col-12 col-lg-7">
-              <div class="p-3 border rounded-3 bg-light h-100">
-                <label class="form-label font-bold mb-2">بانر الواجهة الرئيسية (Desktop & Mobile):</label>
-                
-                <div class="banner-preview-box mb-2">
-                  <img
-                    [src]="(settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
-                    alt="Main Hero Banner"
-                    class="preview-banner-img"
-                  />
-                  <div class="banner-overlay-tag">معاينة البانر النشط</div>
-                </div>
-
-                <div class="upload-controls-row flex-between">
-                  <input
-                    #bannerFileInput
-                    type="file"
-                    accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
-                    (change)="onBannerDesktopUpload($event)"
-                    style="display: none;"
-                  />
-                  <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
-                    <i class="bi bi-image-fill me-1"></i> تغيير صورة البانر (كمبيوتر)
-                  </button>
-
-                  <input
-                    #bannerMobileFileInput
-                    type="file"
-                    accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
-                    (change)="onBannerMobileUpload($event)"
-                    style="display: none;"
-                  />
-                  <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
-                    <i class="bi bi-phone-fill me-1"></i> تغيير صورة البانر (موبايل)
-                  </button>
-
-                  @if (settings()!.heroBannerDesktopUrl) {
-                    <button type="button" class="btn-remove-link text-danger" (click)="removeBannerDesktop()">
-                      <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
-                    </button>
-                  }
-                </div>
-
-                <div class="input-url-wrap mt-2">
-                  <span class="url-label">رابط صورة البانر:</span>
-                  <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    placeholder="/uploads/banners/hero-desktop.jpg"
-                    [(ngModel)]="settings()!.heroBannerDesktopUrl"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+</div>
 
 
 
-          
+
 
         </details>
 
@@ -537,7 +518,7 @@
 
 
 
-          
+
 
         </details>
 
@@ -679,29 +660,16 @@
           </div>
         </details>
 
+
+}
+@if (activeTab() === 'branding') {
         <!-- 6. ELEMENTS VISIBILITY & FLOATING ACTION BUTTON (FAB) -->
         <details class="settings-card settings-disclosure"><summary>6. التحكم في ظهور أقسام وعناصر الواجهة</summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في إظهار أو إخفاء عناصر الصفحة الرئيسية والمفضلة وزر الواتساب العائم على الشاشة.</p>
           </div>
 
-          <div class="form-row mb-3">
-            <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
-              <input type="checkbox" [(ngModel)]="settings()!.showHeroBanner" />
-              <div class="ms-2">
-                <strong>إظهار بانر العروض الرئيسي في الواجهة</strong>
-                <small class="text-muted d-block">إخفاء البانر يرفع شريط البحث والتصنيفات للأعلى تلقائياً.</small>
-              </div>
-            </label>
 
-            <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
-              <input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow" />
-              <div class="ms-2">
-                <strong>إظهار شريط تصنيفات وأقسام المنتجات</strong>
-                <small class="text-muted d-block">عرض أيقونات الأقسام الأفقية في الصفحة الرئيسية.</small>
-              </div>
-            </label>
-          </div>
 
           <div class="form-row mb-3">
             <div class="feature-toggle-card flex-1 p-3 border rounded-3 bg-light">
@@ -750,7 +718,10 @@
             </label>
           </div>
 
-          <!-- Product Details Display Mode -->
+</details>
+}
+@if (activeTab() === 'menu') {
+<details class="settings-card settings-disclosure" open><summary>طريقة عرض المنتج</summary>          <!-- Product Details Display Mode -->
           <div class="product-view-mode-card p-3 border rounded-3 bg-white mt-3 mb-2">
             <div class="fw-bold text-dark mb-1">
               <i class="bi bi-window-stack text-primary me-1"></i> طريقة فتح وعرض تفاصيل المنتج (Product Detail View Mode):
@@ -786,6 +757,9 @@
           </div>
         </details>
 
+
+}
+@if (activeTab() === 'checkout') {
         <!-- 7. CHECKOUT PAGE CUSTOMIZATION -->
         <details class="settings-card settings-disclosure"><summary>7. تخصيص تجربة وخيارات إتمام الطلب (Checkout)</summary>
           <div class="section-title-wrap mb-3">
@@ -886,6 +860,11 @@
           </div>
         </details>
 
+
+}
+@if (activeTab() === 'menu') {
+<details class="settings-card settings-disclosure"><summary>الكروت ونافذة تفاصيل المنتج</summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></details>
+        <app-store-layout-editor mode="cards" [layout]="layoutOptions" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor>
         <!-- 8. CUSTOM LABELS -->
         <details class="settings-card settings-disclosure"><summary>8. تخصيص المسميات والنصوص (Custom Labels)</summary>
           <div class="section-title-wrap mb-3">
@@ -911,26 +890,18 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label>مسمى سلة المشتريات:</label>
-              <input type="text" class="form-control" [(ngModel)]="settings()!.labelCart" placeholder="السلة / حقيبة التسوق" />
-            </div>
-            <div class="form-group flex-1">
-              <label>مسمى قائمة المفضلة:</label>
-              <input type="text" class="form-control" [(ngModel)]="settings()!.labelWishlist" placeholder="المفضلة / قائمة الرغبات" />
-            </div>
-            <div class="form-group flex-1">
-              <label>مسمى التوصيل:</label>
-              <input type="text" class="form-control" [(ngModel)]="settings()!.labelDelivery" placeholder="توصيل للموقع" />
-            </div>
-            <div class="form-group flex-1">
-              <label>مسمى الاستلام من الفرع:</label>
-              <input type="text" class="form-control" [(ngModel)]="settings()!.labelPickup" placeholder="استلام من المستودع / الفرع" />
-            </div>
-          </div>
-        </details>
-
+</details>
+}
+@if (activeTab() === 'cart') {
+<section class="settings-card"><h3>عرض السلة</h3><label>مسمى السلة<input class="form-control" [(ngModel)]="settings()!.labelCart"></label><label><input type="checkbox" [(ngModel)]="settings()!.showCartBadge"> عرض عدد المنتجات على أيقونة السلة</label></section>
+}
+@if (activeTab() === 'checkout') {
+<section class="settings-card"><h3>مسميات التسليم</h3><label>مسمى التوصيل<input class="form-control" [(ngModel)]="settings()!.labelDelivery"></label><label>مسمى الاستلام<input class="form-control" [(ngModel)]="settings()!.labelPickup"></label></section>
+}
+@if (activeTab() === 'branding') {
+<section class="settings-card"><label>مسمى المفضلة<input class="form-control" [(ngModel)]="settings()!.labelWishlist"></label></section>
+}
+@if (activeTab() === 'branding' || activeTab() === 'menu') {
         <!-- Unified Save Button for Branding & UI -->
         <div class="tab-save-footer mt-4 flex-between">
           <div class="save-hint text-muted small">
@@ -940,10 +911,11 @@
             @if (isSaving()) {
               <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
             } @else {
-              <i class="bi bi-floppy2-fill me-1"></i> حفظ تصميم المتجر
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ الإعدادات
             }
           </button>
         </div>
+}
       </div>
     }
 
@@ -962,7 +934,7 @@
           <li><a routerLink="../delivery-zones" queryParamsHandling="preserve">اضبط تغطية الشحن والرسوم</a> ثم راجع طرق الاستلام والدفع.</li>
         </ol>
       </section> }
-      @if (activeTab() === 'policies' || activeTab() === 'cart') { <section class="settings-card"><h3>إعدادات السلة</h3>
+      @if (activeTab() === 'policies') { <section class="settings-card"><h3>ترقيم الطلبات</h3>
         <div class="form-row">
           <label class="form-group">ترقيم الطلبات
             <select class="form-control" [(ngModel)]="layoutOptions.orderNumberMode">
@@ -979,9 +951,12 @@
           }
         </div>
         <p>الترقيم الدوري يضيف تاريخ الفترة إلى الرقم. يبدأ الأسبوع يوم الاثنين. يسري الإعداد على الطلبات الجديدة.</p>
-        <label><input type="checkbox" [ngModel]="layoutOptions.onlineOrdering !== false" (ngModelChange)="layoutOptions.onlineOrdering=$event"> تفعيل السلة وإتمام الطلب</label>
-        <p>عند الإيقاف يظل الكتالوج متاحًا للتصفح وتظل الطلبات السابقة قابلة للمتابعة.</p>
       </section> }
+@if (activeTab() === 'cart') {
+<section class="settings-card"><h3>تشغيل السلة</h3>        <label><input type="checkbox" [ngModel]="layoutOptions.onlineOrdering !== false" (ngModelChange)="layoutOptions.onlineOrdering=$event"> تفعيل السلة وإتمام الطلب</label>
+        <p>عند الإيقاف يظل الكتالوج متاحًا للتصفح وتظل الطلبات السابقة قابلة للمتابعة.</p>
+</section>
+}
       @if (activeTab() === 'account') { <section class="settings-card"><h3>الحساب وطلباتي</h3>
         <label><input type="checkbox" [ngModel]="layoutOptions.showOrdersPage !== false" (ngModelChange)="layoutOptions.showOrdersPage=$event"> إظهار صفحة طلباتي وحساب العميل</label>
         <p>عند إيقافها يُخفى رابط «حسابي وطلباتي» من القوائم، وتظل روابط تتبع الطلبات التي يفتحها العميل مباشرة متاحة.</p>
@@ -991,7 +966,7 @@
         <p>عند السماح للضيف، يمكن إتمام الطلب دون إنشاء حساب. بيانات الطلب تظل قابلة للمتابعة من رابط الطلب.</p>
       </section> }
       <div class="tab-content animate-fade-in">
-        <div class="settings-card glass-panel">
+        @if (activeTab() === 'policies') { <div class="settings-card glass-panel">
           <h3 class="card-title"><i class="bi bi-shield-check text-primary me-2"></i> سياسات العمل والطلب والوزن التقديري</h3>
 
           <div class="form-group mb-4">
@@ -1071,18 +1046,15 @@
               <small class="text-muted">Shown to customers on cart & checkout (English).</small>
             </div>
           </div>
-        </div>
-
+        </div> }
         <!-- Separate Save Button for Policies -->
         <div class="tab-save-footer mt-4 flex-between">
-          <div class="save-hint text-muted small">
-            <i class="bi bi-info-circle me-1"></i> سيتم تطبيق سياسات الحد الأدنى وحالة المتجر فورياً.
-          </div>
-          <button class="btn-primary" (click)="saveSettings('policies')" [disabled]="isSaving()">
+
+          <button class="btn-primary" (click)="saveSettings('policies')" [disabled]="isSaving() || isUploading()">
             @if (isSaving()) {
               <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
             } @else {
-              <i class="bi bi-floppy2-fill me-1"></i> حفظ سياسات العمل والطلب
+              <i class="bi bi-floppy2-fill me-1"></i> حفظ الإعدادات
             }
           </button>
         </div>
@@ -1103,7 +1075,7 @@
             }
           </select>
           <p class="small text-muted mb-4">اختيار "متجر شامل" يتيح لك كافة الأدوات والخصائص بدون أي قيود.</p>
-          
+
           <h3 class="card-title"><i class="bi bi-globe2 text-primary me-2"></i> ربط دومين المتجر المخصص (Custom Domain)</h3>
           <p class="text-muted small mb-3">
             ربط دومين مدفوع خاص بمتجرك (مثل <code>{{ effectiveDomain || 'gandovly.com' }}</code>). يعمل الدومين المخصص ورابط مي كارت الأساسي معاً في نفس الوقت بتزامن كامل ودون أي تعارض.
@@ -1455,58 +1427,6 @@
 
         </div>
 
-        <!-- Electronic Payment & Wallets (Vodafone Cash & InstaPay) -->
-        <div class="settings-card glass-panel mt-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h3 class="card-title text-primary m-0">
-                <i class="bi bi-wallet2 me-2"></i> طرق الدفع الإلكتروني والتحويل (فودافون كاش & إنستاباي) 💳
-              </h3>
-              <p class="card-subtitle text-muted small mt-1">عند إدخال أي رقم، سيظهر خيار التحويل الإلكتروني للعميل تلقائياً في صفحة إتمام الطلب مع تفاصيل التحويل</p>
-            </div>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-              <i class="bi bi-shield-check me-1"></i> بوابات المحافظ الإلكترونية
-            </span>
-          </div>
-
-          <div class="settings-form-grid">
-            <div class="form-group">
-              <label for="setVfCash" class="form-label fw-bold">
-                <i class="bi bi-phone-vibrate text-danger me-1"></i> رقم محفظة فودافون كاش (Vodafone Cash):
-              </label>
-              <input
-                id="setVfCash"
-                type="text"
-                class="form-control fw-bold"
-                placeholder="مثال: 010XXXXXXXX"
-                [(ngModel)]="settings()!.vodafoneCashNumber"
-              />
-              <small class="text-muted">الرقم المخصص لاستقبال تحويلات فودافون كاش من العملاء.</small>
-            </div>
-
-            <div class="form-group">
-              <label for="setInstaPay" class="form-label fw-bold">
-                <i class="bi bi-send-check-fill text-primary me-1"></i> حساب / معرف إنستاباي (InstaPay Account / IPA):
-              </label>
-              <input
-                id="setInstaPay"
-                type="text"
-                class="form-control fw-bold"
-                placeholder="مثال: username@instapay أو 01XXXXXXXXX"
-                [(ngModel)]="settings()!.instaPayAccount"
-              />
-              <small class="text-muted">عنوان الدفع اللحظي (IPA) أو رقم الهاتف المرتبط بإنستاباي.</small>
-            </div>
-          </div>
-
-          <div class="alert alert-info mt-3 mb-0 d-flex align-items-center">
-            <i class="bi bi-info-circle-fill fs-5 me-2"></i>
-            <span class="small">
-              <strong>ملاحظة للمتجر:</strong> عند تفعيل التحويل، يُطلب من العميل إرفاق رقم المحفظة المحول منها أو اسم المحول في خانة الملاحظات لتسريع تأكيد الطلب.
-            </span>
-          </div>
-        </div>
-
         <!-- Country, Localization & Currency Engine -->
         <div class="settings-card glass-panel mt-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1657,7 +1577,7 @@
     <!-- TAB 5: Mecart Store Packages & Seed Engine -->
     @if (activeTab() === 'packages') {
       <div class="settings-tab-pane animate-fade-in">
-        
+
         <div class="card p-4 mb-4"><h3 class="fw-bold mb-2">نسخ بيانات المتجر</h3><p class="text-muted small mb-0">احتفظ بنسخة من المنتجات والأقسام والصور والإعدادات، أو استورد بيانات إلى متجر فارغ.</p></div>
 
         <!-- Live Store Statistics Cards -->
@@ -1696,7 +1616,7 @@
 
         <!-- Actions Grid: Export vs Import -->
         <div class="row g-4">
-          
+
           <!-- Column 1: Export Package -->
           <div class="col-12 col-lg-6">
             <div class="card p-4 h-100 shadow-sm" style="border-radius: 16px; border: 1px solid #E2E8F0;">
