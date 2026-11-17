@@ -15,18 +15,14 @@
   padding: 0;
   touch-action: pan-y;
 
-  @media (min-width: 769px) {
-    padding: 0 1rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
+
 }
 
 .luxury-hero-card {
   position: relative;
   width: 100%;
   height: 215px;
-  border-radius: 0 0 28px 28px;
+  border-radius: 0 0 var(--radius-card, 22px) var(--radius-card, 22px);
   overflow: hidden;
   box-shadow: 0 6px 20px rgba(13, 43, 69, 0.12);
   background: #0d2b45;
@@ -34,14 +30,10 @@
 
   @media (min-width: 769px) {
     height: 330px;
-    border-radius: 28px;
   }
 
   @media (max-width: 768px) {
-    margin-inline: 12px;
-    width: calc(100% - 24px);
     height: 205px;
-    border-radius: 22px;
   }
 
   @media (min-width: 1200px) {
@@ -401,8 +393,8 @@
     }
 
     .category-icon-box {
-      width: 70px;
-      height: 70px;
+      width: 66px;
+      height: 66px;
       border-radius: 20px;
       background: #ffffff;
       border: 1.5px solid #edf2f7;
@@ -858,8 +850,7 @@
   }
 }
 /* Storefront review: readable hero and consistent section spacing. */
-.hero-banner-section { padding: 16px 16px 0; max-width: 1280px; margin-inline: auto; }
-.luxury-hero-card { height: auto; min-height: 320px; border-radius: 22px; box-shadow: none; }
+.luxury-hero-card { height: auto; min-height: 320px; box-shadow: none; }
 .luxury-hero-card .hero-bg-img { position: absolute; inset: 0; }
 .luxury-hero-card .hero-content-overlay { position: relative; min-height: 320px; padding: 32px 36px; background: linear-gradient(270deg, #102b46ed, #102b4699 55%, #102b4610); }
 .luxury-hero-card .hero-texts { max-width: min(58%, 540px); gap: 14px; }
@@ -872,29 +863,29 @@
 .search-filter-section .search-capsule .search-input { min-height: 52px; padding-inline-start: 42px; padding-inline-end: 44px; }
 .search-filter-section .btn-filter-dark { width: 52px; height: 52px; box-shadow: none; border-radius: 14px; }
 .categories-row-section, .popular-section { margin-top: 24px; }
-.categories-row-section .categories-scroll { gap: 14px; padding-block: 10px; }
-.categories-row-section .category-item { width: 96px; min-width: 96px; max-width: 96px; background: transparent; border: 0; padding: 0; }
-.categories-row-section .category-item .category-label { font-size: 13px; line-height: 1.5; height: 3em; }
+.categories-row-section .categories-scroll { gap: 12px; padding-block: 7px; }
+.categories-row-section .category-item { width: 92px; min-width: 92px; max-width: 92px; background: transparent; border: 0; padding: 0; }
+.categories-row-section .category-item .category-label { font-size: 13px; line-height: 1.5; height: auto; }
 .categories-row-section .categories-header-mini { gap: 12px; margin-bottom: 8px; }
 .categories-row-section .categories-header-mini .categories-see-all, .popular-section .see-all-btn, .categories-visual-section .see-all-btn { color: var(--primary-color); font-size: 14px; min-height: 44px; display: inline-flex; align-items: center; }
 .categories-row-section .categories-header-mini .categories-mini-title { font-size: 17px; }
 .popular-section .section-title, .categories-visual-section .header-titles .section-title { font-size: 23px; line-height: 1.5; }
-.popular-section .products-grid-2col { gap: 16px; }
+.popular-section .products-grid-2col { gap: 14px; }
 .categories-visual-section { margin-top: 32px; }
 .categories-visual-section .cat-compact-card { padding: 18px 10px; min-height: 150px; }
 .categories-visual-section .cat-compact-card .cat-card-name { font-size: 14px; line-height: 1.6; }
 .hotline-card-section .hotline-card { box-shadow: none; border-radius: 18px; }
 @media (max-width: 767px) {
   .home-container { padding-bottom: 24px; }
-  .hero-banner-section { padding: 12px 12px 0; }
-  .luxury-hero-card { min-height: 280px; border-radius: 18px; }
+  .luxury-hero-card { min-height: 280px; }
   .luxury-hero-card .hero-content-overlay { min-height: 280px; padding: 24px 20px; background: linear-gradient(270deg, #102b46ef, #102b46bd 65%, #102b4660); }
   .luxury-hero-card .hero-texts { max-width: 100%; gap: 12px; }
   .luxury-hero-card .hero-title { font-size: clamp(22px, 5.5vw, 28px); line-height: 1.55; }
   .luxury-hero-card .hero-subtitle { font-size: 14px; line-height: 1.8; max-width: 32ch; }
   .search-filter-section { margin-top: 16px; }
-  .categories-row-section, .popular-section { margin-top: 20px; }
-  .popular-section .products-grid-2col { gap: 12px; }
+  .categories-row-section { margin-top: 20px; }
+  .popular-section { margin-top: 14px; }
+  .popular-section .products-grid-2col { gap: 10px; }
   .popular-section .section-title, .categories-visual-section .header-titles .section-title { font-size: 21px; }
   .categories-visual-section .section-heading-row { align-items: center; gap: 10px; }
   .categories-visual-section .categories-compact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -902,7 +893,7 @@
 
 .categories-row-section .categories-scroll-wrapper .btn-cat-nav { width: 44px; height: 44px; }
 
-.luxury-hero-card { border-radius: var(--radius-card, 22px); box-shadow: var(--shadow-card); }
+.luxury-hero-card { box-shadow: var(--shadow-card); }
 .luxury-hero-card .btn-hero-cta { border-radius: var(--radius-control, 12px); background: var(--btn-accent-bg, var(--accent-color)); color: var(--btn-accent-text, #fff); }
 .search-filter-section .search-capsule, .search-filter-section .btn-filter-dark { border-radius: var(--radius-control, 14px); }
 .hotline-card-section .hotline-card, .categories-visual-section .cat-compact-card { border-radius: var(--radius-card, 18px); }
