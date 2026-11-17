@@ -33,6 +33,7 @@ export interface HomeSection {
     items: HomeSectionItem[];
 }
 export interface StoreLayout {
+    useBrandColors?: boolean;
     homeProfiles?: Record<string, { useCustomHome: boolean; sections: HomeSection[] }>;
     /** Presentation is deliberately separate from homepage section configuration. */
     homeTheme?: 'classic' | 'cards' | 'editorial' | 'discovery';
@@ -59,6 +60,7 @@ export interface StoreLayout {
     detailImageFit: 'cover' | 'contain';
     detailImageAspect?: 'square' | 'portrait' | 'landscape' | 'auto';
     onlineOrdering?: boolean;
+    showOrdersPage?: boolean;
     guestCheckout?: boolean;
     showFooterStoreName?: boolean;
     navbarLogoWidth?: number;

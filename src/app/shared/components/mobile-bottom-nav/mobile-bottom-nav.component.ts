@@ -8,11 +8,11 @@ import { LanguageService } from '../../../core/services/language.service';
   selector: 'app-mobile-bottom-nav', standalone: true, imports: [RouterModule],
   template: `
 
-      <nav class="store-bottom-nav" [class.compact]="compact()" [style.grid-template-columns]="settings.settings().storeLayout?.onlineOrdering === false ? 'repeat(3,minmax(0,1fr))' : null" [attr.aria-label]="language.text('التنقل في المتجر', 'Store Navigation')">
+      <nav class="store-bottom-nav" [class.compact]="compact()" [style.grid-template-columns]="'repeat(' + (2 + (settings.settings().storeLayout?.onlineOrdering !== false ? 1 : 0) + (settings.settings().storeLayout?.showOrdersPage !== false ? 1 : 0)) + ',minmax(0,1fr))'" [attr.aria-label]="language.text('التنقل في المتجر', 'Store Navigation')">
         <a routerLink="/" routerLinkActive="active" ariaCurrentWhenActive="page" [routerLinkActiveOptions]="{exact: true}"><i class="bi bi-house-door" aria-hidden="true"></i><span>{{ language.text('الرئيسية', 'Home') }}</span></a>
         <a routerLink="/menu" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-grid" aria-hidden="true"></i><span>{{ language.text(settings.settings().labelProducts || 'المنتجات', 'Products') }}</span></a>
         @if(settings.settings().storeLayout?.onlineOrdering !== false){<button type="button" (click)="cart.toggleDrawer()" [attr.aria-label]="language.text('السلة، ' + cart.totalItemsCount() + ' منتج', 'Cart, ' + cart.totalItemsCount() + ' items')"><span class="cart-icon"><i class="bi bi-bag" aria-hidden="true"></i>@if(cart.totalItemsCount() && settings.settings().showCartBadge !== false) { <b>{{cart.totalItemsCount()}}</b> }</span><span>{{ language.text(settings.settings().labelCart || 'السلة', 'Cart') }}</span></button>}
-        <a routerLink="/account" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-person" aria-hidden="true"></i><span>{{ language.text(settings.settings().labelOrders || 'حسابي', 'Account') }}</span></a>
+        @if(settings.settings().storeLayout?.showOrdersPage !== false){<a routerLink="/account" routerLinkActive="active" ariaCurrentWhenActive="page"><i class="bi bi-person" aria-hidden="true"></i><span>{{ language.text(settings.settings().labelOrders || 'حسابي', 'Account') }}</span></a>}
       </nav>
   `,
   styles: [`

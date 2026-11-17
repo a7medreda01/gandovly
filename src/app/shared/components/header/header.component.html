@@ -121,9 +121,9 @@
       }
 
       <!-- Account Button -->
-      <a routerLink="/account" class="account-btn flex-center" [title]="languageService.text('حسابي', 'My Account')" [attr.aria-label]="languageService.text('حسابي', 'My Account')">
+      @if (settingsService.settings().storeLayout?.showOrdersPage !== false) { <a routerLink="/account" class="account-btn flex-center" [title]="languageService.text('حسابي', 'My Account')" [attr.aria-label]="languageService.text('حسابي', 'My Account')">
         <i class="bi bi-person"></i>
-      </a>
+      </a> }
 
       <!-- Cart Button -->
       @if (settingsService.settings().storeLayout?.onlineOrdering !== false) {

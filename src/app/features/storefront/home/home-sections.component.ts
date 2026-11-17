@@ -40,7 +40,7 @@ export class HomeSectionsComponent {
     selected = signal<Product | null>(null);
     search = '';
     ngOnInit() { this.load(); }
-    load() { this.loading.set(true); this.error.set(false); this.api.get<any>('storefront/home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: r => { this.sections.set(r.sections || []); this.loading.set(false); }, error: () => { this.error.set(true); this.loading.set(false); } }); }
+    load() { this.loading.set(true); this.error.set(false); this.api.get<any>('storefront/home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: r => { const rows = r.sections || []; const cfg = this.settings.settings(); const hero = rows.find((row: any) => row.config.kind === 'hero'); if (hero && cfg.showHeroBanner) { hero.config.imageUrl = cfg.heroBannerDesktopUrl || hero.config.imageUrl; hero.config.mobileImageUrl = cfg.heroBannerMobileUrl || hero.config.mobileImageUrl; } this.sections.set(cfg.showHeroBanner === false ? rows.filter((row: any) => row.config.kind !== 'hero') : rows); this.loading.set(false); }, error: () => { this.error.set(true); this.loading.set(false); } }); }
     open(product: Product) {
         if (product) {
             this.selected.set(product);

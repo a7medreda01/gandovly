@@ -125,6 +125,7 @@ export interface StorefrontSettings {
   navbarBorderRadius?: string;
   bottomNavBorderRadius?: string;
   productCardBorderRadius?: string;
+  productCardVerticalSpacing?: number;
   searchBorderRadius?: string;
   cardShadowStyle?: string;
   fontSizeBase?: number;

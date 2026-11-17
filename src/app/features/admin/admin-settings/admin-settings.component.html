@@ -9,53 +9,19 @@
 
   <!-- Settings Navigation Tabs -->
 
-  <div class="settings-tabs-bar" aria-label="أقسام إعدادات المتجر"><button type="button" class="tab-btn" [class.active]="activeTab()==='layout'" (click)="activeTab.set('layout')"><i class="bi bi-layout-text-window"></i> الرئيسية والكروت</button><button type="button" class="tab-btn" [class.active]="activeTab()==='performance'" (click)="activeTab.set('performance')"><i class="bi bi-graph-up"></i> الأداء وPixels</button>
-<button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'info'"
-      (click)="activeTab.set('info')"
-    >
-      <i class="bi bi-telephone-fill me-2"></i>
-      <span>بيانات المتجر</span>
-    </button>
-<button
-      type="button"
-      class="tab-btn highlight-tab"
-      [class.active]="activeTab() === 'branding'"
-      (click)="activeTab.set('branding')"
-    >
-      <i class="bi bi-palette-fill me-2"></i>
-      <span>تصميم المتجر</span>
-    </button>
-<button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'discounts'"
-      (click)="activeTab.set('discounts')"
-    >
-      <i class="bi bi-tag-fill me-2"></i>
-      <span>العروض والتوصيل</span>
-    </button>
-<button
-      type="button"
-      class="tab-btn"
-      [class.active]="activeTab() === 'policies'"
-      (click)="activeTab.set('policies')"
-    >
-      <i class="bi bi-shield-check me-2"></i>
-      <span>الطلب والسياسات</span>
-    </button>
-<button
-      type="button"
-      class="tab-btn highlight-tab"
-      [class.active]="activeTab() === 'packages'"
-      (click)="activeTab.set('packages'); loadPackageStats();"
-    >
-      <i class="bi bi-box-seam-fill me-2"></i>
-      <span>نسخ بيانات المتجر</span>
-    </button>
-  </div>
+  <nav class="settings-tabs-bar settings-page-nav" aria-label="إعدادات صفحات المتجر">
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='layout'" (click)="activeTab.set('layout')"><i class="bi bi-house-door"></i><span>الرئيسية</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='menu'" (click)="activeTab.set('menu')"><i class="bi bi-grid"></i><span>المنيو والمنتجات</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='cart'" (click)="activeTab.set('cart')"><i class="bi bi-bag"></i><span>السلة</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='checkout'" (click)="activeTab.set('checkout')"><i class="bi bi-credit-card"></i><span>إتمام الطلب</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='account'" (click)="activeTab.set('account')"><i class="bi bi-person"></i><span>الحساب وطلباتي</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='policies'" (click)="activeTab.set('policies')"><i class="bi bi-shield-check"></i><span>الطلبات والسياسات</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='branding'" (click)="activeTab.set('branding')"><i class="bi bi-palette"></i><span>الهوية والتصميم</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='info'" (click)="activeTab.set('info')"><i class="bi bi-shop"></i><span>بيانات المتجر</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='discounts'" (click)="activeTab.set('discounts')"><i class="bi bi-tags"></i><span>العروض والتوصيل</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='integrations'" (click)="activeTab.set('integrations')"><i class="bi bi-graph-up"></i><span>التكاملات والقياس</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='packages'" (click)="activeTab.set('packages');loadPackageStats()"><i class="bi bi-box-seam"></i><span>النسخ والاستيراد</span></button>
+  </nav>
 
   @if (isLoading()) {
     <app-loading-state
@@ -69,8 +35,8 @@
 
     <!-- TAB 1: Discounts & Promotions -->
     @if(activeTab()==='layout'){
-<section class="settings-card home-theme-settings">
-  <h3><i class="bi bi-palette2"></i> شكل واجهة المتجر</h3>
+<details class="settings-card home-theme-settings settings-disclosure" open>
+  <summary><i class="bi bi-palette2"></i> شكل واجهة المتجر <small>اختر القالب</small></summary>
   <p class="text-muted">اختر طريقة العرض المناسبة. تغيير القالب لا يحذف ترتيب الأقسام أو محتواها.</p>
   <div class="home-theme-options" role="radiogroup" aria-label="قوالب واجهة المتجر">
     @for(theme of homeThemeOptions; track theme.id) {
@@ -81,15 +47,18 @@
       </button>
     }
   </div>
-</section>
-<section class="settings-card selected-theme-controls">
-  <h3>إعدادات {{ selectedHomeThemeName }}</h3>
+</details>
+<details class="settings-card selected-theme-controls settings-disclosure" open>
+  <summary>ألوان وهوية {{ selectedHomeThemeName }} <small>تخصيص الهوية والخط</small></summary>
   <p>الألوان والخط هوية مشتركة للمتجر. محتوى الرئيسية والبنرات والأقسام محفوظ بشكل مستقل لكل قالب؛ عدّل محتوى القالب المختار من المحرر أدناه ثم احفظ الإعدادات.</p>
+  <label class="brand-color-toggle"><input type="checkbox" [checked]="layoutOptions.useBrandColors !== false" (change)="setBrandColors($any($event.target).checked)"> استخدام ألوان الهوية البصرية</label>
+  @if (layoutOptions.useBrandColors === false) {
   <div class="row g-3">
     <label class="col-md-4">اللون الأساسي<input class="form-control" type="color" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()"></label>
     <label class="col-md-4">لون البطاقات<input class="form-control" type="color" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()"></label>
     <label class="col-md-4">لون الخلفية<input class="form-control" type="color" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()"></label>
   </div>
+  }
   <label>خط المتجر<select class="form-control" [(ngModel)]="settings()!.fontFamily" (ngModelChange)="onColorChange()"><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option></select></label>
   @if (!layoutOptions.useCustomHome) {
     <label><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي</label>
@@ -99,19 +68,19 @@
   }
   <label><input type="checkbox" [(ngModel)]="settings()!.showPromotionStrip"> إظهار الشريط الترويجي</label>
   <label>نص العرض الترويجي<input class="form-control" [(ngModel)]="settings()!.activePromotionBanner"></label>
-</section>
+</details>
 @if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
-<section class="settings-card"><h3>نصوص الرئيسية بالإنجليزية</h3><div class="form-row">
+<details class="settings-card settings-disclosure" open><summary>نصوص الرئيسية بالإنجليزية</summary><div class="form-row">
 <label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
 <label class="form-group">وصف البانر<input type="text" dir="ltr" class="form-control" maxlength="600" [(ngModel)]="layoutOptions.homeSubtitleEn"></label>
 <label class="form-group">زر البانر<input type="text" dir="ltr" class="form-control" maxlength="60" [(ngModel)]="layoutOptions.homeButtonTextEn"></label>
 <label class="form-group">عنوان صف الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoriesTitleEn"></label>
 <label class="form-group">عنوان المنتجات المختارة<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeFeaturedTitleEn"></label>
 <label class="form-group">عنوان شبكة الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoryGridTitleEn"></label>
-</div></section>
+</div></details>
 }
-<section class="settings-card"><h3>نافذة وصفحة تفاصيل المنتج</h3><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></section><app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
-    @if(activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section>}
+<details class="settings-card settings-disclosure"><summary>الكروت ونافذة تفاصيل المنتج</summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></details><app-store-layout-editor #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية والكروت'}}</button>}
+    @if(activeTab()==='integrations' || activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section>}
     @if (activeTab() === 'discounts') {
       <div class="tab-content animate-fade-in">
         <div class="settings-card glass-panel highlight-border">
@@ -242,7 +211,7 @@
     <!-- ========================================================= -->
     <!-- TAB 2: BRANDING, VISUAL MEDIA & FULL UI CUSTOMIZATION 🎨✨ -->
     <!-- ========================================================= -->
-    @if (activeTab() === 'branding') {
+    @if (activeTab() === 'branding' || activeTab() === 'menu' || activeTab() === 'checkout' || activeTab() === 'cart' || activeTab() === 'account') {
       <div class="tab-content animate-fade-in">
         
         <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
@@ -979,8 +948,8 @@
     }
 
     <!-- TAB 3: Operating Policies & Weights -->
-    @if (activeTab() === 'policies') {
-      <section class="settings-card">
+    @if (activeTab() === 'policies' || activeTab() === 'cart' || activeTab() === 'checkout' || activeTab() === 'account') {
+      @if (activeTab() === 'policies') { <section class="settings-card">
         <h3>ابدأ بإعدادات تناسب نشاطك</h3>
         <p>القالب يجهّز نوع النشاط وطريقة عرض المنتج والكروت للمراجعة قبل الحفظ.</p>
         <div class="d-flex flex-wrap gap-2 mb-3">
@@ -992,8 +961,8 @@
           <li><a routerLink="../catalog" queryParamsHandling="preserve">جهّز المنتجات</a> مع الألوان والمقاسات للملابس، أو سعر القطعة والوزن للسوبر ماركت.</li>
           <li><a routerLink="../delivery-zones" queryParamsHandling="preserve">اضبط تغطية الشحن والرسوم</a> ثم راجع طرق الاستلام والدفع.</li>
         </ol>
-      </section>
-      <section class="settings-card"><h3>الطلبات أونلاين</h3>
+      </section> }
+      @if (activeTab() === 'policies' || activeTab() === 'cart') { <section class="settings-card"><h3>إعدادات السلة</h3>
         <div class="form-row">
           <label class="form-group">ترقيم الطلبات
             <select class="form-control" [(ngModel)]="layoutOptions.orderNumberMode">
@@ -1012,8 +981,15 @@
         <p>الترقيم الدوري يضيف تاريخ الفترة إلى الرقم. يبدأ الأسبوع يوم الاثنين. يسري الإعداد على الطلبات الجديدة.</p>
         <label><input type="checkbox" [ngModel]="layoutOptions.onlineOrdering !== false" (ngModelChange)="layoutOptions.onlineOrdering=$event"> تفعيل السلة وإتمام الطلب</label>
         <p>عند الإيقاف يظل الكتالوج متاحًا للتصفح وتظل الطلبات السابقة قابلة للمتابعة.</p>
+      </section> }
+      @if (activeTab() === 'account') { <section class="settings-card"><h3>الحساب وطلباتي</h3>
+        <label><input type="checkbox" [ngModel]="layoutOptions.showOrdersPage !== false" (ngModelChange)="layoutOptions.showOrdersPage=$event"> إظهار صفحة طلباتي وحساب العميل</label>
+        <p>عند إيقافها يُخفى رابط «حسابي وطلباتي» من القوائم، وتظل روابط تتبع الطلبات التي يفتحها العميل مباشرة متاحة.</p>
+      </section> }
+      @if (activeTab() === 'checkout') { <section class="settings-card"><h3>إتمام الطلب والدخول</h3>
         <label><input type="checkbox" [ngModel]="layoutOptions.guestCheckout !== false" (ngModelChange)="layoutOptions.guestCheckout=$event" [disabled]="layoutOptions.onlineOrdering === false"> السماح بالطلب بدون تسجيل دخول</label>
-      </section>
+        <p>عند السماح للضيف، يمكن إتمام الطلب دون إنشاء حساب. بيانات الطلب تظل قابلة للمتابعة من رابط الطلب.</p>
+      </section> }
       <div class="tab-content animate-fade-in">
         <div class="settings-card glass-panel">
           <h3 class="card-title"><i class="bi bi-shield-check text-primary me-2"></i> سياسات العمل والطلب والوزن التقديري</h3>
@@ -1116,7 +1092,7 @@
     <!-- TAB 4: Business Info & Contacts -->
     @if (activeTab() === 'info') {
       <div class="tab-content animate-fade-in">
-                <section class="settings-card domain-settings mb-4">
+                <details class="settings-card domain-settings mb-4 settings-disclosure"><summary>نشاط المتجر والدومين المخصص</summary>
           <h3 class="card-title">تخصص ونشاط المتجر الأساسي</h3>
           <p class="text-muted small mb-2">يحدد التبويبات المتاحة في صفحة تشغيل النشاط، والخصائص ونمط التشغيل المقترح تلقائيًا للمنتجات الجديدة.</p>
           <select class="form-control mb-2" [(ngModel)]="settings()!.activityPreset">
@@ -1343,12 +1319,13 @@
               </p>
             </div>
           </div>
-        </section>
+
+        </details>
         <div class="row g-4">
           <div class="col-12 col-lg-6">
 
-        <div class="settings-card glass-panel h-100">
-              <h3 class="card-title"><i class="bi bi-info-circle-fill text-primary me-2"></i> بيانات المؤسسة الأساسية (عربي / English)</h3>
+        <details class="settings-card glass-panel h-100 settings-disclosure" open>
+              <summary>بيانات المؤسسة الأساسية <small>اسم المتجر ووصفه</small></summary>
 
               <div class="form-row">
                 <div class="form-group flex-1">
@@ -1382,12 +1359,12 @@
                   <textarea id="setDescEn" dir="ltr" class="form-control" rows="3" placeholder="A comprehensive e-commerce platform..." [(ngModel)]="layoutOptions.descriptionEn"></textarea>
                 </div>
               </div>
-            </div>
+            </details>
           </div>
 
           <div class="col-12 col-lg-6">
-            <div class="settings-card glass-panel h-100 contact-settings-card">
-              <h3 class="card-title"><i class="bi bi-telephone-fill text-primary me-2"></i> وسائل الاتصال والعنوان (عربي / English)</h3>
+            <details class="settings-card glass-panel h-100 contact-settings-card settings-disclosure" open>
+              <summary>وسائل الاتصال والعنوان <small>الهاتف والبريد والموقع</small></summary>
 
               <div class="form-row">
                 <div class="form-group flex-1">
@@ -1421,12 +1398,13 @@
                   <input id="setAddrEn" type="text" dir="ltr" class="form-control" placeholder="e.g. 123 Main St" [(ngModel)]="layoutOptions.addressEn" />
                 </div>
               </div>
-            </div>
+            </details>
           </div>
 
 
 
           <!-- Social Media & Location Links Full Width Card -->
+          <details class="settings-card settings-disclosure" open><summary>روابط التواصل وموقع المتجر</summary>
           <div class="col-12 mt-2">
             <div class="settings-card glass-panel">
               <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom flex-wrap gap-2">
@@ -1473,10 +1451,7 @@
               </div>
             </div>
           </div>
-
-
-
-          
+          </details>
 
         </div>
 

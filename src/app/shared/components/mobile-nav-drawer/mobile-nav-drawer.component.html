@@ -107,7 +107,7 @@
 
       <div class="drawer-divider"></div>
 
-      <a
+      @if (settingsService.settings().storeLayout?.showOrdersPage !== false) { <a
         routerLink="/account"
         routerLinkActive="active"
         (click)="close()"
@@ -119,6 +119,7 @@
         </div>
         <i class="bi bi-chevron-left link-arrow"></i>
       </a>
+      }
 
       @if (isKitchenAllowed) {
         <div class="drawer-divider"></div>
@@ -155,4 +156,3 @@
   </div>
 </div>
 }
-

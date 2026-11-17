@@ -167,7 +167,7 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout'>('info');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout' | 'menu' | 'cart' | 'checkout' | 'account' | 'integrations'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -288,8 +288,26 @@ export class AdminSettingsComponent implements OnInit {
   onColorChange() {
     const current = this.settings();
     if (current) {
+      if (current.storeLayout?.useBrandColors) {
+        current.storeLayout.useBrandColors = false;
+      }
       this.settingsService.applyCssThemeVariables(current);
     }
+  }
+
+  setBrandColors(enabled: boolean) {
+    const current = this.settings();
+    if (!current) return;
+    current.storeLayout ??= defaultStoreLayout();
+    current.storeLayout.useBrandColors = enabled;
+    if (enabled) {
+      current.primaryColor = current.primaryColor || '#0a3d62';
+      current.secondaryColor = current.secondaryColor || '#a26f47';
+      current.accentColor = current.accentColor || '#e67e22';
+      current.surfaceColor = current.surfaceColor || '#f8fafd';
+      current.cardBgColor = current.cardBgColor || '#ffffff';
+    }
+    this.settingsService.applyCssThemeVariables(current);
   }
 
   sanitizeHexField(field: string): void {
@@ -307,7 +325,7 @@ export class AdminSettingsComponent implements OnInit {
   private readonly route=inject(ActivatedRoute);
   ngOnInit() {
     this.commerce.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});
-    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(requestedTab==='performance'||requestedTab==='layout')this.activeTab.set(requestedTab);
+    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(['performance','layout','menu','cart','checkout','account','info','branding','discounts','policies','packages','integrations'].includes(requestedTab||''))this.activeTab.set(requestedTab as any);
     this.loadSettings();
     this.loadPackageStats();
     this.loadDomain();
