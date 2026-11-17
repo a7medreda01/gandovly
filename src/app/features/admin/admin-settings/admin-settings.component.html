@@ -69,6 +69,19 @@
 
     <!-- TAB 1: Discounts & Promotions -->
     @if(activeTab()==='layout'){
+<section class="settings-card home-theme-settings">
+  <h3><i class="bi bi-palette2"></i> شكل واجهة المتجر</h3>
+  <p class="text-muted">اختر طريقة العرض المناسبة. تغيير القالب لا يحذف ترتيب الأقسام أو محتواها.</p>
+  <div class="home-theme-options" role="radiogroup" aria-label="قوالب واجهة المتجر">
+    @for(theme of homeThemeOptions; track theme.id) {
+      <button type="button" class="home-theme-option" [class.selected]="layoutOptions.homeTheme === theme.id" role="radio" [attr.aria-checked]="layoutOptions.homeTheme === theme.id" (click)="selectHomeTheme(theme.id)">
+        <span class="theme-preview" [attr.data-preview-theme]="theme.id"><i [class]="theme.icon"></i><span></span><span></span><span></span></span>
+        <span class="theme-option-copy"><strong>{{theme.name}}</strong><small>{{theme.description}}</small></span>
+        @if(layoutOptions.homeTheme === theme.id) { <i class="bi bi-check-circle-fill theme-selected-mark" aria-hidden="true"></i> }
+      </button>
+    }
+  </div>
+</section>
 @if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
 <section class="settings-card"><h3>نصوص الرئيسية بالإنجليزية</h3><div class="form-row">
 <label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
@@ -222,6 +235,16 @@
 
           <div class="row g-4">
             <!-- Restaurant Logo Section -->
+            <div class="col-12 col-lg-4">
+              <div class="store-icon-card">
+                <div class="store-icon-card-heading"><i class="bi bi-window-sidebar"></i><div><strong>أيقونة المتجر</strong><small>أيقونة التبويب ونتائج البحث (Favicon)</small></div></div>
+                <div class="store-icon-preview">@if (settings()!.faviconUrl) { <img [src]="settings()!.faviconUrl | imageUrl:'category'" alt="معاينة أيقونة المتجر"> } @else { <i class="bi bi-shop"></i> }</div>
+                <input #faviconFileInput type="file" accept="image/png,image/jpeg,image/webp" (change)="onFaviconUpload($event)" hidden>
+                <div class="store-icon-actions"><button type="button" class="btn-outline-upload" (click)="faviconFileInput.click()" [disabled]="isUploading()"><i class="bi bi-cloud-arrow-up-fill"></i> رفع الأيقونة</button>@if (settings()!.faviconUrl) { <button type="button" class="store-icon-reset" (click)="resetFavicon()">إعادة الافتراضية</button> }</div>
+                <label class="store-icon-url"><span>أو رابط صورة مباشر</span><input type="url" class="form-control form-control-sm" dir="ltr" [(ngModel)]="settings()!.faviconUrl" placeholder="/uploads/branding/store-icon.webp"></label>
+                <p>يفضل شعار مربع واضح بحجم 512 × 512 بكسل. سيظهر في تبويب المتصفح ونتائج البحث.</p>
+              </div>
+            </div>
             <div class="col-12 col-lg-5">
               <div class="p-3 border rounded-3 bg-light h-100">
                 <label class="form-label font-bold mb-2">شعار المؤسسة (Logo):</label>

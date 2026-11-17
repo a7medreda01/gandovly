@@ -1086,3 +1086,22 @@ img.image-pending { opacity: 0; }
   }
 }
 
+
+/* Light, compact contact card with a clear call action on phones */
+.hotline-card-section .hotline-card { border: 1px solid rgba(255,255,255,.68); border-radius: 22px; background: linear-gradient(150deg,rgba(255,255,255,.98),rgba(246,249,255,.95)) !important; box-shadow: 0 12px 34px rgba(31,51,80,.09); color: var(--text-main,#172238) !important; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-title { color: var(--text-main,#172238) !important; font-weight: 720; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-icon { border: 1px solid #e7edf6; background: #f2f6fc !important; color: #3779cc !important; }
+.hotline-card-section .hotline-card .hotline-texts .numbers-str { color: #717d90 !important; }
+.hotline-card-section .hotline-card .hotline-phone-link { display: inline-flex; align-items: center; gap: 7px; width: fit-content; font-variant-numeric: tabular-nums; text-decoration: none; }
+.hotline-card-section .hotline-card .hotline-phone-link i { color: #94a0b2; font-size: 11px; }
+.hotline-card-section .hotline-card .btn-call-action { min-height: 46px; padding-inline: 20px; border: 1px solid #d9e6fa; border-radius: 14px; background: #eef5ff !important; color: #2469bd !important; box-shadow: none; }
+.hotline-card-section .hotline-card .btn-call-action .call-arrow { margin-inline-start: 4px; font-size: 12px; opacity: .75; }
+@media(max-width:767px) {
+  .hotline-card-section.container { padding-inline: 16px; }
+  .hotline-card-section .hotline-card { grid-template-columns: minmax(0,1fr); gap: 14px; padding: 18px; border-radius: 20px; }
+  .hotline-card-section .hotline-card .hotline-texts { min-width: 0; gap: 9px; }
+  .hotline-card-section .hotline-card .hotline-texts .hotline-title-row { align-items: center; gap: 10px; }
+  .hotline-card-section .hotline-card .hotline-texts .hotline-title { font-size: 15px; line-height: 1.55; }
+  .hotline-card-section .hotline-card .hotline-texts .numbers-str { font-size: 14px; }
+  .hotline-card-section .hotline-card .btn-call-action { width: 100%; min-height: 48px; justify-content: center; border-radius: 14px; font-size: 14px; }
+}

@@ -25,6 +25,12 @@ import { PhoneInputComponent } from '../../../shared/components/phone-input/phon
   styleUrl: './admin-settings.component.scss'
 })
 export class AdminSettingsComponent implements OnInit {
+  readonly homeThemeOptions = [
+    { id: 'classic' as const, name: 'الشكل العادي', description: 'واجهة المتجر الحالية بتوازنها البسيط.', icon: 'bi bi-layout-text-window-reverse' },
+    { id: 'cards' as const, name: 'شكل الكروت', description: 'أقسام ومنتجات داخل بطاقات بارزة.', icon: 'bi bi-grid-1x2' },
+    { id: 'editorial' as const, name: 'مجلة تحريرية', description: 'صور وعناوين بارزة بطابع مطبوع هادئ.', icon: 'bi bi-journal-richtext' },
+    { id: 'discovery' as const, name: 'لوحة اكتشاف', description: 'ألوان ومسارات تصفح سريعة للأقسام.', icon: 'bi bi-compass' }
+  ];
   private readonly adminService = inject(AdminService);
   readonly settingsService = inject(SettingsService);
   private readonly toast = inject(NotificationService);
@@ -355,6 +361,11 @@ export class AdminSettingsComponent implements OnInit {
     return settings.storeLayout ??= defaultStoreLayout();
   }
 
+  selectHomeTheme(theme: 'classic' | 'cards' | 'editorial' | 'discovery') {
+    this.layoutOptions.homeTheme = theme;
+    this.onColorChange();
+  }
+
   saveSettings(section?: string, silent = false) {
     const current = this.settings();
     if (!current) return;
@@ -442,6 +453,34 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
+  async onFaviconUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+    this.isUploading.set(true);
+    try {
+      const icon = await compressImage(file, { maxWidth: 512, quality: 0.92 });
+      this.adminService.uploadImage(icon, 'branding').subscribe({
+        next: url => {
+          this.isUploading.set(false);
+          this.settings.update(s => s ? { ...s, faviconUrl: url } : s);
+          this.saveSettings('branding', true);
+          this.toast.success('تم تحديث أيقونة المتجر وحفظها.');
+        },
+        error: () => { this.isUploading.set(false); this.toast.error('تعذر رفع أيقونة المتجر.'); }
+      });
+    } catch {
+      this.isUploading.set(false);
+      this.toast.error('تعذر تجهيز أيقونة المتجر. جرّب صورة PNG أو WebP.');
+    }
+  }
+
+  resetFavicon() {
+    this.settings.update(s => s ? { ...s, faviconUrl: '/assets/images/branding/store-mark.svg' } : s);
+    this.saveSettings('branding', true);
+    this.toast.success('تمت استعادة أيقونة المتجر الافتراضية.');
+  }
   async onBannerDesktopUpload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;

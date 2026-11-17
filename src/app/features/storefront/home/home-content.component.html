@@ -172,7 +172,6 @@
     (closeModal)="closeProductModal()"></app-product-detail-modal>
   }
 </div>
-
 }
 
 <!-- Customer Support Call Banner -->
@@ -184,11 +183,12 @@
           <i class="bi bi-headset hotline-icon"></i>
           <h4 class="hotline-title">خدمة العملاء وطلبات المساعدة</h4>
         </div>
-        <p class="numbers-str">{{ settingsService.settings().phone }}</p>
+        <a class="numbers-str hotline-phone-link" [href]="'tel:' + settingsService.settings().phone" dir="ltr">{{ settingsService.settings().phone }} <i class="bi bi-arrow-up-left"></i></a>
       </div>
       <a [href]="'tel:' + settingsService.settings().phone" class="btn-call-action">
         <i class="bi bi-telephone-outbound-fill"></i>
-        <span>اتصل الآن</span>
+        <span>اتصل بخدمة العملاء</span>
+        <i class="bi bi-arrow-up-left call-arrow"></i>
       </a>
     </div>
   </section>

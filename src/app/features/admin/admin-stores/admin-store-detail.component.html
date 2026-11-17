@@ -212,6 +212,14 @@
         <hr class="card-divider">
 
         <!-- 2.2 Custom Domain Management -->
+        <details class="domain-disclosure">
+          <summary class="domain-disclosure-summary">
+            <span class="domain-disclosure-icon"><i class="bi bi-globe2"></i></span>
+            <span class="domain-disclosure-copy"><strong>الدومين المخصص</strong><small>ربط نطاق المتجر وإدارة سجلات DNS</small></span>
+            @if (s.customDomain) { <span class="domain-disclosure-status"><i class="bi bi-check-circle-fill"></i> متصل</span> }
+            <i class="bi bi-chevron-down domain-disclosure-chevron"></i>
+          </summary>
+          <div class="domain-disclosure-body">
         <div class="domain-sub-section">
           <div class="section-badge-title">
             <span class="sub-num">2</span>
@@ -432,6 +440,8 @@
             </div>
           </div>
         </div>
+          </div>
+        </details>
       </section>
 
       <!-- Card 3: Store Access & Support -->
