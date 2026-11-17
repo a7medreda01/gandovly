@@ -18,6 +18,7 @@
     <button type="button" class="tab-btn" [class.active]="activeTab()==='policies'" [attr.aria-current]="activeTab()==='policies' ? 'true' : null" (click)="activeTab.set('policies')"><i class="bi bi-shield-check"></i><span>الطلبات والسياسات</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='branding'" [attr.aria-current]="activeTab()==='branding' ? 'true' : null" (click)="activeTab.set('branding')"><i class="bi bi-palette"></i><span>الهوية والتصميم</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='info'" [attr.aria-current]="activeTab()==='info' ? 'true' : null" (click)="activeTab.set('info')"><i class="bi bi-shop"></i><span>بيانات المتجر</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='domain'" [attr.aria-current]="activeTab()==='domain' ? 'true' : null" (click)="activeTab.set('domain')"><i class="bi bi-globe2" aria-hidden="true"></i><span>الدومين</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='discounts'" [attr.aria-current]="activeTab()==='discounts' ? 'true' : null" (click)="activeTab.set('discounts')"><i class="bi bi-tags"></i><span>العروض والتوصيل</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='integrations'" [attr.aria-current]="activeTab()==='integrations' ? 'true' : null" (click)="activeTab.set('integrations')"><i class="bi bi-graph-up"></i><span>التكاملات والقياس</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='packages'" [attr.aria-current]="activeTab()==='packages' ? 'true' : null" (click)="activeTab.set('packages');loadPackageStats()"><i class="bi bi-box-seam"></i><span>النسخ والاستيراد</span></button>
@@ -1061,21 +1062,8 @@
       </div>
     }
 
-    <!-- TAB 4: Business Info & Contacts -->
-    @if (activeTab() === 'info') {
-      <div class="tab-content animate-fade-in">
-                <details class="settings-card domain-settings mb-4 settings-disclosure"><summary>نشاط المتجر والدومين المخصص</summary>
-          <h3 class="card-title">تخصص ونشاط المتجر الأساسي</h3>
-          <p class="text-muted small mb-2">يحدد التبويبات المتاحة في صفحة تشغيل النشاط، والخصائص ونمط التشغيل المقترح تلقائيًا للمنتجات الجديدة.</p>
-          <select class="form-control mb-2" [(ngModel)]="settings()!.activityPreset">
-            <option value="all">متجر شامل — يضم كافة المجالات والخيارات (افتراضي)</option>
-            <option value="">حسب المجال الأساسي للمتجر</option>
-            @for(preset of activityPresets;track preset.id){
-              <option [value]="preset.id">{{preset.name}}</option>
-            }
-          </select>
-          <p class="small text-muted mb-4">اختيار "متجر شامل" يتيح لك كافة الأدوات والخصائص بدون أي قيود.</p>
-
+    @if (activeTab() === 'domain') {
+      <section class="settings-card domain-settings">
           <h3 class="card-title"><i class="bi bi-globe2 text-primary me-2"></i> ربط دومين المتجر المخصص (Custom Domain)</h3>
           <p class="text-muted small mb-3">
             ربط دومين مدفوع خاص بمتجرك (مثل <code>{{ effectiveDomain || 'gandovly.com' }}</code>). يعمل الدومين المخصص ورابط مي كارت الأساسي معاً في نفس الوقت بتزامن كامل ودون أي تعارض.
@@ -1115,10 +1103,13 @@
                   <a [href]="'https://' + customDomain()" target="_blank" rel="noopener" class="url-link">
                     https://{{ customDomain() }}
                   </a>
+                  @if (vercelStatus()) {
+                    <span class="small">{{ vercelMessages[vercelStatus()] }}</span>
+                  }
                   @if (dnsConfigured()) {
                     <span class="status-pill status-active">
                       <i class="bi bi-check-circle-fill"></i>
-                      <span>متصل ويعمل بنجاح</span>
+                      <span>DNS يشير إلى Vercel</span>
                     </span>
                   } @else {
                     <span class="status-pill status-pending">
@@ -1287,11 +1278,27 @@
               </div>
               <p class="domain-note">
                 <i class="bi bi-shield-check text-success"></i>
-                <span>أضف السجلين في Hostinger ثم اضغط <strong>حفظ وتفعيل الدومين</strong>. سيتم ربط الدومين وإصدار شهادة الأمان (SSL) تلقائياً.</span>
+                <span>أضف السجلين في Hostinger ثم اضغط <strong>حفظ وتفعيل الدومين</strong>. راجع حالة التسجيل بعد الحفظ، واستخدم قيم DNS التي يعرضها Vercel إذا طلب تعديلها.</span>
               </p>
             </div>
           </div>
+      </section>
+    }
 
+    <!-- TAB 4: Business Info & Contacts -->
+    @if (activeTab() === 'info') {
+      <div class="tab-content animate-fade-in">
+        <details class="settings-card settings-disclosure"><summary>نشاط المتجر</summary>
+          <h3 class="card-title">تخصص ونشاط المتجر الأساسي</h3>
+          <p class="text-muted small mb-2">يحدد التبويبات المتاحة في صفحة تشغيل النشاط، والخصائص ونمط التشغيل المقترح تلقائيًا للمنتجات الجديدة.</p>
+          <select class="form-control mb-2" [(ngModel)]="settings()!.activityPreset">
+            <option value="all">متجر شامل — يضم كافة المجالات والخيارات (افتراضي)</option>
+            <option value="">حسب المجال الأساسي للمتجر</option>
+            @for(preset of activityPresets;track preset.id){
+              <option [value]="preset.id">{{preset.name}}</option>
+            }
+          </select>
+          <p class="small text-muted mb-4">اختيار "متجر شامل" يتيح لك كافة الأدوات والخصائص بدون أي قيود.</p>
         </details>
         <div class="row g-4">
           <div class="col-12 col-lg-6">

@@ -41,6 +41,17 @@ export class AdminSettingsComponent implements OnInit {
   domainInput = '';
   domainBusy = signal(false);
   dnsConfigured = signal(false);
+  vercelStatus = signal('');
+  readonly vercelMessages: Record<string, string> = {
+    registered: 'مسجّل على مشروع Vercel المحدد',
+    not_registered: 'الدومين غير مسجّل على مشروع Vercel المحدد. أعد حفظه لمحاولة التسجيل.',
+    configuration_missing: 'إعدادات التسجيل التلقائي على الخادم غير مكتملة.',
+    access_denied: 'Vercel رفض الصلاحية. راجع التوكن والفريق والمشروع.',
+    conflict: 'Vercel رفض الإضافة بسبب تعارض في ربط الدومين.',
+    verification_required: 'Vercel يطلب التحقق من ملكية الدومين.',
+    rejected: 'Vercel رفض تسجيل الدومين. راجع إعدادات المشروع.',
+    unavailable: 'تعذر الاتصال بـ Vercel. أعد الفحص.'
+  };
 
   get effectiveDomain(): string {
     return (this.domainInput || this.customDomain() || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
@@ -75,6 +86,7 @@ export class AdminSettingsComponent implements OnInit {
         this.customDomain.set(r.data.customDomain || '');
         this.domainInput = r.data.customDomain || '';
         this.dnsConfigured.set(!!r.data.dnsConfigured);
+        this.vercelStatus.set(r.data.vercelStatus || '');
         if (r.data.storeUrl) this.storeUrl.set(r.data.storeUrl);
       }
     });
@@ -92,7 +104,8 @@ export class AdminSettingsComponent implements OnInit {
         this.domainBusy.set(false);
         this.customDomain.set(r.data.customDomain || '');
         this.dnsConfigured.set(!!r.data.dnsConfigured);
-        this.toast.success(r.message || 'تم حفظ وربط الدومين بنجاح!');
+        this.vercelStatus.set(r.data.vercelStatus || '');
+        this.toast.info(r.message || 'تم حفظ الدومين. راجع حالة التسجيل.');
       },
       error: e => {
         this.domainBusy.set(false);
@@ -110,6 +123,7 @@ export class AdminSettingsComponent implements OnInit {
         this.customDomain.set('');
         this.domainInput = '';
         this.dnsConfigured.set(false);
+        this.vercelStatus.set('');
         this.toast.success(r.message || 'تم إلغاء ربط الدومين.');
       },
       error: e => {
@@ -127,10 +141,11 @@ export class AdminSettingsComponent implements OnInit {
       next: r => {
         this.domainBusy.set(false);
         this.dnsConfigured.set(!!r.data.dnsConfigured);
+        this.vercelStatus.set(r.data.vercelStatus || '');
         if (r.data.dnsConfigured) {
-          this.toast.success('سجل DNS متصل بنجاح! متجرك يعمل الآن على الدومين.');
+          this.toast.success('سجلات DNS تشير إلى Vercel. راجع حالة تسجيل الدومين في المشروع.');
         } else {
-          this.toast.info('سجل DNS لم ينتشر بعد في Hostinger. انتظر بضع دقائق وأعد الفحص.');
+          this.toast.info('لم يكتشف الفحص سجلات DNS المتوقعة. راجع القيم المطلوبة من Vercel.');
         }
       },
       error: () => {
@@ -167,7 +182,7 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout' | 'menu' | 'cart' | 'checkout' | 'account' | 'integrations'>('info');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout' | 'menu' | 'cart' | 'checkout' | 'account' | 'integrations' | 'domain'>('info');
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -325,7 +340,7 @@ export class AdminSettingsComponent implements OnInit {
   private readonly route=inject(ActivatedRoute);
   ngOnInit() {
     this.commerce.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});
-    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(['performance','layout','menu','cart','checkout','account','info','branding','discounts','policies','packages','integrations'].includes(requestedTab||''))this.activeTab.set(requestedTab as any);
+    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(['performance','layout','menu','cart','checkout','account','info','branding','discounts','policies','packages','integrations','domain'].includes(requestedTab||''))this.activeTab.set(requestedTab as any);
     this.loadSettings();
     this.loadPackageStats();
     this.loadDomain();
