@@ -1,24 +1,24 @@
 :host { display: contents; }
 :host ::ng-deep .home-container {
-  background: #eef5f3; color: #142e3b; padding-bottom: 84px;
+  background: color-mix(in srgb, var(--primary-color) 6%, var(--surface-color, #fff)); color: var(--text-main); padding-bottom: 84px;
   .luxury-hero-card { border-radius: 0 0 30px 30px; }
   .search-filter-section { margin-top: 18px; }
   .search-capsule { border-radius: 999px; }
-  .categories-row-section, .popular-section, .categories-visual-section { margin-inline: clamp(12px, 3vw, 34px); padding: 20px; border-radius: 24px; background: #fff; box-shadow: 0 14px 34px rgba(20, 46, 59, .08); }
-  .categories-compact-grid .cat-compact-card { border: 0; border-radius: 20px; background: #e5f0ed; box-shadow: none; }
+  .categories-row-section, .popular-section, .categories-visual-section { margin-inline: clamp(12px, 3vw, 34px); padding: 20px; border-radius: 24px; background: var(--card-bg, #fff); box-shadow: 0 14px 34px rgba(20, 46, 59, .08); }
+  .categories-compact-grid .cat-compact-card { border: 0; border-radius: 20px; background: color-mix(in srgb, var(--primary-color) 12%, var(--card-bg, #fff)); box-shadow: none; }
 }
 :host ::ng-deep .home-builder {
-  --discovery-ink: #142e3b; background: #eef5f3; color: var(--discovery-ink); padding: clamp(12px, 2.5vw, 28px); border-radius: 24px;
+  --discovery-ink: var(--text-main); background: color-mix(in srgb, var(--primary-color) 6%, var(--surface-color, #fff)); color: var(--discovery-ink); padding: clamp(12px, 2.5vw, 28px); border-radius: 24px;
   .home-search input { border-radius: 999px; }
   .home-search a { border-radius: 50%; }
   .promo, .content-section { border: 0; border-radius: 28px; box-shadow: 0 16px 38px rgba(20, 46, 59, .1); }
-  .promo:not(.overlay) .promo-copy { background: linear-gradient(145deg, color-mix(in srgb, var(--primary-color) 13%, white), white 72%); }
-  .collection { padding: 22px; border-radius: 24px; background: white; }
+  .promo:not(.overlay) .promo-copy { background: linear-gradient(145deg, color-mix(in srgb, var(--primary-color) 13%, var(--card-bg, #fff)), var(--card-bg, #fff) 72%); }
+  .collection { padding: 22px; border-radius: 24px; background: var(--card-bg, #fff); }
   .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-  .info-card { border: 0; border-radius: 22px; background: #e5f0ed; box-shadow: none; }
+  .info-card { border: 0; border-radius: 22px; background: color-mix(in srgb, var(--primary-color) 12%, var(--card-bg, #fff)); box-shadow: none; }
   .items-grid.categories .info-card { border-radius: 999px; }
 }
-:host ::ng-deep .home-builder .promo.no-image { background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 18%, white), white); }
+:host ::ng-deep .home-builder .promo.no-image { background: linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 18%, var(--card-bg, #fff)), var(--card-bg, #fff)); }
 @media (max-width: 767px) {
   :host ::ng-deep .home-container { .categories-row-section, .popular-section, .categories-visual-section { margin-inline: 10px; padding: 14px; border-radius: 20px; } }
   :host ::ng-deep .home-builder { padding: 10px; border-radius: 18px; .collection { padding: 14px; } .collection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }

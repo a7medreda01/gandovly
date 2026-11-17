@@ -86,7 +86,7 @@ export class StoreLayoutEditorComponent {
         this.busy.set(true);
         try {
             const compressed = await compressImage(file, { maxWidth: field === 'mobileImageUrl' ? 900 : 1600, quality: .86 });
-            this.admin.uploadImage(compressed, 'branding').subscribe({ next: url => { (target as any)[field] = url; this.busy.set(false); this.changed(); this.toast.success('تم رفع الصورة؛ احفظ الإعدادات لتطبيقها'); }, error: () => { this.busy.set(false); this.toast.error('تعذر رفع الصورة'); } });
+            this.admin.uploadImage(compressed, 'branding').subscribe({ next: url => { const previous = (target as any)[field] as string; if (previous && previous !== url) this.admin.deleteImageIfUnused(previous).subscribe({ error: () => {} }); (target as any)[field] = url; this.busy.set(false); this.changed(); this.toast.success('تم رفع الصورة؛ حجمها لا يتجاوز 30 كيلوبايت. احفظ الإعدادات لتطبيقها'); }, error: () => { this.busy.set(false); this.toast.error('تعذر رفع الصورة'); } });
         }
         catch {
             this.busy.set(false);

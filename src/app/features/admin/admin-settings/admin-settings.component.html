@@ -82,6 +82,24 @@
     }
   </div>
 </section>
+<section class="settings-card selected-theme-controls">
+  <h3>إعدادات {{ selectedHomeThemeName }}</h3>
+  <p>الهوية والألوان والبنرات التالية تطبق على القالب المختار. يمكنك بناء الأقسام والعروض من محرر المحتوى أسفلها.</p>
+  <div class="row g-3">
+    <label class="col-md-4">اللون الأساسي<input class="form-control" type="color" [(ngModel)]="settings()!.primaryColor" (ngModelChange)="onColorChange()"></label>
+    <label class="col-md-4">لون البطاقات<input class="form-control" type="color" [(ngModel)]="settings()!.cardBgColor" (ngModelChange)="onColorChange()"></label>
+    <label class="col-md-4">لون الخلفية<input class="form-control" type="color" [(ngModel)]="settings()!.surfaceColor" (ngModelChange)="onColorChange()"></label>
+  </div>
+  <label>خط المتجر<select class="form-control" [(ngModel)]="settings()!.fontFamily" (ngModelChange)="onColorChange()"><option value="Cairo">Cairo</option><option value="Tajawal">Tajawal</option><option value="Almarai">Almarai</option></select></label>
+  @if (!layoutOptions.useCustomHome) {
+    <label><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي</label>
+    <div class="row g-3"><label class="col-md-6">بانر الكمبيوتر<input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onBannerDesktopUpload($event)" [disabled]="isUploading()"></label><label class="col-md-6">بانر الموبايل<input class="form-control" type="file" accept="image/png,image/jpeg,image/webp" (change)="onBannerMobileUpload($event)" [disabled]="isUploading()"></label></div>
+    <label>عنوان الرئيسية<input class="form-control" [(ngModel)]="settings()!.restaurantName"></label>
+    <label>وصف الرئيسية<textarea class="form-control" [(ngModel)]="settings()!.description"></textarea></label>
+  }
+  <label><input type="checkbox" [(ngModel)]="settings()!.showPromotionStrip"> إظهار الشريط الترويجي</label>
+  <label>نص العرض الترويجي<input class="form-control" [(ngModel)]="settings()!.activePromotionBanner"></label>
+</section>
 @if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
 <section class="settings-card"><h3>نصوص الرئيسية بالإنجليزية</h3><div class="form-row">
 <label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>

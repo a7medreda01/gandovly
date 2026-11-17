@@ -1,119 +1,72 @@
 export interface CompressionOptions {
   maxWidth?: number;
   maxHeight?: number;
-  quality?: number; // 0.0 to 1.0 (default 0.85)
+  quality?: number;
+  maxBytes?: number;
   mimeType?: 'image/webp' | 'image/jpeg';
 }
 
-/**
- * Compresses an image file on the client side using HTML5 Canvas.
- * Converts to WebP format with high-quality bicubic downscaling.
- * Visually lossless while reducing 4MB-10MB camera shots down to ~80-150 KB.
- */
-export async function compressImage(
-  file: File,
-  options: CompressionOptions = {}
-): Promise<File> {
+const DEFAULT_MAX_BYTES = 30 * 1024;
+const QUALITY_STEPS = [0.9, 0.84, 0.78, 0.72, 0.66, 0.6, 0.54, 0.48, 0.42, 0.36, 0.3];
+
+/** Downscales and encodes an upload until it fits the storage ceiling. */
+export async function compressImage(file: File, options: CompressionOptions = {}): Promise<File> {
   const {
     maxWidth = 1400,
     maxHeight = 1400,
-    quality = 0.85,
+    maxBytes = DEFAULT_MAX_BYTES,
+    quality = 0.9,
     mimeType = 'image/webp'
   } = options;
 
-  // 1. Skip non-raster or non-image files
-  if (!file.type || !file.type.startsWith('image/')) {
-    return file;
+  if (!file.type.startsWith('image/') || /svg|ico/i.test(file.type) || /\.(svg|ico)$/i.test(file.name)) {
+    throw new Error('يرجى اختيار صورة نقطية PNG أو JPEG أو WebP.');
   }
 
-  // Skip SVGs and Icons (lossless vector/icons)
-  if (file.type.includes('svg') || file.type.includes('ico') || file.name.endsWith('.svg') || file.name.endsWith('.ico')) {
-    return file;
-  }
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error('تعذر قراءة الصورة.'));
+      element.src = objectUrl;
+    });
 
-  // 2. Load image onto HTMLImageElement
-  return new Promise<File>((resolve) => {
-    const objectUrl = URL.createObjectURL(file);
-    const img = new Image();
+    let width = image.naturalWidth;
+    let height = image.naturalHeight;
+    if (!width || !height) throw new Error('أبعاد الصورة غير صالحة.');
+    const initialScale = Math.min(1, maxWidth / width, maxHeight / height);
+    width = Math.max(1, Math.round(width * initialScale));
+    height = Math.max(1, Math.round(height * initialScale));
 
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-
-      let { width, height } = img;
-
-      // Don't upscale smaller images
-      if (width > maxWidth || height > maxHeight) {
-        const ratio = Math.min(maxWidth / width, maxHeight / height);
-        width = Math.round(width * ratio);
-        height = Math.round(height * ratio);
-      }
-
-      // Create offscreen canvas
+    while (Math.max(width, height) >= 32) {
       const canvas = document.createElement('canvas');
       canvas.width = width;
       canvas.height = height;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('تعذر تجهيز الصورة للضغط.');
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = 'high';
+      context.drawImage(image, 0, 0, width, height);
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        // Fallback to original if canvas context unavailable
-        resolve(file);
-        return;
+      const startQuality = Math.min(0.98, Math.max(0.3, quality));
+      const qualities = [...new Set(QUALITY_STEPS.map(step => Math.max(0.24, startQuality - (0.9 - step))))];
+      for (const candidateQuality of qualities) {
+        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, mimeType, candidateQuality));
+        if (!blob) continue;
+        if (blob.size <= maxBytes) {
+          const extension = blob.type === 'image/jpeg' ? '.jpg' : '.webp';
+          const name = file.name.replace(/\.[^/.]+$/, '') + extension;
+          return new File([blob], name, { type: blob.type, lastModified: file.lastModified });
+        }
       }
 
-      // Premium rendering settings for crisp food photos
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, 0, 0, width, height);
+      width = Math.max(1, Math.floor(width * 0.82));
+      height = Math.max(1, Math.floor(height * 0.82));
+    }
 
-      // Attempt WebP export first
-      canvas.toBlob(
-        (blob) => {
-          if (!blob) {
-            // If WebP export failed, fallback to JPEG
-            canvas.toBlob(
-              (fallbackBlob) => {
-                if (!fallbackBlob || fallbackBlob.size >= file.size) {
-                  resolve(file);
-                  return;
-                }
-                const newName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
-                resolve(new File([fallbackBlob], newName, { type: 'image/jpeg' }));
-              },
-              'image/jpeg',
-              quality
-            );
-            return;
-          }
-
-          // If compression didn't save space (rare), keep original
-          if (blob.size >= file.size) {
-            resolve(file);
-            return;
-          }
-
-          const extension = blob.type === 'image/webp' ? '.webp'
-            : blob.type === 'image/jpeg' ? '.jpg' : '.png';
-          const cleanName = file.name.replace(/\.[^/.]+$/, '') + extension;
-          const compressedFile = new File([blob], cleanName, { type: blob.type });
-
-          const savedPercent = Math.round(((file.size - blob.size) / file.size) * 100);
-          console.log(
-            `[ImageCompressor] "${file.name}" (${(file.size / 1024).toFixed(1)} KB) -> "${cleanName}" (${(blob.size / 1024).toFixed(1)} KB) [${savedPercent}% saved]`
-          );
-
-          resolve(compressedFile);
-        },
-        mimeType,
-        quality
-      );
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      // Fallback on error
-      resolve(file);
-    };
-
-    img.src = objectUrl;
-  });
+    throw new Error(`تعذر ضغط الصورة إلى ${Math.round(maxBytes / 1024)} كيلوبايت. جرّب صورة أبسط.`);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 }

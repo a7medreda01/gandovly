@@ -975,7 +975,7 @@ export class AdminCatalogComponent implements OnInit {
 
     const files = Array.from(input.files);
     this.isUploadingProductImage.set(true);
-    this.uploadProgressText.set(`جاري ضغط وتحسين ${files.length} صورة بأعلى دقة WebP...`);
+          this.uploadProgressText.set(`جاري ضغط ${files.length} صورة لتصبح كل صورة 30 كيلوبايت أو أقل...`);
 
     try {
       // Auto compress & convert to ultra-fast WebP without visible quality loss
@@ -1000,13 +1000,13 @@ export class AdminCatalogComponent implements OnInit {
           this.syncProductImagesToForm();
           this.isUploadingProductImage.set(false);
           this.uploadProgressText.set('');
-          this.toast.success(`تم ضغط ورفع ${urls.length} صورة بنجاح بصيغة WebP فائقة السرعة.`);
+          this.toast.success(`تم ضغط ورفع ${urls.length} صورة؛ حجم كل صورة لا يتجاوز 30 كيلوبايت.`);
           input.value = '';
         },
         error: () => {
           this.isUploadingProductImage.set(false);
           this.uploadProgressText.set('');
-          this.toast.error('فشل في رفع بعض الصور أو أن حجم الملف كبير (أقصى حجم 10MB).');
+          this.toast.error('تعذر ضغط الصورة إلى 30 كيلوبايت أو رفعها. جرّب صورة أبسط.');
           input.value = '';
         }
       });
@@ -1037,8 +1037,10 @@ export class AdminCatalogComponent implements OnInit {
 
   removeProductImage(index: number) {
     if (index < 0 || index >= this.productImages.length) return;
+    const removedImage = this.productImages[index]?.imageUrl;
     this.productImages.splice(index, 1);
     this.syncProductImagesToForm();
+    if (removedImage) this.adminService.deleteImageIfUnused(removedImage).subscribe({ error: () => {} });
     this.toast.info('تمت إزالة الصورة من الصنف.');
   }
 
@@ -1053,9 +1055,11 @@ export class AdminCatalogComponent implements OnInit {
       const compressed = await compressImage(file, { maxWidth: 800, quality: 0.85 });
       this.adminService.uploadImage(compressed, 'categories').subscribe({
         next: (url) => {
+          const previousUrl = this.categoryForm.imageUrl;
+          if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
           this.categoryForm.imageUrl = url;
           this.isUploadingCategoryImage.set(false);
-          this.toast.success('تم ضغط ورفع صورة القسم بنجاح بصيغة WebP.');
+          this.toast.success('تم ضغط ورفع صورة القسم؛ حجمها لا يتجاوز 30 كيلوبايت.');
           input.value = '';
         },
         error: () => {
@@ -1072,6 +1076,7 @@ export class AdminCatalogComponent implements OnInit {
   }
 
   removeCategoryImage() {
+    if (this.categoryForm.imageUrl) this.adminService.deleteImageIfUnused(this.categoryForm.imageUrl).subscribe({ error: () => {} });
     this.categoryForm.imageUrl = '';
     this.toast.info('تمت إزالة صورة القسم.');
   }

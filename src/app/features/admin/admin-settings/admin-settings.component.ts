@@ -361,6 +361,8 @@ export class AdminSettingsComponent implements OnInit {
     return settings.storeLayout ??= defaultStoreLayout();
   }
 
+  get selectedHomeThemeName() { return this.homeThemeOptions.find(t => t.id === (this.layoutOptions.homeTheme || 'classic'))?.name || ''; }
+
   selectHomeTheme(theme: 'classic' | 'cards' | 'editorial' | 'discovery') {
     this.layoutOptions.homeTheme = theme;
     this.onColorChange();
@@ -437,9 +439,11 @@ export class AdminSettingsComponent implements OnInit {
         next: url => {
           this.isUploading.set(false);
           if (this.settings()) {
+            const previousUrl = this.settings()!.logoUrl;
+            if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
             this.settings.update(s => s ? { ...s, logoUrl: url } : s);
             this.saveSettings('branding', true);
-            this.toast.success('تم ضغط الشعار ورفعه بنجاح بصيغة WebP.');
+            this.toast.success('تم ضغط الشعار ورفعه؛ حجمه لا يتجاوز 30 كيلوبايت.');
           }
         },
         error: () => {
@@ -464,9 +468,11 @@ export class AdminSettingsComponent implements OnInit {
       this.adminService.uploadImage(icon, 'branding').subscribe({
         next: url => {
           this.isUploading.set(false);
+          const previousUrl = this.settings()?.faviconUrl;
+          if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
           this.settings.update(s => s ? { ...s, faviconUrl: url } : s);
           this.saveSettings('branding', true);
-          this.toast.success('تم تحديث أيقونة المتجر وحفظها.');
+          this.toast.success('تم تحديث أيقونة المتجر؛ حجمها لا يتجاوز 30 كيلوبايت.');
         },
         error: () => { this.isUploading.set(false); this.toast.error('تعذر رفع أيقونة المتجر.'); }
       });
@@ -477,6 +483,8 @@ export class AdminSettingsComponent implements OnInit {
   }
 
   resetFavicon() {
+    const previousUrl = this.settings()?.faviconUrl;
+    if (previousUrl) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
     this.settings.update(s => s ? { ...s, faviconUrl: '/assets/images/branding/store-mark.svg' } : s);
     this.saveSettings('branding', true);
     this.toast.success('تمت استعادة أيقونة المتجر الافتراضية.');
@@ -492,9 +500,11 @@ export class AdminSettingsComponent implements OnInit {
         next: url => {
           this.isUploading.set(false);
           if (this.settings()) {
+            const previousUrl = this.settings()!.heroBannerDesktopUrl;
+            if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
             this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: url } : s);
             this.saveSettings('branding', true);
-            this.toast.success('تم ضغط البانر ورفعه بنجاح بصيغة WebP فائقة السرعة.');
+            this.toast.success('تم ضغط البانر ورفعه؛ حجمه لا يتجاوز 30 كيلوبايت.');
           }
         },
         error: () => {
@@ -519,9 +529,11 @@ export class AdminSettingsComponent implements OnInit {
         next: url => {
           this.isUploading.set(false);
           if (this.settings()) {
+            const previousUrl = this.settings()!.heroBannerMobileUrl;
+            if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
             this.settings.update(s => s ? { ...s, heroBannerMobileUrl: url } : s);
             this.saveSettings('branding', true);
-            this.toast.success('تم ضغط بانر الموبايل ورفعه بنجاح بصيغة WebP فائقة السرعة.');
+            this.toast.success('تم ضغط بانر الموبايل ورفعه؛ حجمه لا يتجاوز 30 كيلوبايت.');
           }
         },
         error: () => {
@@ -537,6 +549,8 @@ export class AdminSettingsComponent implements OnInit {
 
   removeLogo() {
     if (this.settings()) {
+      const previousUrl = this.settings()!.logoUrl;
+      if (previousUrl) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
       this.settings.update(s => s ? { ...s, logoUrl: '' } : s);
       this.saveSettings('branding', true);
       this.toast.info('تم حذف اللوجو وحفظ التعديل في قاعدة البيانات.');
@@ -545,6 +559,8 @@ export class AdminSettingsComponent implements OnInit {
 
   removeBannerDesktop() {
     if (this.settings()) {
+      const previousUrl = this.settings()!.heroBannerDesktopUrl;
+      if (previousUrl) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
       this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: '' } : s);
       this.saveSettings('branding', true);
       this.toast.info('تم استعادة البانر الافتراضي وحفظ التعديل في قاعدة البيانات.');

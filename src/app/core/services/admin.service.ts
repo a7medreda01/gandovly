@@ -366,6 +366,11 @@ export class AdminService {
       .pipe(map((res: { success: boolean; data: string; message: string }) => res.data));
   }
 
+  deleteImageIfUnused(path: string): Observable<boolean> {
+    return this.http.delete<{ success: boolean; data: boolean; message: string }>(`${this.api.baseUrl}/admin/media`, { params: { path } })
+      .pipe(map(res => res.data));
+  }
+
   // Mecart Store Package Engine (Seed & Export/Import)
   getPackageStats(): Observable<any> {
     return this.api.get<any>('admin/store-package/stats');

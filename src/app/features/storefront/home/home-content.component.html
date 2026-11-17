@@ -7,10 +7,13 @@
   @if (settingsService.settings().showHeroBanner) {
   <section class="hero-banner-section">
     <div class="luxury-hero-card" appScrollAnimate [style.--hero-text-color]="settingsService.settings().heroTextColor || '#FFFFFF'">
+      <picture>
+        @if (settingsService.settings().heroBannerMobileUrl) { <source media="(max-width: 767px)" [srcset]="settingsService.settings().heroBannerMobileUrl | imageUrl:'banner'"> }
       <img appImageReveal
         [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl) | imageUrl:'banner'"
         [alt]="settingsService.settings().restaurantName || 'منصة التجارة الشاملة'" class="hero-bg-img"
         fetchpriority="high" />
+      </picture>
       <div class="hero-content-overlay">
         <div class="hero-texts">
           <h1 class="hero-title">
