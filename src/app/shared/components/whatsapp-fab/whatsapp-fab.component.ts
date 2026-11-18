@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SettingsService } from '../../../core/services/settings.service';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-whatsapp-fab',
@@ -14,7 +15,7 @@ import { SettingsService } from '../../../core/services/settings.service';
     }
     @if (isVisible) {
       <a
-        [href]="'https://wa.me/' + targetPhone"
+        [href]="whatsappUrl"
         target="_blank"
         rel="noopener noreferrer"
         class="whatsapp-fab flex-center"
@@ -107,7 +108,20 @@ import { SettingsService } from '../../../core/services/settings.service';
 })
 export class WhatsAppFabComponent {
   private settingsService = inject(SettingsService);
+  private languageService = inject(LanguageService);
   settings = this.settingsService.settings;
+
+  get whatsappUrl(): string {
+    const phone = this.targetPhone;
+    if (!phone) return '#';
+    const layout = this.settings().storeLayout;
+    const msg = this.languageService.currentLang() === 'en' && layout?.whatsappDefaultMessageEn
+      ? layout?.whatsappDefaultMessageEn
+      : (layout?.whatsappDefaultMessage || '');
+    return msg
+      ? 'https://wa.me/' + phone + '?text=' + encodeURIComponent(msg)
+      : 'https://wa.me/' + phone;
+  }
 
   get callPhone(): string {
     const raw = (this.settings().phone || '').trim();

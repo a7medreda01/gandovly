@@ -171,6 +171,8 @@ export class SettingsService {
     root.style.setProperty('--product-image-padding',String(layout?.cardImagePadding||0)+'px');
     root.style.setProperty('--product-image-radius',(layout?.cardImageRadius??-1)<0?'var(--radius-product-card)':layout!.cardImageRadius+'px');
     root.style.setProperty('--product-image-aspect',layout?.cardImageAspect==='portrait'?'3 / 4':layout?.cardImageAspect==='landscape'?'4 / 3':'1 / 1');
+    root.style.setProperty('--product-card-style', layout?.productCardStyle || 'modern');
+    root.style.setProperty('--header-position', layout?.stickyHeader === false ? 'relative' : 'sticky');
     if (layout?.navbarLogoWidth) root.style.setProperty('--navbar-logo-width', layout.navbarLogoWidth + 'px');
     else root.style.removeProperty('--navbar-logo-width');
     if (layout?.navbarLogoHeight) root.style.setProperty('--navbar-logo-height', layout.navbarLogoHeight + 'px');

@@ -212,7 +212,7 @@
           </div>
 
           <!-- Active Promotion Banner Text -->
-          <div class="form-group mb-0">
+          <div class="form-group mb-3">
             <label class="font-bold mb-1">
               <i class="bi bi-megaphone-fill text-danger me-1"></i> شريط الإعلان الترويجي العلوي (Active Promotion Banner):
             </label>
@@ -223,6 +223,28 @@
               [(ngModel)]="settings()!.activePromotionBanner"
             />
             <small class="text-muted mt-1 d-block">يظهر هذا النص كشريط متحرك أو بارز في أعلى المتجر للعملاء لجذب الانتباه للعروض.</small>
+          </div>
+          @if (settings()?.enableEnglish) {
+            <div class="form-group mb-3">
+              <label class="font-bold mb-1">نص شريط الإعلان بالإنجليزية (Promotion Banner EN):</label>
+              <input type="text" class="form-control" dir="ltr" placeholder="Special offer: 10% off for limited time! 🔥" [(ngModel)]="layoutOptions.activePromotionBannerEn" />
+            </div>
+          }
+          <div class="row g-2 mb-0">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold">رابط توجيه زر الإعلان (مثال: /menu):</label>
+              <input type="text" class="form-control" dir="ltr" placeholder="/menu" [(ngModel)]="layoutOptions.promoBannerLink" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-bold">نص الزر بالعربية:</label>
+              <input type="text" class="form-control" placeholder="اطلب الآن 🔥" [(ngModel)]="layoutOptions.promoBannerBtnText" />
+            </div>
+            @if (settings()?.enableEnglish) {
+              <div class="col-md-3">
+                <label class="form-label small fw-bold">نص الزر بالإنجليزية:</label>
+                <input type="text" class="form-control" dir="ltr" placeholder="Order Now 🔥" [(ngModel)]="layoutOptions.promoBannerBtnTextEn" />
+              </div>
+            }
           </div>
         </div>
 
@@ -695,7 +717,21 @@
                   }
                 </select>
               </div>
+              <div class="mt-2" *ngIf="settings()!.showWhatsAppFab">
+                <label class="small text-muted mb-1">نص رسالة الواتساب التلقائية (عند فتح المحادثة):</label>
+                <input type="text" class="form-control form-control-sm" placeholder="مثال: مرحباً، أود الاستفسار بخصوص منتجات المتجر" [(ngModel)]="layoutOptions.whatsappDefaultMessage" />
+                @if (settings()?.enableEnglish) {
+                  <input type="text" class="form-control form-control-sm mt-1" dir="ltr" placeholder="Hello, I would like to inquire about your products" [(ngModel)]="layoutOptions.whatsappDefaultMessageEn" />
+                }
+              </div>
             </div>
+          </div>
+
+          <div class="form-row mb-3">
+            <label class="checkbox-label flex-1 p-3 border rounded-3 bg-light cursor-pointer">
+              <input type="checkbox" [ngModel]="layoutOptions.stickyHeader !== false" (ngModelChange)="layoutOptions.stickyHeader=$event; onColorChange()" />
+              <span><strong><i class="bi bi-pin-angle-fill text-primary"></i> تثبيت شريط التنقل العلوي (Sticky Header)</strong><small class="text-muted d-block">إبقاء شريط الهيدر ثابتاً أعلى الشاشة أثناء تمرير العميل لتسهيل الوصول للأقسام والسلة.</small></span>
+            </label>
           </div>
 
           <div class="form-row mb-3">
@@ -864,7 +900,10 @@
 
 }
 @if (activeTab() === 'menu') {
-<details class="settings-card settings-disclosure"><summary>الكروت ونافذة تفاصيل المنتج</summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div><label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></details>
+<details class="settings-card settings-disclosure"><summary>الكروت ونافذة تفاصيل المنتج</summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div>
+<div class="row g-3 mt-1"><div class="col-md-6"><label class="form-group">نمط وتصميم كارت المنتج (Card Style Preset)<select class="form-control" [(ngModel)]="layoutOptions.productCardStyle" (ngModelChange)="onColorChange()"><option value="modern">عصري بارز مع ظل ناعم (Modern Floating)</option><option value="bordered">محدد بإطار أنيق هادئ (Bordered Minimal)</option><option value="minimal">شفاف بسيط بدون حدود (Ultra Minimal)</option></select></label></div><div class="col-md-6"><label class="form-group">طريقة عرض شارة الخصم (Discount Badge)<select class="form-control" [(ngModel)]="layoutOptions.discountBadgeMode" (ngModelChange)="onColorChange()"><option value="percent">نسبة مئوية (مثال: خصم 20%)</option><option value="amount">مبلغ التوفير (مثال: وفر 50 ج.م)</option><option value="both">النسبة والمبلغ معاً</option></select></label></div></div>
+<label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [(ngModel)]="layoutOptions.enableBuyNowButton" (ngModelChange)="settings()!.enableBuyNow = $event"><span class="fw-bold"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> تفعيل زر "شراء الآن" السريع في تفاصيل المنتج (ينقل العميل مباشرة لإنهاء الطلب)</span></label>
+<label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></details>
         <app-store-layout-editor mode="cards" [layout]="layoutOptions" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor>
         <!-- 8. CUSTOM LABELS -->
         <details class="settings-card settings-disclosure"><summary>8. تخصيص المسميات والنصوص (Custom Labels)</summary>
@@ -891,10 +930,52 @@
             </div>
           </div>
 
-</details>
+          <div class="form-row mb-3">
+            <div class="form-group flex-1">
+              <label>رسالة نتائج البحث الفارغة:</label>
+              <input type="text" class="form-control" [(ngModel)]="layoutOptions.emptySearchText" placeholder="لم نجد أصنافاً مطابقة لبحثك" />
+            </div>
+            @if (settings()?.enableEnglish) {
+              <div class="form-group flex-1">
+                <label>رسالة البحث الفارغة بالإنجليزية:</label>
+                <input type="text" class="form-control" dir="ltr" [(ngModel)]="layoutOptions.emptySearchTextEn" placeholder="No matching products found" />
+              </div>
+            }
+          </div>
+        </details>
 }
 @if (activeTab() === 'cart') {
-<section class="settings-card"><h3>عرض السلة</h3><label>مسمى السلة<input class="form-control" [(ngModel)]="settings()!.labelCart"></label><label><input type="checkbox" [(ngModel)]="settings()!.showCartBadge"> عرض عدد المنتجات على أيقونة السلة</label></section>
+<section class="settings-card">
+  <h3>عرض السلة والمفضلة</h3>
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <label class="form-group">مسمى السلة<input class="form-control" [(ngModel)]="settings()!.labelCart"></label>
+    </div>
+    <div class="col-md-6 d-flex align-items-center">
+      <label class="d-flex align-items-center gap-2 cursor-pointer mt-3"><input type="checkbox" [(ngModel)]="settings()!.showCartBadge"> عرض عدد المنتجات على أيقونة السلة</label>
+    </div>
+  </div>
+  <div class="row g-3 mb-2">
+    <div class="col-md-6">
+      <label class="form-group">رسالة السلة الفارغة (عربي)<input class="form-control" [(ngModel)]="layoutOptions.emptyCartText" placeholder="السلة فارغة حالياً"></label>
+    </div>
+    @if (settings()?.enableEnglish) {
+      <div class="col-md-6">
+        <label class="form-group">رسالة السلة الفارغة (EN)<input class="form-control" dir="ltr" [(ngModel)]="layoutOptions.emptyCartTextEn" placeholder="Your cart is empty"></label>
+      </div>
+    }
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-group">رسالة المفضلة الفارغة (عربي)<input class="form-control" [(ngModel)]="layoutOptions.emptyWishlistText" placeholder="قائمة المفضلة فارغة حالياً"></label>
+    </div>
+    @if (settings()?.enableEnglish) {
+      <div class="col-md-6">
+        <label class="form-group">رسالة المفضلة الفارغة (EN)<input class="form-control" dir="ltr" [(ngModel)]="layoutOptions.emptyWishlistTextEn" placeholder="Your wishlist is currently empty"></label>
+      </div>
+    }
+  </div>
+</section>
 }
 @if (activeTab() === 'checkout') {
 <section class="settings-card"><h3>مسميات التسليم</h3><label>مسمى التوصيل<input class="form-control" [(ngModel)]="settings()!.labelDelivery"></label><label>مسمى الاستلام<input class="form-control" [(ngModel)]="settings()!.labelPickup"></label></section>

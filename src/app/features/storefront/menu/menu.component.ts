@@ -1,3 +1,4 @@
+import { SettingsService } from '../../../core/services/settings.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Component, OnInit, AfterViewInit, OnDestroy, inject, signal, ViewChild, ElementRef, HostListener } from '@angular/core';
@@ -22,6 +23,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 })
 export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly catalogService = inject(CatalogService);
+  readonly settingsService = inject(SettingsService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 

@@ -2,8 +2,10 @@
   @if (settingsService.settings().activePromotionBanner) {
   <div class="top-promo-banner flex-center">
     <i class="bi bi-stars me-1 text-warning"></i>
-    <span>{{ settingsService.settings().activePromotionBanner }}</span>
-    <a routerLink="/menu" class="btn-banner-link ms-2">اطلب الآن 🔥</a>
+    <span>{{ languageService.currentLang() === 'en' && settingsService.settings().storeLayout?.activePromotionBannerEn ? settingsService.settings().storeLayout?.activePromotionBannerEn : settingsService.settings().activePromotionBanner }}</span>
+    <a [routerLink]="settingsService.settings().storeLayout?.promoBannerLink || '/menu'" class="btn-banner-link ms-2">
+      {{ languageService.currentLang() === 'en' && settingsService.settings().storeLayout?.promoBannerBtnTextEn ? settingsService.settings().storeLayout?.promoBannerBtnTextEn : (settingsService.settings().storeLayout?.promoBannerBtnText || languageService.text('اطلب الآن 🔥', 'Order Now 🔥')) }}
+    </a>
   </div>
   }
 

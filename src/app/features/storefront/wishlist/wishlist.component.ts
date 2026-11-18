@@ -54,7 +54,7 @@ import { Product, PagedResult } from '../../../core/models/models';
           <div class="empty-icon-wrap mb-3 flex-center">
             <i class="bi bi-heart"></i>
           </div>
-          <h3 class="fw-bold mb-2">{{ languageService.text('قائمة المفضلة فارغة حالياً', 'Your wishlist is currently empty') }}</h3>
+          <h3 class="fw-bold mb-2">{{ (languageService.currentLang() === 'en' && settingsService.settings().storeLayout?.emptyWishlistTextEn ? settingsService.settings().storeLayout?.emptyWishlistTextEn : settingsService.settings().storeLayout?.emptyWishlistText) || languageService.text('قائمة المفضلة فارغة حالياً', 'Your wishlist is currently empty') }}</h3>
           <p class="text-muted mb-4 max-w-md mx-auto">
             {{ emptyWishlistDesc }}
           </p>

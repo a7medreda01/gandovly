@@ -27,7 +27,7 @@
             <div class="empty-cart-icon-ring">
               <i class="bi bi-cart-x"></i>
             </div>
-            <h3>{{ languageService.text('السلة فارغة حالياً', 'Your cart is empty') }}</h3>
+            <h3>{{ (languageService.currentLang() === 'en' && settingsService.settings().storeLayout?.emptyCartTextEn ? settingsService.settings().storeLayout?.emptyCartTextEn : settingsService.settings().storeLayout?.emptyCartText) || languageService.text('السلة فارغة حالياً', 'Your cart is empty') }}</h3>
             <p>{{ languageService.text('تصفح كتالوج المنتجات وأضف ما ترغب به إلى سلتك!', 'Browse our catalog and add items to your cart!') }}</p>
             <button class="btn-browse-menu" (click)="goToMenu()" type="button">
               <span>{{ languageService.text('تصفح المنتجات الآن', 'Browse Products Now') }}</span>

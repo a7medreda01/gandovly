@@ -1,7 +1,7 @@
-<article class="product-card" [class.is-out-of-stock]="!product.isAvailable" [class.has-reveal-anim]="settingsService.settings().storeLayout?.enableProductCardAnimations !== false">
+<article class="product-card" [ngClass]="cardStyleClass" [class.is-out-of-stock]="!product.isAvailable" [class.has-reveal-anim]="settingsService.settings().storeLayout?.enableProductCardAnimations !== false">
   <button type="button" class="card-media" (click)="onSelect()" [attr.aria-label]="'عرض تفاصيل ' + languageService.getLocalizedName(product)">
     <span class="product-img-wrapper"><img appImageReveal [src]="product.imageUrl | imageUrl:'product':(product.updatedAt || product.id)" [alt]="languageService.getLocalizedName(product)" class="product-real-img" loading="lazy" decoding="async" (error)="onImageError($event)" /></span>
-    @if (hasDiscount) { <span class="card-badges"><span class="badge-discount">{{ languageService.text('خصم', 'Save') }} {{ discountPercent }}%</span></span> }
+    @if (hasDiscount) { <span class="card-badges"><span class="badge-discount">{{ discountBadgeText }}</span></span> }
     @if (!product.isAvailable) { <span class="unavailable-label">{{ languageService.text('غير متاح حاليًا', 'Out of stock') }}</span> }
   </button>
   <div class="card-body">

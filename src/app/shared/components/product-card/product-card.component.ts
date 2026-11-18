@@ -54,6 +54,27 @@ export class ProductCardComponent {
     return Math.round(((this.product.originalPrice - this.displayPrice) / this.product.originalPrice) * 100);
   }
 
+  get discountAmount(): number {
+    if (!this.hasDiscount || !this.product.originalPrice) return 0;
+    return Math.max(0, Math.round(this.product.originalPrice - this.displayPrice));
+  }
+
+  get discountBadgeText(): string {
+    const mode = this.settingsService.settings().storeLayout?.discountBadgeMode || 'percent';
+    if (mode === 'amount') {
+      return this.languageService.text('وفر ' + this.discountAmount + ' ' + this.currencySymbol, 'Save ' + this.discountAmount + ' ' + this.currencySymbol);
+    }
+    if (mode === 'both') {
+      return this.languageService.text('خصم ' + this.discountPercent + '% (وفر ' + this.discountAmount + ')', 'Save ' + this.discountPercent + '%');
+    }
+    return this.languageService.text('خصم', 'Save') + ' ' + this.discountPercent + '%';
+  }
+
+  get cardStyleClass(): string {
+    const style = this.settingsService.settings().storeLayout?.productCardStyle || 'modern';
+    return 'card-style-' + style;
+  }
+
   get secondaryImage(): string | undefined {
     if (this.product?.images && this.product.images.length > 1) {
       const nonPrimary = this.product.images.find(img => !img.isPrimary);
