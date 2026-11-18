@@ -58,7 +58,6 @@ export interface StoreLayout {
     productCardStyle?: 'modern' | 'bordered' | 'minimal';
     discountBadgeMode?: 'percent' | 'amount' | 'both';
     stickyHeader?: boolean;
-    enableBuyNowButton?: boolean;
     whatsappDefaultMessage?: string;
     whatsappDefaultMessageEn?: string;
     emptyCartText?: string;
