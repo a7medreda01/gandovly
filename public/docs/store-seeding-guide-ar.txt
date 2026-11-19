@@ -1,520 +1,383 @@
-# دليل تجهيز حزمة بيانات متجر — الإصدار 1.2.0
+# دليل تجهيز وحزم بيانات المتجر — الإصدار 1.3.0 الشامل
+# MeCart Store Seeding & Migration Engine Specification
 
-## تصميم الكروت وسكشنات الرئيسية — جديد في 1.2.0
+هذا الدليل هو المرجع الهندسي والتشغيلي المعتمد لإعداد قوالب المتاجر، تصدير واستيراد حزم البيانات (Store Packages بصيغة ZIP)، وضبط الهوية وتخطيط الواجهة لجميع منصات MeCart.
 
-إعدادات التصميم في settings.json داخل كائن storeLayout. الحزم القديمة 1.0.0 و1.1.0 مقبولة؛ غياب هذا الكائن يحافظ على الرئيسية التقليدية. من الإدارة افتح إعدادات المتجر ← الرئيسية والكروت. الإعدادات تخص المتجر الحالي فقط وتحفظ مع هويته.
+---
+
+## 1. التحديثات والميزات الجديدة في الإصدار 1.3.0
+
+1. **4 قوالب متكاملة للواجهة الرئيسية (Storefront Themes)**:
+   - `classic`: الشكل الكلاسيكي المتوازن — ملائم لكافة الأنشطة العامة ومتاجر التجزئة.
+   - `cards`: شكل الكروت البارزة — كروت منتجات وأقسام ذات ظلال أنيقة، مثالي للإلكترونيات والأجهزة.
+   - `editorial`: المجلة التحريرية الفخمة — تصميم راقٍ ذو كروت أفقية ومساحات واسعة، مثالي للأثاث، الديكور، والموضة.
+   - `discovery`: لوحة الاكتشاف التفاعلية — شريط بحث علوي بارز وشبكة أقسام دائرية، ملائم للسوبرماركت والهايبر ماركت.
+
+2. **بانرات مستقلة لكل قالب (Theme-Specific Banners)**:
+   - يتيح النظام تخصيص بانر كمبيوتر وموبايل وعنوان وزر مستقل لكل قالب ضمن كائن `themeBanners` في `storeLayout`.
+   - عند تبديل القالب، تظهر تلقائياً البانرات المخصصة لذلك القالب دون الحاجة لإعادة رفعها أو فقدان إعدادات القالب الآخر.
+
+3. **16 نوع سكشن للواجهة الرئيسية (16 Homepage Section Types)**:
+   - إضافة 10 أنواع سكاشن تفاعلية جديدة (سلايدر الهيرو، كاروسيل المنتجات، آراء العملاء، شبكة الأقسام، العداد التنازلي، النشرة البريدية، شريط الإحصائيات، الدعوة للشراء الكاملة، الفيديو، وكتل الماركداون) بجانب السكاشن السابقة (الهيرو، المنتجات، البانر الإعلاني، المميزات، الماركات، والأقسام).
+
+4. **نظام ضغط الصور الذكي وتحسين الأداء (Image Compression & Performance)**:
+   - خيار تفعيل الضغط التلقائي `enableImageCompression` وتحديد الحجم الأقصى بالكيلوبايت `maxImageCompressionKb` (افتراضي 150KB).
+   - يتم ضغط الصور محلياً بدقة فائقة قبل الرفع مما يقلل استهلاك السيرفر ويسرع تحميل المتجر للعملاء.
+
+5. **زر "شراء الآن" السريع (Quick Buy Now Button)**:
+   - خيار `enableBuyNow` يظهر زراً سريعاً مميزاً بجانب "إضافة للسلة" في نافذة وصفحة المنتج ينقل العميل مباشرة لإنهاء الطلب باختياراته.
+
+6. **تخصيص أنماط العرض والتأثيرات الحركية (Visuals & Animations)**:
+   - أنماط كروت المنتجات `productCardStyle`: `modern` (عصري بدون حواف حادة مع ظل خفيف)، `bordered` (مؤطر بحدود ناعمة)، `minimal` (بسيط ومسطح).
+   - نمط شارة الخصم `discountBadgeMode`: `percent` (نسبة مئوية %)، `amount` (قيمة التوفير بالعملة)، `both` (كلاهما).
+   - التحكم بتأثيرات الحركة: `enableHomeSectionAnimations`، `enableProductCardAnimations`، و `enableProductPageAnimations`.
+   - تثبيت الهيدر العلوي `stickyHeader`.
+
+---
+
+## 2. بنية ملف الأرشيف المضغوط (ZIP Structure)
+
+يجب أن توضع الملفات التالية في جذر الأرشيف مباشرة (Root) بدون مجلد أب:
+
+```
+├── manifest.json              # بيانات تعريف الحزمة والإصدار والإحصائيات
+├── settings.json              # إعدادات المتجر والهوية و storeLayout
+├── categories.json            # أقسام المتجر وتصنيفاته
+├── products.json              # المنتجات مع خيارات الأسعار والصور والمتغيرات
+├── delivery_zones.json        # مناطق التوصيل والأسعار
+├── branches.json              # الفروع ومواعيد العمل (اختياري)
+├── modifier_groups.json       # خيارات وإضافات المنتجات (اختياري)
+├── preparation_groups.json    # طرق التحضير والتجهيز (اختياري)
+├── resources.json             # الموارد ومواعيد الحجز للمسارات المتخصصة (اختياري)
+├── batches.json               # تشغيلات الصلاحية للأغذية (اختياري)
+├── digital_assets.json        # الملفات الرقمية للبيع (اختياري)
+├── uploads/                   # مجلد الوسائط والصور المرفوعة
+│   ├── branding/              # الشعار، الأيقونة، وبانرات القوالب
+│   ├── categories/            # صور الأقسام
+│   └── products/              # صور المنتجات والمتغيرات
+└── private_assets/            # الملفات الرقمية المدفوعة والكتب الرقمية (اختياري)
+```
+
+---
+
+## 3. إعدادات تخطيط المتجر والسكاشن (storeLayout)
+
+يُضمن كائن `storeLayout` داخل `settings.json`. فيما يلي نموذج يوضح كافة الخصائص الجديدة:
 
 ```json
 {
   "storeLayout": {
+    "homeTheme": "classic",
+    "useCustomHome": true,
     "mobileColumns": 2,
-    "cardImageFit": "contain",
+    "cardImageFit": "cover",
     "cardImagePadding": 12,
     "cardImageRadius": -1,
     "cardImageAspect": "square",
     "detailImageFit": "contain",
-    "useCustomHome": true,
+    "detailImageAspect": "square",
+    "productCardStyle": "modern",
+    "discountBadgeMode": "percent",
+    "stickyHeader": true,
+    "enableImageCompression": true,
+    "maxImageCompressionKb": 150,
+    "enableHomeSectionAnimations": true,
+    "enableProductCardAnimations": true,
+    "enableProductPageAnimations": true,
+    "themeBanners": {
+      "classic": {
+        "desktopUrl": "/uploads/branding/classic-desktop.webp",
+        "mobileUrl": "/uploads/branding/classic-mobile.webp",
+        "title": "أهلاً بكم في متجرنا",
+        "subtitle": "تسوق أحدث المنتجات والعروض الحصرية بأفضل الأسعار.",
+        "buttonText": "تسوق الآن",
+        "buttonLink": "/menu"
+      },
+      "cards": {
+        "desktopUrl": "/uploads/branding/cards-desktop.webp",
+        "mobileUrl": "/uploads/branding/cards-mobile.webp",
+        "title": "تشكيلة الكروت المميزة",
+        "subtitle": "استكشف كل جديد في أقسامنا المنظمة.",
+        "buttonText": "تصفح الكتالوج",
+        "buttonLink": "/menu"
+      },
+      "editorial": {
+        "desktopUrl": "/uploads/branding/editorial-desktop.webp",
+        "mobileUrl": "/uploads/branding/editorial-mobile.webp",
+        "title": "الفخامة تبدأ من التفاصيل",
+        "subtitle": "تصاميم وأثاث عصري يجمع بين الجودة العالية والراحة.",
+        "buttonText": "استكشف المجموعة",
+        "buttonLink": "/menu"
+      },
+      "discovery": {
+        "desktopUrl": "/uploads/branding/discovery-desktop.webp",
+        "mobileUrl": "/uploads/branding/discovery-mobile.webp",
+        "title": "عالم من الخيارات اليومية",
+        "subtitle": "كل ما تحتاجه أسرتك طازج وبأسرع توصيل.",
+        "buttonText": "ابدأ التسوق",
+        "buttonLink": "/menu"
+      }
+    },
     "sections": [
-      {"id":"intro","kind":"hero","enabled":true,"title":"اختيارات المتجر","subtitle":"تصفح المنتجات واختر ما يناسبك.","eyebrow":"اكتشف الجديد","imageUrl":"/uploads/branding/home-desktop.webp","mobileImageUrl":"/uploads/branding/home-mobile.webp","layout":"split","backgroundColor":"#f2f0ff","textColor":"#172238","overlayOpacity":20,"buttonText":"تسوق الآن","link":"/menu","source":"featured","categoryId":null,"productIds":[],"limit":8,"items":[]},
-      {"id":"new","kind":"products","enabled":true,"title":"وصل حديثًا","source":"latest","limit":8,"buttonText":"عرض الكل","link":"/menu"},
-      {"id":"offers","kind":"products","enabled":true,"title":"عروض وخصومات","source":"offers","limit":8,"buttonText":"كل العروض","link":"/menu?sort=offers"},
-      {"id":"help","kind":"features","title":"تسوق بسهولة","items":[{"title":"متابعة الطلب","text":"تفاصيل طلباتك وحالتها","icon":"bi-box-seam","imageUrl":"","link":"/account"}]}
+      {
+        "id": "hero_slider_1",
+        "kind": "hero_slider",
+        "enabled": true,
+        "title": "أقوى العروض",
+        "slides": [
+          {
+            "title": "مجموعة الموسم الجديدة",
+            "subtitle": "خصومات حصرية تصل إلى 40% لفترة محدودة.",
+            "buttonText": "اكتشف العرض",
+            "link": "/menu?sort=offers",
+            "imageUrl": "/uploads/branding/slide-1.webp",
+            "mobileImageUrl": "/uploads/branding/slide-1-mob.webp",
+            "overlayOpacity": 40,
+            "textColor": "#FFFFFF"
+          },
+          {
+            "title": "توصيل مجاني للطلبات الكبيرة",
+            "subtitle": "استمتع بتوصيل سريع ومجاني عند الطلب بأكثر من 500 جنيه.",
+            "buttonText": "اطلب الآن",
+            "link": "/menu",
+            "imageUrl": "/uploads/branding/slide-2.webp",
+            "mobileImageUrl": "/uploads/branding/slide-2-mob.webp",
+            "overlayOpacity": 50,
+            "textColor": "#FFFFFF"
+          }
+        ]
+      },
+      {
+        "id": "cats_grid_1",
+        "kind": "categories_grid",
+        "enabled": true,
+        "title": "تسوق حسب القسم",
+        "subtitle": "اختر القسم وتصفح مئات الأصناف المتوفرة"
+      },
+      {
+        "id": "flash_deal_1",
+        "kind": "countdown",
+        "enabled": true,
+        "title": "عروض التخفيضات الكبرى",
+        "subtitle": "ينتهي العرض قريباً، سارع باقتناص الفرصة!",
+        "countdownTarget": "2026-12-31T23:59:59Z",
+        "buttonText": "مشاهدة العروض",
+        "link": "/menu?sort=offers",
+        "backgroundColor": "#1E293B",
+        "textColor": "#F8FAFC"
+      },
+      {
+        "id": "prod_carousel_1",
+        "kind": "product_carousel",
+        "enabled": true,
+        "title": "الأكثر مبيعاً هذا الأسبوع",
+        "subtitle": "المنتجات الأكثر طلباً وإعجاباً من عملائنا",
+        "source": "bestsellers",
+        "limit": 10,
+        "buttonText": "عرض الكل",
+        "link": "/menu?sort=bestsellers"
+      },
+      {
+        "id": "latest_prods_1",
+        "kind": "products",
+        "enabled": true,
+        "title": "وصل حديثاً",
+        "subtitle": "أحدث الأصناف المضافة لمتجرنا",
+        "source": "latest",
+        "limit": 8,
+        "buttonText": "تصفح الجديد",
+        "link": "/menu?sort=latest"
+      },
+      {
+        "id": "features_bar_1",
+        "kind": "features",
+        "enabled": true,
+        "title": "لماذا تتسوق معنا؟",
+        "items": [
+          { "title": "شحن سريع وآمن", "text": "توصيل فوري حتى باب منزلك", "icon": "bi-truck", "link": "/menu" },
+          { "title": "دفع مرن", "text": "كاش عند الاستلام أو تحويل إلكتروني", "icon": "bi-wallet2", "link": "/menu" },
+          { "title": "ضمان الجودة", "text": "منتجات أصلية ومفحوصة بنسبة 100%", "icon": "bi-shield-check", "link": "/menu" },
+          { "title": "دعم فني متواصل", "text": "خدمة عملاء على مدار اليوم عبر واتساب", "icon": "bi-headset", "link": "/menu" }
+        ]
+      },
+      {
+        "id": "testimonials_1",
+        "kind": "testimonials",
+        "enabled": true,
+        "title": "آراء وتجارب عملائنا",
+        "subtitle": "ماذا يقول عملاؤنا الكرام عن جودة منتجاتنا وخدمتنا",
+        "testimonials": [
+          {
+            "name": "خالد العتيبي",
+            "role": "عميل موثق",
+            "text": "تعاقدت معهم على تجهيز أثاث المنزل، النتيجة ممتازة والتسليم في الموعد تماماً. خدمة محترمة وخامات ممتازة.",
+            "rating": 5,
+            "avatarUrl": "/uploads/branding/avatar-1.webp"
+          },
+          {
+            "name": "سارة أحمد",
+            "role": "عميلة دائمة",
+            "text": "أفضل تجربة شراء أونلاين! المنتجات طازجة ومغلفة بإتقان وسرعة التوصيل مبهرة.",
+            "rating": 5,
+            "avatarUrl": "/uploads/branding/avatar-2.webp"
+          }
+        ]
+      },
+      {
+        "id": "stats_counter_1",
+        "kind": "stats",
+        "enabled": true,
+        "title": "أرقامنا تتحدث عنا",
+        "items": [
+          { "title": "+15,000", "text": "طلب مكتمل بنجاح", "icon": "bi-bag-check" },
+          { "title": "+5,000", "text": "عميل سعيد وموثق", "icon": "bi-emoji-smile" },
+          { "title": "99.8%", "text": "نسبة الرضا والتقييمات الإيجابية", "icon": "bi-star-fill" },
+          { "title": "24/7", "text": "خدمة دعم جاهزة لمساعدتك", "icon": "bi-clock-history" }
+        ]
+      },
+      {
+        "id": "promo_banner_1",
+        "kind": "banner",
+        "enabled": true,
+        "title": "تخفيضات حصرية على قسم الأثاث",
+        "subtitle": "استخدم كوبون الخصم واحصل على وفر إضافي 15%",
+        "eyebrow": "عرض اليوم فقط",
+        "imageUrl": "/uploads/branding/promo-desktop.webp",
+        "mobileImageUrl": "/uploads/branding/promo-mobile.webp",
+        "buttonText": "استفد من العرض",
+        "link": "/menu",
+        "backgroundColor": "#0F172A",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "id": "cta_section_1",
+        "kind": "cta_full",
+        "enabled": true,
+        "title": "هل تحتاج لمساعدة في اختيار طلبك؟",
+        "subtitle": "فريقنا جاهز لمساعدتك عبر واتساب والإجابة عن أي استفسار فوراً.",
+        "buttonText": "تحدث معنا عبر واتساب",
+        "link": "/account",
+        "backgroundColor": "#0284C7",
+        "textColor": "#FFFFFF"
+      },
+      {
+        "id": "newsletter_1",
+        "kind": "newsletter",
+        "enabled": true,
+        "title": "انضم إلى قائمتنا البريدية",
+        "subtitle": "اشترك لتصلك أحدث العروض والخصومات الحصرية أولاً بأول."
+      }
     ]
   }
 }
 ```
 
-- mobileColumns: عدد الكروت في صف الموبايل، 1 أو2 أو3. يستخدم في الرئيسية والكتالوج. عرض سطح المكتب يتكيف تلقائيًا.
-- cardImageFit: contain للصورة الكاملة دون قص، أو cover لملء الإطار مع احتمال قص أطراف الصورة. cardImagePadding: مساحة داخلية من0 إلى32 بكسل. cardImageRadius: ‎-1 لوراثة حواف الكارت، أو0 إلى100 بكسل. cardImageAspect: square (1:1)، portrait (3:4)، landscape (4:3). detailImageFit: contain أوcover لصفحة/موديل التفاصيل؛ عارض التكبير يعرض الصورة كاملة.
-- useCustomHome=false يعيد الرئيسية التقليدية دون حذف السكشنات المحفوظة. true يعرض السكشنات المفعلة بترتيب المصفوفة. ابدأ بترتيب جاهز من الإدارة ثم عدله؛ لا توجد شعارات أو ضمانات أو تقييمات وهمية مضافة تلقائيًا.
-- الأنواع kind: hero بانر رئيسي، products مجموعة منتجات، banner بانر ترويجي، features مميزات، brands علامات تجارية، categories أقسام المتجر.
-- حدود الأداء: حتى16 سكشنًا، منها حتى6 مجموعات منتجات، حتى12 منتجًا في المجموعة، و12 عنصرًا للمميزات أو الماركات. المجموعة الفارغة تخفى تلقائيًا. الصور أسفل أول سكشن تحمل عند الاقتراب منها، مع تثبيت نسب الإطارات لتقليل تغير التخطيط.
-- مصادر المنتجات source: featured ترتيب الكتالوج، latest آخر المنتجات المضافة بترتيب المعرف تنازليًا، offers سعر أصلي أعلى من سعر البيع الأساسي، bestsellers مجموع كميات الطلبات المكتملة فقط، category باستخدام categoryId، manual باستخدام productIds حسب ترتيب الاختيار. لا يُستخدم عدد طلبات عشوائي ولا تحسب الطلبات الملغاة ضمن المبيعات. الأقسام غير المتاحة والمنتجات غير المتاحة لا تعرضها واجهة الرئيسية.
-- layout: split للصورة بجوار النص، أو overlay للنص فوق الصورة. imageUrl لصورة الكمبيوتر وmobileImageUrl بديل الموبايل الاختياري. overlayOpacity من0 إلى80. backgroundColor وtextColor لون HEX مثل #FFFFFF أو نص فارغ للهوية. ارفع صورك من الإدارة؛ لا تضع بيانات سرية في رابط الصورة.
-- title حتى160 حرفًا، subtitle حتى600، eyebrow حتى80، buttonText حتى60؛ إفراغ نص الزر يخفيه. الروابط داخل المتجر فقط: /menu، /account، /product/123، مع category أوsort أوsearch للكتالوج. لا تدعم JavaScript أو تغيير tenant داخل الرابط. source يحدد فلتر زر عرض الكل تلقائيًا.
-- عناصر features وbrands: title حتى100 حرفًا، text حتى240، icon اسم Bootstrap Icons مثل bi-truck أوbi-headset أوbi-shield-check، imageUrl صورة/شعار اختياري، link وجهة داخل المتجر. استخدم فقط مميزات وسياسات وشعارات حقيقية ومصرحًا بها.
-- كل imageUrl وmobileImageUrl في السكشنات وعناصرها يشير إلى صورة مضمنة في ZIP مثل باقي الصور. النظام يعيد كتابة الصور تلقائيًا، ويعيد ترقيم productIds وcategoryId وروابط /product/ID و/menu?category=ID عند النقل إلى متجر جديد. لا تستخدم storeLayoutJson؛ هو تمثيل داخلي فقط. أرفق الأقسام والمنتجات المشار إليها في نفس الحزمة. المنتج أو القسم المشار إليه في الرئيسية يجب إزالته من السكشنات قبل حذفه، أو تعطيل إتاحته بدلًا من الحذف.
-- endpoint الرئيسية: GET /api/v1/storefront/home يعيد السكشنات المفعلة ومنتجاتها في استجابة واحدة. يطبق عزل المتاجر، وحدود المجموعات، ويجلب تفاصيل المنتجات دفعة واحدة دون طلب قاعدة بيانات لكل كارت. فلاتر الكتالوج عبر GET /api/v1/storefront/products?sortBy=latest أوoffers أوbestsellers.
+---
 
-للحزم الجديدة استخدم manifest.version="1.2.0". باقي مواصفات الأنشطة والمخزون والمنتجات في الأقسام التالية تظل سارية.
+## 4. تفاصيل الـ 16 نوعاً لسكاشن الصفحة الرئيسية (Section Kinds)
 
-## تشغيل الأنشطة المتخصصة — اقرأ هذا القسم أولًا
+| نوع السكشن (kind) | الوصف والاستخدام | الخصائص والبيانات التابعة له |
+|---|---|---|
+| `hero` | بانر رئيسي عريض أو منقسم بنصوص وزر | `title`, `subtitle`, `eyebrow`, `buttonText`, `link`, `imageUrl`, `mobileImageUrl`, `layout: split\|overlay` |
+| `products` | شبكة كروت منتجات ديناميكية مع فلترة | `title`, `subtitle`, `source: featured\|latest\|offers\|bestsellers\|category\|manual`, `categoryId`, `productIds`, `limit`, `buttonText`, `link` |
+| `product_carousel` | سلايدر منتجات أفقي أنيق قابل للسحب | نفس خصائص `products` مع عرض انسيابي أفقي ملائم للموبايل والكمبيوتر |
+| `hero_slider` | سلايدر بانرات متعدد الشرائح بأعلى الصفحة | مصفوفة `slides` (كل شريحة لها `title`, `subtitle`, `buttonText`, `link`, `imageUrl`, `mobileImageUrl`, `overlayOpacity`, `textColor`) |
+| `categories` | شريط أقسام دائري أفقي مع تمرير انسيابي | يقرأ الأقسام النشطة تلقائياً من `categories.json` مع صورها |
+| `categories_grid` | شبكة كروت عصرية مخصصة لأقسام المتجر | يقرأ الأقسام مع صورها البارزة وتأثيرات التكبير عند التمرير |
+| `banner` | بانر إعلاني أو ترويجي بنص عريض وزر إجراء | `title`, `subtitle`, `eyebrow`, `imageUrl`, `mobileImageUrl`, `backgroundColor`, `textColor`, `buttonText`, `link` |
+| `features` | بطاقات مميزات المتجر والضمانات | مصفوفة `items` (كل عنصر له `title`, `text`, `icon` كاسم Bootstrap Icon مثل `bi-truck`، و `link`) |
+| `brands` | شريط شعارات الماركات والشركاء | مصفوفة `items` (كل عنصر له `title`, `imageUrl`, `link`) |
+| `testimonials` | بطاقات آراء وتقييمات العملاء الموثقة | مصفوفة `testimonials` (كل عنصر له `name`, `role`, `text`, `rating: 1-5`, `avatarUrl`) |
+| `stats` | شريط عدادات وإحصائيات المتجر | مصفوفة `items` (كل عنصر له `title` كالرقم، `text` كوصف، و `icon`) |
+| `countdown` | سكشن العروض المحدودة بعداد تنازلي مباشر | `title`, `subtitle`, `countdownTarget` (بتنسيق ISO 8601 مثل `2026-12-31T23:59:59Z`), `buttonText`, `link` |
+| `cta_full` | نداء لاتخاذ إجراء عريض (Full-width Call to Action) | `title`, `subtitle`, `buttonText`, `link`, `backgroundColor`, `textColor` |
+| `newsletter` | نموذج الاشتراك في النشرة البريدية | `title`, `subtitle`, `buttonText` |
+| `video` | سكشن فيديو ترويجي للمنتجات | `title`, `subtitle`, `videoUrl` (رابط MP4 أو يوتيوب), `imageUrl` كغلاف, `buttonText`, `link` |
+| `markdown` | كتلة محتوى نصي غني أو تعليمات مخصصة | `title`, `subtitle`, `markdownContent` (نص ماركداون منسق) |
 
-هذا الإصدار يضيف قوالب النشاط، الموارد والمواعيد، تشغيلات الصلاحية والملفات الرقمية الخاصة. يقبل المستورد حزم 1.0.0 القديمة أيضًا؛ الحقول والملفات الجديدة اختيارية، والمنتج بلا commerce يعمل كمنتج عادي Physical. الاستيراد لإنشاء بيانات متجر فارغ، وليس مزامنة أو دمجًا أو استعادة كاملة للعمليات المالية.
+---
 
-لا يوجد تحصيل تلقائي أو خصم دوري من بطاقة العميل. الدفع والمقدم وتجديد الاشتراك يُسجلون يدويًا بعد التأكد الفعلي من استلام المبلغ، بمرجع فريد يمنع تسجيل نفس الدفعة مرتين. طلب التقسيط عرض ومتابعة إدارية، وليس عقد تمويل أو جدول تحصيل آلي.
+## 5. مواصفات settings.json وإعدادات الهوية والتجارة
 
-### تحديد النشاط
-
-businessDomain وdefaultDomain يظلان إحدى القيم الست القديمة الموضحة أدناه. أضف activityPreset في settings.json لاختيار إعدادات المنتجات الافتراضية، وفي كل منتج لتخصيصه. القيم:
-
-| activityPreset | الاستخدام | businessDomain المعتاد | commerce.mode |
-|---|---|---|---|
-| grocery | سوبر ماركت | Supermarket | Physical |
-| perishable | غذاء بصلاحية وتشغيلات | Supermarket | Perishable |
-| restaurant | مطعم وكافيه | Restaurant | Physical |
-| pharmacy | صيدلية | Pharmacy | Prescription |
-| auto-parts | قطع غيار | AutoParts | Physical |
-| electronics | إلكترونيات | Electronics | Physical |
-| clothing / shoes | ملابس / أحذية | GeneralRetail | Physical |
-| furniture / beauty | أثاث / تجميل | GeneralRetail | Physical |
-| cars | معرض سيارات | GeneralRetail | Vehicle |
-| books / flowers / building / sports / jewelry | كتب / هدايا / بناء / رياضة / مجوهرات | GeneralRetail | Physical |
-| services / rental | خدمات / تأجير | GeneralRetail | Booking |
-| digital | ملفات أو أكواد رقمية | GeneralRetail | Digital |
-| subscription | اشتراك | GeneralRetail | Subscription |
-
-اختيار القالب في محرر المنتج يقترح حقول المواصفات وطريقة التشغيل. لا يغيّر منتجات المتجر القديمة تلقائيًا. املأ specificationsJson بالمواصفات الحقيقية؛ أسماء الحقول المقترحة ليست قيودًا تمنع إضافة مواصفات أخرى. المقاسات والألوان وصورها تستخدم variants الموثق في نهاية الملف، وليس مجموعات الإضافات. يمكن جمع أنشطة متعددة بمتجر واحد بتحديد commerce لكل منتج.
-
-### إعداد تشغيل المنتج داخل products.json
-
-استخدم commerce ككائن JSON، وليس commerceJson كنص داخلي:
+فيما يلي قائمة بأهم حقول `settings.json` المرتبطة بالميزات الجديدة:
 
 ```json
 {
-  "id": 101,
-  "categoryId": 1,
-  "nameAr": "جلسة استشارة",
-  "pricingType": "FixedPerUnit",
-  "pricePerUnit": 250,
-  "isAvailable": true,
-  "activityPreset": "services",
-  "commerce": {
-    "mode": "Booking",
-    "resourceId": 7,
-    "durationMinutes": 60,
-    "flexibleDuration": false,
-    "maxDurationMinutes": 480,
-    "prescriptionRequired": false,
-    "subscriptionDays": 30,
-    "digitalDelivery": "File",
-    "depositAmount": 0
-  }
+  "restaurantName": "متجر الأثاث العصري",
+  "defaultDomain": "GeneralRetail",
+  "businessDomainLabel": "أثاث وديكور",
+  "tagline": "أثاث يناسب مساحتك ويعكس ذوقك",
+  "description": "تشكيلة متكاملة من الأثاث المنزلي والمكتبي والديكورات العصرية مع شحن سريع وضمان استبدال.",
+  "logoUrl": "/uploads/branding/logo.png",
+  "faviconUrl": "/uploads/branding/favicon.ico",
+  "primaryColor": "#153E5C",
+  "secondaryColor": "#128577",
+  "accentColor": "#F4A254",
+  "surfaceColor": "#F8FAFD",
+  "phone": "+201000000000",
+  "whatsApp": "+201000000000",
+  "address": "شارع الثورة، مصر الجديدة",
+  "city": "القاهرة",
+  "currencyCode": "EGP",
+  "currencySymbol": "ج.م",
+  "enableBuyNow": true,
+  "showPhoneFab": true,
+  "showWhatsAppFab": true,
+  "showCustomerServiceBar": true,
+  "isOrdersOpen": true,
+  "minimumOrderAmount": 50,
+  "defaultDeliveryFee": 30,
+  "isFreeDeliveryEnabled": true,
+  "freeDeliveryMinOrderAmount": 500,
+  "navbarBrandMode": "both",
+  "productDetailViewMode": "modal",
+  "languageMode": "both",
+  "defaultLanguage": "ar",
+  "enableEnglish": true
 }
 ```
 
-الحقول غير المرسلة تستخدم افتراضيات النظام. mode إحدى Physical,Prescription,Vehicle,Booking,Digital,Subscription,Perishable. durationMinutes من 15 إلى 43200؛ maxDurationMinutes لا يقل عنها ولا يزيد على 525600. subscriptionDays من 1 إلى 3660. digitalDelivery هو File أو Code. depositAmount غير سالب، حتى مليار، بمنزلتين عشريتين. resourceId يجب أن يشير إلى مورد في resources.json لنفس الحزمة، ويعاد ترقيمه تلقائيًا. Booking يحتاج موردًا؛ Vehicle يحتاجه عند اعتماد موعد معاينة.
+- **`enableBuyNow`**: عند تفعيله (`true`)، يظهر زر "شراء الآن" البرتقالي السريع بجوار زر "إضافة للسلة".
+- **`showPhoneFab`**: إظهار زر الاتصال الهاتفي العائم فوق زر الواتساب.
+- **`showCustomerServiceBar`**: إظهار شريط خدمة العملاء والمساعدة في أسفل المتجر.
 
-Booking وDigital وSubscription وVehicle تستخدم FixedPerUnit. المتغيرات variants مدعومة مع Physical وPrescription فقط. Perishable يقبل الوزن أو القطعة، ولا يجمع مع متغيرات الألوان. لا ترسل حجز عميل أو بيانات روشتة في حزمة التهيئة.
+---
 
-### الملفات الجديدة الاختيارية في جذر ZIP
+## 6. صور المتجر والوسائط (Media Guidelines)
+
+- يُشترط أن توضع الصور داخل مجلد `uploads/` داخل الـ ZIP.
+- المسارات داخل الـ JSON تكتب كمسارات نسبية تبدأ بـ `/uploads/` مثل `/uploads/products/item-01.webp`.
+- **الصيغ المدعومة**: `.webp`, `.png`, `.jpg`, `.jpeg`, `.avif`, `.gif`, `.ico`. نوصي بصيغة `WebP` لأعلى جودة وأقل حجم.
+- **الأبعاد المقترحة**:
+  - صور المنتجات: مربعة `1000x1000` أو `1200x1200` بكسل بخلفية نظيفة.
+  - صور الأقسام: مربعة أو دائرية `600x600` بكسل.
+  - بانرات سطح المكتب: عريضة `1920x600` أو `1920x800` بكسل.
+  - بانرات الموبايل: رأسية متناسبة `1080x1350` أو `1080x1080` بكسل.
+  - شعار المتجر: شفاف بصيغة PNG أو WebP بأبعاد تناسب شريط التنقل (`300x100` تقريباً).
+- **الضغط التلقائي**: عند تفعيل `enableImageCompression`، يضمن النظام تحجيم الصور آلياً لتكون أقل من الحجم المحدد بالكيلوبايت قبل حفظها.
+
+---
+
+## 7. آلية التصدير والاستيراد (Export & Import Engine)
+
+1. **تصدير حزمة المتجر (Export)**:
+   - يضغط كافة الكتالوجات (المنتجات، الأقسام، المتغيرات، خيارات التجهيز، مناطق التوصيل، الإعدادات، والهوية).
+   - يصدر كائن `storeLayout` متضمناً القالب المختار، بانرات القوالب المستقلة `themeBanners`، وكافة السكاشن الـ 16.
+   - يعيد حزم كافة ملفات الصور المرفوعة محلياً داخل `uploads/media/` ويعيد كتابة الروابط تلقائياً لضمان عزل المتاجر (Multi-Tenant Isolation).
+   - يضمن ملف `manifest.json` بإصدار `1.3.0` وملف `SEED_GUIDE.md`.
+
+2. **استيراد حزمة المتجر (Import)**:
+   - **الاستيراد لمتجر فارغ (Clean Import)**: يزرع المتجر الجديد بالكامل ويعيد ربط معرفات الأقسام والمنتجات والسكاشن تلقائياً داخل قاعدة البيانات دون أي تعارض.
+   - **المزامنة الذكية لمتجر قائم (Smart Sync)**: في حال وجود بيانات مسبقة في المتجر، يقوم النظام بتحديث نصوص المنتجات والأقسام، وتحديث إعدادات الهوية و`storeLayout` والبانرات والسكاشن الجديدة بأمان تام دون حذف سجل الطلبات التاريخي أو إتلاف بيانات العملاء.
+
+---
+
+## 8. نص جاهز للتوجيه عبر الذكاء الاصطناعي (AI Prompt)
 
 ```
-resources.json
-batches.json
-digital_assets.json
-private_assets/guide.pdf
+قم بتجهيز حزمة متجر MeCart متكاملة بصيغة ZIP وفق مواصفة الإصدار 1.3.0.
+يجب أن يحتوي الجذر على manifest.json بإصدار "1.3.0"، settings.json متضمناً storeLayout مع القالب المختار (classic أو cards أو editorial أو discovery)، بانرات themeBanners لكل قالب، والسكاشن الـ 16 المناسبة للنشاط، بالإضافة لملفات categories.json و products.json ومناطق التوصيل ومجلد uploads بالصور الحقيقية بصيغة WebP. احرص على استخدام روابط سليمة تبدأ بـ /uploads/ دون أي معرفات tenant سابقة.
 ```
 
-كل ملف JSON هنا مصفوفة؛ غيابه يساوي []. يجب أن تظل الملفات الأساسية القديمة موجودة ولو بمصفوفة فارغة. manifest.version للحزم الجديدة هو "1.1.0".
-
-### الموارد والمواعيد والخدمات والتأجير
-
-resources.json مثال:
-
-```json
-[
-  {"id":7,"name":"المستشار الأول","capacity":1,"isActive":true,"opensAt":"09:00","closesAt":"18:00","daysOfWeek":"0,1,2,3,4","blackoutDates":["2026-12-25"]}
-]
-```
-
-السعة من 1 إلى 1000. الساعات HH:mm بنظام 24 ساعة، الإغلاق بعد الفتح؛ لا يدعم المورد فترة ليلية تعبر منتصف الليل. أيام الأسبوع: الأحد0 حتى السبت6. الأيام والتواريخ تطبق حسب timeZone في إعدادات المتجر. الطلب يرسل bookingStartUtc وbookingEndUtc بتوقيت UTC (لاحقة Z)، والواجهة تحوّل من توقيت جهاز العميل. افحص توفر الموعد أولًا؛ السيرفر يعيد التحقق عند إنشاء الطلب داخل قفل ومعاملة لمنع الحجز المتزامن فوق السعة.
-
-مدة ثابتة: flexibleDuration=false، السعر لكل مدة durationMinutes. تأجير مرن: true، السعر لكل وحدة durationMinutes، والمدة تُقرب لأعلى لوحدة كاملة، بحد maxDurationMinutes. تشمل فحوص الأيام المغلقة والتواريخ المحظورة. الحجوزات المعتمدة للمعاينات تشارك نفس سعة المورد. إلغاء/رفض الطلب يحرر الموعد، ولا يعاد فتح طلب متخصص ملغي. تقويم التشغيل إداري، وليس تقويم Google أو تذكيرًا خارجيًا تلقائيًا. تعديل ساعات المورد يؤثر على قبول الحجوزات الجديدة، ولا يعيد جدولة الحجوزات القائمة.
-
-### الصيدليات والروشتات
-
-اجعل mode=Prescription وprescriptionRequired=true فقط للمنتجات التي تتطلب مراجعة روشتة. العميل يرفع PDF أو PNG أو JPEG بحد 8MB عند إتمام الطلب؛ الخادم يرجع رمزًا مؤقتًا يربطه بطلب واحد. لا تعتمد على مواصفة نصية مثل requiresPrescription بدل إعداد commerce الفعلي.
-
-الملف خاص ولا يوجد تحت uploads العام، وتراجعه إدارة المتجر من تشغيل النشاط. يمنع السيرفر تقدم الطلب قبل الموافقة. الرفض يحتاج سببًا، ويمكن للعميل رفع نسخة جديدة من تفاصيل الطلب أثناء انتظار التأكيد. الروشتات والعملاء والقرارات الطبية لا تُصدر إلى قوالب البيانات. يتولى الشخص المختص مراجعة صلاحية الوصفة وملاءمتها؛ النظام ينظم المراجعة ولا يتخذ قرارًا طبيًا.
-
-### السيارات والمعاينات والعروض
-
-mode=Vehicle يعرض طلب عرض سعر أو معاينة أو مقدم حجز أو تقسيط بدل الشراء بالسلة. المواصفات مثل الماركة والموديل والسنة والكيلومترات توضع في مواصفات المنتج، والصور في images. durationMinutes مدة المعاينة، resourceId الموظف/مكان المعاينة، depositAmount المقدم المقترح.
-
-يتابع العميل الطلب برابط خاص محفوظ على جهازه. الإدارة تعتمد السعر والمقدم والأقساط والرد، وتراجع توفر المورد عند اعتماد المعاينة، ثم تسجل استلام المقدم بمرجع بعد التحقق. هذه البيانات التشغيلية لا تُنقل إلى قالب متجر آخر.
-
-### الملفات الرقمية والأكواد والاشتراكات
-
-ملفات digital_assets.json مثال:
-
-```json
-[
-  {"id":1,"productId":102,"fileName":"guide.pdf","filePath":"private_assets/guide.pdf"}
-]
-```
-
-المنتج102 يجب أن يكون Digital مع digitalDelivery=File، أو Subscription. الملف نفسه موجود داخل ZIP تحت private_assets/. الامتدادات المسموحة pdf,png,jpg,jpeg,zip,epub,mp3,mp4، وحجم الملف حتى32MB. يفحص النظام محتوى الملف الأساسي والامتداد؛ لا تضع EXE أو SVG أو HTML. الملفات تنقل إلى تخزين خاص مستقل للمتجر خارج wwwroot، وليس إلى uploads العام. Digital/File يسلم الملفات الفعالة المرتبطة بالطلب بعد تأكيد الدفع؛ الاشتراك يتيح الملفات الفعالة للمنتج طوال الاستحقاق.
-
-للأكواد اجعل digitalDelivery=Code. **لا تضع مفاتيح بيع سرية في ZIP أو JSON**. بعد الاستيراد أضف الأكواد من تشغيل النشاط، كل كود بسطر، حتى500 في الدفعة؛ تخزن مشفرة وتخصص مرة واحدة للعميل. الحجز غير المدفوع للكود مدته48ساعة. الكود المكشوف بعد الدفع لا يرجع للبيع عند الإلغاء. المنتج الرقمي غير الجاهز بملف أو أكواد يرفض الطلب، حتى تجهزه الإدارة.
-
-الملفات والأكواد لا تُتاح قبل تأكيد الدفع من السيرفر. حالة إكمال الطلب وحدها لا تتجاوز الحماية. التنزيل عبر رابط طلب خاص، ويمنع بعد إلغاء/رفض الطلب أو إيقاف الملف أو انتهاء/إيقاف الاشتراك. الرابط سر حامل؛ لا تنشره أو تضعه في بيانات القالب. الاشتراك يبدأ بعد الدفع لمدة subscriptionDays؛ التجديد اليدوي يمدد من نهاية المدة الحالية أو من الآن إذا انتهى. لا يخصم أي مبلغ تلقائيًا ولا يجدد دون تسجيل دفعة جديدة.
-
-### الأغذية والتشغيلات والصلاحية
-
-batches.json مثال:
-
-```json
-[
-  {"id":1,"productId":103,"lotNumber":"LOT-2026-A","expiresOn":"2026-12-31","remainingQuantity":20,"isBlocked":false}
-]
-```
-
-المنتج103 يجب أن يكون Perishable. remainingQuantity عدد القطع للمنتج FixedPerUnit، وجرامات صحيحة للمنتج ByWeight. رقم التشغيلة فريد داخل المنتج. يسحب الطلب من الأقرب انتهاءً أولًا FEFO، ويستبعد المحظور والمنتهي، ويرفض نقص المخزون الصالح. الإلغاء يعيد الكمية إلى نفس التشغيلات. تنبيهات تشغيل النشاط تميز المنتهي وما ينتهي خلال7أيام؛ ليست رسائل خارجية مجدولة. تاريخ الصلاحية صالح حتى نهاية يوم UTC المحدد في التنفيذ الحالي. لا تستخدم مخزون variants لهذا المسار.
-
-### ما ينقله التصدير وما يستبعده
-
-ينقل: هوية المتجر، الأقسام، المنتجات والصور، الخيارات والإضافات، المتغيرات، مناطق التوصيل والفروع، قوالب النشاط، الموارد وإعدادات المواعيد، التشغيلات بكمياتها المتبقية، والملفات الرقمية العامة للبيع داخل مجلد خاص في الحزمة. **تعامل مع ZIP كملف خاص لأنه قد يحتوي ملفات رقمية مدفوعة**.
-
-يستبعد: العملاء والطلبات، الروشتات، المواعيد المحجوزة فعليًا، العروض والمقدمات، سجلات الدفع والاستحقاقات والأكواد السرية، كلمات المرور والجلسات ومفاتيحAPI. تُمسح معرفات pixels عند الاستيراد، حتى لا تنتقل زيارات عميل لحساب إعلانات عميل آخر. الحزمة ليست بديلًا عن نسخة احتياطية مشفرة لقاعدة البيانات والتخزين الخاص ومفاتيح Data Protection المحفوظة في App_Data/keys. عند نقل السيرفر بالكامل يجب حفظ الثلاثة لاستمرار فك تشفير الأكواد. ملفات App_Data الخاصة تُحفظ عبر التحديثات ولا تُنشر من جهاز المطور.
-
-### قائمة تسليم لمن يجهز البيانات
-
-1. اجمع متطلبات المتجر واختر domain وactivityPreset، ثم حدّد mode لكل منتج.
-2. استخدم معرفات محلية فريدة وثابتة للأقسام والمنتجات والموارد والمجموعات، واربطها داخل نفس الحزمة.
-3. جهز الصور والخيارات والمتغيرات كما في الأقسام التالية. ضع الملفات المدفوعة في private_assets فقط.
-4. أرفق JSON الجديدة اللازمة للنشاط، وتحقق من وجود كل ملف مشار إليه، والأسعار والوحدات والتواريخ.
-5. استورد إلى متجر اختبار فارغ؛ افحص الصور، منتجًا بكل مسار، حجزين متعارضين، والصلاحية والكمية.
-6. اختبر طلبًا غير مدفوع ثم تأكيدًا يدويًا بمرجع اختبار في بيئة الاختبار؛ تحقق من منع التسليم قبل التأكيد وتكرار نفس المرجع.
-7. صدّر المتجر التجريبي ثم استورده إلى متجر اختبار آخر، وافحص إعادة ترقيم الروابط والموارد والتشغيلات والملفات.
-8. سلّم ZIP وتقرير المصادر والنواقص، دون بيانات أشخاص أو أسرار أو أوامر دفع حقيقية.
-
-هذا الملف مواصفة تنفيذية لشخص أو AI. المطلوب ZIP قابل للاستيراد من مساحة القوالب والبيانات إلى متجر فارغ، وليس SQL أو نسخة قاعدة بيانات. لا ترفع بيانات عملاء أو طلبات أو كلمات مرور أو مفاتيح API أو جلسات واتساب.
-
-## 1. المعلومات المطلوبة قبل البدء
-اجمع اسم المتجر، نوع النشاط، اللغة، العملة، الهوية والألوان والشعار، وصف المتجر، التواصل الحقيقي، سياسة التسعير والتوصيل والفروع. اطلب المصدر المصرح به للمنتجات والصور، الأسعار والخصومات والمخزون والخيارات. لا تخترع بيانات ناقصة. لا تستخدم اسم المنصة في هوية المتجر. جهز تقريرًا بالنواقص ومصدر كل منتج.
-الأنشطة المقبولة: Supermarket, Restaurant, Pharmacy, AutoParts, Electronics, GeneralRetail. استخدم GeneralRetail للأثاث والملابس والأنشطة العامة. أسماء الأنشطة حساسة لقيم enum، لا تترجمها داخل JSON.
-
-## 2. بنية ZIP
-يجب أن تكون الملفات التالية في جذر الأرشيف مباشرة، بدون مجلد أب:
-manifest.json
-settings.json
-categories.json
-products.json
-delivery_zones.json
-branches.json (اختياري)
-modifier_groups.json (اختياري)
-preparation_groups.json (اختياري)
-uploads/branding/...
-uploads/categories/...
-uploads/products/...
-
-ملفات القوائم مصفوفات JSON، ويمكن [] للقوائم الفارغة. settings وmanifest كائنات JSON. استخدم UTF-8 وJSON صالحًا دون تعليقات أو فاصلة زائدة. manifest.version للحزمة الجديدة يجب أن يساوي "1.2.0". مثال:
-{"templateId":"store-package-v1","version":"1.2.0","businessDomain":"GeneralRetail","counts":{"categories":1,"products":1}}
-counts معلومات توثيقية، ولا تغني عن العد الفعلي.
-
-## 3. الصور والهوية
-نزّل الصور المسموح باستخدامها داخل uploads. JSON يشير إلى /uploads/products/chair-01.webp بينما اسم الملف داخل ZIP هو uploads/products/chair-01.webp. لا تستخدم مسار Windows أو file:// أو tenantId قديم. كل صورة محلية مشار إليها يجب أن توجد في الأرشيف. الصيغ المقبولة png,jpg,jpeg,webp,gif,ico,avif. SVG غير مقبول في الحزمة. لا تستخدم ../ أو backslash أو مسارات مطلقة أو أسماء مكررة. النظام ينسخ الصور لمجلد مستقل للمتجر ويعيد كتابة الروابط تلقائيًا.
-للجودة: صور منتجات مربعة 1000–1600px مع المنتج بوضوح وبدون هوامش مبالغ فيها، أقسام 600px تقريبًا، بانر سطح مكتب عريض وموبايل رأسي مناسب، شعار شفاف إن توفر. هذه مقاسات مقترحة وليست قيودًا تقنية. حسّن الحجم مع الحفاظ على التفاصيل. لا تربط صورًا محمية تتطلب تسجيل دخول. الروابط الخارجية أقل ضمانًا من الصور المحلية.
-
-## 4. settings.json
-الأفضل تصدير حزمة مرجعية من متجر مضبوط واستخدام settings.json منها، ثم مراجعة كل بيانات الهوية والتواصل والصور. الاستيراد يكتب إعدادات الحزمة وليس دمجًا جزئيًا؛ الحقول المحذوفة قد تعود لقيم النظام الافتراضية. راجع جميع الحقول في الملحق أدناه، خصوصًا الدفع والتوصيل والإشعارات. لا تنقل أرقام متجر آخر. مثال أساسي (استبدل البيانات والصور بأصول موجودة فعليًا):
-{"restaurantName":"متجر الأثاث","defaultDomain":"GeneralRetail","businessDomainLabel":"أثاث","tagline":"أثاث يناسب مساحتك","description":"تشكيلة أثاث منزلي وخارجي","logoUrl":"/uploads/branding/logo.png","heroBannerDesktopUrl":"/uploads/branding/desktop.jpg","heroBannerMobileUrl":"/uploads/branding/mobile.jpg","faviconUrl":"/uploads/branding/favicon.ico","primaryColor":"#153e5c","secondaryColor":"#128577","accentColor":"#f4a254","phone":"","whatsApp":"","address":"","city":""}
-
-## 5. الأقسام categories.json
-[{"id":1,"nameAr":"كراسي الحدائق","nameEn":"Garden chairs","domain":"GeneralRetail","imageUrl":"/uploads/categories/chairs.webp","displayOrder":1,"isActive":true}]
-كل id موجب وفريد داخل قائمة الكيان. الترتيب displayOrder تصاعدي. لا تنشئ قسم جميع الأصناف؛ الواجهة تنشئه. الاسم العربي واضح ومختصر.
-
-## 6. المنتجات products.json
-[{"id":10,"categoryId":1,"nameAr":"كرسي حديقة","nameEn":"Garden chair","description":"وصف حقيقي للخامة والمقاس والاستخدام","descriptionEn":"Material, dimensions and usage","domain":"GeneralRetail","pricingType":"FixedPerUnit","pricePerUnit":1200,"originalPrice":1500,"allowOrderByPieces":true,"allowOrderByWeight":false,"stockQuantity":null,"isAvailable":true,"sku":"CHAIR-001","brand":"","imageUrl":"/uploads/products/chair-01.webp","images":[{"id":101,"imageUrl":"/uploads/products/chair-01.webp","isPrimary":true,"displayOrder":0},{"id":102,"imageUrl":"/uploads/products/chair-02.webp","isPrimary":false,"displayOrder":1}],"displayOrder":1,"specificationsJson":"{\"الخامة\":\"خشب\",\"المقاس\":\"80 × 70 سم\"}","modifierGroups":[{"modifierGroupId":60}],"preparationGroups":[]}]
-categoryId يطابق قسمًا موجودًا. النظام يعيد توليد IDs وربط العلاقات داخل المتجر، فلا تعتمد على أرقام قاعدة البيانات. لا تضع tenantId أو navigation objects. الصور المتعددة مرتبة ولها صورة أساسية واحدة. originalPrice سعر قبل الخصم ويجب أن يزيد عن السعر الحالي؛ احذفه إن لم يوجد خصم. stockQuantity=null يعني غير محدد؛ لا تخترع مخزونًا. الأسعار أرقام عشرية بدون عملة أو فواصل آلاف. specificationsJson نص يحتوي JSON صالحًا، وليس كائنًا مباشرًا.
-للبيع بالوزن: pricingType="ByWeight"، pricePerKg قيمة الكيلو، allowOrderByWeight=true، وaverageUnitWeightGrams عند إتاحة الطلب بالقطع. استخدم وحدات صحيحة ولا تسمّ سعر الكيلو سعر القطعة.
-الأحجام/الألوان: إذا كان لكل بديل SKU ومخزون وصور مستقلة فأنشئ منتجًا مستقلًا. إذا كانت إضافة بسعر على المنتج فاستخدم modifier_groups؛ لا تخترع ملف variants غير مدعوم.
-
-## 7. الخيارات والإضافات modifier_groups.json
-[{"id":60,"nameAr":"إضافات","nameEn":"Extras","isRequired":false,"minSelection":0,"maxSelection":2,"displayOrder":0,"options":[{"id":61,"nameAr":"وسادة إضافية","nameEn":"Extra cushion","price":150,"isAvailable":true,"displayOrder":0}]}]
-اربط المجموعة بالمنتج عبر modifierGroups:[{"modifierGroupId":60}]. السعر هنا إضافة إلى سعر المنتج. minSelection لا يتجاوز maxSelection أو عدد الخيارات المتاحة. للمجموعة الإجبارية اجعل isRequired=true وحدًا أدنى مناسبًا. لا تضع خيارات مكررة أو مراجع غير موجودة.
-
-## 8. مجموعات التجهيز preparation_groups.json
-[{"id":80,"nameAr":"التجهيز","nameEn":"Preparation","description":"اختر التجهيز","isRequired":true,"maxSelection":1,"displayOrder":0,"options":[{"id":81,"nameAr":"عادي","nameEn":"Standard","pricingType":"AddOn","price":0,"isAvailable":true,"displayOrder":0},{"id":82,"nameAr":"مع التركيب","nameEn":"With assembly","pricingType":"AddOn","price":100,"isAvailable":true,"displayOrder":1}]}]
-ربط المنتج: preparationGroups:[{"preparationOptionGroupId":80}]. AddOn إضافة للسعر؛ FinalPrice سعر نهائي وليس إضافة. لا تستخدم FinalPrice دون مراجعة حساب إجمالي السلة فعليًا. لا تخلط أسماء مفاتيح ربط التجهيز والإضافات.
-
-## 9. التوصيل والفروع
-مثال delivery_zones.json:
-[{"id":1,"name":"المدينة","city":"القاهرة","level":"Macro","parentZoneId":null,"deliveryFee":40,"minimumOrder":100,"estimatedDeliveryTimeMinutes":60,"isActive":true,"displayOrder":0},{"id":2,"name":"الحي","city":"القاهرة","level":"Sub","parentZoneId":1,"deliveryFee":30,"minimumOrder":100,"estimatedDeliveryTimeMinutes":45,"isActive":true,"displayOrder":1}]
-المستويات Macro ثم Sub ثم Micro عند الحاجة. المراجع يجب أن توجد بدون دورات أو ربط المنطقة بنفسها. لا تضف مناطق وهمية. استخدم [] إذا لم تتوفر بيانات حقيقية، واضبط سياسة التوصيل لاحقًا.
-مثال branches.json:
-[{"id":1,"name":"الفرع الرئيسي","phone":"","address":"عنوان حقيقي","isActive":true,"workingHoursText":"مواعيد العمل الفعلية"}]
-
-## 10. حدود الأرشيف والأمان
-حد رفع ZIP عبر API هو 100MB، وإجمالي المحتوى المفكوك 250MB، وعدد المداخل 10000. قد تفرض الاستضافة حدًا أقل. لا تضغط مجلد node_modules أو قواعد بيانات أو أسرار. الاستيراد إلى متجر فارغ فقط (بدون منتجات أو أقسام)، وليس أداة تحديث أو دمج لمتجر عامل. يحدث داخل معاملة مع إعادة فحص فراغ المتجر. لا تفترض أن إعدادات الهوية ستبقى كما كانت قبل الاستيراد.
-
-## 11. خطوات التسليم والاختبار
-1. سلّم ZIP وREADME يذكر المصادر، النشاط، اللغة، العملة، الأعداد والحقول الناقصة وحقوق الصور.
-2. فك الأرشيف في مجلد تجريبي وافحص كل JSON وكل مرجع وصورة قبل الرفع. تأكد أن الملفات في الجذر.
-3. أنشئ متجر اختبار فارغًا بالنشاط الصحيح بدون قالب مزروع؛ اختره صراحة في القوالب والبيانات.
-4. استورد وانتظر النجاح. قارن أعداد الأقسام والمنتجات والصور والخيارات بالمصدر.
-5. افتح الرئيسية والأقسام والبحث وصفحة منتج متعدد الصور على الموبايل وسطح المكتب. اختبر الأسعار قبل/بعد الخصم والخيارات الإجبارية والحد الأقصى.
-6. أضف للسلة واختبر الكمية/الوزن وحساب الإضافات/التجهيز والتوصيل، بدون إرسال طلب حقيقي أو رسالة إلا بإذن.
-7. راجع الهوية والتواصل والدفع والتوصيل من إعدادات المتجر؛ صدّر الحزمة واختبر إعادة الاستيراد في متجر اختبار فارغ آخر عند الحاجة.
-8. لا ترفع حزمة فاشلة جزئيًا للمتجر الفعلي. سجل الأخطاء والنواقص بدقة.
-
-## 12. نص جاهز لإرساله لأي AI
-جهّز حزمة ZIP وفق هذا الدليل من البيانات والمصادر التي أعطيك إياها. افحص الصيغة الفعلية ولا تخترع حقولًا أو أسعارًا أو مخزونًا. نزّل الصور المسموح بها داخل uploads واربطها بمسارات /uploads/. أنشئ الأقسام والمنتجات والهوية والخيارات والإضافات والتجهيز والتوصيل والفروع المتاحة. استخدم IDs محلية وروابط صحيحة دون tenantId أو بيانات حساسة. تحقق من كل JSON والملفات والحدود وأعطني تقرير تحقق وأعدادًا ومصادر ونواقص. لا تنفذ الاستيراد على متجر فعلي دون تحديده صراحة.
-
-## 13. مرجع أسماء الحقول الفعلية
-القوائم التالية مأخوذة من كائنات النظام عند إصدار الدليل. القيم الافتراضية والحدود الموجودة في خصائص C# مرجع للمطور؛ ملفات JSON تستخدم camelCase، والـenum نص بالقيم المذكورة. لا تنقل Id/TenantId/ConcurrencyVersion أو خصائص العلاقات الملاحية إلى settings. استخرج حزمة مرجعية للحصول على إعدادات تصميم متوافقة بدل تخمين القيم.
-
-### RestaurantSettings
-```csharp
-    public int Id { get; set; }
-    public BusinessDomain DefaultDomain { get; set; } = BusinessDomain.Supermarket;
-    public bool IsMultiDomain { get; set; } = false;
-    public string? BusinessDomainLabel { get; set; } = "سوبر ماركت";
-    public string RestaurantName { get; set; } = "سوبر ماركت المدينة";
-    public string Tagline { get; set; } = "تسوق أفضل المنتجات بأعلى جودة وأفضل الأسعار يومياً";
-    public string Description { get; set; } = "منصة تسوق متكاملة تضمن لك أفضل المنتجات الغذائية والاستهلاكية مع التوصيل السريع.";
-    public string LogoUrl { get; set; } = "/uploads/branding/logo.png";
-    public string HeroBannerDesktopUrl { get; set; } = "/uploads/branding/hero-desktop.jpg";
-    public string HeroBannerMobileUrl { get; set; } = "/uploads/branding/hero-mobile.jpg";
-    public string FaviconUrl { get; set; } = "/uploads/branding/favicon.ico";
-    public string PrimaryColor { get; set; } = "#0a3d62"; // كحلي بحري عميق
-    public string SecondaryColor { get; set; } = "#00a8cc"; // تركواز بحري
-    public string AccentColor { get; set; } = "#e67e22"; // مرجاني دافئ
-    public string SurfaceColor { get; set; } = "#f8fafd"; // عاجي بحري ناعم
-    public string Phone { get; set; } = "+201000000000";
-    public string WhatsApp { get; set; } = "+201000000000";
-    public string Address { get; set; } = "شارع البحر، المحافظة";
-    public string City { get; set; } = "القاهرة";
-    public string? FacebookUrl { get; set; }
-    public string? InstagramUrl { get; set; }
-    public string? TikTokUrl { get; set; }
-    public string? YouTubeUrl { get; set; }
-    public string? TwitterUrl { get; set; }
-    public string? SnapchatUrl { get; set; }
-    public string? LocationUrl { get; set; }
-    public string FontFamily { get; set; } = "Cairo";
-    public string CountryCode { get; set; } = "EG";
-    public string PhoneCountryCode { get; set; } = "+20";
-    public string CurrencyCode { get; set; } = "EGP";
-    public string CurrencySymbol { get; set; } = "ج.م";
-    public string TimeZone { get; set; } = "Africa/Cairo";
-    public string Locale { get; set; } = "ar-EG";
-    public bool IsOrdersOpen { get; set; } = true;
-    public string? PauseMessage { get; set; }
-    public decimal MinimumOrderAmount { get; set; } = 50m;
-    public decimal DefaultDeliveryFee { get; set; } = 25m;
-    public bool IsFreeDeliveryEnabled { get; set; } = false;
-    public decimal? FreeDeliveryMinOrderAmount { get; set; } = 300m;
-    public bool IsTieredDiscountEnabled { get; set; } = false;
-    public decimal? TieredDiscountThresholdAmount { get; set; } = 500m;
-    public decimal? TieredDiscountPercentage { get; set; } = 10m; // 10%
-    public bool IsFlatDiscountEnabled { get; set; } = false;
-    public decimal? FlatDiscountPercentage { get; set; } = 5m; // 5%
-    public string? ActivePromotionBanner { get; set; }
-    public string EstimatedWeightDisclaimer { get; set; } = "الوزن والسعر تقديريان، ويتم تحديدهما نهائياً بعد الوزن الفعلي في المطبخ وقد يختلفان قليلاً.";
-    public string? TermsAndPrivacyText { get; set; }
-    public string? VodafoneCashNumber { get; set; }
-    public string? InstaPayAccount { get; set; }
-    public bool SendOnOrderPlaced { get; set; } = true;
-    public bool SendOnOrderConfirmed { get; set; } = true;
-    public bool SendOnKitchenWeighed { get; set; } = true;
-    public bool SendOnOutForDelivery { get; set; } = true;
-    public bool SendOnOrderCompleted { get; set; } = true;
-    public bool SendOnOrderCancelled { get; set; } = true;
-    public bool NotifyCashierOnNewOrder { get; set; } = true;
-    public string CashierWhatsAppNumber { get; set; } = "01000000000";
-    public int CashierNotificationDelaySeconds { get; set; } = 3;
-    public string DefaultNotificationSessionId { get; set; } = "default";
-    public bool IsPostDeliveryFollowUpEnabled { get; set; } = true;
-    public int PostDeliveryFollowUpDelayHours { get; set; } = 24;
-    public string PostDeliveryFollowUpMessageTemplate { get; set; } = "أهلاً بك يا {اسم_العميل} 🔥، نسعد بخدمتك وتسوقك معنا لطلبك #{رقم_الطلب}. نأمل أن تكون راضياً تماماً عن جودة المنتجات والتوصيل! لأي استفسار أو اقتراح، نحن دائماً في خدمتك.";
-    [MaxLength(20)] public string NavbarBgColor { get; set; } = "#FFFFFF";
-    [MaxLength(20)] public string NavbarTextColor { get; set; } = "#12263F";
-    [MaxLength(20)] public string FooterBgColor { get; set; } = "#12263F";
-    [MaxLength(20)] public string FooterTextColor { get; set; } = "#FFFFFF";
-    [MaxLength(20)] public string CardBgColor { get; set; } = "#FFFFFF";
-    [MaxLength(20)] public string BorderColor { get; set; } = "#E1E6EE";
-    [MaxLength(20)] public string BtnPrimaryBg { get; set; } = "#12263F";
-    [MaxLength(20)] public string BtnPrimaryText { get; set; } = "#FFFFFF";
-    [MaxLength(20)] public string BtnAccentBg { get; set; } = "#F4A261";
-    [MaxLength(20)] public string BtnAccentText { get; set; } = "#FFFFFF";
-    [MaxLength(20)] public string SuccessColor { get; set; } = "#00875A";
-    [MaxLength(20)] public string ErrorColor { get; set; } = "#DC2626";
-    [MaxLength(20)] public string WarningColor { get; set; } = "#D97706";
-    [MaxLength(20)] public string BorderRadius { get; set; } = "16px";
-    [MaxLength(20)] public string ButtonBorderRadius { get; set; } = "12px";
-    [MaxLength(20)] public string NavbarBorderRadius { get; set; } = "0px";
-    [MaxLength(20)] public string BottomNavBorderRadius { get; set; } = "28px";
-    [MaxLength(20)] public string ProductCardBorderRadius { get; set; } = "18px";
-    [MaxLength(20)] public string SearchBorderRadius { get; set; } = "999px";
-    [MaxLength(20)] public string CardShadowStyle { get; set; } = "soft"; // soft | medium | strong | none
-    public int FontSizeBase { get; set; } = 15;
-    [MaxLength(20)] public string NavbarBrandMode { get; set; } = "both"; // logo_only | name_only | both | icon_name
-    public bool ShowNavbarTagline { get; set; } = true;
-    public bool ShowWhatsAppInNavbar { get; set; } = true;
-    public bool ShowPhoneInNavbar { get; set; } = false;
-    public bool ShowSearchBar { get; set; } = true;
-    public bool ShowCartBadge { get; set; } = true;
-    public bool ShowWhatsAppFab { get; set; } = true;
-    [MaxLength(20)] public string FabPosition { get; set; } = "bottom-right"; // bottom-right | bottom-left
-    public bool EnableWishlist { get; set; } = true;
-    public bool ShowWishlistInMobileNav { get; set; } = true;
-    public bool ShowWishlistInSidebar { get; set; } = true;
-    public bool ShowHeroBanner { get; set; } = true;
-    public bool ShowCategoriesRow { get; set; } = true;
-    public bool ShowCategoriesGrid { get; set; } = true;
-    public bool ShowPromotionStrip { get; set; } = true;
-    public bool ShowCustomerServiceBar { get; set; } = true;
-    public bool ShowSocialMediaInFooter { get; set; } = true;
-    public bool ShowLocationInFooter { get; set; } = true;
-    public bool ShowWhatsAppInMobileNav { get; set; } = true;
-    public bool ShowCallInMobileNav { get; set; } = false;
-    [MaxLength(20)] public string ProductDetailViewMode { get; set; } = "modal"; // modal | page
-    public bool CheckoutEnableDelivery { get; set; } = true;
-    public bool CheckoutEnablePickup { get; set; } = true;
-    public bool CheckoutEnableScheduled { get; set; } = true;
-    [MaxLength(100)] public string PickupLocationLabel { get; set; } = "المستودع الرئيسي";
-    [MaxLength(300)] public string PickupLocationAddress { get; set; } = "";
-    [MaxLength(100)] public string PickupWorkingHours { get; set; } = "من 8:00 ص حتى 11:00 م";
-    [MaxLength(200)] public string PickupInstructions { get; set; } = "يرجى إحضار رقم الطلب عند الاستلام";
-    public bool PaymentEnableCOD { get; set; } = true;
-    public bool PaymentEnableWalletTransfer { get; set; } = true;
-    public bool PaymentEnableOnlineCard { get; set; } = false;
-    [MaxLength(50)] public string PaymentGatewayProvider { get; set; } = "";
-    [MaxLength(200)] public string PaymentGatewayPublicKey { get; set; } = "";
-    [MaxLength(60)] public string CheckoutPageTitle { get; set; } = "إتمام الطلب";
-    [MaxLength(100)] public string CheckoutPageSubtitle { get; set; } = "أدخل بيانات التوصيل لتأكيد الطلب";
-    [MaxLength(50)] public string CheckoutSubmitBtnText { get; set; } = "تأكيد الطلب";
-    [MaxLength(100)] public string CheckoutSuccessMessage { get; set; } = "تم استلام طلبك بنجاح! ✅";
-    [MaxLength(30)] public string LabelOrder { get; set; } = "طلب";
-    [MaxLength(30)] public string LabelOrders { get; set; } = "طلباتي";
-    [MaxLength(30)] public string LabelProduct { get; set; } = "صنف";
-    [MaxLength(30)] public string LabelProducts { get; set; } = "أصناف";
-    [MaxLength(30)] public string LabelCategory { get; set; } = "قسم";
-    [MaxLength(30)] public string LabelCategories { get; set; } = "أقسام";
-    [MaxLength(30)] public string LabelCart { get; set; } = "السلة";
-    [MaxLength(30)] public string LabelDelivery { get; set; } = "التوصيل";
-    [MaxLength(30)] public string LabelPickup { get; set; } = "استلام من الفرع";
-    [MaxLength(30)] public string LabelWishlist { get; set; } = "المفضلة";
-    [MaxLength(20)] public string LanguageMode { get; set; } = "both"; // ar_only | en_only | both
-    [MaxLength(10)] public string DefaultLanguage { get; set; } = "ar"; // ar | en
-    public bool EnableEnglish { get; set; } = true;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public string? UpdatedBy { get; set; }
-```
-
-### Product
-```csharp
-    public int Id { get; set; }
-    public int CategoryId { get; set; }
-    public string NameAr { get; set; } = string.Empty;
-    public string? NameEn { get; set; }
-    public string? Description { get; set; }
-    public string? DescriptionEn { get; set; }
-    public string? ImageUrl { get; set; }
-    public string? SecondaryImageUrl { get; set; }
-    public string? Brand { get; set; }
-    public string? Sku { get; set; }
-    public string? Barcode { get; set; }
-    public PricingType PricingType { get; set; } = PricingType.FixedPerUnit;
-    public decimal PricePerUnit { get; set; } = 0m;
-    public decimal? OriginalPrice { get; set; }
-    public decimal? PricePerKg { get; set; }
-    public int? AverageUnitWeightGrams { get; set; }
-    public bool AllowOrderByPieces { get; set; } = true;
-    public bool AllowOrderByWeight { get; set; } = false;
-    public int PreparationTimeMinutes { get; set; } = 0;
-    public string? AllergyNotice { get; set; }
-    public string? SpecificationsJson { get; set; }
-    public int DisplayOrder { get; set; } = 0;
-    public bool IsAvailable { get; set; } = true;
-    public int? StockQuantity { get; set; }
-```
-
-### MenuCategory
-```csharp
-    public int Id { get; set; }
-    public string NameAr { get; set; } = string.Empty;
-    public string? NameEn { get; set; }
-    public string? Description { get; set; }
-    public string? DescriptionEn { get; set; }
-    public string? ImageUrl { get; set; }
-    public string? IconName { get; set; }
-    public BusinessDomain Domain { get; set; } = BusinessDomain.Supermarket;
-    public int DisplayOrder { get; set; } = 0;
-    public bool IsActive { get; set; } = true;
-```
-
-### ModifierGroup
-```csharp
-    public int Id { get; set; }
-    public string NameAr { get; set; } = string.Empty;
-    public string? NameEn { get; set; }
-    public bool IsRequired { get; set; } = false;
-    public int MinSelection { get; set; } = 0;
-    public int MaxSelection { get; set; } = 5;
-    public int DisplayOrder { get; set; } = 0;
-```
-
-### ModifierOption
-```csharp
-    public int Id { get; set; }
-    public int GroupId { get; set; }
-    public string NameAr { get; set; } = string.Empty;
-    public string? NameEn { get; set; }
-    public decimal Price { get; set; } = 0m;
-    public bool IsAvailable { get; set; } = true;
-    public int DisplayOrder { get; set; } = 0;
-```
-
-### PreparationOptionGroup
-```csharp
-    public int Id { get; set; }
-    public string NameAr { get; set; } = "طريقة الطهي والتحضير";
-    public string? NameEn { get; set; }
-    public string? Description { get; set; }
-    public bool IsRequired { get; set; } = true;
-    public int MaxSelection { get; set; } = 1;
-    public int DisplayOrder { get; set; } = 0;
-```
-
-### PreparationOption
-```csharp
-    public int Id { get; set; }
-    public int GroupId { get; set; }
-    public string NameAr { get; set; } = string.Empty;
-    public string? NameEn { get; set; }
-    public string? Description { get; set; }
-    public PreparationPricingType PricingType { get; set; } = PreparationPricingType.AddOn;
-    public decimal Price { get; set; } = 0m;
-    public bool IsAvailable { get; set; } = true;
-    public int DisplayOrder { get; set; } = 0;
-```
-
-### DeliveryZone
-```csharp
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string City { get; set; } = "الجيزة";
-    public int? ParentZoneId { get; set; }
-    public DeliveryZone? ParentZone { get; set; }
-    public ZoneLevel Level { get; set; } = ZoneLevel.Sub;
-    public string NeighborhoodKeywords { get; set; } = string.Empty;
-    public decimal DeliveryFee { get; set; } = 25m;
-    public decimal MinimumOrder { get; set; } = 50m;
-    public int EstimatedDeliveryTimeMinutes { get; set; } = 45;
-    public bool IsActive { get; set; } = true;
-    public int DisplayOrder { get; set; } = 0;
-```
-
-### Branch
-```csharp
-    public int Id { get; set; }
-    public string Name { get; set; } = "الفرع الرئيسي";
-    public string Phone { get; set; } = "+201000000000";
-    public string Address { get; set; } = "الفرع الرئيسي - شارع النصر";
-    public bool IsActive { get; set; } = true;
-    public string WorkingHoursText { get; set; } = "يومياً من 11:00 صباحاً حتى 01:00 بعد منتصف الليل";
-```
-
-## تحديث: متغيرات المقاسات والألوان
-أضف داخل كل صف في products.json حقل variants كمصفوفة. لا تستخدم variantsJson في الحزمة؛ النظام يحفظها داخليًا فقط.
-مثال:
-[{"id":"black-m","color":"أسود","size":"M","sku":"TS-BLK-M","price":250,"stockQuantity":5,"isAvailable":true,"images":["/uploads/products/shirt-black.webp"]},{"id":"black-l","color":"أسود","size":"L","sku":"TS-BLK-L","price":null,"stockQuantity":0,"isAvailable":true,"images":["/uploads/products/shirt-black.webp"]}]
-المعرف id نص ثابت وفريد داخل المنتج (حروف إنجليزية وأرقام وشرطة، حتى 64 حرفًا). نفس اللون والمقاس لا يتكرران. الحد 200 تركيبة؛ color حتى 80 حرفًا، size حتى 40، sku حتى 100. السعر null يستخدم سعر المنتج، وstockQuantity=null يعني مخزونًا غير محدد، و0 يعني نفاد المخزون. الأسعار لا تتجاوز منزلتين عشريتين. images مصفوفة حتى 10 روابط صور للون، وتُرفق ملفات /uploads/ داخل الأرشيف مثل بقية الصور. اجعل صور اللون متطابقة بين مقاساته. المتغيرات للمنتجات FixedPerUnit فقط.
-في السلة والطلب يُرسل variantId، ويحسب الباك السعر ويخصم المخزون ويحفظ اللون والمقاس في لقطة اسم الصنف. لا تحذف تركيبة مرتبطة بطلب قائم؛ عطّل إتاحتها بدل ذلك. إعادة استيراد الحزمة تحافظ على معرفات المتغيرات داخل المنتج الجديد.
-قبل تسليم قالب لعميل آخر امسح metaPixelId وtikTokPixelId وsnapPixelId من settings.json أو ضع قيمًا فارغة؛ كل متجر يستخدم معرفاته الخاصة، وليس حساب إعلانات صاحب القالب.
-
-
-ألوان المتغيرات: بجانب color (اسم اللون) أرسل colorId (معرف ثابت مشترك لكل مقاسات اللون) وcolorHex بصيغة #RRGGBB. مثال: {"id":"black-m","color":"أسود","colorId":"black","colorHex":"#171717","size":"M","images":[]}. تحفظ هذه الحقول في VariantsJson بقاعدة البيانات وتنتقل مع الاستيراد والتصدير. البيانات القديمة تظل مدعومة، ويولد الباك معرفًا عند حفظها. لا تغير id لتركيبة مستخدمة في طلب.
+---
+*تم إعداد وتحديث هذا الدليل لمنصة MeCart المتطورة — الإصدار 1.3.0.*

@@ -1,5 +1,5 @@
 ﻿<div class="settings-page">
-<a class="btn btn-outline-primary my-3" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md"><i class="bi bi-file-earmark-arrow-down"></i> تنزيل إرشادات تجهيز بيانات المتجر والصور</a>
+<a class="btn btn-outline-primary my-3 shadow-sm fw-bold" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md"><i class="bi bi-file-earmark-arrow-down"></i> تنزيل إرشادات تجهيز بيانات المتجر والصور (v1.3.0)</a>
   <div class="page-title-row flex-between">
     <div>
       <h1 class="page-heading">إعدادات المتجر</h1>
@@ -1892,37 +1892,66 @@
     @if (activeTab() === 'packages') {
       <div class="settings-tab-pane animate-fade-in">
 
-        <div class="card p-4 mb-4"><h3 class="fw-bold mb-2">نسخ بيانات المتجر</h3><p class="text-muted small mb-0">احتفظ بنسخة من المنتجات والأقسام والصور والإعدادات، أو استورد بيانات إلى متجر فارغ.</p></div>
+        <div class="card p-4 mb-4 border-0 shadow-sm" style="border-radius: 16px; background: #fff;">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h3 class="fw-bold mb-0" style="color: #0F172A;">نسخ وإدارة بيانات المتجر (Store Packages)</h3>
+                <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1" style="font-size: 0.8rem;">v1.3.0 التحديث الشامل</span>
+              </div>
+              <p class="text-muted small mb-0">تصدير نسخة احتياطية أو قالب متكامل يشمل المنتجات والأقسام، الـ 16 نوع سكشن للرئيسية، بانرات القوالب المستقلة، إعدادات ضغط الصور وزر الشراء، أو استيراد حزمة إلى متجر فارغ أو مزامنتها مع المتجر الحالي.</p>
+            </div>
+            <div>
+              <a class="btn btn-outline-primary fw-bold shadow-sm" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md" style="border-radius: 10px;">
+                <i class="bi bi-file-earmark-arrow-down-fill me-1"></i> تنزيل إرشادات تجهيز بيانات المتجر والصور (v1.3.0)
+              </a>
+            </div>
+          </div>
+        </div>
 
         <!-- Live Store Statistics Cards -->
         @if (packageStats()) {
           <div class="row g-3 mb-4">
-            <div class="col-6 col-md-3">
-              <div class="card p-3 text-center border-0 shadow-sm" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-bag-check-fill text-success" style="font-size: 1.8rem;"></i>
-                <div class="fw-bold fs-4 mt-2" style="color: #0F172A;">{{ packageStats().productsCount }}</div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                <i class="bi bi-bag-check-fill text-success" style="font-size: 1.6rem;"></i>
+                <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().productsCount }}</div>
                 <div class="text-muted small">إجمالي المنتجات</div>
               </div>
             </div>
-            <div class="col-6 col-md-3">
-              <div class="card p-3 text-center border-0 shadow-sm" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-grid-fill text-primary" style="font-size: 1.8rem;"></i>
-                <div class="fw-bold fs-4 mt-2" style="color: #0F172A;">{{ packageStats().categoriesCount }}</div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                <i class="bi bi-grid-fill text-primary" style="font-size: 1.6rem;"></i>
+                <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().categoriesCount }}</div>
                 <div class="text-muted small">أقسام المتجر</div>
               </div>
             </div>
-            <div class="col-6 col-md-3">
-              <div class="card p-3 text-center border-0 shadow-sm" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-geo-alt-fill text-warning" style="font-size: 1.8rem;"></i>
-                <div class="fw-bold fs-4 mt-2" style="color: #0F172A;">{{ packageStats().zonesCount }}</div>
-                <div class="text-muted small">مناطق التوصيل</div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                <i class="bi bi-geo-alt-fill text-warning" style="font-size: 1.6rem;"></i>
+                <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().zonesCount }}</div>
+                <div class="text-muted small">مناطق التوصيل @if (packageStats().branchesCount) { ({{ packageStats().branchesCount }} فرع) }</div>
               </div>
             </div>
-            <div class="col-6 col-md-3">
-              <div class="card p-3 text-center border-0 shadow-sm" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-images text-danger" style="font-size: 1.8rem;"></i>
-                <div class="fw-bold fs-4 mt-2" style="color: #0F172A;">{{ packageStats().uploadsFilesCount }} ({{ packageStats().uploadsSizeMb }} MB)</div>
-                <div class="text-muted small">ملفات الصور المرفوعة</div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                <i class="bi bi-images text-danger" style="font-size: 1.6rem;"></i>
+                <div class="fw-bold fs-5 mt-1" style="color: #0F172A;">{{ packageStats().uploadsFilesCount }}</div>
+                <div class="text-muted small">{{ packageStats().uploadsSizeMb }} MB وسائط</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                <i class="bi bi-layout-text-window-reverse text-info" style="font-size: 1.6rem;"></i>
+                <div class="fw-bold fs-5 mt-1" style="color: #0F172A;">{{ packageStats().sectionsCount ?? layoutOptions.sections.length }} سكشن</div>
+                <div class="text-muted small">القالب: {{ getThemeLabel(packageStats().homeTheme || layoutOptions.homeTheme) }}</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                <i class="bi bi-lightning-charge-fill text-warning" style="font-size: 1.6rem;"></i>
+                <div class="fw-bold fs-6 mt-1" style="color: #0F172A;">{{ (packageStats().enableImageCompression ?? layoutOptions.enableImageCompression) !== false ? (packageStats().maxImageCompressionKb || layoutOptions.maxImageCompressionKb || 150) + ' KB' : 'بدون ضغط' }}</div>
+                <div class="text-muted small">شراء الآن: {{ (packageStats().enableBuyNow ?? settings()?.enableBuyNow) ? 'مفعّل' : 'معطّل' }}</div>
               </div>
             </div>
           </div>
@@ -1935,23 +1964,34 @@
           <div class="col-12 col-lg-6">
             <div class="card p-4 h-100 shadow-sm" style="border-radius: 16px; border: 1px solid #E2E8F0;">
               <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                   <i class="bi bi-cloud-arrow-down-fill"></i>
                 </div>
                 <div>
                   <h4 class="fw-bold mb-0" style="color: #1E293B;">تصدير حزمة المتجر (Export Package)</h4>
-                  <small class="text-muted">تنزيل نسخة احتياطية أو قالب جاهز للاستخدام</small>
+                  <small class="text-muted">تنزيل نسخة احتياطية أو قالب جاهز للاستخدام الفوري (v1.3.0)</small>
                 </div>
               </div>
 
-              <p class="text-muted small mb-4">
-                يقوم النظام بتجميع كافة المنتجات، الأقسام، خيارات التجهيز، مناطق التوصيل، الإعدادات والهوية البصرية مع مجلد الصور المنظم، ويخرجها في ملف ZIP مضغوط يحتوي على ملف تعريف <code>manifest.json</code> ودليل <code>دليل الاستخدام</code>.
+              <p class="text-muted small mb-3">
+                يقوم النظام بتجميع كافة المنتجات، الأقسام، خيارات التجهيز، مناطق التوصيل، الإعدادات والهوية البصرية مع مجلد الصور المنظم، ويخرجها في ملف ZIP مضغوط متوافق مع كافة الإصدارات.
               </p>
+
+              <div class="bg-light p-3 rounded-3 mb-4 small">
+                <div class="fw-bold text-dark mb-2"><i class="bi bi-check2-circle text-success me-1"></i> تتضمن الحزمة المُصدّرة:</div>
+                <ul class="mb-0 ps-3 text-muted" style="line-height: 1.8;">
+                  <li>كافة الكتالوجات (المنتجات، الأقسام، المتغيرات، خيارات التجهيز، مناطق التوصيل، الفروع).</li>
+                  <li>القالب المختار وبانرات كل قالب المستقلة (Theme Banners) المعدة في <code>storeLayout</code>.</li>
+                  <li>جميع سكاشن الرئيسية (16 نوعاً: سلايدر الهيرو، كاروسيل المنتجات، آراء العملاء، شبكة الأقسام، العداد التنازلي...).</li>
+                  <li>إعدادات ضغط الصور وتحسين الأداء وزر الشراء السريع وكافة ألوان وهويات المتجر.</li>
+                  <li>ملفات الوسائط والصور المرفوعة مضغوطة ومنظمة مع ملف التعريف <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>.</li>
+                </ul>
+              </div>
 
               <div class="mt-auto">
                 <button
                   type="button"
-                  class="btn w-100 py-3 fw-bold shadow-sm"
+                  class="btn w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center"
                   style="background: #10B981; color: #fff; border-radius: 12px; font-size: 1.05rem;"
                   (click)="onExportPackage()"
                   [disabled]="isExporting()"
@@ -1970,20 +2010,28 @@
           <div class="col-12 col-lg-6">
             <div class="card p-4 h-100 shadow-sm" style="border-radius: 16px; border: 1px solid #E2E8F0;">
               <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width: 44px; height: 44px; border-radius: 10px; background: #FDF2F8; color: #DB2777; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: #FDF2F8; color: #DB2777; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
                   <i class="bi bi-cloud-arrow-up-fill"></i>
                 </div>
                 <div>
-                  <h4 class="fw-bold mb-0" style="color: #1E293B;">استيراد بيانات المتجر</h4>
-                  <small class="text-muted">زرع وتثبيت بيانات وصور متجر جديد</small>
+                  <h4 class="fw-bold mb-0" style="color: #1E293B;">استيراد بيانات المتجر (Import & Seed)</h4>
+                  <small class="text-muted">زرع وتثبيت بيانات وصور متجر جديد أو مزامنة متجر حالي</small>
                 </div>
               </div>
 
               <p class="text-muted small mb-3">
-                ارفع ملف حزمة المتجر بصيغة <code>.zip</code> لاستيراد المنتجات والأقسام والصور تلقائيًا إلى متجر فارغ.
+                ارفع ملف حزمة المتجر بصيغة <code>.zip</code> لاستيراد المنتجات والأقسام والصور والسكاشن تلقائيًا.
               </p>
 
-              <p class="text-muted small">الاستيراد لمتجر فارغ فقط، دون حذف البيانات الحالية.</p>
+              <div class="bg-light p-3 rounded-3 mb-4 small">
+                <div class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-primary me-1"></i> مميزات وآليات الاستيراد الذكي:</div>
+                <ul class="mb-0 ps-3 text-muted" style="line-height: 1.8;">
+                  <li>يدعم حزم الإصدارات <code>1.0.0</code> و <code>1.1.0</code> و <code>1.2.0</code> و <code>1.3.0</code> الحديثة.</li>
+                  <li><strong>للمتجر الفارغ:</strong> زرع كامل للكتالوج والسكاشن وتوليد المعرفات ونقل الصور تلقائياً.</li>
+                  <li><strong>للمتجر القائم:</strong> دمج ومزامنة ذكية لتحديث الهوية والسكاشن والبانرات والترجمات الإنجليزية بدون حذف الطلبات التاريخية.</li>
+                  <li>إعادة توجيه الروابط وترقيم الأصناف والأقسام داخل السكاشن لضمان عمل كافة الأزرار بسلاسة.</li>
+                </ul>
+              </div>
 
               <!-- Upload Input Button -->
               <div class="mt-auto">
@@ -2011,7 +2059,7 @@
 
         </div>
 
-        <p class="text-muted mt-4">لحماية بيانات المتجر، إعادة التهيئة المدمرة غير متاحة. يمكن استيراد قالب إلى متجر فارغ.</p>
+        <p class="text-muted mt-4 small"><i class="bi bi-info-circle me-1"></i> لحماية بيانات المتجر، إعادة التهيئة المدمرة غير متاحة. الحزم تحافظ على أعلى معايير أمان البيانات وعزل المستأجرين (Tenant Isolation).</p>
 
       </div>
     }

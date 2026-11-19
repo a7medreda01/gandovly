@@ -600,6 +600,7 @@ export class AdminSettingsComponent implements OnInit {
   }
 
   get selectedHomeThemeName() { return this.homeThemeOptions.find(t => t.id === (this.layoutOptions.homeTheme || 'classic'))?.name || ''; }
+  getThemeLabel(themeId?: string): string { return this.homeThemeOptions.find(t => t.id === (themeId || 'classic'))?.name || 'الشكل العادي'; }
 
   selectHomeTheme(theme: 'classic' | 'cards' | 'editorial' | 'discovery') {
     const layout = this.layoutOptions;
