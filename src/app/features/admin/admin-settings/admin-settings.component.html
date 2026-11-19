@@ -1,4 +1,4 @@
-﻿<div class="settings-page">
+<div class="settings-page">
 <a class="btn btn-outline-primary my-3 shadow-sm fw-bold" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md"><i class="bi bi-file-earmark-arrow-down"></i> تنزيل إرشادات تجهيز بيانات المتجر والصور (v1.3.0)</a>
   <div class="page-title-row flex-between">
     <div>
@@ -917,6 +917,17 @@
               </div>
             </label>
           </div>
+          @if (settings()!.showCustomerServiceBar) {
+            <div class="form-row mb-3 ms-3">
+              <label class="checkbox-label flex-center flex-1 p-2.5 border rounded-3 bg-light">
+                <input type="checkbox" [(ngModel)]="layoutOptions.showCustomerServicePhone" />
+                <div class="ms-2">
+                  <strong><i class="bi bi-telephone text-primary me-1"></i> إظهار رقم الهاتف نصياً داخل الكارت</strong>
+                  <small class="text-muted d-block">افتراضياً: يتم إخفاء الرقم كنص للحفاظ على المظهر الأنيق ويكتفى بزر الاتصال المباشر ونبذة المساعدة.</small>
+                </div>
+              </label>
+            </div>
+          }
 
 </details>
 }

@@ -1,4 +1,5 @@
 export interface HomeSectionItem {
+    number?: string;
     titleEn?: string;
     textEn?: string;
     title: string;
@@ -84,6 +85,7 @@ export interface StoreLayout {
     homeProfiles?: Record<string, { useCustomHome: boolean; sections: HomeSection[] }>;
     /** Presentation is deliberately separate from homepage section configuration. */
     homeTheme?: 'classic' | 'cards' | 'editorial' | 'discovery';
+    showCustomerServicePhone?: boolean;
     homeTitleEn?: string;
     homeSubtitleEn?: string;
     homeButtonTextEn?: string;
@@ -139,7 +141,7 @@ export interface StoreLayout {
     useCustomHome: boolean;
     sections: HomeSection[];
 }
-export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
+export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
 export function newHomeSection(kind: HomeSection['kind']): HomeSection {
     const titles: Record<HomeSection['kind'], string> = {
         hero: 'اكتشف مجموعتنا',

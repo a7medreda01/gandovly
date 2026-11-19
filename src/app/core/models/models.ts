@@ -156,6 +156,7 @@ export interface StorefrontSettings {
   showCategoriesGrid?: boolean;
   showPromotionStrip?: boolean;
   showCustomerServiceBar?: boolean;
+  showCustomerServicePhone?: boolean;
   showSocialMediaInFooter?: boolean;
   showLocationInFooter?: boolean;
 

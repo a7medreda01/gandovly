@@ -184,13 +184,17 @@
       <div class="hotline-texts">
         <div class="hotline-title-row">
           <i class="bi bi-headset hotline-icon"></i>
-          <h4 class="hotline-title">خدمة العملاء وطلبات المساعدة</h4>
+          <h4 class="hotline-title">{{ languageService.text('خدمة العملاء وطلبات المساعدة', 'Customer Support & Help') }}</h4>
         </div>
-        <a class="numbers-str hotline-phone-link" [href]="'tel:' + settingsService.settings().phone" dir="ltr">{{ settingsService.settings().phone }} <i class="bi bi-arrow-up-left"></i></a>
+        @if (settingsService.settings().showCustomerServicePhone || settingsService.settings().storeLayout?.showCustomerServicePhone) {
+          <a class="numbers-str hotline-phone-link" [href]="'tel:' + settingsService.settings().phone" dir="ltr">{{ settingsService.settings().phone }} <i class="bi bi-arrow-up-left"></i></a>
+        } @else {
+          <p class="hotline-sub mb-0">{{ languageService.text('فريق الدعم متاح للإجابة على جميع استفساراتكم ومساعدتكم', 'Our support team is available to assist and answer your inquiries') }}</p>
+        }
       </div>
       <a [href]="'tel:' + settingsService.settings().phone" class="btn-call-action">
         <i class="bi bi-telephone-outbound-fill"></i>
-        <span>اتصل بخدمة العملاء</span>
+        <span>{{ languageService.text('اتصل بخدمة العملاء', 'Call Support') }}</span>
         <i class="bi bi-arrow-up-left call-arrow"></i>
       </a>
     </div>

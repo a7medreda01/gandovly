@@ -42,6 +42,23 @@ import { LanguageService } from '../../../../core/services/language.service';
     }
     .stat-card {
       padding: 1.25rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .stat-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+      margin-bottom: 0.65rem;
+      color: var(--primary-color, #10b981);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .stat-icon i {
+      display: inline-block;
     }
     .stat-number {
       font-size: 2.25rem;
@@ -49,6 +66,7 @@ import { LanguageService } from '../../../../core/services/language.service';
       color: var(--primary-color, #10b981);
       line-height: 1.1;
       margin-bottom: 0.5rem;
+      font-variant-numeric: tabular-nums;
     }
     .stat-label {
       font-size: 0.95rem;
@@ -77,6 +95,11 @@ import { LanguageService } from '../../../../core/services/language.service';
   <div class="stats-grid">
     @for (item of statsList(); track $index) {
       <div class="stat-card">
+        @if (item.icon) {
+          <div class="stat-icon">
+            <i class="bi" [ngClass]="item.icon" aria-hidden="true"></i>
+          </div>
+        }
         <div class="stat-number">{{ item.number }}</div>
         <h3 class="stat-label">{{ item.title }}</h3>
         @if (item.sub) {
@@ -98,17 +121,48 @@ export class SectionStatsComponent {
 
   statsList() {
     if (this.s.items && this.s.items.length > 0) {
-      return this.s.items.map(it => ({
-        number: it.icon || '+10K',
-        title: this.lang.text(it.title, it.titleEn),
-        sub: this.lang.text(it.text, it.textEn)
-      }));
+      return this.s.items.map(it => {
+        const rawIcon = (it.icon || '').trim();
+        const isIconClass = /^(bi-|fa-|ph-|icon-)/.test(rawIcon) || rawIcon.includes('bi-') || rawIcon.includes(' ');
+        
+        let icon = '';
+        let number = ((it as any).number || '').trim();
+        let title = this.lang.text(it.title, it.titleEn)?.trim() || '';
+        let sub = this.lang.text(it.text, it.textEn)?.trim() || '';
+
+        if (isIconClass) {
+          icon = rawIcon;
+        }
+
+        if (!number) {
+          // If title starts with a digit or looks like a stat number (e.g. "+75,000", "99.4%", "2,000+", "27")
+          const isNumericTitle = /^[+0-9%.,\sKkMmBb]+$/.test(title) || /^[+0-9]/.test(title);
+          if (isNumericTitle) {
+            number = title;
+            title = sub;
+            sub = '';
+          } else if (!isIconClass && rawIcon) {
+            number = rawIcon;
+          } else {
+            number = title;
+            title = sub;
+            sub = '';
+          }
+        }
+
+        return {
+          icon,
+          number: number || '+10K',
+          title: title || '',
+          sub: sub || ''
+        };
+      });
     }
     return [
-      { number: '+15,000', title: this.lang.text('طلب مكتمل', 'Orders Completed'), sub: this.lang.text('في كافة المناطق', 'Nationwide delivery') },
-      { number: '99.4%', title: this.lang.text('رضا العملاء', 'Happy Customers'), sub: this.lang.text('تقييمات إيجابية', '5-star reviews') },
-      { number: '+500', title: this.lang.text('منتج أصلي', 'Curated Products'), sub: this.lang.text('بأعلى معايير الجودة', 'Guaranteed quality') },
-      { number: '24/7', title: this.lang.text('دعم فوري', 'Support Around Clock'), sub: this.lang.text('جاهزون لمساعدتك', 'Ready to assist') }
+      { icon: 'bi-box-seam', number: '+15,000', title: this.lang.text('طلب مكتمل', 'Orders Completed'), sub: this.lang.text('في كافة المناطق', 'Nationwide delivery') },
+      { icon: 'bi-star-fill', number: '99.4%', title: this.lang.text('رضا العملاء', 'Happy Customers'), sub: this.lang.text('تقييمات إيجابية', '5-star reviews') },
+      { icon: 'bi-shield-check', number: '+500', title: this.lang.text('منتج أصلي', 'Curated Products'), sub: this.lang.text('بأعلى معايير الجودة', 'Guaranteed quality') },
+      { icon: 'bi-headset', number: '24/7', title: this.lang.text('دعم فوري', 'Support Around Clock'), sub: this.lang.text('جاهزون لمساعدتك', 'Ready to assist') }
     ];
   }
 }

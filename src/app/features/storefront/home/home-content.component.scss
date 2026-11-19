@@ -734,6 +734,13 @@
         letter-spacing: 0.5px;
         margin: 0;
       }
+
+      .hotline-sub {
+        font-size: 0.86rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0;
+        line-height: 1.45;
+      }
     }
 
     .btn-call-action {
@@ -1098,6 +1105,7 @@ img.image-pending { opacity: 0; }
 .hotline-card-section .hotline-card .hotline-texts .hotline-title { color: var(--text-main,#172238) !important; font-weight: 720; }
 .hotline-card-section .hotline-card .hotline-texts .hotline-icon { border: 1px solid #e7edf6; background: #f2f6fc !important; color: #3779cc !important; }
 .hotline-card-section .hotline-card .hotline-texts .numbers-str { color: #717d90 !important; }
+.hotline-card-section .hotline-card .hotline-texts .hotline-sub { color: #64748b !important; font-size: 13.5px; line-height: 1.45; }
 .hotline-card-section .hotline-card .hotline-phone-link { display: inline-flex; align-items: center; gap: 7px; width: fit-content; font-variant-numeric: tabular-nums; text-decoration: none; }
 .hotline-card-section .hotline-card .hotline-phone-link i { color: #94a0b2; font-size: 11px; }
 .hotline-card-section .hotline-card .btn-call-action { min-height: 46px; padding-inline: 20px; border: 1px solid #d9e6fa; border-radius: 14px; background: #eef5ff !important; color: #2469bd !important; box-shadow: none; }
