@@ -7,13 +7,38 @@ export interface HomeSectionItem {
     imageUrl: string;
     link: string;
 }
+export interface HomeSectionTestimonial {
+    name: string;
+    nameEn?: string;
+    role?: string;
+    roleEn?: string;
+    text: string;
+    textEn?: string;
+    rating: number;
+    avatarUrl?: string;
+}
+export interface HomeSectionSlide {
+    titleEn?: string;
+    subtitleEn?: string;
+    buttonTextEn?: string;
+    title: string;
+    subtitle?: string;
+    buttonText?: string;
+    link?: string;
+    imageUrl?: string;
+    mobileImageUrl?: string;
+    overlayOpacity?: number;
+    textColor?: string;
+}
 export interface HomeSection {
     titleEn?: string;
     subtitleEn?: string;
     eyebrowEn?: string;
     buttonTextEn?: string;
     id: string;
-    kind: 'hero' | 'products' | 'banner' | 'features' | 'brands' | 'categories';
+    kind: 'hero' | 'products' | 'banner' | 'features' | 'brands' | 'categories'
+        | 'product_carousel' | 'testimonials' | 'hero_slider' | 'categories_grid'
+        | 'countdown' | 'newsletter' | 'stats' | 'cta_full' | 'video' | 'markdown';
     enabled: boolean;
     title: string;
     subtitle: string;
@@ -31,8 +56,30 @@ export interface HomeSection {
     productIds: number[];
     limit: number;
     items: HomeSectionItem[];
+    /** countdown target date ISO string (for countdown sections) */
+    countdownTarget?: string;
+    /** video embed URL or direct URL (for video sections) */
+    videoUrl?: string;
+    /** markdown/HTML content (for markdown sections) */
+    markdownContent?: string;
+    /** testimonials list (for testimonials sections) */
+    testimonials?: HomeSectionTestimonial[];
+    /** slides list (for hero_slider) */
+    slides?: HomeSectionSlide[];
+}
+export interface HomeThemeBannerConfig {
+    desktopUrl?: string;
+    mobileUrl?: string;
+    title?: string;
+    titleEn?: string;
+    subtitle?: string;
+    subtitleEn?: string;
+    buttonText?: string;
+    buttonTextEn?: string;
+    buttonLink?: string;
 }
 export interface StoreLayout {
+    themeBanners?: Record<string, HomeThemeBannerConfig>;
     useBrandColors?: boolean;
     homeProfiles?: Record<string, { useCustomHome: boolean; sections: HomeSection[] }>;
     /** Presentation is deliberately separate from homepage section configuration. */
@@ -85,12 +132,32 @@ export interface StoreLayout {
     enableProductPageAnimations?: boolean;
     enableProductCardAnimations?: boolean;
     enableHomeSectionAnimations?: boolean;
+    enableImageCompression?: boolean;
+    maxImageCompressionKb?: number;
     orderNumberMode?: 'random' | 'continuous' | 'daily' | 'weekly' | 'monthly' | null;
     orderNumberStart?: number;
     useCustomHome: boolean;
     sections: HomeSection[];
 }
-export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
+export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
 export function newHomeSection(kind: HomeSection['kind']): HomeSection {
-    return { id: crypto.randomUUID().replaceAll('-', ''), kind, enabled: true, title: ({ hero: 'اكتشف مجموعتنا', products: 'منتجات مختارة', banner: 'اختيارات تناسبك', features: 'لماذا تختارنا؟', brands: 'العلامات التجارية', categories: 'تسوق حسب القسم' })[kind], subtitle: '', eyebrow: '', imageUrl: '', mobileImageUrl: '', layout: 'split', backgroundColor: '', textColor: '', overlayOpacity: 20, buttonText: 'تسوق الآن', link: '/menu', source: 'featured', categoryId: null, productIds: [], limit: 8, items: [] };
+    const titles: Record<HomeSection['kind'], string> = {
+        hero: 'اكتشف مجموعتنا',
+        products: 'منتجات مختارة',
+        banner: 'اختيارات تناسبك',
+        features: 'لماذا تختارنا؟',
+        brands: 'العلامات التجارية',
+        categories: 'تسوق حسب القسم',
+        product_carousel: 'منتجات مميزة',
+        testimonials: 'آراء عملائنا',
+        hero_slider: 'استعرض مجموعتنا',
+        categories_grid: 'تصفح التشكيلات',
+        countdown: 'عرض لفترة محدودة',
+        newsletter: 'اشترك في النشرة',
+        stats: 'أرقام وإنجازات',
+        cta_full: 'تواصل معنا الآن',
+        video: 'شاهد الفيديو',
+        markdown: 'محتوى مخصص',
+    };
+    return { id: crypto.randomUUID().replaceAll('-', ''), kind, enabled: true, title: titles[kind] ?? kind, subtitle: '', eyebrow: '', imageUrl: '', mobileImageUrl: '', layout: 'split', backgroundColor: '', textColor: '', overlayOpacity: 20, buttonText: 'تسوق الآن', link: '/menu', source: 'featured', categoryId: null, productIds: [], limit: 8, items: [] };
 }

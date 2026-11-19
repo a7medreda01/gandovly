@@ -18,7 +18,40 @@ import { ImageUrlPipe } from '../../../../../shared/pipes/image-url.pipe';
 import { ProductCardComponent } from '../../../../../shared/components/product-card/product-card.component';
 import { ProductDetailModalComponent } from '../../../../../shared/components/product-detail-modal/product-detail-modal.component';
 import { HomeSectionsComponent } from '../../home-sections.component';
-@Component({selector: 'app-discovery-home-theme', standalone:true, imports:[CommonModule, FormsModule, RouterLink, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent, HomeSkeletonComponent, ImageRevealDirective, ScrollAnimateDirective], templateUrl:'./discovery-home-theme.component.html', styleUrls:['../../home-sections.component.scss','./discovery-home-theme.component.scss']})
+
+import { SectionHeroComponent } from '../../sections/section-hero.component';
+import { SectionProductsComponent } from '../../sections/section-products.component';
+import { SectionBannerComponent } from '../../sections/section-banner.component';
+import { SectionFeaturesComponent } from '../../sections/section-features.component';
+import { SectionBrandsComponent } from '../../sections/section-brands.component';
+import { SectionCategoriesComponent } from '../../sections/section-categories.component';
+import { SectionProductCarouselComponent } from '../../sections/section-product-carousel.component';
+import { SectionTestimonialsComponent } from '../../sections/section-testimonials.component';
+import { SectionHeroSliderComponent } from '../../sections/section-hero-slider.component';
+import { SectionCategoriesGridComponent } from '../../sections/section-categories-grid.component';
+import { SectionCountdownComponent } from '../../sections/section-countdown.component';
+import { SectionNewsletterComponent } from '../../sections/section-newsletter.component';
+import { SectionStatsComponent } from '../../sections/section-stats.component';
+import { SectionCtaFullComponent } from '../../sections/section-cta-full.component';
+import { SectionVideoComponent } from '../../sections/section-video.component';
+import { SectionMarkdownComponent } from '../../sections/section-markdown.component';
+
+@Component({
+  selector: 'app-discovery-home-theme',
+  standalone: true,
+  imports: [
+    CommonModule, FormsModule, RouterLink, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent,
+    HomeSkeletonComponent, ImageRevealDirective, ScrollAnimateDirective,
+    SectionHeroComponent, SectionProductsComponent, SectionBannerComponent,
+    SectionFeaturesComponent, SectionBrandsComponent, SectionCategoriesComponent,
+    SectionProductCarouselComponent, SectionTestimonialsComponent,
+    SectionHeroSliderComponent, SectionCategoriesGridComponent,
+    SectionCountdownComponent, SectionNewsletterComponent, SectionStatsComponent,
+    SectionCtaFullComponent, SectionVideoComponent, SectionMarkdownComponent
+  ],
+  templateUrl: './discovery-home-theme.component.html',
+  styleUrls: ['../../home-sections.component.scss', './discovery-home-theme.component.scss']
+})
 export class DiscoveryHomeThemeComponent extends HomeSectionsComponent {
   private readonly themeDestroyRef = inject(DestroyRef);
   override ngOnInit() {

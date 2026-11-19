@@ -31,6 +31,199 @@ export class AdminSettingsComponent implements OnInit {
     { id: 'editorial' as const, name: 'مجلة تحريرية', description: 'للعلامات والمجموعات: قصة مصورة ومساحات عرض واسعة.', icon: 'bi bi-journal-richtext' },
     { id: 'discovery' as const, name: 'لوحة اكتشاف', description: 'للمتاجر المتنوعة: بحث سريع وأقسام وعروض واكتشاف منتجات.', icon: 'bi bi-compass' }
   ];
+
+  readonly themeBannerPresets: Record<string, {
+    id: string;
+    name: string;
+    desktopUrl: string;
+    mobileUrl: string;
+    title: string;
+    titleEn: string;
+    subtitle: string;
+    subtitleEn: string;
+    buttonText: string;
+    buttonTextEn: string;
+    buttonLink: string;
+  }[]> = {
+    classic: [
+      {
+        id: 'supermarket',
+        name: 'سوبرماركت وتجزئة يومية',
+        desktopUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=768&q=80',
+        title: 'تسوق كافة احتياجاتك اليومية بأفضل الأسعار',
+        titleEn: 'Shop your daily essentials at the best prices',
+        subtitle: 'أفضل جودة، منتجات طازجة، وتوصيل سريع حتى باب بيتك',
+        subtitleEn: 'Fresh products, top quality, fast delivery to your door',
+        buttonText: 'تسوق العروض',
+        buttonTextEn: 'Shop Deals',
+        buttonLink: '/menu'
+      },
+      {
+        id: 'weekly_deals',
+        name: 'تخفيضات أسبوعية وتوفير',
+        desktopUrl: 'https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1583258292688-d0213dc5a3a8?auto=format&fit=crop&w=768&q=80',
+        title: 'خصومات أسبوعية متجددة على كافة الأقسام',
+        titleEn: 'Weekly fresh discounts across all departments',
+        subtitle: 'وفر أكثر مع سلة مشترياتك المفضلة وعروض التوفير الحصرية',
+        subtitleEn: 'Save more on your favorite shopping basket with exclusive offers',
+        buttonText: 'اكتشف الخصومات',
+        buttonTextEn: 'Discover Discounts',
+        buttonLink: '/menu?sort=offers'
+      }
+    ],
+    cards: [
+      {
+        id: 'cards_custom',
+        name: 'البانر الحالي للمتجر (بانرك المخصص)',
+        desktopUrl: '',
+        mobileUrl: '',
+        title: '',
+        titleEn: '',
+        subtitle: '',
+        subtitleEn: '',
+        buttonText: 'تسوق الآن',
+        buttonTextEn: 'Shop now',
+        buttonLink: '/menu'
+      },
+      {
+        id: 'cards_modern',
+        name: 'بطاقات عروض بارزة (Modern Cards)',
+        desktopUrl: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=768&q=80',
+        title: 'أحدث المنتجات والعروض بتصميم الكروت الحديث',
+        titleEn: 'Latest products & offers in modern card layout',
+        subtitle: 'تصفح مريح وبطاقات بارزة تسهل عليك اختيار المنتج المناسب',
+        subtitleEn: 'Comfortable browsing with standout cards for easy shopping',
+        buttonText: 'استعرض المنتجات',
+        buttonTextEn: 'View Products',
+        buttonLink: '/menu'
+      }
+    ],
+    editorial: [
+      {
+        id: 'luxury_furniture',
+        name: 'أثاث وديكور عصري فاخر (Living & Interior)',
+        desktopUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=768&q=80',
+        title: 'الأناقة تبدأ من التفاصيل: نصنع أثاثاً يجمع الجودة العالية',
+        titleEn: 'Elegance starts in details: Modern furniture crafted with passion',
+        subtitle: 'تصاميم استثنائية تناسب ذوقك وتمنح منزلك لمسة من الفخامة والراحة الدائمة',
+        subtitleEn: 'Exceptional designs bringing comfort and timeless luxury to your space',
+        buttonText: 'استكشف التشكيلة',
+        buttonTextEn: 'Explore Collection',
+        buttonLink: '/menu'
+      },
+      {
+        id: 'luxury_lifestyle',
+        name: 'أزياء وبراندات راقية (Haute Couture & Brand Story)',
+        desktopUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=768&q=80',
+        title: 'قصة إبداع خلف كل قطعة وتصميم يعكس تميزك وتفردك',
+        titleEn: 'A story of craft behind every curated piece',
+        subtitle: 'مجموعات حصرية مختارة بعناية تجمع بين الأصالة واللمسة العصرية',
+        subtitleEn: 'Curated seasonal collections that define modern elegance',
+        buttonText: 'تصفح المجلة',
+        buttonTextEn: 'Explore Magazine',
+        buttonLink: '/menu'
+      }
+    ],
+    discovery: [
+      {
+        id: 'tech_gadgets',
+        name: 'تكنولوجيا وإلكترونيات ذكية (Smart Tech & Gadgets)',
+        desktopUrl: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=768&q=80',
+        title: 'اكتشف أحدث التقنيات وأفضل الأجهزة الذكية الأصلية',
+        titleEn: 'Discover cutting-edge tech and smart innovations',
+        subtitle: 'أجهزة أصلية بأسعار تنافسية مع ضمان معتمد وشحن سريع إلى بابك',
+        subtitleEn: 'Authentic gadgets with official warranty and fast delivery',
+        buttonText: 'تصفح الأجهزة',
+        buttonTextEn: 'Browse Tech',
+        buttonLink: '/menu'
+      },
+      {
+        id: 'marketplace_all',
+        name: 'سوق متكامل ومنوعات (All-in-One Marketplace)',
+        desktopUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=768&q=80',
+        title: 'آلاف المنتجات بين يديك مع عروض يومية متجددة',
+        titleEn: 'Thousands of products with daily exclusive deals',
+        subtitle: 'بحث فوري، تصفح سريع، وتجربة تسوق لا تضاهى لكل العائلة',
+        subtitleEn: 'Smart search, multi-departments, and daily unmissable deals',
+        buttonText: 'ابدأ الاكتشاف',
+        buttonTextEn: 'Start Discovery',
+        buttonLink: '/menu'
+      }
+    ]
+  };
+
+  get activeThemePresets() {
+    const theme = this.layoutOptions.homeTheme || 'classic';
+    return this.themeBannerPresets[theme] || this.themeBannerPresets['classic'];
+  }
+
+  getActiveThemeBanner() {
+    const layout = this.layoutOptions;
+    layout.themeBanners ??= {};
+    const currentTheme = layout.homeTheme || 'classic';
+    if (!layout.themeBanners[currentTheme]) {
+      if (currentTheme === 'cards') {
+        layout.themeBanners[currentTheme] = {
+          desktopUrl: this.settings()?.heroBannerDesktopUrl || '',
+          mobileUrl: this.settings()?.heroBannerMobileUrl || '',
+          title: this.settings()?.restaurantName || '',
+          titleEn: layout.homeTitleEn || '',
+          subtitle: this.settings()?.description || '',
+          subtitleEn: layout.homeSubtitleEn || '',
+          buttonText: 'تسوق الآن',
+          buttonTextEn: layout.homeButtonTextEn || 'Shop now',
+          buttonLink: '/menu'
+        };
+      } else {
+        const preset = this.themeBannerPresets[currentTheme]?.[0];
+        layout.themeBanners[currentTheme] = {
+          desktopUrl: preset?.desktopUrl || this.settings()?.heroBannerDesktopUrl || '',
+          mobileUrl: preset?.mobileUrl || this.settings()?.heroBannerMobileUrl || '',
+          title: preset?.title || this.settings()?.restaurantName || '',
+          titleEn: preset?.titleEn || layout.homeTitleEn || '',
+          subtitle: preset?.subtitle || this.settings()?.description || '',
+          subtitleEn: preset?.subtitleEn || layout.homeSubtitleEn || '',
+          buttonText: preset?.buttonText || 'تسوق الآن',
+          buttonTextEn: preset?.buttonTextEn || 'Shop now',
+          buttonLink: preset?.buttonLink || '/menu'
+        };
+      }
+    }
+    return layout.themeBanners[currentTheme];
+  }
+
+  applyThemeBannerPreset(preset: any) {
+    const b = this.getActiveThemeBanner();
+    if (preset.id === 'cards_custom') {
+      b.desktopUrl = this.settings()?.heroBannerDesktopUrl || '';
+      b.mobileUrl = this.settings()?.heroBannerMobileUrl || '';
+      b.title = this.settings()?.restaurantName || '';
+      b.titleEn = this.layoutOptions.homeTitleEn || '';
+      b.subtitle = this.settings()?.description || '';
+      b.subtitleEn = this.layoutOptions.homeSubtitleEn || '';
+    } else {
+      b.desktopUrl = preset.desktopUrl;
+      b.mobileUrl = preset.mobileUrl;
+      b.title = preset.title;
+      b.titleEn = preset.titleEn;
+      b.subtitle = preset.subtitle;
+      b.subtitleEn = preset.subtitleEn;
+      b.buttonText = preset.buttonText;
+      b.buttonTextEn = preset.buttonTextEn;
+      b.buttonLink = preset.buttonLink || '/menu';
+    }
+    if (this.layoutOptions.homeTheme === 'cards' || !this.layoutOptions.homeTheme) {
+      this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: b.desktopUrl || '', heroBannerMobileUrl: b.mobileUrl || '' } : s);
+    }
+    this.toast.success('تم اختيار بانر (' + preset.name + ') لقالب (' + this.selectedHomeThemeName + ') بنجاح');
+  }
   private readonly adminService = inject(AdminService);
   readonly settingsService = inject(SettingsService);
   private readonly toast = inject(NotificationService);
@@ -394,6 +587,18 @@ export class AdminSettingsComponent implements OnInit {
     return settings.storeLayout ??= defaultStoreLayout();
   }
 
+  get compressionOptions() {
+    const layout = this.layoutOptions;
+    return {
+      enabled: layout.enableImageCompression !== false,
+      maxBytes: (layout.maxImageCompressionKb || 150) * 1024
+    };
+  }
+
+  setImageCompressionKb(kb: number) {
+    this.layoutOptions.maxImageCompressionKb = kb;
+  }
+
   get selectedHomeThemeName() { return this.homeThemeOptions.find(t => t.id === (this.layoutOptions.homeTheme || 'classic'))?.name || ''; }
 
   selectHomeTheme(theme: 'classic' | 'cards' | 'editorial' | 'discovery') {
@@ -491,7 +696,7 @@ export class AdminSettingsComponent implements OnInit {
 
     this.isUploading.set(true);
     try {
-      const compressed = await compressImage(file, { maxWidth: 600, quality: 0.9 });
+      const compressed = await compressImage(file, { maxWidth: 600, quality: 0.9, ...this.compressionOptions });
       this.adminService.uploadImage(compressed, 'branding').subscribe({
         next: url => {
           this.isUploading.set(false);
@@ -500,7 +705,7 @@ export class AdminSettingsComponent implements OnInit {
             if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
             this.settings.update(s => s ? { ...s, logoUrl: url } : s);
             this.saveSettings('branding', true);
-            this.toast.success('تم ضغط الشعار ورفعه؛ حجمه لا يتجاوز 30 كيلوبايت.');
+            this.toast.success('تم تجهيز الشعار ورفعه بنجاح.');
           }
         },
         error: () => {
@@ -521,7 +726,7 @@ export class AdminSettingsComponent implements OnInit {
     input.value = '';
     this.isUploading.set(true);
     try {
-      const icon = await compressImage(file, { maxWidth: 512, quality: 0.92 });
+      const icon = await compressImage(file, { maxWidth: 512, quality: 0.92, ...this.compressionOptions });
       this.adminService.uploadImage(icon, 'branding').subscribe({
         next: url => {
           this.isUploading.set(false);
@@ -529,7 +734,7 @@ export class AdminSettingsComponent implements OnInit {
           if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
           this.settings.update(s => s ? { ...s, faviconUrl: url } : s);
           this.saveSettings('branding', true);
-          this.toast.success('تم تحديث أيقونة المتجر؛ حجمها لا يتجاوز 30 كيلوبايت.');
+          this.toast.success('تم تحديث أيقونة المتجر بنجاح.');
         },
         error: () => { this.isUploading.set(false); this.toast.error('تعذر رفع أيقونة المتجر.'); }
       });
@@ -552,16 +757,19 @@ export class AdminSettingsComponent implements OnInit {
 
     this.isUploading.set(true);
     try {
-      const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.85 });
+      const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.85, ...this.compressionOptions });
       this.adminService.uploadImage(compressed, 'banners').subscribe({
         next: url => {
           this.isUploading.set(false);
           if (this.settings()) {
             const previousUrl = this.settings()!.heroBannerDesktopUrl;
             if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
-            this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: url } : s);
+            this.getActiveThemeBanner().desktopUrl = url;
+              if (this.layoutOptions.homeTheme === 'cards' || !this.layoutOptions.homeTheme) {
+                this.settings.update(s => s ? { ...s, heroBannerDesktopUrl: url } : s);
+              }
             this.saveSettings('branding', true);
-            this.toast.success('تم ضغط البانر ورفعه؛ حجمه لا يتجاوز 30 كيلوبايت.');
+            this.toast.success('تم تجهيز البانر ورفعه بنجاح.');
           }
         },
         error: () => {
@@ -581,16 +789,19 @@ export class AdminSettingsComponent implements OnInit {
 
     this.isUploading.set(true);
     try {
-      const compressed = await compressImage(file, { maxWidth: 1080, quality: 0.85 });
+      const compressed = await compressImage(file, { maxWidth: 1080, quality: 0.85, ...this.compressionOptions });
       this.adminService.uploadImage(compressed, 'banners').subscribe({
         next: url => {
           this.isUploading.set(false);
           if (this.settings()) {
             const previousUrl = this.settings()!.heroBannerMobileUrl;
             if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
-            this.settings.update(s => s ? { ...s, heroBannerMobileUrl: url } : s);
+            this.getActiveThemeBanner().mobileUrl = url;
+              if (this.layoutOptions.homeTheme === 'cards' || !this.layoutOptions.homeTheme) {
+                this.settings.update(s => s ? { ...s, heroBannerMobileUrl: url } : s);
+              }
             this.saveSettings('branding', true);
-            this.toast.success('تم ضغط بانر الموبايل ورفعه؛ حجمه لا يتجاوز 30 كيلوبايت.');
+            this.toast.success('تم تجهيز بانر الموبايل ورفعه بنجاح.');
           }
         },
         error: () => {

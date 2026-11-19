@@ -4,9 +4,10 @@ export interface CompressionOptions {
   quality?: number;
   maxBytes?: number;
   mimeType?: 'image/webp' | 'image/jpeg';
+  enabled?: boolean;
 }
 
-const DEFAULT_MAX_BYTES = 30 * 1024;
+const DEFAULT_MAX_BYTES = 150 * 1024;
 const QUALITY_STEPS = [0.9, 0.84, 0.78, 0.72, 0.66, 0.6, 0.54, 0.48, 0.42, 0.36, 0.3];
 
 /** Downscales and encodes an upload until it fits the storage ceiling. */
@@ -16,8 +17,13 @@ export async function compressImage(file: File, options: CompressionOptions = {}
     maxHeight = 1400,
     maxBytes = DEFAULT_MAX_BYTES,
     quality = 0.9,
-    mimeType = 'image/webp'
+    mimeType = 'image/webp',
+    enabled = true
   } = options;
+
+  if (enabled === false) {
+    return file;
+  }
 
   if (!file.type.startsWith('image/') || /svg|ico/i.test(file.type) || /\.(svg|ico)$/i.test(file.name)) {
     throw new Error('يرجى اختيار صورة نقطية PNG أو JPEG أو WebP.');

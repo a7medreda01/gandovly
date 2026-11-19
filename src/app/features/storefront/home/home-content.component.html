@@ -1,4 +1,4 @@
-@if (loadingSettings()) {
+﻿@if (loadingSettings()) {
   <app-home-skeleton />
 } @else if (settingsService.settings().storeLayout?.useCustomHome){<app-home-sections></app-home-sections>}@else{
 @let layout = settingsService.settings().storeLayout;
@@ -8,20 +8,20 @@
   <section class="hero-banner-section">
     <div class="luxury-hero-card" appScrollAnimate [style.--hero-text-color]="settingsService.settings().heroTextColor || '#FFFFFF'">
       <picture>
-        @if (settingsService.settings().heroBannerMobileUrl) { <source media="(max-width: 767px)" [srcset]="settingsService.settings().heroBannerMobileUrl | imageUrl:'banner'"> }
+        @if (activeThemeBanner().mobileUrl) { <source media="(max-width: 767px)" [srcset]="activeThemeBanner().mobileUrl | imageUrl:'banner'"> }
       <img appImageReveal
-        [src]="(settingsService.settings().heroBannerDesktopUrl || settingsService.settings().heroBannerMobileUrl) | imageUrl:'banner'"
-        [alt]="settingsService.settings().restaurantName || 'منصة التجارة الشاملة'" class="hero-bg-img"
+        [src]="(activeThemeBanner().desktopUrl || activeThemeBanner().mobileUrl) | imageUrl:'banner'"
+        [alt]="activeThemeBanner().title || settingsService.settings().restaurantName || 'منصة التجارة الشاملة'" class="hero-bg-img"
         fetchpriority="high" />
       </picture>
       <div class="hero-content-overlay">
         <div class="hero-texts">
           <h1 class="hero-title">
-            <span class="gold-text">{{ languageService.text(settingsService.settings().restaurantName, layout?.homeTitleEn) }}</span>
+            <span class="gold-text">{{ languageService.text(activeThemeBanner().title || settingsService.settings().restaurantName, activeThemeBanner().titleEn || layout?.homeTitleEn) }}</span>
           </h1>
-          <p class="hero-subtitle">{{ languageService.text(settingsService.settings().description || 'تسوق كافة المنتجات والطلبات بأفضل جودة وأسرع توصيل لباب منزلك', layout?.homeSubtitleEn || 'Explore our products and shop online.') }}</p>
-          <a routerLink="/menu" class="btn-hero-cta">
-            <span>{{ languageService.text('تسوق الآن', layout?.homeButtonTextEn || 'Shop now') }}</span>
+          <p class="hero-subtitle">{{ languageService.text(activeThemeBanner().subtitle || settingsService.settings().description || 'تسوق كافة المنتجات والطلبات بأفضل جودة وأسرع توصيل لباب منزلك', activeThemeBanner().subtitleEn || layout?.homeSubtitleEn || 'Explore our products and shop online.') }}</p>
+          <a [routerLink]="activeThemeBanner().buttonLink || '/menu'" class="btn-hero-cta">
+            <span>{{ languageService.text(activeThemeBanner().buttonText || 'تسوق الآن', activeThemeBanner().buttonTextEn || layout?.homeButtonTextEn || 'Shop now') }}</span>
             <i class="bi bi-arrow-left"></i>
           </a>
         </div>

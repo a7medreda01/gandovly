@@ -3,7 +3,7 @@ import { ScrollAnimateDirective } from '../../../shared/directives/scroll-animat
 import { HomeSkeletonComponent } from './home-skeleton.component';
 import { NotificationService } from '../../../core/services/notification.service';
 import { HomeSectionsComponent } from './home-sections.component';
-import { Component, OnInit, OnDestroy, inject, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +31,89 @@ export class HomeContentComponent implements OnInit, OnDestroy {
   readonly catalogService = inject(CatalogService);
   readonly authService = inject(AuthService);
   readonly languageService = inject(LanguageService);
+
+  readonly activeThemeBanner = computed(() => {
+    const s = this.settingsService.settings();
+    const layout = s.storeLayout;
+    const theme = layout?.homeTheme || 'classic';
+    const tb = layout?.themeBanners?.[theme];
+
+    if (theme === 'cards') {
+      return {
+        desktopUrl: tb?.desktopUrl || s.heroBannerDesktopUrl || '',
+        mobileUrl: tb?.mobileUrl || s.heroBannerMobileUrl || '',
+        title: tb?.title || s.restaurantName || '',
+        titleEn: tb?.titleEn || layout?.homeTitleEn || '',
+        subtitle: tb?.subtitle || s.description || '',
+        subtitleEn: tb?.subtitleEn || layout?.homeSubtitleEn || '',
+        buttonText: tb?.buttonText || 'تسوق الآن',
+        buttonTextEn: tb?.buttonTextEn || layout?.homeButtonTextEn || 'Shop now',
+        buttonLink: tb?.buttonLink || '/menu'
+      };
+    }
+
+    if (tb && (tb.desktopUrl || tb.title)) {
+      return {
+        desktopUrl: tb.desktopUrl || s.heroBannerDesktopUrl || '',
+        mobileUrl: tb.mobileUrl || s.heroBannerMobileUrl || '',
+        title: tb.title || s.restaurantName || '',
+        titleEn: tb.titleEn || layout?.homeTitleEn || '',
+        subtitle: tb.subtitle || s.description || '',
+        subtitleEn: tb.subtitleEn || layout?.homeSubtitleEn || '',
+        buttonText: tb.buttonText || 'تسوق الآن',
+        buttonTextEn: tb.buttonTextEn || layout?.homeButtonTextEn || 'Shop now',
+        buttonLink: tb.buttonLink || '/menu'
+      };
+    }
+
+    const presets: Record<string, any> = {
+      classic: {
+        desktopUrl: s.heroBannerDesktopUrl || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: s.heroBannerMobileUrl || 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=768&q=80',
+        title: s.restaurantName || 'تسوق كافة احتياجاتك اليومية بأفضل الأسعار',
+        titleEn: layout?.homeTitleEn || 'Shop your daily essentials at the best prices',
+        subtitle: s.description || 'أفضل جودة، منتجات طازجة، وتوصيل سريع حتى باب بيتك',
+        subtitleEn: layout?.homeSubtitleEn || 'Fresh products, top quality, fast delivery to your door',
+        buttonText: 'تسوق العروض',
+        buttonTextEn: 'Shop Deals',
+        buttonLink: '/menu'
+      },
+      editorial: {
+        desktopUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=768&q=80',
+        title: 'الأناقة تبدأ من التفاصيل: تصاميم عصرية تجمع الجودة العالية',
+        titleEn: 'Elegance starts in the details: Modern living curated with passion',
+        subtitle: 'تصاميم استثنائية تناسب ذوقك وتمنح منزلك لمسة من الفخامة والراحة',
+        subtitleEn: 'Exceptional craftsmanship bringing comfort and timeless luxury to your space',
+        buttonText: 'اكتشف التشكيلة',
+        buttonTextEn: 'Explore Collection',
+        buttonLink: '/menu'
+      },
+      discovery: {
+        desktopUrl: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=1920&q=80',
+        mobileUrl: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=768&q=80',
+        title: 'اكتشف أحدث المنتجات والتقنيات الذكية',
+        titleEn: 'Discover cutting-edge products and smart innovations',
+        subtitle: 'آلاف المنتجات بين يديك مع عروض يومية متجددة وضمان معتمد',
+        subtitleEn: 'Thousands of products with daily exclusive deals',
+        buttonText: 'ابدأ الاكتشاف',
+        buttonTextEn: 'Start Discovery',
+        buttonLink: '/menu'
+      }
+    };
+
+    return presets[theme] || {
+      desktopUrl: s.heroBannerDesktopUrl || '',
+      mobileUrl: s.heroBannerMobileUrl || '',
+      title: s.restaurantName || '',
+      titleEn: layout?.homeTitleEn || '',
+      subtitle: s.description || '',
+      subtitleEn: layout?.homeSubtitleEn || '',
+      buttonText: 'تسوق الآن',
+      buttonTextEn: 'Shop now',
+      buttonLink: '/menu'
+    };
+  });
 
 
   @ViewChild('catScrollContainer') catScrollContainer?: ElementRef<HTMLDivElement>;

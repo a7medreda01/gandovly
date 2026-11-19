@@ -975,12 +975,19 @@ export class AdminCatalogComponent implements OnInit {
 
     const files = Array.from(input.files);
     this.isUploadingProductImage.set(true);
-          this.uploadProgressText.set(`جاري ضغط ${files.length} صورة لتصبح كل صورة 30 كيلوبايت أو أقل...`);
+    const layout = this.settingsService.settings().storeLayout;
+    const enabled = layout?.enableImageCompression !== false;
+    const maxKb = layout?.maxImageCompressionKb || 150;
+    this.uploadProgressText.set(
+      enabled
+        ? `جاري ضغط ${files.length} صورة لتصبح كل صورة ${maxKb} كيلوبايت أو أقل...`
+        : `جاري تجهيز ${files.length} صورة للرفع...`
+    );
 
     try {
       // Auto compress & convert to ultra-fast WebP without visible quality loss
       const compressedFiles = await Promise.all(
-        files.map(file => compressImage(file, { maxWidth: 1400, quality: 0.85 }))
+        files.map(file => compressImage(file, { maxWidth: 1400, quality: 0.85, enabled, maxBytes: maxKb * 1024 }))
       );
 
       this.uploadProgressText.set(`جاري رفع ${compressedFiles.length} صورة...`);
@@ -1052,14 +1059,17 @@ export class AdminCatalogComponent implements OnInit {
     this.isUploadingCategoryImage.set(true);
 
     try {
-      const compressed = await compressImage(file, { maxWidth: 800, quality: 0.85 });
+      const layout = this.settingsService.settings().storeLayout;
+      const enabled = layout?.enableImageCompression !== false;
+      const maxKb = layout?.maxImageCompressionKb || 150;
+      const compressed = await compressImage(file, { maxWidth: 800, quality: 0.85, enabled, maxBytes: maxKb * 1024 });
       this.adminService.uploadImage(compressed, 'categories').subscribe({
         next: (url) => {
           const previousUrl = this.categoryForm.imageUrl;
           if (previousUrl && previousUrl !== url) this.adminService.deleteImageIfUnused(previousUrl).subscribe({ error: () => {} });
           this.categoryForm.imageUrl = url;
           this.isUploadingCategoryImage.set(false);
-          this.toast.success('تم ضغط ورفع صورة القسم؛ حجمها لا يتجاوز 30 كيلوبايت.');
+          this.toast.success('تم رفع صورة القسم بنجاح.');
           input.value = '';
         },
         error: () => {

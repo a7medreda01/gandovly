@@ -1,4 +1,4 @@
-<div class="settings-page">
+﻿<div class="settings-page">
 <a class="btn btn-outline-primary my-3" href="/docs/store-seeding-guide-ar.txt" download="store-seeding-guide-ar.md"><i class="bi bi-file-earmark-arrow-down"></i> تنزيل إرشادات تجهيز بيانات المتجر والصور</a>
   <div class="page-title-row flex-between">
     <div>
@@ -49,62 +49,160 @@
     }
   </div>
 </details>
-<details class="settings-card settings-disclosure"><summary>بانر الرئيسية</summary><label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام في الرئيسية</label><div class="form-grid home-banner-fields"><label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي</label>            <!-- Desktop & Mobile Hero Banners -->
-            <div class="home-banner-media">
-              <div class="p-3 border rounded-3 bg-light h-100">
-                <label class="form-label font-bold mb-2">بانر الواجهة الرئيسية (Desktop & Mobile):</label>
+<details class="settings-card settings-disclosure" open>
+  <summary><i class="bi bi-image"></i> بانر واجهة المتجر وقوالب البانرات <small>خاص بقالب {{ selectedHomeThemeName }}</small></summary>
+  <div class="section-title-wrap mb-3">
+    <p class="section-desc">لكل قالب بانراته الخاصة وتنسيقه المخصص. يمكنك اختيار أحد البانرات المقترحة أو رفع وتصميم بانرك الخاص للقالب الحالي.</p>
+  </div>
 
-                <div class="banner-preview-box mb-2">
-                  <img
-                    [src]="(settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
-                    alt="Main Hero Banner"
-                    class="preview-banner-img"
-                  />
-                  <div class="banner-overlay-tag">معاينة البانر النشط</div>
-                </div>
+  <div class="row g-3 mb-3">
+    <div class="col-12 col-md-6">
+      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي في المتجر</label>
+    </div>
+    <div class="col-12 col-md-6">
+      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام السريع في الرئيسية</label>
+    </div>
+  </div>
 
-                <div class="upload-controls-row flex-between">
-                  <input
-                    #bannerFileInput
-                    type="file"
-                    accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
-                    (change)="onBannerDesktopUpload($event)"
-                    style="display: none;"
-                  />
-                  <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
-                    <i class="bi bi-image-fill me-1"></i> تغيير صورة البانر (كمبيوتر)
-                  </button>
-
-                  <input
-                    #bannerMobileFileInput
-                    type="file"
-                    accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
-                    (change)="onBannerMobileUpload($event)"
-                    style="display: none;"
-                  />
-                  <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
-                    <i class="bi bi-phone-fill me-1"></i> تغيير صورة البانر (موبايل)
-                  </button>
-
-                  @if (settings()!.heroBannerDesktopUrl) {
-                    <button type="button" class="btn-remove-link text-danger" (click)="removeBannerDesktop()">
-                      <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
-                    </button>
-                  }
-                </div>
-
-                <div class="input-url-wrap mt-2">
-                  <span class="url-label">رابط صورة البانر:</span>
-                  <input
-                    type="text"
-                    class="form-control form-control-sm"
-                    placeholder="/uploads/banners/hero-desktop.jpg"
-                    [(ngModel)]="settings()!.heroBannerDesktopUrl"
-                  />
-                </div>
-              </div>
+  <!-- Template Banners Presets Gallery -->
+  @if (activeThemePresets && activeThemePresets.length) {
+    <div class="theme-presets-section mb-4 p-3 border rounded-3 bg-light">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <h5 class="m-0 fs-6 fw-bold"><i class="bi bi-stars text-warning me-1"></i> بانرات مقترحة جاهزة لقالب ({{ selectedHomeThemeName }}):</h5>
+        <span class="text-muted small">اضغط لتطبيق أي بانر فورا</span>
+      </div>
+      <div class="preset-cards-grid">
+        @for (preset of activeThemePresets; track preset.id) {
+          @let isActivePreset = getActiveThemeBanner().desktopUrl === preset.desktopUrl;
+          <div class="preset-banner-card" [class.selected]="isActivePreset">
+            <div class="preset-thumb-wrap">
+              <img [src]="preset.desktopUrl | imageUrl:'banner'" [alt]="preset.name" loading="lazy" />
+              @if (isActivePreset) {
+                <span class="active-badge"><i class="bi bi-check-circle-fill me-1"></i> نشط حالياً</span>
+              }
             </div>
-          </div></details>
+            <div class="preset-details">
+              <div>
+                <strong>{{ preset.name }}</strong>
+                <p class="text-muted small mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ preset.title }}</p>
+              </div>
+              <button type="button" class="btn btn-sm" [class.btn-success]="isActivePreset" [class.btn-outline-primary]="!isActivePreset" (click)="applyThemeBannerPreset(preset)">
+                <i class="bi" [class.bi-check2]="isActivePreset" [class.bi-palette]="!isActivePreset"></i>
+                {{ isActivePreset ? 'البانر المختار' : 'استخدام هذا البانر' }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Active Theme Banner Editor -->
+  @let themeBanner = getActiveThemeBanner();
+  <div class="home-banner-media mb-3">
+    <div class="p-3 border rounded-3 bg-light">
+      <h5 class="fs-6 fw-bold mb-3"><i class="bi bi-sliders me-1"></i> تخصيص صورة ونصوص بانر قالب ({{ selectedHomeThemeName }}):</h5>
+
+      <div class="banner-preview-box mb-3">
+        <img
+          [src]="(themeBanner.desktopUrl || settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
+          alt="Banner Preview"
+          class="preview-banner-img"
+        />
+        <div class="banner-overlay-tag">معاينة بانر ({{ selectedHomeThemeName }})</div>
+      </div>
+
+      <div class="upload-controls-row flex-between flex-wrap gap-2 mb-3">
+        <input
+          #bannerFileInput
+          type="file"
+          accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
+          (change)="onBannerDesktopUpload($event)"
+          style="display: none;"
+        />
+        <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
+          <i class="bi bi-image-fill me-1"></i> رفع صورة البانر (كمبيوتر)
+        </button>
+
+        <input
+          #bannerMobileFileInput
+          type="file"
+          accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
+          (change)="onBannerMobileUpload($event)"
+          style="display: none;"
+        />
+        <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
+          <i class="bi bi-phone-fill me-1"></i> رفع صورة البانر (موبايل)
+        </button>
+
+        @if (themeBanner.desktopUrl) {
+          <button type="button" class="btn-remove-link text-danger" (click)="themeBanner.desktopUrl=''; themeBanner.mobileUrl=''; saveSettings('branding', true)">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
+          </button>
+        }
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label small fw-bold">رابط صورة البانر للكمبيوتر (Desktop):</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            dir="ltr"
+            placeholder="/uploads/banners/hero-desktop.webp أو رابط خارجي"
+            [(ngModel)]="themeBanner.desktopUrl"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label small fw-bold">رابط صورة البانر للموبايل (Mobile):</label>
+          <input
+            type="text"
+            class="form-control form-control-sm"
+            dir="ltr"
+            placeholder="/uploads/banners/hero-mobile.webp أو رابط خارجي"
+            [(ngModel)]="themeBanner.mobileUrl"
+          />
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-12 col-md-6">
+          <label class="form-label small fw-bold">عنوان البانر الرئيسي:</label>
+          <input type="text" class="form-control" [(ngModel)]="themeBanner.title" placeholder="عنوان جذاب يعبر عن متجرك" />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label small fw-bold">وصف البانر:</label>
+          <input type="text" class="form-control" [(ngModel)]="themeBanner.subtitle" placeholder="وصف قصير للعروض والمنتجات" />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label small fw-bold">نص زر البانر:</label>
+          <input type="text" class="form-control" [(ngModel)]="themeBanner.buttonText" placeholder="تسوق الآن" />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label small fw-bold">رابط الزر:</label>
+          <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.buttonLink" placeholder="/menu" />
+        </div>
+      </div>
+
+      @if (settings()!.languageMode !== 'ar_only') {
+        <div class="row g-2 mt-2 pt-2 border-top">
+          <div class="col-12 col-md-4">
+            <label class="form-label small fw-bold">Banner Title (English):</label>
+            <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.titleEn" placeholder="Title in English" />
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label small fw-bold">Banner Subtitle (English):</label>
+            <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.subtitleEn" placeholder="Subtitle in English" />
+          </div>
+          <div class="col-12 col-md-4">
+            <label class="form-label small fw-bold">Button Text (English):</label>
+            <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.buttonTextEn" placeholder="Shop now" />
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</details>
 @if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
 <details class="settings-card settings-disclosure" open><summary>نصوص الرئيسية بالإنجليزية</summary><div class="form-row">
 <label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
@@ -365,6 +463,71 @@
 
 
 
+        </details>
+
+        <!-- 1.2 IMAGE COMPRESSION & PERFORMANCE SETTINGS -->
+        <details class="settings-card settings-disclosure" open>
+          <summary><i class="bi bi-file-earmark-zip text-primary me-2"></i> ضغط الصور وتحسين سرعة وأداء المتجر</summary>
+          <div class="section-title-wrap mb-3">
+            <p class="section-desc">تحكم في تفعيل ضغط الصور التلقائي عند الرفع وتحديد الحجم الأقصى بالكيلوبايت (KB) لتسريع تحميل المتجر وتقليل استهلاك باقة الإنترنت للعملاء.</p>
+          </div>
+
+          <div class="compression-settings-box p-3 border rounded-3 bg-light">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <label class="checkbox-label d-flex align-items-center gap-2 m-0 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="layoutOptions.enableImageCompression" />
+                <span class="fw-bold fs-6">تفعيل ضغط الصور التلقائي عند الرفع (موصى به)</span>
+              </label>
+              @if (layoutOptions.enableImageCompression !== false) {
+                <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> ضغط الصور مُفعّل</span>
+              } @else {
+                <span class="badge bg-secondary px-3 py-2"><i class="bi bi-dash-circle me-1"></i> الضغط معطّل (رفع بحجم أصلي)</span>
+              }
+            </div>
+
+            <p class="text-muted small mb-3">
+              عند التفعيل، يتم ضغط صور المنتجات والأقسام والبانرات وتحويلها لصيغة WebP فائقة السرعة فور اختيارها من جهازك دون أي تشويه ملحوظ بالجودة.
+            </p>
+
+            @if (layoutOptions.enableImageCompression !== false) {
+              <div class="compression-controls border-top pt-3">
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-12 col-md-5">
+                    <label class="form-label fw-bold mb-1">الحد الأقصى لحجم الصورة (كيلوبايت - KB):</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        min="10"
+                        max="10000"
+                        step="10"
+                        [(ngModel)]="layoutOptions.maxImageCompressionKb"
+                        placeholder="150"
+                      />
+                      <span class="input-group-text">KB</span>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-7">
+                    <label class="form-label text-muted small d-block mb-1">أحجام سريعة مقترحة:</label>
+                    <div class="d-flex flex-wrap gap-2">
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 50" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 50" (click)="setImageCompressionKb(50)">50 KB (سرعة فائقة)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 100" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 100" (click)="setImageCompressionKb(100)">100 KB (سريع ومتوازن)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="!layoutOptions.maxImageCompressionKb || layoutOptions.maxImageCompressionKb === 150" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb && layoutOptions.maxImageCompressionKb !== 150" (click)="setImageCompressionKb(150)">150 KB (الافتراضي)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 300" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 300" (click)="setImageCompressionKb(300)">300 KB (دقة عالية)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 500" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 500" (click)="setImageCompressionKb(500)">500 KB (أقصى وضوح)</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="alert alert-info py-2 px-3 mb-0 small">
+                  <i class="bi bi-info-circle me-1"></i> الصور الأكبر من {{ layoutOptions.maxImageCompressionKb || 150 }} كيلوبايت سيتم تقليص حجمها وأبعادها تدريجياً وبدقة لتصبح أقل من أو مساوية للحجم المحدد فوراً قبل رفعها.
+                </div>
+              </div>
+            } @else {
+              <div class="alert alert-warning py-2 px-3 mb-0 small">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> تنبيه: عند تعطيل الضغط، ستُرفع الصور بحجمها وأبعادها الأصلية الكاملة، مما قد يستهلك سعة التخزين ويبطئ تحميل المتجر على أجهزة العملاء.
+              </div>
+            }
+          </div>
         </details>
 
         <!-- 2. BRAND PRESENTATION MODE IN NAVBAR -->

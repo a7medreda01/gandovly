@@ -17,7 +17,40 @@ import { Product } from '../../../core/models/models';
 import { ImageUrlPipe } from '../../../shared/pipes/image-url.pipe';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { ProductDetailModalComponent } from '../../../shared/components/product-detail-modal/product-detail-modal.component';
-@Component({ selector: 'app-home-sections', standalone: true, imports: [ImageRevealDirective, ScrollAnimateDirective, HomeSkeletonComponent, CommonModule, FormsModule, RouterLink, ImageUrlPipe, ProductCardComponent, ProductDetailModalComponent], templateUrl: './home-sections.component.html', styleUrl: './home-sections.component.scss' })
+import { SectionHeroComponent } from './sections/section-hero.component';
+import { SectionProductsComponent } from './sections/section-products.component';
+import { SectionBannerComponent } from './sections/section-banner.component';
+import { SectionFeaturesComponent } from './sections/section-features.component';
+import { SectionBrandsComponent } from './sections/section-brands.component';
+import { SectionCategoriesComponent } from './sections/section-categories.component';
+import { SectionProductCarouselComponent } from './sections/section-product-carousel.component';
+import { SectionTestimonialsComponent } from './sections/section-testimonials.component';
+import { SectionHeroSliderComponent } from './sections/section-hero-slider.component';
+import { SectionCategoriesGridComponent } from './sections/section-categories-grid.component';
+import { SectionCountdownComponent } from './sections/section-countdown.component';
+import { SectionNewsletterComponent } from './sections/section-newsletter.component';
+import { SectionStatsComponent } from './sections/section-stats.component';
+import { SectionCtaFullComponent } from './sections/section-cta-full.component';
+import { SectionVideoComponent } from './sections/section-video.component';
+import { SectionMarkdownComponent } from './sections/section-markdown.component';
+
+@Component({
+    selector: 'app-home-sections',
+    standalone: true,
+    imports: [
+        ImageRevealDirective, ScrollAnimateDirective, HomeSkeletonComponent,
+        CommonModule, FormsModule, RouterLink, ImageUrlPipe, ProductCardComponent,
+        ProductDetailModalComponent,
+        SectionHeroComponent, SectionProductsComponent, SectionBannerComponent,
+        SectionFeaturesComponent, SectionBrandsComponent, SectionCategoriesComponent,
+        SectionProductCarouselComponent, SectionTestimonialsComponent,
+        SectionHeroSliderComponent, SectionCategoriesGridComponent,
+        SectionCountdownComponent, SectionNewsletterComponent, SectionStatsComponent,
+        SectionCtaFullComponent, SectionVideoComponent, SectionMarkdownComponent
+    ],
+    templateUrl: './home-sections.component.html',
+    styleUrl: './home-sections.component.scss'
+})
 export class HomeSectionsComponent {
     readonly language = inject(LanguageService);
     readonly settings = inject(SettingsService);
@@ -40,7 +73,7 @@ export class HomeSectionsComponent {
     selected = signal<Product | null>(null);
     search = '';
     ngOnInit() { this.load(); }
-    load() { this.loading.set(true); this.error.set(false); this.api.get<any>('storefront/home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: r => { const rows = r.sections || []; const cfg = this.settings.settings(); const hero = rows.find((row: any) => row.config.kind === 'hero'); if (hero && cfg.showHeroBanner) { hero.config.imageUrl = cfg.heroBannerDesktopUrl || hero.config.imageUrl; hero.config.mobileImageUrl = cfg.heroBannerMobileUrl || hero.config.mobileImageUrl; } this.sections.set(cfg.showHeroBanner === false ? rows.filter((row: any) => row.config.kind !== 'hero') : rows); this.loading.set(false); }, error: () => { this.error.set(true); this.loading.set(false); } }); }
+    load() { this.loading.set(true); this.error.set(false); this.api.get<any>('storefront/home').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: r => { const rows = r.sections || []; const cfg = this.settings.settings(); const hero = rows.find((row: any) => row.config.kind === 'hero' || row.config.kind === 'hero_slider'); if (hero && cfg.showHeroBanner) { const theme = cfg.storeLayout?.homeTheme || 'classic'; const tb = cfg.storeLayout?.themeBanners?.[theme]; if (tb?.desktopUrl) hero.config.imageUrl = tb.desktopUrl; else if (theme === 'cards' && cfg.heroBannerDesktopUrl) hero.config.imageUrl = cfg.heroBannerDesktopUrl; if (tb?.mobileUrl) hero.config.mobileImageUrl = tb.mobileUrl; else if (theme === 'cards' && cfg.heroBannerMobileUrl) hero.config.mobileImageUrl = cfg.heroBannerMobileUrl; if (tb?.title) hero.config.title = tb.title; if (tb?.titleEn) hero.config.titleEn = tb.titleEn; if (tb?.subtitle) hero.config.subtitle = tb.subtitle; if (tb?.subtitleEn) hero.config.subtitleEn = tb.subtitleEn; if (tb?.buttonText) hero.config.buttonText = tb.buttonText; if (tb?.buttonTextEn) hero.config.buttonTextEn = tb.buttonTextEn; if (tb?.buttonLink) hero.config.link = tb.buttonLink; } this.sections.set(cfg.showHeroBanner === false ? rows.filter((row: any) => row.config.kind !== 'hero' && row.config.kind !== 'hero_slider') : rows); this.loading.set(false); }, error: () => { this.error.set(true); this.loading.set(false); } }); }
     open(product: Product) {
         if (product) {
             this.selected.set(product);

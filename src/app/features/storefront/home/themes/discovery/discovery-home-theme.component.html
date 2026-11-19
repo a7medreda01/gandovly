@@ -10,31 +10,60 @@
     <a routerLink="/menu" [queryParams]="{sort:'bestsellers'}"><i class="bi bi-graph-up-arrow"></i>{{language.text('الأكثر مبيعًا','Bestsellers')}}</a>
   </nav>
   @if(error()){<div class="home-error" role="alert">{{ language.text('تعذر تحميل الرئيسية.', 'Could not load the homepage.') }} <button type="button" (click)="load()">{{ language.text('إعادة المحاولة', 'Try again') }}</button></div>}
-  @for(row of sections();track row.config.id){@let s=row.config;
-    @let title = language.text(s.title, s.titleEn);
-    @let subtitle = language.text(s.subtitle, s.subtitleEn);
-    @let eyebrow = language.text(s.eyebrow, s.eyebrowEn);
-    @let buttonText = language.text(s.buttonText, s.buttonTextEn);
-    @if(s.kind==='hero'||s.kind==='banner'){
-      <section class="promo" appScrollAnimate [class.hero]="s.kind==='hero'" [class.overlay]="s.layout==='overlay'" [class.no-image]="!s.imageUrl&&!s.mobileImageUrl&&!row.products.length" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)" [style.--overlay]="s.overlayOpacity/100">
-        @if(s.imageUrl||s.mobileImageUrl){<picture class="promo-media">@if(s.mobileImageUrl){<source media="(max-width:767px)" [srcset]="s.mobileImageUrl|imageUrl:'banner'">}<img appImageReveal [src]="(s.imageUrl||s.mobileImageUrl)|imageUrl:'banner'" [alt]="title" [attr.loading]="$first?'eager':'lazy'" [attr.fetchpriority]="$first?'high':'auto'" decoding="async"></picture>}
-        @else if(row.products.length){<div class="spotlight"><app-product-card [product]="row.products[0]" (selectProduct)="open($event)"></app-product-card></div>}
-        <div class="promo-copy">@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}@if(buttonText){<a class="primary-action" [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge" [style.background]="buttonBgColor(s)" [style.color]="buttonTextColor(s)"><span>{{ buttonText }}</span> <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</div>
-      </section>
-    }
-    @if(s.kind==='products'&&row.products.length){
-      @let isFirstProd = s.id === firstProductSectionId();
-      <section class="collection" [class.first-collection]="isFirstProd" [class.has-fade-in-up]="!isFirstProd && settings.settings().storeLayout?.enableHomeSectionAnimations !== false" [attr.appScrollAnimate]="!isFirstProd ? '' : null"><header><div>@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}</div>@if(buttonText){<a [routerLink]="path(s)" [queryParams]="query(s)" queryParamsHandling="merge">{{ buttonText }} <i class="bi bi-arrow-left" aria-hidden="true"></i></a>}</header><div class="collection-grid">@for(p of row.products;track p.id){<app-product-card [product]="p" (selectProduct)="open($event)"></app-product-card>}</div></section>
-    }
-    @if((s.kind==='features'||s.kind==='brands')&&s.items.length){
-      <section class="content-section" appScrollAnimate [class.has-fade-in-up]="settings.settings().storeLayout?.enableHomeSectionAnimations !== false" [style.background]="s.backgroundColor||null" [style.color]="colorFor(s)"><header>@if(eyebrow){<span class="eyebrow">{{ eyebrow }}</span>}<h2>{{ title }}</h2>@if(subtitle){<p>{{ subtitle }}</p>}</header><div class="items-grid" [class.brands]="s.kind==='brands'">@for(item of s.items;track $index){<a class="info-card" [routerLink]="path(item)" [queryParams]="query(item)" queryParamsHandling="merge">@if(item.imageUrl){<img appImageReveal [src]="item.imageUrl|imageUrl:'category'" [alt]="language.text(item.title, item.titleEn)" loading="lazy" decoding="async">}@else{<span class="info-icon"><i class="bi" [ngClass]="item.icon" aria-hidden="true"></i></span>}<div><h3>{{language.text(item.title, item.titleEn)}}</h3>@if(language.text(item.text, item.textEn)){<p>{{language.text(item.text, item.textEn)}}</p>}</div></a>}</div></section>
-    }
-    @if(s.kind==='categories'){
-      <section class="content-section" appScrollAnimate [class.has-fade-in-up]="settings.settings().storeLayout?.enableHomeSectionAnimations !== false"><header><h2>{{ title }}</h2><p>{{ subtitle }}</p></header><div class="items-grid categories">@for(cat of catalog.categories().slice(0,s.limit);track cat.id){<a class="info-card" routerLink="/menu" [queryParams]="{category:cat.id,page:null,search:null,sort:null}" queryParamsHandling="merge"><img appImageReveal [src]="cat.imageUrl|imageUrl:'category'" [alt]="language.getLocalizedName(cat)" loading="lazy"><h3>{{language.getLocalizedName(cat)}}</h3></a>}</div></section>
+  @for(row of sections(); track row.config.id){
+    @let s = row.config;
+    @switch (s.kind) {
+      @case ('hero') {
+        <app-section-hero [s]="s" [settings]="settings.settings()"></app-section-hero>
+      }
+      @case ('products') {
+        <app-section-products [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-products>
+      }
+      @case ('banner') {
+        <app-section-banner [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-banner>
+      }
+      @case ('features') {
+        <app-section-features [s]="s" [settings]="settings.settings()"></app-section-features>
+      }
+      @case ('brands') {
+        <app-section-brands [s]="s" [settings]="settings.settings()"></app-section-brands>
+      }
+      @case ('categories') {
+        <app-section-categories [s]="s" [settings]="settings.settings()"></app-section-categories>
+      }
+      @case ('product_carousel') {
+        <app-section-product-carousel [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-product-carousel>
+      }
+      @case ('testimonials') {
+        <app-section-testimonials [s]="s" [settings]="settings.settings()"></app-section-testimonials>
+      }
+      @case ('hero_slider') {
+        <app-section-hero-slider [s]="s" [settings]="settings.settings()"></app-section-hero-slider>
+      }
+      @case ('categories_grid') {
+        <app-section-categories-grid [s]="s" [settings]="settings.settings()"></app-section-categories-grid>
+      }
+      @case ('countdown') {
+        <app-section-countdown [s]="s" [settings]="settings.settings()"></app-section-countdown>
+      }
+      @case ('newsletter') {
+        <app-section-newsletter [s]="s" [settings]="settings.settings()"></app-section-newsletter>
+      }
+      @case ('stats') {
+        <app-section-stats [s]="s" [settings]="settings.settings()"></app-section-stats>
+      }
+      @case ('cta_full') {
+        <app-section-cta-full [s]="s" [settings]="settings.settings()"></app-section-cta-full>
+      }
+      @case ('video') {
+        <app-section-video [s]="s" [settings]="settings.settings()"></app-section-video>
+      }
+      @case ('markdown') {
+        <app-section-markdown [s]="s" [settings]="settings.settings()"></app-section-markdown>
+      }
     }
   }
   @if(loadingProduct()){<div class="product-opening" role="status">جاري تحميل تفاصيل المنتج...</div>}
   @if(selected()){<app-product-detail-modal [product]="selected()!" (closeModal)="selected.set(null)"></app-product-detail-modal>}
 </div>
-
 }

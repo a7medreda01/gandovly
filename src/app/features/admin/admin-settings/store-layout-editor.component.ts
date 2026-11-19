@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+﻿import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HomeSection, HomeSectionItem, StoreLayout, defaultStoreLayout, newHomeSection } from '../../../core/models/store-layout';
@@ -30,7 +30,24 @@ export class StoreLayoutEditorComponent {
     kinds: {
         id: HomeSection['kind'];
         name: string;
-    }[] = [{ id: 'hero', name: 'بانر رئيسي' }, { id: 'products', name: 'مجموعة منتجات' }, { id: 'banner', name: 'بانر ترويجي' }, { id: 'features', name: 'مميزات وخدمات' }, { id: 'brands', name: 'علامات تجارية' }, { id: 'categories', name: 'أقسام المتجر' }];
+    }[] = [
+        { id: 'hero', name: 'بانر رئيسي' },
+        { id: 'products', name: 'مجموعة منتجات' },
+        { id: 'banner', name: 'بانر ترويجي' },
+        { id: 'features', name: 'مميزات وخدمات' },
+        { id: 'brands', name: 'علامات تجارية' },
+        { id: 'categories', name: 'أقسام المتجر' },
+        { id: 'product_carousel', name: 'سلايدر منتجات متحرك (Carousel)' },
+        { id: 'testimonials', name: 'آراء وتقييمات العملاء' },
+        { id: 'hero_slider', name: 'سلايدر بانر كامل الشاشة' },
+        { id: 'categories_grid', name: 'شبكة تشكيلات وأقسام عريضة' },
+        { id: 'countdown', name: 'عداد تنازلي لعرض مؤقت' },
+        { id: 'newsletter', name: 'اشتراك النشرة البريدية' },
+        { id: 'stats', name: 'أرقام وإحصائيات المتجر' },
+        { id: 'cta_full', name: 'بانر دعوة للتواصل / اتخاذ إجراء' },
+        { id: 'video', name: 'فيديو تعريفي' },
+        { id: 'markdown', name: 'محتوى / قصة مخصصة' }
+    ];
     ngOnInit() { this.catalog.loadCategories().subscribe(); this.findProducts(); }
     radiusMode(mode: string) { this.layout.cardImageRadius = mode === 'inherit' ? -1 : Math.min(100, parseInt(this.settings.settings().productCardBorderRadius || '18px', 10) || 18); this.changed(); }
     changed() { this.layoutChange.emit(this.layout); }
@@ -86,8 +103,8 @@ export class StoreLayoutEditorComponent {
             return;
         this.busy.set(true);
         try {
-            const compressed = await compressImage(file, { maxWidth: field === 'mobileImageUrl' ? 900 : 1600, quality: .86 });
-            this.admin.uploadImage(compressed, 'branding').subscribe({ next: url => { const previous = (target as any)[field] as string; if (previous && previous !== url) this.admin.deleteImageIfUnused(previous).subscribe({ error: () => {} }); (target as any)[field] = url; this.busy.set(false); this.changed(); this.toast.success('تم رفع الصورة؛ حجمها لا يتجاوز 30 كيلوبايت. احفظ الإعدادات لتطبيقها'); }, error: () => { this.busy.set(false); this.toast.error('تعذر رفع الصورة'); } });
+            const enabled = this.layout?.enableImageCompression !== false; const maxKb = this.layout?.maxImageCompressionKb || 150; const compressed = await compressImage(file, { maxWidth: field === 'mobileImageUrl' ? 900 : 1600, quality: .86, enabled, maxBytes: maxKb * 1024 });
+            this.admin.uploadImage(compressed, 'branding').subscribe({ next: url => { const previous = (target as any)[field] as string; if (previous && previous !== url) this.admin.deleteImageIfUnused(previous).subscribe({ error: () => {} }); (target as any)[field] = url; this.busy.set(false); this.changed(); this.toast.success('تم رفع الصورة؛ احفظ الإعدادات لتطبيقها'); }, error: () => { this.busy.set(false); this.toast.error('تعذر رفع الصورة'); } });
         }
         catch {
             this.busy.set(false);
