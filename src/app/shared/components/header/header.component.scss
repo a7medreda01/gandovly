@@ -8,6 +8,71 @@
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: background 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+
+  &.transparent-hero-header:not(.is-scrolled) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: transparent !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+
+    .top-promo-banner {
+      background: rgba(13, 43, 69, 0.75);
+      backdrop-filter: blur(8px);
+    }
+
+    .mobile-toggle-btn {
+      background: rgba(255, 255, 255, 0.92);
+      color: #1e293b;
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      transition: transform 0.2s ease, background 0.2s ease;
+
+      &:hover {
+        background: #ffffff;
+        transform: scale(1.05);
+      }
+    }
+
+    .brand-logo {
+      background: rgba(255, 255, 255, 0.88);
+      padding: 4px 14px;
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+    }
+
+    .header-actions {
+      .cart-trigger-btn, .account-btn, .header-language {
+        background: rgba(255, 255, 255, 0.92);
+        color: #1e293b;
+        border-radius: 999px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+      }
+    }
+  }
+
+  &.transparent-hero-header.is-scrolled {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
 }
 
 .top-promo-banner {

@@ -1,4 +1,8 @@
-<header class="main-header" [style.background]="settingsService.settings().navbarBgColor || 'var(--navbar-bg)'" [style.color]="settingsService.settings().navbarTextColor || 'var(--navbar-text)'">
+<header class="main-header"
+  [class.transparent-hero-header]="isTransparentHeroHeader()"
+  [class.is-scrolled]="isScrolled()"
+  [style.background]="isTransparentHeroHeader() && !isScrolled() ? 'transparent' : (settingsService.settings().navbarBgColor || 'var(--navbar-bg)')"
+  [style.color]="settingsService.settings().navbarTextColor || 'var(--navbar-text)'">
   @if (settingsService.settings().activePromotionBanner) {
   <div class="top-promo-banner flex-center">
     <i class="bi bi-stars me-1 text-warning"></i>

@@ -22,28 +22,32 @@ import { LanguageService } from '../../../../core/services/language.service';
     .hero-slider-wrap {
       position: relative;
       width: 100%;
-      min-height: 440px;
-      height: 62vh;
-      max-height: 680px;
+      min-height: 88vh;
+      height: 90vh;
+      height: 90dvh;
       overflow: hidden;
       border-radius: 0;
-      margin: 0 0 2rem 0;
+      margin: 0;
       background: #0f172a;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding-top: 60px;
     }
     @media (min-width: 768px) {
       .hero-slider-wrap {
-        min-height: 520px;
-        height: 68vh;
+        min-height: 88vh;
+        height: 90vh;
       }
     }
     @media (max-width: 767px) {
       .hero-slider-wrap {
-        min-height: 380px;
-        height: 52vh;
-        margin-bottom: 1.25rem;
+        min-height: 100vh;
+        min-height: 100dvh;
+        height: 100vh;
+        height: 100dvh;
+        margin-bottom: 0;
+        padding-top: 50px;
       }
     }
 
