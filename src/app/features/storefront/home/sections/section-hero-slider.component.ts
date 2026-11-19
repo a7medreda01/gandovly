@@ -22,56 +22,31 @@ import { LanguageService } from '../../../../core/services/language.service';
     .hero-slider-wrap {
       position: relative;
       width: 100%;
-      min-height: 88vh;
-      height: 90vh;
-      height: 90dvh;
+      min-height: 480px;
+      height: 65vh;
+      max-height: 680px;
       overflow: hidden;
       border-radius: 0;
-      margin: 0;
+      margin: 0 0 2rem 0;
       background: #0f172a;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding-top: 60px;
     }
     @media (min-width: 768px) {
       .hero-slider-wrap {
-        min-height: 88vh;
-        height: 90vh;
+        min-height: 520px;
+        height: 68vh;
       }
     }
     @media (max-width: 767px) {
       .hero-slider-wrap {
-        min-height: 100vh;
-        min-height: 100dvh;
-        height: 100vh;
-        height: 100dvh;
-        margin-bottom: 0;
-        padding-top: 50px;
+        min-height: 380px;
+        height: 54vh;
+        margin-bottom: 1.25rem;
       }
     }
 
-    /* Seamless Navbar Integration: Gold Accent & Top Gradient */
-    .slide-gold-accent-line {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent 0%, #c88a2c 25%, #f59e0b 50%, #c88a2c 75%, transparent 100%);
-      z-index: 5;
-      opacity: 0.9;
-    }
-    .slide-top-gradient {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 140px;
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.2) 60%, transparent 100%);
-      z-index: 2;
-      pointer-events: none;
-    }
     .slide-bottom-gradient {
       position: absolute;
       bottom: 0;
@@ -214,9 +189,6 @@ import { LanguageService } from '../../../../core/services/language.service';
   appScrollAnimate
   [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false">
 
-  <!-- Navbar Integration Vignette & Gold Accent Line -->
-  <div class="slide-gold-accent-line"></div>
-  <div class="slide-top-gradient"></div>
   <div class="slide-bottom-gradient"></div>
 
   <picture class="slide-picture">
