@@ -921,6 +921,70 @@
 </details>
 }
 @if (activeTab() === 'menu') {
+        <!-- IMAGE COMPRESSION & PERFORMANCE SETTINGS (MENU TAB) -->
+        <details class="settings-card settings-disclosure" open>
+          <summary><i class="bi bi-file-earmark-zip text-primary me-2"></i> ضغط صور المنتجات وتحسين سرعة وأداء المتجر</summary>
+          <div class="section-title-wrap mb-3">
+            <p class="section-desc">تحكم في تفعيل ضغط صور المنتجات التلقائي عند الرفع وتحديد الحجم الأقصى بالكيلوبايت (KB) لتسريع تحميل المتجر وتقليل استهلاك باقة الإنترنت للعملاء.</p>
+          </div>
+
+          <div class="compression-settings-box p-3 border rounded-3 bg-light mb-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+              <label class="checkbox-label d-flex align-items-center gap-2 m-0 cursor-pointer">
+                <input type="checkbox" [(ngModel)]="layoutOptions.enableImageCompression" />
+                <span class="fw-bold fs-6">تفعيل ضغط الصور التلقائي عند الرفع (موصى به)</span>
+              </label>
+              @if (layoutOptions.enableImageCompression !== false) {
+                <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i> ضغط الصور مُفعّل</span>
+              } @else {
+                <span class="badge bg-secondary px-3 py-2"><i class="bi bi-dash-circle me-1"></i> الضغط معطّل (رفع بحجم أصلي)</span>
+              }
+            </div>
+
+            <p class="text-muted small mb-3">
+              عند التفعيل، يتم ضغط صور المنتجات والأقسام والبانرات وتحويلها لصيغة WebP فائقة السرعة فور اختيارها من جهازك دون أي تشويه ملحوظ بالجودة.
+            </p>
+
+            @if (layoutOptions.enableImageCompression !== false) {
+              <div class="compression-controls border-top pt-3">
+                <div class="row g-3 align-items-center mb-3">
+                  <div class="col-12 col-md-5">
+                    <label class="form-label fw-bold mb-1">الحد الأقصى لحجم الصورة (كيلوبايت - KB):</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        min="10"
+                        max="10000"
+                        step="10"
+                        [(ngModel)]="layoutOptions.maxImageCompressionKb"
+                        placeholder="150"
+                      />
+                      <span class="input-group-text">KB</span>
+                    </div>
+                  </div>
+                  <div class="col-12 col-md-7">
+                    <label class="form-label text-muted small d-block mb-1">أحجام سريعة مقترحة:</label>
+                    <div class="d-flex flex-wrap gap-2">
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 50" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 50" (click)="setImageCompressionKb(50)">50 KB (سرعة فائقة)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 100" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 100" (click)="setImageCompressionKb(100)">100 KB (سريع ومتوازن)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="!layoutOptions.maxImageCompressionKb || layoutOptions.maxImageCompressionKb === 150" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb && layoutOptions.maxImageCompressionKb !== 150" (click)="setImageCompressionKb(150)">150 KB (الافتراضي)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 300" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 300" (click)="setImageCompressionKb(300)">300 KB (دقة عالية)</button>
+                      <button type="button" class="btn btn-sm" [class.btn-primary]="layoutOptions.maxImageCompressionKb === 500" [class.btn-outline-secondary]="layoutOptions.maxImageCompressionKb !== 500" (click)="setImageCompressionKb(500)">500 KB (أقصى وضوح)</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="alert alert-info py-2 px-3 mb-0 small">
+                  <i class="bi bi-info-circle me-1"></i> الصور الأكبر من {{ layoutOptions.maxImageCompressionKb || 150 }} كيلوبايت سيتم تقليص حجمها وأبعادها تدريجياً وبدقة لتصبح أقل من أو مساوية للحجم المحدد فوراً قبل رفعها.
+                </div>
+              </div>
+            } @else {
+              <div class="alert alert-warning py-2 px-3 mb-0 small">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> تنبيه: عند تعطيل الضغط، ستُرفع الصور بحجمها وأبعادها الأصلية الكاملة، مما قد يستهلك سعة التخزين ويبطئ تحميل المتجر على أجهزة العملاء.
+              </div>
+            }
+          </div>
+        </details>
 <details class="settings-card settings-disclosure" open><summary>طريقة عرض المنتج</summary>          <!-- Product Details Display Mode -->
           <div class="product-view-mode-card p-3 border rounded-3 bg-white mt-3 mb-2">
             <div class="fw-bold text-dark mb-1">
