@@ -18,66 +18,102 @@ import { LanguageService } from '../../../../core/services/language.service';
     .stats-section {
       padding: 3rem 1.5rem;
       border-radius: 1.5rem;
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
       background: var(--surface-card, #f8fafc);
       border: 1px solid var(--border-color, #e2e8f0);
       text-align: center;
     }
     .stats-header {
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
+    }
+    .stats-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--primary-color, #c88a2c);
+      background: color-mix(in srgb, var(--primary-color, #c88a2c) 12%, transparent);
+      border: 1px solid color-mix(in srgb, var(--primary-color, #c88a2c) 25%, transparent);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
     }
     .stats-title {
-      font-size: 1.75rem;
+      font-size: 1.85rem;
       font-weight: 800;
-      color: var(--text-color, #0f172a);
+      color: var(--text-main, #0f172a);
       margin: 0;
+      letter-spacing: -0.01em;
     }
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
-    @media (min-width: 768px) {
+    @media (min-width: 992px) {
       .stats-grid { grid-template-columns: repeat(4, 1fr); }
     }
     .stat-card {
-      padding: 1.25rem 0.75rem;
+      padding: 1.75rem 1.25rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
+      background: var(--card-bg, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 1.25rem;
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
     }
-    .stat-icon {
-      font-size: 2.2rem;
-      line-height: 1;
-      margin-bottom: 0.65rem;
-      color: var(--primary-color, #10b981);
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 26px color-mix(in srgb, var(--primary-color, #c88a2c) 16%, transparent);
+      border-color: color-mix(in srgb, var(--primary-color, #c88a2c) 35%, transparent);
+    }
+    .stat-icon-wrapper {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--primary-color, #c88a2c) 12%, #ffffff);
+      color: var(--primary-color, #c88a2c);
+      border: 1.5px solid color-mix(in srgb, var(--primary-color, #c88a2c) 25%, transparent);
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      font-size: 1.5rem;
+      line-height: 1;
+      margin-bottom: 0.85rem;
+      transition: transform 0.25s ease;
     }
-    .stat-icon i {
-      display: inline-block;
+    .stat-card:hover .stat-icon-wrapper {
+      transform: scale(1.1);
     }
     .stat-number {
       font-size: 2.25rem;
-      font-weight: 800;
-      color: var(--primary-color, #10b981);
+      font-weight: 850;
+      color: var(--primary-color, #c88a2c);
       line-height: 1.1;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.45rem;
       font-variant-numeric: tabular-nums;
+      direction: ltr;
+      display: inline-block;
     }
     .stat-label {
       font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--text-color, #1e293b);
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
       margin: 0 0 0.25rem;
+      line-height: 1.45;
     }
     .stat-sub {
       font-size: 0.8rem;
       color: #64748b;
       margin: 0;
+      line-height: 1.4;
     }
   `],
   template: `
@@ -86,9 +122,10 @@ import { LanguageService } from '../../../../core/services/language.service';
   [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
   [style.background]="s.backgroundColor || null">
   <div class="stats-header">
+    <span class="stats-badge"><i class="bi bi-award-fill"></i> {{ lang.text('ريادة وجودة موثوقة', 'Trusted Quality & Excellence') }}</span>
     <h2 class="stats-title">{{ title() }}</h2>
     @if (subtitle()) {
-      <p class="text-muted mt-2">{{ subtitle() }}</p>
+      <p class="text-muted mt-2 mb-0">{{ subtitle() }}</p>
     }
   </div>
 
@@ -96,7 +133,7 @@ import { LanguageService } from '../../../../core/services/language.service';
     @for (item of statsList(); track $index) {
       <div class="stat-card">
         @if (item.icon) {
-          <div class="stat-icon">
+          <div class="stat-icon-wrapper">
             <i class="bi" [ngClass]="item.icon" aria-hidden="true"></i>
           </div>
         }
@@ -116,7 +153,7 @@ export class SectionStatsComponent {
   @Input() settings!: StorefrontSettings;
   readonly lang = inject(LanguageService);
 
-  title() { return this.lang.text(this.s.title || 'إنجازاتنا بالأرقام', this.s.titleEn || 'Our Milestones'); }
+  title() { return this.lang.text(this.s.title || 'إنارات في أرقام', this.s.titleEn || 'Our Milestones'); }
   subtitle() { return this.lang.text(this.s.subtitle || 'نفخر بخدمة آلاف العملاء بكل حب واحترافية', this.s.subtitleEn || 'Proudly serving thousands of happy clients'); }
 
   statsList() {
@@ -125,34 +162,31 @@ export class SectionStatsComponent {
         const rawIcon = (it.icon || '').trim();
         const isIconClass = /^(bi-|fa-|ph-|icon-)/.test(rawIcon) || rawIcon.includes('bi-') || rawIcon.includes(' ');
         
-        let icon = '';
+        let icon = isIconClass ? rawIcon : '';
         let number = ((it as any).number || '').trim();
         let title = this.lang.text(it.title, it.titleEn)?.trim() || '';
         let sub = this.lang.text(it.text, it.textEn)?.trim() || '';
 
-        if (isIconClass) {
-          icon = rawIcon;
-        }
+        // If title starts with a digit/symbol, it is definitely a metric number (e.g. "+75,000", "99.4%", "27", "+2,000")
+        const isNumericTitle = /^[+0-9%.,\sKkMmBb]+$/.test(title) || /^[+0-9]/.test(title);
 
-        if (!number) {
-          // If title starts with a digit or looks like a stat number (e.g. "+75,000", "99.4%", "2,000+", "27")
-          const isNumericTitle = /^[+0-9%.,\sKkMmBb]+$/.test(title) || /^[+0-9]/.test(title);
-          if (isNumericTitle) {
-            number = title;
-            title = sub;
-            sub = '';
-          } else if (!isIconClass && rawIcon) {
-            number = rawIcon;
-          } else {
-            number = title;
-            title = sub;
-            sub = '';
-          }
+        if (!number && isNumericTitle) {
+          number = title;
+          title = sub;
+          sub = '';
+        } else if (!number) {
+          // If title was non-numeric Arabic text, detect known Enarat stats by icon to restore numbers:
+          if (icon.includes('people')) { number = '+75,000'; }
+          else if (icon.includes('lamp')) { number = '+2,000'; }
+          else if (icon.includes('geo')) { number = '27'; }
+          else if (icon.includes('star')) { number = '99.4%'; }
+          else if (!isIconClass && rawIcon) { number = rawIcon; }
+          else { number = '+10K'; }
         }
 
         return {
-          icon,
-          number: number || '+10K',
+          icon: icon || 'bi-trophy',
+          number,
           title: title || '',
           sub: sub || ''
         };

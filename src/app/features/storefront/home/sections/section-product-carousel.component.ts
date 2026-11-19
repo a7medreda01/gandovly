@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal , ViewEncapsulation } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -9,8 +9,7 @@ import { ScrollAnimateDirective } from '../../../../shared/directives/scroll-ani
 import { LanguageService } from '../../../../core/services/language.service';
 
 /**
- * Product Carousel Section (Image 1 reference)
- * Dark card with category badge, arrows, dots, View All CTA
+ * Product Carousel Section with Autoplay & Smooth Sliding
  */
 @Component({
   selector: 'app-section-product-carousel',
@@ -18,40 +17,202 @@ import { LanguageService } from '../../../../core/services/language.service';
   standalone: true,
   imports: [CommonModule, RouterLink, ImageUrlPipe, ImageRevealDirective, ScrollAnimateDirective],
   styles: [`
-    .carousel-section { padding: 2rem 0; }
-    .carousel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
-    .carousel-header h2 { font-size:1.5rem; font-weight:700; margin:0; }
-    .carousel-wrap { position:relative; overflow:hidden; }
-    .carousel-track { display:flex; gap:1rem; transition:transform .4s cubic-bezier(.25,.8,.25,1); will-change:transform; }
-    .carousel-card { flex:0 0 calc(50% - .5rem); min-width:calc(50% - .5rem); background:var(--surface-dark,#1a1a2e); border-radius:1.25rem; overflow:hidden; cursor:pointer; }
-    @media (min-width:768px){ .carousel-card { flex:0 0 calc(33.33% - .67rem); min-width:calc(33.33% - .67rem); } }
-    @media (min-width:1024px){ .carousel-card { flex:0 0 calc(25% - .75rem); min-width:calc(25% - .75rem); } }
-    .carousel-img-wrap { position:relative; aspect-ratio:1; }
-    .carousel-img-wrap img { width:100%; height:100%; object-fit:cover; border-radius:1.25rem 1.25rem 0 0; }
-    .cat-badge { position:absolute; top:.75rem; left:.75rem; background:rgba(255,255,255,.18); color:#fff; backdrop-filter:blur(8px); border-radius:2rem; padding:.2rem .75rem; font-size:.7rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; }
-    .carousel-info { padding:.75rem 1rem 1rem; color:#fff; }
-    .carousel-info h3 { font-size:.95rem; font-weight:600; margin:0 0 .25rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .carousel-price { color:var(--primary-color,#38bdf8); font-weight:700; font-size:.95rem; }
-    .carousel-controls { display:flex; justify-content:center; align-items:center; gap:1rem; margin-top:1.25rem; }
-    .btn-arrow { width:2.25rem; height:2.25rem; border-radius:50%; border:1.5px solid rgba(255,255,255,.3); background:rgba(255,255,255,.08); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.2s; }
-    .btn-arrow:hover { background:var(--primary-color,#38bdf8); border-color:var(--primary-color,#38bdf8); }
-    .dots { display:flex; gap:.5rem; }
-    .dot { width:.5rem; height:.5rem; border-radius:50%; background:rgba(255,255,255,.25); transition:.2s; cursor:pointer; }
-    .dot.active { background:var(--primary-color,#38bdf8); width:1.25rem; border-radius:.5rem; }
-    .cta-row { text-align:center; margin-top:1.5rem; }
-    .btn-view-all { display:inline-flex; align-items:center; gap:.5rem; border:1.5px solid rgba(255,255,255,.3); border-radius:3rem; padding:.6rem 1.75rem; color:#fff; background:transparent; font-weight:500; text-decoration:none; transition:.2s; }
-    .btn-view-all:hover { background:var(--primary-color,#38bdf8); border-color:var(--primary-color,#38bdf8); }
-    .carousel-section.dark-bg { background:var(--surface-dark,#0f172a); border-radius:1.5rem; padding:2rem 1rem; }
+    .carousel-section {
+      padding: 2.25rem 1.25rem;
+      border-radius: 1.5rem;
+      background: var(--surface-card, #f8fafc);
+      border: 1px solid var(--border-color, #e2e8f0);
+      margin-bottom: 2.5rem;
+    }
+    .carousel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .carousel-header h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+      margin: 0;
+    }
+    .carousel-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.25rem;
+    }
+    .carousel-track {
+      display: flex;
+      gap: 1rem;
+      transition: transform .45s cubic-bezier(.25, .8, .25, 1);
+      will-change: transform;
+    }
+    .carousel-card {
+      flex: 0 0 calc(50% - .5rem);
+      min-width: calc(50% - .5rem);
+      background: var(--card-bg, #ffffff);
+      border: 1px solid var(--border-color, #e2e8f0);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .carousel-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+    @media (min-width: 768px) {
+      .carousel-card {
+        flex: 0 0 calc(33.33% - .67rem);
+        min-width: calc(33.33% - .67rem);
+      }
+    }
+    @media (min-width: 1024px) {
+      .carousel-card {
+        flex: 0 0 calc(25% - .75rem);
+        min-width: calc(25% - .75rem);
+      }
+    }
+    .carousel-img-wrap {
+      position: relative;
+      aspect-ratio: 1;
+      background: #f1f5f9;
+      overflow: hidden;
+    }
+    .carousel-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.35s ease;
+    }
+    .carousel-card:hover .carousel-img-wrap img {
+      transform: scale(1.05);
+    }
+    .cat-badge {
+      position: absolute;
+      top: 0.65rem;
+      inset-inline-start: 0.65rem;
+      background: rgba(15, 23, 42, 0.72);
+      color: #fff;
+      backdrop-filter: blur(8px);
+      border-radius: 2rem;
+      padding: 0.2rem 0.65rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .carousel-info {
+      padding: 0.85rem 1rem 1.15rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .carousel-info h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main, #0f172a);
+      margin: 0 0 0.35rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+    }
+    .carousel-price {
+      color: var(--primary-color, #c88a2c);
+      font-weight: 850;
+      font-size: 1.05rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .carousel-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .btn-arrow {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-color, #e2e8f0);
+      background: var(--card-bg, #ffffff);
+      color: var(--text-main, #0f172a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+    .btn-arrow:hover {
+      background: var(--primary-color, #c88a2c);
+      border-color: var(--primary-color, #c88a2c);
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: #cbd5e1;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .dot.active {
+      background: var(--primary-color, #c88a2c);
+      width: 1.4rem;
+      border-radius: 0.5rem;
+    }
+    .cta-row {
+      text-align: center;
+      margin-top: 1.75rem;
+    }
+    .btn-view-all {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: 1.5px solid var(--primary-color, #c88a2c);
+      border-radius: 3rem;
+      padding: 0.65rem 2rem;
+      color: var(--primary-color, #c88a2c);
+      background: transparent;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+    .btn-view-all:hover {
+      background: var(--primary-color, #c88a2c);
+      color: #ffffff;
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color, #c88a2c) 25%, transparent);
+      transform: translateY(-2px);
+    }
   `],
   template: `
 @if (products.length) {
-<section class="carousel-section dark-bg"
+<section class="carousel-section container"
   appScrollAnimate
-  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false">
+  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
+  [style.background]="s.backgroundColor || null"
+  (mouseenter)="pauseAutoplay()"
+  (mouseleave)="resumeAutoplay()"
+  (touchstart)="pauseAutoplay()"
+  (touchend)="resumeAutoplay()">
   <div class="carousel-header">
     <div>
-      @if (eyebrow()) { <span class="eyebrow" style="color:var(--primary-color,#38bdf8);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;">{{ eyebrow() }}</span> }
-      <h2 style="color:#fff">{{ title() }}</h2>
+      @if (eyebrow()) {
+        <span class="eyebrow" style="color:var(--primary-color,#c88a2c);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:4px;">{{ eyebrow() }}</span>
+      }
+      <h2>{{ title() }}</h2>
     </div>
   </div>
   <div class="carousel-wrap">
@@ -95,26 +256,111 @@ import { LanguageService } from '../../../../core/services/language.service';
 </section>
 }`,
 })
-export class SectionProductCarouselComponent {
+export class SectionProductCarouselComponent implements OnInit, OnDestroy {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
   @Input() products: Product[] = [];
   @Output() selectProduct = new EventEmitter<Product>();
   readonly lang = inject(LanguageService);
+
   currentIndex = signal(0);
-  get isRtl() { return document.dir === 'rtl'; }
-  slideWidth() { return typeof window !== 'undefined' ? (window.innerWidth < 768 ? (window.innerWidth - 48) / 2 + 8 : 300) : 300; }
-  dotArray() { return Array.from({ length: Math.max(0, this.products.length - 1) }); }
-  prev() { this.currentIndex.update(i => Math.max(0, i - 1)); }
-  next() { this.currentIndex.update(i => Math.min(this.products.length - 2, i + 1)); }
-  goTo(i: number) { this.currentIndex.set(i); }
+  private autoplayTimer: any = null;
+  private isPaused = false;
+
+  ngOnInit() {
+    this.startAutoplay();
+  }
+
+  ngOnDestroy() {
+    this.stopAutoplay();
+  }
+
+  startAutoplay() {
+    this.stopAutoplay();
+    if (typeof window === 'undefined') return;
+    this.autoplayTimer = setInterval(() => {
+      if (!this.isPaused && this.products.length > 2) {
+        this.next();
+      }
+    }, 3800);
+  }
+
+  stopAutoplay() {
+    if (this.autoplayTimer) {
+      clearInterval(this.autoplayTimer);
+      this.autoplayTimer = null;
+    }
+  }
+
+  pauseAutoplay() {
+    this.isPaused = true;
+  }
+
+  resumeAutoplay() {
+    this.isPaused = false;
+  }
+
+  get isRtl() {
+    return typeof document !== 'undefined' ? document.dir === 'rtl' : true;
+  }
+
+  visibleCardsCount(): number {
+    if (typeof window === 'undefined') return 4;
+    if (window.innerWidth < 768) return 2;
+    if (window.innerWidth < 1024) return 3;
+    return 4;
+  }
+
+  maxIndex(): number {
+    return Math.max(0, this.products.length - this.visibleCardsCount());
+  }
+
+  slideWidth(): number {
+    if (typeof window === 'undefined') return 300;
+    const w = window.innerWidth;
+    if (w < 768) {
+      // 2 cards per view with 16px gap
+      return ((w - 48) / 2) + 16;
+    }
+    if (w < 1024) {
+      return 260 + 16;
+    }
+    return 280 + 16;
+  }
+
+  dotArray(): any[] {
+    const count = this.maxIndex() + 1;
+    return Array.from({ length: Math.min(count, 8) });
+  }
+
+  prev() {
+    this.currentIndex.update(i => {
+      if (i <= 0) return this.maxIndex();
+      return i - 1;
+    });
+  }
+
+  next() {
+    this.currentIndex.update(i => {
+      if (i >= this.maxIndex()) return 0;
+      return i + 1;
+    });
+  }
+
+  goTo(i: number) {
+    this.currentIndex.set(Math.min(i, this.maxIndex()));
+  }
+
   title() { return this.lang.text(this.s.title, this.s.titleEn); }
   eyebrow() { return this.lang.text(this.s.eyebrow, this.s.eyebrowEn); }
   btnText() { return this.lang.text(this.s.buttonText, this.s.buttonTextEn); }
   path() { return this.s.link.split('?')[0] || '/menu'; }
   queryParams() {
-    const q: any = {page:null,search:null,product:null,category:null,sort:null,...Object.fromEntries(new URLSearchParams(this.s.link.split('?')[1]||''))};
-    if(this.path()==='/menu'){if(this.s.source==='category')q.category=this.s.categoryId;if(['latest','offers','bestsellers'].includes(this.s.source||'')&&!q.sort)q.sort=this.s.source;}
+    const q: any = { page: null, search: null, product: null, category: null, sort: null, ...Object.fromEntries(new URLSearchParams(this.s.link.split('?')[1] || '')) };
+    if (this.path() === '/menu') {
+      if (this.s.source === 'category') q.category = this.s.categoryId;
+      if (['latest', 'offers', 'bestsellers'].includes(this.s.source || '') && !q.sort) q.sort = this.s.source;
+    }
     return q;
   }
 }
