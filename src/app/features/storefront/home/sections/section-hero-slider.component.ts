@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, computed , ViewEncapsulation } from '@angular/core';
+import { Component, Input, inject, signal, computed, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection, HomeSectionSlide } from '../../../../core/models/store-layout';
@@ -21,12 +21,14 @@ import { LanguageService } from '../../../../core/services/language.service';
   styles: [`
     .hero-slider {
       position: relative;
-      width: 100%;
+      width: 100vw;
       min-height: 440px;
       max-height: 650px;
       overflow: hidden;
-      border-radius: 1.5rem;
+      border-radius: 0;
       margin-bottom: 2rem;
+      margin-left: calc(-50vw + 50%);
+      margin-right: calc(-50vw + 50%);
       background: #0f172a;
       display: flex;
       align-items: center;
@@ -181,11 +183,28 @@ import { LanguageService } from '../../../../core/services/language.service';
 </section>
 `
 })
-export class SectionHeroSliderComponent {
+export class SectionHeroSliderComponent implements OnInit, OnDestroy {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
   readonly lang = inject(LanguageService);
   currentIndex = signal(0);
+  private autoplayTimer: ReturnType<typeof setInterval> | null = null;
+
+  ngOnInit() {
+    this.startAutoplay();
+  }
+  ngOnDestroy() {
+    this.stopAutoplay();
+  }
+  private startAutoplay() {
+    this.autoplayTimer = setInterval(() => {
+      const len = this.slidesList().length;
+      if (len > 1) this.currentIndex.update(i => (i >= len - 1 ? 0 : i + 1));
+    }, 5000);
+  }
+  private stopAutoplay() {
+    if (this.autoplayTimer) { clearInterval(this.autoplayTimer); this.autoplayTimer = null; }
+  }
 
   slidesList = computed(() => {
     if (this.s.slides && this.s.slides.length > 0) {
@@ -212,12 +231,18 @@ export class SectionHeroSliderComponent {
   });
 
   prev() {
+    this.stopAutoplay();
     this.currentIndex.update(i => (i <= 0 ? this.slidesList().length - 1 : i - 1));
+    this.startAutoplay();
   }
   next() {
+    this.stopAutoplay();
     this.currentIndex.update(i => (i >= this.slidesList().length - 1 ? 0 : i + 1));
+    this.startAutoplay();
   }
   goTo(idx: number) {
+    this.stopAutoplay();
     this.currentIndex.set(idx);
+    this.startAutoplay();
   }
 }

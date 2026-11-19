@@ -193,7 +193,7 @@ import { LanguageService } from '../../../../core/services/language.service';
       <div class="stat-card">
         @if (item.icon) {
           <div class="stat-icon-wrapper">
-            <i class="bi" [ngClass]="item.icon" aria-hidden="true"></i>
+            <i [class]="'bi ' + item.icon" aria-hidden="true"></i>
           </div>
         }
         <div class="stat-number">{{ item.number }}</div>

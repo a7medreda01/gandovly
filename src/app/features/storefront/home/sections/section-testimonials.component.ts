@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal , ViewEncapsulation } from '@angular/core';
+import { Component, Input, inject, signal, OnInit, OnDestroy, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeSection, HomeSectionTestimonial } from '../../../../core/models/store-layout';
 import { StorefrontSettings } from '../../../../core/models/models';
@@ -20,10 +20,10 @@ import { LanguageService } from '../../../../core/services/language.service';
     .testimonials-eyebrow::before, .testimonials-eyebrow::after { content:''; flex:1; max-width:60px; height:1px; background:var(--primary-color,#38bdf8); opacity:.5; }
     .testimonials-section h2 { text-align:center; color:#fff; font-size:1.75rem; font-weight:700; margin:0 0 .5rem; }
     .testimonials-section .subtitle { text-align:center; color:rgba(255,255,255,.55); margin-bottom:2rem; }
-    .testimonial-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:1.25rem; padding:1.5rem; position:relative; min-height:160px; }
+    .testimonial-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:1.25rem; padding:1.5rem; position:relative; min-height:220px; display:flex; flex-direction:column; }
     .quote-icon { position:absolute; top:1rem; left:1rem; font-size:2rem; color:rgba(255,255,255,.12); line-height:1; font-family:Georgia,serif; }
     .stars { color:#f59e0b; font-size:1.1rem; margin-bottom:1rem; display:flex; gap:.15rem; }
-    .review-text { color:rgba(255,255,255,.85); line-height:1.7; margin-bottom:1.25rem; }
+    .review-text { color:rgba(255,255,255,.85); line-height:1.7; margin-bottom:1.25rem; flex:1; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
     .reviewer { display:flex; align-items:center; gap:.75rem; }
     .avatar { width:2.5rem; height:2.5rem; border-radius:50%; background:var(--primary-color,#38bdf8); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; overflow:hidden; flex-shrink:0; }
     .avatar img { width:100%; height:100%; object-fit:cover; }
@@ -68,7 +68,7 @@ import { LanguageService } from '../../../../core/services/language.service';
       <button class="btn-arrow" (click)="prev()"><i class="bi bi-chevron-right"></i></button>
       <div class="dots">
         @for (d of reviews(); track $index) {
-          <span class="dot" [class.active]="idx() === $index" (click)="idx.set($index)"></span>
+          <span class="dot" [class.active]="idx() === $index" (click)="goTo($index)"></span>
         }
       </div>
       <button class="btn-arrow" (click)="next()"><i class="bi bi-chevron-left"></i></button>
@@ -77,17 +77,36 @@ import { LanguageService } from '../../../../core/services/language.service';
 </section>
 }`,
 })
-export class SectionTestimonialsComponent {
+export class SectionTestimonialsComponent implements OnInit, OnDestroy {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
   readonly lang = inject(LanguageService);
   idx = signal(0);
+  private autoplayTimer: ReturnType<typeof setInterval> | null = null;
+
+  ngOnInit() {
+    this.startAutoplay();
+  }
+  ngOnDestroy() {
+    this.stopAutoplay();
+  }
+  private startAutoplay() {
+    this.autoplayTimer = setInterval(() => {
+      const len = this.reviews().length;
+      if (len > 1) this.idx.update(i => (i >= len - 1 ? 0 : i + 1));
+    }, 4500);
+  }
+  private stopAutoplay() {
+    if (this.autoplayTimer) { clearInterval(this.autoplayTimer); this.autoplayTimer = null; }
+  }
+
   reviews() { return (this.s.testimonials?.length ? this.s.testimonials : this.defaultReviews) as HomeSectionTestimonial[]; }
   current() { return this.reviews()[this.idx()] ?? this.reviews()[0]; }
   starsArray() { return [1,2,3,4,5]; }
   initial() { return (this.current().name || '?').charAt(0).toUpperCase(); }
-  prev() { this.idx.update(i => Math.max(0, i - 1)); }
-  next() { this.idx.update(i => Math.min(this.reviews().length - 1, i + 1)); }
+  prev() { this.stopAutoplay(); this.idx.update(i => Math.max(0, i - 1)); this.startAutoplay(); }
+  next() { this.stopAutoplay(); this.idx.update(i => Math.min(this.reviews().length - 1, i + 1)); this.startAutoplay(); }
+  goTo(i: number) { this.stopAutoplay(); this.idx.set(i); this.startAutoplay(); }
   title() { return this.lang.text(this.s.title, this.s.titleEn); }
   subtitle() { return this.lang.text(this.s.subtitle, this.s.subtitleEn); }
   eyebrow() { return this.lang.text(this.s.eyebrow || 'آراء العملاء', this.s.eyebrowEn || 'TESTIMONIALS'); }
