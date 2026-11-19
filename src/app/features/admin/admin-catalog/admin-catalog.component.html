@@ -1485,7 +1485,7 @@
                         <label class="form-label small fw-bold text-dark">اختر المجموعة *</label>
                         <select class="form-select form-select-sm" [(ngModel)]="quickSelectedGroupId">
                           @for (grp of modifierGroups(); track grp.id) {
-                            <option [value]="grp.id">{{ grp.nameAr }} ({{ grp.options.length }} خيارات حالياً)</option>
+                            <option [ngValue]="grp.id">{{ grp.nameAr }} ({{ grp.options.length }} خيارات حالياً)</option>
                           }
                         </select>
                       </div>

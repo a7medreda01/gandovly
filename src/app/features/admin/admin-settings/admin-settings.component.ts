@@ -629,6 +629,13 @@ export class AdminSettingsComponent implements OnInit {
     this.onColorChange();
   }
 
+  onHomeSearchToggle(enabled: boolean) {
+    this.layoutOptions.showHomeSearch = enabled;
+    if (this.settings()) {
+      this.settings()!.showSearchBar = enabled;
+    }
+  }
+
   saveSettings(section?: string, silent = false) {
     const current = this.settings();
     if (!current) return;
@@ -636,8 +643,10 @@ export class AdminSettingsComponent implements OnInit {
     const layout = this.layoutOptions;
     delete (layout as any).enableBuyNowButton;
     layout.showMobileBottomNav = current.showMobileBottomNav !== false;
+    current.showSearchBar = layout.showHomeSearch !== false;
     const payload = {
       ...current,
+      showSearchBar: layout.showHomeSearch !== false,
       showMobileBottomNav: current.showMobileBottomNav !== false,
       enableBuyNow: !!current.enableBuyNow,
       storeLayout: layout,

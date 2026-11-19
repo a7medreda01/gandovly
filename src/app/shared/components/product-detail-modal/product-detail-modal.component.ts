@@ -125,14 +125,22 @@ export class ProductDetailModalComponent implements OnInit {
         brand_ar: { label: 'الماركة', icon: 'bi-award-fill' },
         origin: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
         origin_ar: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
+        originCountry: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
         weight: { label: 'الوزن / الحجم', icon: 'bi-speedometer' },
         weight_ar: { label: 'الوزن / الحجم', icon: 'bi-speedometer' },
         size: { label: 'الحجم / الكمية', icon: 'bi-box' },
         size_ar: { label: 'الحجم / الكمية', icon: 'bi-box' },
         unitSize: { label: 'حجم الوحدة', icon: 'bi-box' },
-        originCountry: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
+        warrantyYears: { label: 'فترة الضمان', icon: 'bi-shield-check' },
+        powerVoltage: { label: 'القدرة / الجهد', icon: 'bi-lightning-charge-fill' },
         storageType: { label: 'طريقة التخزين', icon: 'bi-thermometer-half' },
         storage: { label: 'طريقة التخزين', icon: 'bi-thermometer-half' },
+        activeIngredient: { label: 'المادة الفعالة', icon: 'bi-capsule' },
+        dosageForm: { label: 'الشكل الدوائي', icon: 'bi-prescription2' },
+        requiresPrescription: { label: 'الوصفة الطبية', icon: 'bi-file-earmark-medical' },
+        partCondition: { label: 'حالة القطعة', icon: 'bi-patch-check' },
+        oemNumber: { label: 'رقم القطعة الأصلي (OEM)', icon: 'bi-upc' },
+        compatibleVehicles: { label: 'الموديلات المتوافقة', icon: 'bi-truck' },
         caloriesper100g: { label: 'السعرات لكل 100 جرام', icon: 'bi-fire' },
         calories: { label: 'السعرات الحرارية', icon: 'bi-fire' },
         ingredients: { label: 'المكونات الرئيسية', icon: 'bi-list-ul' },
@@ -158,7 +166,15 @@ export class ProductDetailModalComponent implements OnInit {
           items.push({ label: meta.label, value: String(val).trim(), icon: meta.icon });
           addedLabels.add(meta.label);
         }
-        if (items.length >= 6) break;
+      }
+
+      // Custom/dynamic key-value specifications
+      for (const [key, val] of Object.entries(specsObj)) {
+        if (!specMap[key] && val !== undefined && val !== null && String(val).trim() && !addedLabels.has(key)) {
+          items.push({ label: key, value: String(val).trim(), icon: 'bi-info-circle-fill' });
+          addedLabels.add(key);
+        }
+        if (items.length >= 16) break;
       }
     }
 

@@ -46,6 +46,16 @@
         @switch (s.kind) {
           @case ('hero') {
             <app-section-hero [s]="s" [settings]="settings.settings()"></app-section-hero>
+            @if (showHomeSearch() && i === 0) {
+              <div class="home-search-wrap search-under-hero" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+                <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()">
+                  <input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج أو قسم...', 'Search products or categories...')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')">
+                  <a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                  </a>
+                </form>
+              </div>
+            }
           }
           @case ('products') {
             <app-section-products [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-products>

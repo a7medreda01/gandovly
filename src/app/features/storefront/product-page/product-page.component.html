@@ -1,4 +1,4 @@
-<div class="product-page-container container" [class.entrance-active]="entranceAnimationActive()" [class.entrance-done]="entranceAnimationDone()">
+﻿<div class="product-page-container container" [class.entrance-active]="entranceAnimationActive()" [class.entrance-done]="entranceAnimationDone()">
   <!-- Top Breadcrumbs & Back Navigation -->
   <div class="product-page-top-nav d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -395,7 +395,7 @@
             [(ngModel)]="specialInstructions"
           ></textarea></details>        <!-- Specifications Table (if any) -->
         @if (parsedKeySpecs.length > 0) {
-          <details class="product-disclosure">
+          <details class="product-disclosure" open>
             <summary>{{ languageService.text('المواصفات', 'Specifications') }}</summary>
             <div class="specs-grid mt-2">
               @for (spec of parsedKeySpecs; track spec.label) {

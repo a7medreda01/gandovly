@@ -69,6 +69,9 @@ export class StoreLayoutEditorComponent {
   }
 
   changed() {
+    if (this.layout.showHomeSearch !== undefined && this.settings.settings()) {
+      this.settings.settings().showSearchBar = this.layout.showHomeSearch !== false;
+    }
     this.layoutChange.emit(this.layout);
   }
 

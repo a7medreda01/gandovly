@@ -67,6 +67,10 @@ export class AdminService {
     return this.api.get<PagedResult<Product>>('admin/catalog/products', queryParams);
   }
 
+  getProductById(id: number) {
+    return this.api.get<Product>(`admin/catalog/products/${id}`);
+  }
+
   createProduct(dto: any) {
     return this.api.post<Product>('admin/catalog/products', dto);
   }

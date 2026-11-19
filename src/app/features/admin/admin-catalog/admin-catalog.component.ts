@@ -567,8 +567,8 @@ export class AdminCatalogComponent implements OnInit {
       isAvailable: prod.isAvailable,
       stockQuantity: prod.stockQuantity ?? 100,
       specificationsJson: prod.specificationsJson || '',
-      preparationOptionGroupIds: prod.preparationGroups?.map(g => g.id) || [],
-      modifierGroupIds: prod.modifierGroups?.map(g => g.id) || [],
+      preparationOptionGroupIds: (prod.preparationGroups?.map(g => Number(g.id)) || []).filter(n => n > 0),
+      modifierGroupIds: (prod.modifierGroups?.map(g => Number(g.id)) || []).filter(n => n > 0),
       unitSize: '',
       originCountry: '',
       storageType: '',
@@ -588,6 +588,21 @@ export class AdminCatalogComponent implements OnInit {
     this.showQuickModifierPanel.set(false);
     this.productModalTab.set('basic');
     this.showProductModal.set(true);
+
+    // Fetch fresh full product details to ensure groups and specs are completely up to date
+    this.adminService.getProductById(prod.id).subscribe({
+      next: (fresh) => {
+        if (!fresh || this.productForm.id !== fresh.id || !this.showProductModal()) return;
+        this.editingProductVersion = fresh.version;
+        if (fresh.preparationGroups) {
+          this.productForm.preparationOptionGroupIds = fresh.preparationGroups.map(g => Number(g.id)).filter(n => n > 0);
+        }
+        if (fresh.modifierGroups) {
+          this.productForm.modifierGroupIds = fresh.modifierGroups.map(g => Number(g.id)).filter(n => n > 0);
+        }
+      },
+      error: () => {}
+    });
   }
 
   // Specifications Parsing & Building
@@ -701,7 +716,7 @@ export class AdminCatalogComponent implements OnInit {
     }
   }
 
-  saveQuickModifierGroup() {
+  saveQuickModifierGroup(onCompleted?: () => void) {
     const name = this.quickGroupNameAr.trim();
     if (!name) {
       this.toast.error('يرجى كتابة اسم مجموعة الخيارات (مثال: الحجم، الإضافات، اللون...)');
@@ -726,8 +741,9 @@ export class AdminCatalogComponent implements OnInit {
 
     this.adminService.createModifierGroup(groupDto).subscribe({
       next: (createdGroup) => {
+        const createdGroupId = Number(createdGroup.id);
         const optionObservables = validOptions.map((opt, idx) =>
-          this.adminService.createModifierOption(createdGroup.id, {
+          this.adminService.createModifierOption(createdGroupId, {
             nameAr: opt.nameAr.trim(),
             price: Number(opt.price) || 0,
             displayOrder: idx + 1,
@@ -735,24 +751,34 @@ export class AdminCatalogComponent implements OnInit {
           })
         );
 
-        forkJoin(optionObservables).subscribe({
-          next: () => {
-            this.adminService.getModifierGroups().subscribe(groups => {
+        const attachGroupAndFinish = () => {
+          this.adminService.getModifierGroups().subscribe({
+            next: groups => {
               this.modifierGroups.set(groups || []);
-              if (!this.productForm.modifierGroupIds.includes(createdGroup.id)) {
-                this.productForm.modifierGroupIds.push(createdGroup.id);
+              if (createdGroupId > 0 && !this.productForm.modifierGroupIds.map(Number).includes(createdGroupId)) {
+                this.productForm.modifierGroupIds = [...this.productForm.modifierGroupIds.map(Number), createdGroupId];
               }
               this.isSavingQuickModifier.set(false);
               this.showQuickModifierPanel.set(false);
               this.toast.success(`تم إنشاء مجموعة "${name}" وربطها بالصنف بنجاح! 🎉`);
-            });
-          },
+              onCompleted?.();
+            },
+            error: () => {
+              if (createdGroupId > 0 && !this.productForm.modifierGroupIds.map(Number).includes(createdGroupId)) {
+                this.productForm.modifierGroupIds = [...this.productForm.modifierGroupIds.map(Number), createdGroupId];
+              }
+              this.isSavingQuickModifier.set(false);
+              this.showQuickModifierPanel.set(false);
+              onCompleted?.();
+            }
+          });
+        };
+
+        forkJoin(optionObservables).subscribe({
+          next: attachGroupAndFinish,
           error: () => {
-            this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
-            this.productForm.modifierGroupIds.push(createdGroup.id);
-            this.isSavingQuickModifier.set(false);
-            this.showQuickModifierPanel.set(false);
-            this.toast.success(`تم إنشاء المجموعة وربطها بالصنف.`);
+            this.toast.error('تم إنشاء المجموعة ولكن تعذر حفظ بعض الخيارات.');
+            attachGroupAndFinish();
           }
         });
       },
@@ -763,9 +789,10 @@ export class AdminCatalogComponent implements OnInit {
     });
   }
 
-  saveQuickOptionToExisting() {
+  saveQuickOptionToExisting(onCompleted?: () => void) {
+    const groupId = Number(this.quickSelectedGroupId);
     const optName = this.quickExistingOptionNameAr.trim();
-    if (!this.quickSelectedGroupId) {
+    if (!groupId) {
       this.toast.error('يرجى اختيار المجموعة لإضافة الخيار إليها');
       return;
     }
@@ -775,21 +802,32 @@ export class AdminCatalogComponent implements OnInit {
     }
 
     this.isSavingQuickModifier.set(true);
-    this.adminService.createModifierOption(this.quickSelectedGroupId, {
+    this.adminService.createModifierOption(groupId, {
       nameAr: optName,
       price: Number(this.quickExistingOptionPrice) || 0,
       displayOrder: 99,
       isAvailable: true
     }).subscribe({
       next: () => {
-        this.adminService.getModifierGroups().subscribe(groups => {
-          this.modifierGroups.set(groups || []);
-          if (!this.productForm.modifierGroupIds.includes(this.quickSelectedGroupId)) {
-            this.productForm.modifierGroupIds.push(this.quickSelectedGroupId);
+        this.adminService.getModifierGroups().subscribe({
+          next: groups => {
+            this.modifierGroups.set(groups || []);
+            if (!this.productForm.modifierGroupIds.map(Number).includes(groupId)) {
+              this.productForm.modifierGroupIds = [...this.productForm.modifierGroupIds.map(Number), groupId];
+            }
+            this.isSavingQuickModifier.set(false);
+            this.showQuickModifierPanel.set(false);
+            this.toast.success(`تم إضافة الخيار "${optName}" وربطه بالصنف بنجاح! 🎉`);
+            onCompleted?.();
+          },
+          error: () => {
+            if (!this.productForm.modifierGroupIds.map(Number).includes(groupId)) {
+              this.productForm.modifierGroupIds = [...this.productForm.modifierGroupIds.map(Number), groupId];
+            }
+            this.isSavingQuickModifier.set(false);
+            this.showQuickModifierPanel.set(false);
+            onCompleted?.();
           }
-          this.isSavingQuickModifier.set(false);
-          this.showQuickModifierPanel.set(false);
-          this.toast.success(`تم إضافة الخيار "${optName}" وربطه بالصنف بنجاح! 🎉`);
         });
       },
       error: () => {
@@ -834,6 +872,24 @@ export class AdminCatalogComponent implements OnInit {
       return;
     }
 
+    // If user left the inline quick-modifier form open with filled data, save and attach it automatically first
+    if (this.showQuickModifierPanel()) {
+      if (this.quickModifierMode === 'new_group' && this.quickGroupNameAr.trim()) {
+        const hasValidOpts = this.quickGroupOptions.some(o => o.nameAr.trim().length > 0);
+        if (hasValidOpts) {
+          this.saveQuickModifierGroup(() => this.persistProductPayload());
+          return;
+        }
+      } else if (this.quickModifierMode === 'add_to_existing' && Number(this.quickSelectedGroupId) > 0 && this.quickExistingOptionNameAr.trim()) {
+        this.saveQuickOptionToExisting(() => this.persistProductPayload());
+        return;
+      }
+    }
+
+    this.persistProductPayload();
+  }
+
+  private persistProductPayload() {
     this.syncProductImagesToForm();
 
     if (this.productForm.pricingType === 'FixedPerUnit') {
@@ -845,6 +901,9 @@ export class AdminCatalogComponent implements OnInit {
 
     // Build specs JSON from domain inputs + custom specs
     this.productForm.specificationsJson = this.buildSpecificationsJson();
+
+    const prepIds = Array.from(new Set((this.productForm.preparationOptionGroupIds || []).map(Number).filter(id => id > 0)));
+    const modIds = Array.from(new Set((this.productForm.modifierGroupIds || []).map(Number).filter(id => id > 0)));
 
     const payload: any = {
       categoryId: this.productForm.categoryId,
@@ -876,8 +935,8 @@ export class AdminCatalogComponent implements OnInit {
       displayOrder: Number(this.productForm.displayOrder) || 0,
       isAvailable: this.productForm.isAvailable,
       stockQuantity: this.productForm.stockQuantity !== null && this.productForm.stockQuantity !== undefined ? Number(this.productForm.stockQuantity) : null,
-      preparationOptionGroupIds: this.productForm.preparationOptionGroupIds,
-      modifierGroupIds: this.productForm.modifierGroupIds
+      preparationOptionGroupIds: prepIds,
+      modifierGroupIds: modIds
     };
 
     if (this.isEditingProduct()) {

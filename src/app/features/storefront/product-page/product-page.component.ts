@@ -217,30 +217,77 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     if (!p) return [];
     const items: { label: string; value: string; icon?: string }[] = [];
 
-    if (p.brand) {
-      items.push({ label: 'الماركة', value: p.brand, icon: 'bi-award-fill' });
+    if (p.brand?.trim()) {
+      items.push({ label: 'الماركة / العلامة التجارية', value: p.brand.trim(), icon: 'bi-award-fill' });
     }
 
     if (p.specificationsJson) {
       try {
         const specs = JSON.parse(p.specificationsJson);
-        const map: { [k: string]: { label: string; icon: string } } = {
-          origin: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
-          origin_ar: { label: 'بلد المنشأ', icon: 'bi-geo-alt-fill' },
-          weight: { label: 'الوزن / الحجم', icon: 'bi-speedometer' },
-          size: { label: 'الحجم', icon: 'bi-box' },
-          storage: { label: 'طريقة الحفظ', icon: 'bi-thermometer-half' },
-          calories: { label: 'السعرات', icon: 'bi-fire' },
+        const specMap: { [k: string]: { label: string; icon: string } } = {
+          unitSize: { label: 'المقاس / الأبعاد / السعة', icon: 'bi-aspect-ratio' },
+          originCountry: { label: 'بلد المنشأ والتصنيع', icon: 'bi-geo-alt-fill' },
+          origin: { label: 'بلد المنشأ والتصنيع', icon: 'bi-geo-alt-fill' },
+          origin_ar: { label: 'بلد المنشأ والتصنيع', icon: 'bi-geo-alt-fill' },
+          warrantyYears: { label: 'فترة الضمان المعتمد', icon: 'bi-shield-check' },
+          powerVoltage: { label: 'القدرة الكهربائية / الجهد', icon: 'bi-lightning-charge-fill' },
+          storageType: { label: 'طريقة الحفظ والتخزين', icon: 'bi-thermometer-half' },
+          storage: { label: 'طريقة الحفظ والتخزين', icon: 'bi-thermometer-half' },
+          weight: { label: 'الوزن التقريبي', icon: 'bi-speedometer' },
+          weight_ar: { label: 'الوزن التقريبي', icon: 'bi-speedometer' },
+          size: { label: 'الحجم / الأبعاد', icon: 'bi-box' },
+          size_ar: { label: 'الحجم / الأبعاد', icon: 'bi-box' },
+          activeIngredient: { label: 'المادة الفعالة', icon: 'bi-capsule' },
+          dosageForm: { label: 'الشكل الدوائي', icon: 'bi-prescription2' },
+          requiresPrescription: { label: 'الوصفة الطبية', icon: 'bi-file-earmark-medical' },
+          partCondition: { label: 'حالة القطعة', icon: 'bi-patch-check' },
+          oemNumber: { label: 'رقم القطعة الأصلي (OEM)', icon: 'bi-upc' },
+          compatibleVehicles: { label: 'الموديلات المتوافقة', icon: 'bi-truck' },
+          calories: { label: 'السعرات الحرارية', icon: 'bi-fire' },
+          caloriesper100g: { label: 'السعرات لكل 100 جرام', icon: 'bi-fire' },
           ingredients: { label: 'المكونات', icon: 'bi-list-ul' },
-          flavor: { label: 'النكهة', icon: 'bi-stars' }
+          ingredients_ar: { label: 'المكونات', icon: 'bi-list-ul' },
+          flavor: { label: 'النكهة', icon: 'bi-stars' },
+          flavor_ar: { label: 'النكهة', icon: 'bi-stars' }
         };
-        for (const [k, meta] of Object.entries(map)) {
-          if (specs[k] && !items.some(i => i.label === meta.label)) {
-            items.push({ label: meta.label, value: String(specs[k]), icon: meta.icon });
+
+        const addedLabels = new Set(items.map(i => i.label));
+
+        // 1. Process known standard mapped keys
+        for (const [k, meta] of Object.entries(specMap)) {
+          const val = specs[k];
+          if (val !== undefined && val !== null && String(val).trim() && !addedLabels.has(meta.label)) {
+            items.push({ label: meta.label, value: String(val).trim(), icon: meta.icon });
+            addedLabels.add(meta.label);
+          }
+        }
+
+        // 2. Process all custom/dynamic keys (like "نوع الخشب والخامة", "الأبعاد", etc.)
+        for (const [k, v] of Object.entries(specs)) {
+          if (!specMap[k] && v !== undefined && v !== null && String(v).trim()) {
+            const valStr = String(v).trim();
+            if (!addedLabels.has(k)) {
+              items.push({ label: k, value: valStr, icon: 'bi-info-circle-fill' });
+              addedLabels.add(k);
+            }
           }
         }
       } catch {}
     }
+
+    // Fallback: if no structured specs found, attempt parsing from description text
+    if (items.length === 0 && p.description) {
+      const text = p.description.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
+      const dimM = text.match(/(?:[-–—•\s]|^)الأبعاد\s*:\s*([^•\n]+)/i);
+      if (dimM && dimM[1].trim()) items.push({ label: 'الأبعاد والمقاسات', value: dimM[1].trim(), icon: 'bi-aspect-ratio' });
+      const capM = text.match(/(?:[-–—•\s]|^)السعة\s*:\s*([^•\n]+)/i);
+      if (capM && capM[1].trim()) items.push({ label: 'السعة والنوع', value: capM[1].trim(), icon: 'bi-droplet-half' });
+      const wM = text.match(/(?:[-–—•\s]|^)الوزن\s*:\s*([^•\n]+)/i);
+      if (wM && wM[1].trim()) items.push({ label: 'الوزن التقريبي', value: wM[1].trim(), icon: 'bi-speedometer' });
+      const orgM = text.match(/(?:[-–—•\s]|^)الصناعة\s*:\s*([^•\n]+)/i);
+      if (orgM && orgM[1].trim()) items.push({ label: 'بلد الصنع', value: orgM[1].trim(), icon: 'bi-patch-check-fill' });
+    }
+
     return items;
   }
 

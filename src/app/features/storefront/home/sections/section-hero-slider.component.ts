@@ -22,12 +22,12 @@ import { LanguageService } from '../../../../core/services/language.service';
     .hero-slider-wrap {
       position: relative;
       width: 100%;
-      min-height: 480px;
-      height: 65vh;
-      max-height: 680px;
+      height: calc(100vh - 72px);
+      min-height: calc(100vh - 72px);
+      max-height: none;
       overflow: hidden;
       border-radius: 0;
-      margin: 0 0 2rem 0;
+      margin: 0;
       background: #0f172a;
       display: flex;
       align-items: center;
@@ -35,15 +35,19 @@ import { LanguageService } from '../../../../core/services/language.service';
     }
     @media (min-width: 768px) {
       .hero-slider-wrap {
-        min-height: 520px;
-        height: 68vh;
+        height: calc(100vh - 72px);
+        min-height: calc(100vh - 72px);
+        max-height: none;
       }
     }
     @media (max-width: 767px) {
       .hero-slider-wrap {
-        min-height: 380px;
-        height: 54vh;
-        margin-bottom: 1.25rem;
+        height: calc(100vh - 56px);
+        height: calc(100dvh - 56px);
+        min-height: calc(100vh - 56px);
+        min-height: calc(100dvh - 56px);
+        max-height: none;
+        margin-bottom: 0;
       }
     }
 

@@ -63,7 +63,7 @@
       <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام السريع في الرئيسية</label>
     </div>
     <div class="col-12 col-md-4">
-      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="layoutOptions.showHomeSearch"> إظهار شريط البحث في الصفحة الرئيسية</label>
+      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="layoutOptions.showHomeSearch" (ngModelChange)="onHomeSearchToggle($event)"> إظهار شريط البحث في الصفحة الرئيسية</label>
     </div>
   </div>
 

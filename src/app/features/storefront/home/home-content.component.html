@@ -31,6 +31,7 @@
   } 
 
   <!-- 2. Search & Filter Bar (Overlapping Bottom of Banner or top-spaced when banner is disabled) -->
+  @if (settingsService.settings().showSearchBar !== false && settingsService.settings().storeLayout?.showHomeSearch !== false) {
   <section class="search-filter-section container" [class.no-hero]="!settingsService.settings().showHeroBanner">
     <div class="search-filter-row">
       <!-- Search Button on Right (1st child in RTL) -->
@@ -51,6 +52,7 @@
       </div>
     </div>
   </section>
+  }
 
   <!-- 3. Horizontal Categories Row -->
   @if (settingsService.settings().showCategoriesRow) {
