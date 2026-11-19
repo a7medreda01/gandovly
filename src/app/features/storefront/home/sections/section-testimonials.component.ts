@@ -20,10 +20,10 @@ import { LanguageService } from '../../../../core/services/language.service';
     .testimonials-eyebrow::before, .testimonials-eyebrow::after { content:''; flex:1; max-width:60px; height:1px; background:var(--primary-color,#38bdf8); opacity:.5; }
     .testimonials-section h2 { text-align:center; color:#fff; font-size:1.75rem; font-weight:700; margin:0 0 .5rem; }
     .testimonials-section .subtitle { text-align:center; color:rgba(255,255,255,.55); margin-bottom:2rem; }
-    .testimonial-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:1.25rem; padding:1.5rem; position:relative; min-height:220px; display:flex; flex-direction:column; }
+    .testimonial-card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:1.25rem; padding:1.75rem; position:relative; min-height:260px; display:flex; flex-direction:column; justify-content:space-between; transition:min-height .25s ease; }
     .quote-icon { position:absolute; top:1rem; left:1rem; font-size:2rem; color:rgba(255,255,255,.12); line-height:1; font-family:Georgia,serif; }
-    .stars { color:#f59e0b; font-size:1.1rem; margin-bottom:1rem; display:flex; gap:.15rem; }
-    .review-text { color:rgba(255,255,255,.85); line-height:1.7; margin-bottom:1.25rem; flex:1; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
+    .stars { color:#f59e0b; font-size:1.1rem; margin-bottom:.75rem; display:flex; gap:.15rem; }
+    .review-text { color:rgba(255,255,255,.85); line-height:1.7; margin-bottom:1.25rem; min-height:5.2rem; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
     .reviewer { display:flex; align-items:center; gap:.75rem; }
     .avatar { width:2.5rem; height:2.5rem; border-radius:50%; background:var(--primary-color,#38bdf8); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; overflow:hidden; flex-shrink:0; }
     .avatar img { width:100%; height:100%; object-fit:cover; }

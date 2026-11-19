@@ -137,6 +137,7 @@ export interface StorefrontSettings {
   showPhoneInNavbar?: boolean;
   showSearchBar?: boolean;
   showCartBadge?: boolean;
+  showMobileBottomNav?: boolean;
 
   // FAB
   enableBuyNow?: boolean;

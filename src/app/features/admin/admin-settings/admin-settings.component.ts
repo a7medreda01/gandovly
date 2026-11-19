@@ -635,8 +635,10 @@ export class AdminSettingsComponent implements OnInit {
 
     const layout = this.layoutOptions;
     delete (layout as any).enableBuyNowButton;
+    layout.showMobileBottomNav = current.showMobileBottomNav !== false;
     const payload = {
       ...current,
+      showMobileBottomNav: current.showMobileBottomNav !== false,
       enableBuyNow: !!current.enableBuyNow,
       storeLayout: layout,
       restaurantNameEn: layout.restaurantNameEn || current.restaurantNameEn || '',

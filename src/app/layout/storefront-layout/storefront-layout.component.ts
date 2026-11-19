@@ -90,7 +90,9 @@ import { SettingsService } from '../../core/services/settings.service';
         <app-cart-drawer></app-cart-drawer>
         <app-mobile-nav-drawer></app-mobile-nav-drawer>
         <app-whatsapp-fab></app-whatsapp-fab>
-        <app-mobile-bottom-nav></app-mobile-bottom-nav>
+        @if (settingsService.settings().showMobileBottomNav !== false && settingsService.settings().storeLayout?.showMobileBottomNav !== false) {
+          <app-mobile-bottom-nav></app-mobile-bottom-nav>
+        }
         @if(pixels.configured()){@if(pixels.consent()===null){<aside class="marketing-consent" aria-label="تفضيلات التتبع"><p>نستخدم أدوات قياس من منصات التواصل لتحسين الإعلانات وقياس الزيارات والطلبات. هل توافق على تشغيلها؟</p><button type="button" (click)="pixels.choose('accepted')">أوافق</button><button type="button" (click)="pixels.choose('rejected')">لا أوافق</button></aside>}@else{<button type="button" class="marketing-preferences" (click)="pixels.preferences()">تفضيلات التتبع</button>}}
       </div>
     }

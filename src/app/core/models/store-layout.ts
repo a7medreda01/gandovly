@@ -87,6 +87,7 @@ export interface StoreLayout {
     homeTheme?: 'classic' | 'cards' | 'editorial' | 'discovery';
     showCustomerServicePhone?: boolean;
     showHomeSearch?: boolean;
+    showMobileBottomNav?: boolean;
     homeTitleEn?: string;
     homeSubtitleEn?: string;
     homeButtonTextEn?: string;
@@ -142,7 +143,7 @@ export interface StoreLayout {
     useCustomHome: boolean;
     sections: HomeSection[];
 }
-export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, showHomeSearch: true, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
+export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, showHomeSearch: true, showMobileBottomNav: true, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
 export function newHomeSection(kind: HomeSection['kind']): HomeSection {
     const titles: Record<HomeSection['kind'], string> = {
         hero: 'اكتشف مجموعتنا',
