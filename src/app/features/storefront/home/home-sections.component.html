@@ -1,63 +1,99 @@
 @if (loading()) {
   <app-home-skeleton />
 } @else {
-<div class="home-builder container">
+<div class="home-builder" [class.flush-top]="isFirstSectionHero()">
   <h1 class="sr-only">{{settings.settings().restaurantName}}</h1>
-  <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()"><input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج', 'Search products')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')"><a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')"><i class="bi bi-search" aria-hidden="true"></i></a></form>
-  @if(error()){<div class="home-error" role="alert">{{ language.text('تعذر تحميل الرئيسية.', 'Could not load the homepage.') }} <button type="button" (click)="load()">{{ language.text('إعادة المحاولة', 'Try again') }}</button></div>}
-  @for(row of sections(); track row.config.id){
+
+  <!-- Top Search Bar (when hero is NOT the first element and search is enabled) -->
+  @if (showHomeSearch() && !isFirstSectionHero()) {
+    <div class="container home-search-wrap">
+      <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()">
+        <input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج أو قسم', 'Search products')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')">
+        <a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')">
+          <i class="bi bi-search" aria-hidden="true"></i>
+        </a>
+      </form>
+    </div>
+  }
+
+  @if(error()){
+    <div class="container">
+      <div class="home-error" role="alert">{{ language.text('تعذر تحميل الرئيسية.', 'Could not load the homepage.') }} <button type="button" (click)="load()">{{ language.text('إعادة المحاولة', 'Try again') }}</button></div>
+    </div>
+  }
+
+  @for(row of sections(); track row.config.id; let i = $index){
     @let s = row.config;
-    @switch (s.kind) {
-      @case ('hero') {
-        <app-section-hero [s]="s" [settings]="settings.settings()"></app-section-hero>
+
+    @if (s.kind === 'hero_slider') {
+      <!-- Full Screen Hero Slider: Edge-to-Edge without container limits -->
+      <app-section-hero-slider [s]="s" [settings]="settings.settings()"></app-section-hero-slider>
+
+      <!-- If hero slider was at top and search is enabled, place search bar right below hero slider with luxury styling -->
+      @if (showHomeSearch() && i === 0) {
+        <div class="container home-search-wrap search-under-hero">
+          <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()">
+            <input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج أو قسم أو طاولة...', 'Search products or categories...')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')">
+            <a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')">
+              <i class="bi bi-search" aria-hidden="true"></i>
+            </a>
+          </form>
+        </div>
       }
-      @case ('products') {
-        <app-section-products [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-products>
-      }
-      @case ('banner') {
-        <app-section-banner [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-banner>
-      }
-      @case ('features') {
-        <app-section-features [s]="s" [settings]="settings.settings()"></app-section-features>
-      }
-      @case ('brands') {
-        <app-section-brands [s]="s" [settings]="settings.settings()"></app-section-brands>
-      }
-      @case ('categories') {
-        <app-section-categories [s]="s" [settings]="settings.settings()"></app-section-categories>
-      }
-      @case ('product_carousel') {
-        <app-section-product-carousel [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-product-carousel>
-      }
-      @case ('testimonials') {
-        <app-section-testimonials [s]="s" [settings]="settings.settings()"></app-section-testimonials>
-      }
-      @case ('hero_slider') {
-        <app-section-hero-slider [s]="s" [settings]="settings.settings()"></app-section-hero-slider>
-      }
-      @case ('categories_grid') {
-        <app-section-categories-grid [s]="s" [settings]="settings.settings()"></app-section-categories-grid>
-      }
-      @case ('countdown') {
-        <app-section-countdown [s]="s" [settings]="settings.settings()"></app-section-countdown>
-      }
-      @case ('newsletter') {
-        <app-section-newsletter [s]="s" [settings]="settings.settings()"></app-section-newsletter>
-      }
-      @case ('stats') {
-        <app-section-stats [s]="s" [settings]="settings.settings()"></app-section-stats>
-      }
-      @case ('cta_full') {
-        <app-section-cta-full [s]="s" [settings]="settings.settings()"></app-section-cta-full>
-      }
-      @case ('video') {
-        <app-section-video [s]="s" [settings]="settings.settings()"></app-section-video>
-      }
-      @case ('markdown') {
-        <app-section-markdown [s]="s" [settings]="settings.settings()"></app-section-markdown>
-      }
+    } @else {
+      <!-- Standard sections wrapped in container for optimal reading grid -->
+      <div class="container section-outer-wrap">
+        @switch (s.kind) {
+          @case ('hero') {
+            <app-section-hero [s]="s" [settings]="settings.settings()"></app-section-hero>
+          }
+          @case ('products') {
+            <app-section-products [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-products>
+          }
+          @case ('banner') {
+            <app-section-banner [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-banner>
+          }
+          @case ('features') {
+            <app-section-features [s]="s" [settings]="settings.settings()"></app-section-features>
+          }
+          @case ('brands') {
+            <app-section-brands [s]="s" [settings]="settings.settings()"></app-section-brands>
+          }
+          @case ('categories') {
+            <app-section-categories [s]="s" [settings]="settings.settings()"></app-section-categories>
+          }
+          @case ('product_carousel') {
+            <app-section-product-carousel [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-product-carousel>
+          }
+          @case ('testimonials') {
+            <app-section-testimonials [s]="s" [settings]="settings.settings()"></app-section-testimonials>
+          }
+          @case ('categories_grid') {
+            <app-section-categories-grid [s]="s" [settings]="settings.settings()"></app-section-categories-grid>
+          }
+          @case ('countdown') {
+            <app-section-countdown [s]="s" [settings]="settings.settings()"></app-section-countdown>
+          }
+          @case ('newsletter') {
+            <app-section-newsletter [s]="s" [settings]="settings.settings()"></app-section-newsletter>
+          }
+          @case ('stats') {
+            <app-section-stats [s]="s" [settings]="settings.settings()"></app-section-stats>
+          }
+          @case ('cta_full') {
+            <app-section-cta-full [s]="s" [settings]="settings.settings()"></app-section-cta-full>
+          }
+          @case ('video') {
+            <app-section-video [s]="s" [settings]="settings.settings()"></app-section-video>
+          }
+          @case ('markdown') {
+            <app-section-markdown [s]="s" [settings]="settings.settings()"></app-section-markdown>
+          }
+        }
+      </div>
     }
   }
+
   @if(loadingProduct()){<div class="product-opening" role="status">جاري تحميل تفاصيل المنتج...</div>}
   @if(selected()){<app-product-detail-modal [product]="selected()!" (closeModal)="selected.set(null)"></app-product-detail-modal>}
 </div>

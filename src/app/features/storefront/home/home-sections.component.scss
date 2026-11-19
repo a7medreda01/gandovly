@@ -28,6 +28,22 @@ app-section-markdown {
 .home-builder {
   padding-block: 24px 40px;
   color: var(--text-main, #152138);
+  width: 100%;
+  overflow-x: clip;
+
+  &.flush-top {
+    padding-top: 0 !important;
+  }
+}
+
+.home-search-wrap {
+  display: flex;
+  justify-content: center;
+
+  &.search-under-hero {
+    margin-top: 24px;
+    margin-bottom: 24px;
+  }
 }
 
 .sr-only {

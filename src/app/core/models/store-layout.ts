@@ -86,6 +86,7 @@ export interface StoreLayout {
     /** Presentation is deliberately separate from homepage section configuration. */
     homeTheme?: 'classic' | 'cards' | 'editorial' | 'discovery';
     showCustomerServicePhone?: boolean;
+    showHomeSearch?: boolean;
     homeTitleEn?: string;
     homeSubtitleEn?: string;
     homeButtonTextEn?: string;
@@ -141,7 +142,7 @@ export interface StoreLayout {
     useCustomHome: boolean;
     sections: HomeSection[];
 }
-export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
+export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, showHomeSearch: true, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
 export function newHomeSection(kind: HomeSection['kind']): HomeSection {
     const titles: Record<HomeSection['kind'], string> = {
         hero: 'اكتشف مجموعتنا',
@@ -152,7 +153,7 @@ export function newHomeSection(kind: HomeSection['kind']): HomeSection {
         categories: 'تسوق حسب القسم',
         product_carousel: 'منتجات مميزة',
         testimonials: 'آراء عملائنا',
-        hero_slider: 'استعرض مجموعتنا',
+        hero_slider: 'أحدث عروض المتجر',
         categories_grid: 'تصفح التشكيلات',
         countdown: 'عرض لفترة محدودة',
         newsletter: 'اشترك في النشرة',
@@ -161,5 +162,35 @@ export function newHomeSection(kind: HomeSection['kind']): HomeSection {
         video: 'شاهد الفيديو',
         markdown: 'محتوى مخصص',
     };
-    return { id: crypto.randomUUID().replaceAll('-', ''), kind, enabled: true, title: titles[kind] ?? kind, subtitle: '', eyebrow: '', imageUrl: '', mobileImageUrl: '', layout: 'split', backgroundColor: '', textColor: '', overlayOpacity: 20, buttonText: 'تسوق الآن', link: '/menu', source: 'featured', categoryId: null, productIds: [], limit: 8, items: [] };
+    const s: HomeSection = {
+        id: crypto.randomUUID().replaceAll('-', ''),
+        kind,
+        enabled: true,
+        title: titles[kind] ?? kind,
+        subtitle: '',
+        eyebrow: '',
+        imageUrl: '',
+        mobileImageUrl: '',
+        layout: 'split',
+        backgroundColor: '',
+        textColor: '',
+        overlayOpacity: 20,
+        buttonText: 'تسوق الآن',
+        link: '/menu',
+        source: 'featured',
+        categoryId: null,
+        productIds: [],
+        limit: 8,
+        items: []
+    };
+    if (kind === 'hero_slider') {
+        s.slides = [
+            { title: '', subtitle: '', buttonText: 'تسوق الآن', link: '/menu', imageUrl: '', mobileImageUrl: '', overlayOpacity: 30 }
+        ];
+    } else if (kind === 'testimonials') {
+        s.testimonials = [
+            { name: '', role: 'عميل موثق', text: '', rating: 5 }
+        ];
+    }
+    return s;
 }
