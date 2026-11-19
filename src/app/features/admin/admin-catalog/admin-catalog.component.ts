@@ -511,13 +511,15 @@ export class AdminCatalogComponent implements OnInit {
         if (b.isPrimary) return 1;
         return a.displayOrder - b.displayOrder;
       });
-      sorted.forEach((img, idx) => {
-        imgs.push({
-          id: img.id,
-          imageUrl: img.imageUrl,
-          isPrimary: idx === 0,
-          displayOrder: idx
-        });
+      sorted.forEach((img) => {
+        if (img.imageUrl && !imgs.some(x => x.imageUrl === img.imageUrl)) {
+          imgs.push({
+            id: img.id,
+            imageUrl: img.imageUrl,
+            isPrimary: imgs.length === 0,
+            displayOrder: imgs.length
+          });
+        }
       });
     } else {
       if (prod.imageUrl && prod.imageUrl.trim()) {
@@ -1049,6 +1051,17 @@ export class AdminCatalogComponent implements OnInit {
     this.syncProductImagesToForm();
     if (removedImage) this.adminService.deleteImageIfUnused(removedImage).subscribe({ error: () => {} });
     this.toast.info('تمت إزالة الصورة من الصنف.');
+  }
+
+  clearAllProductImages() {
+    if (this.productImages.length === 0) return;
+    if (confirm('هل أنت متأكد من مسح كافة صور هذا الصنف لاستبدالها بصور جديدة؟')) {
+      const removed = this.productImages.map(i => i.imageUrl).filter(Boolean);
+      this.productImages = [];
+      this.syncProductImagesToForm();
+      removed.forEach(img => this.adminService.deleteImageIfUnused(img).subscribe({ error: () => {} }));
+      this.toast.info('تم مسح كافة صور الصنف. يمكنك الآن رفع الصور الجديدة.');
+    }
   }
 
   // ===== CATEGORIES IMAGES =====

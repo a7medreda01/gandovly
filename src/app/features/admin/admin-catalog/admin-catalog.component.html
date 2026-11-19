@@ -752,6 +752,18 @@
                   <i class="bi bi-cloud-arrow-up-fill me-1"></i>
                   رفع صور إضافية
                 </button>
+                @if (productImages.length > 0) {
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger ms-2"
+                    [disabled]="isUploadingProductImage()"
+                    (click)="clearAllProductImages()"
+                    title="مسح كافة الصور الحالية لهذا الصنف لاستبدالها"
+                  >
+                    <i class="bi bi-trash3 me-1"></i>
+                    مسح كافة الصور
+                  </button>
+                }
               </div>
             </div>
 
