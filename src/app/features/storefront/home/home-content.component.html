@@ -1,4 +1,4 @@
-﻿@if (loadingSettings()) {
+@if (loadingSettings()) {
   <app-home-skeleton />
 } @else if (settingsService.settings().storeLayout?.useCustomHome){<app-home-sections></app-home-sections>}@else{
 @let layout = settingsService.settings().storeLayout;
