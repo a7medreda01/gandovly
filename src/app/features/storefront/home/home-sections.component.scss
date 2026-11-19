@@ -1,5 +1,28 @@
-:host {
+:host,
+app-home-sections,
+app-editorial-home-theme,
+app-discovery-home-theme {
   display: block;
+}
+
+app-section-hero,
+app-section-products,
+app-section-banner,
+app-section-features,
+app-section-brands,
+app-section-categories,
+app-section-product-carousel,
+app-section-testimonials,
+app-section-hero-slider,
+app-section-categories-grid,
+app-section-countdown,
+app-section-newsletter,
+app-section-stats,
+app-section-cta-full,
+app-section-video,
+app-section-markdown {
+  display: block;
+  width: 100%;
 }
 
 .home-builder {

@@ -4,7 +4,7 @@ import { ScrollAnimateDirective } from '../../../shared/directives/scroll-animat
 import { HomeSkeletonComponent } from './home-skeleton.component';
 import { Subscription } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
@@ -36,6 +36,7 @@ import { SectionMarkdownComponent } from './sections/section-markdown.component'
 
 @Component({
     selector: 'app-home-sections',
+    encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [
         ImageRevealDirective, ScrollAnimateDirective, HomeSkeletonComponent,

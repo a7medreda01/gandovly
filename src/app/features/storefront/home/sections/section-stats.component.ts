@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject , ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
 import { StorefrontSettings } from '../../../../core/models/models';
@@ -11,6 +11,7 @@ import { LanguageService } from '../../../../core/services/language.service';
  */
 @Component({
   selector: 'app-section-stats',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, ScrollAnimateDirective],
   styles: [`

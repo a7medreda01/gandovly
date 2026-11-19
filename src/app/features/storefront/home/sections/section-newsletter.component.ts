@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, Input, inject, signal , ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -13,6 +13,7 @@ import { NotificationService } from '../../../../core/services/notification.serv
  */
 @Component({
   selector: 'app-section-newsletter',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, FormsModule, ScrollAnimateDirective],
   styles: [`

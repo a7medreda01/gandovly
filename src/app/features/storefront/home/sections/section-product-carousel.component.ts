@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal , ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -14,6 +14,7 @@ import { LanguageService } from '../../../../core/services/language.service';
  */
 @Component({
   selector: 'app-section-product-carousel',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, RouterLink, ImageUrlPipe, ImageRevealDirective, ScrollAnimateDirective],
   styles: [`

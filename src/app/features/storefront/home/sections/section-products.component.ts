@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject , ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -9,6 +9,7 @@ import { ProductCardComponent } from '../../../../shared/components/product-card
 
 @Component({
   selector: 'app-section-products',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, RouterLink, ScrollAnimateDirective, ProductCardComponent],
   template: `

@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, inject , ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -16,6 +16,7 @@ import { CatalogService } from '../../../../core/services/catalog.service';
  */
 @Component({
   selector: 'app-section-categories-grid',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, RouterLink, ImageUrlPipe, ImageRevealDirective, ScrollAnimateDirective],
   styles: [`

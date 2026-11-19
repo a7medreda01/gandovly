@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, inject, signal, OnInit, OnDestroy , ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -12,6 +12,7 @@ import { LanguageService } from '../../../../core/services/language.service';
  */
 @Component({
   selector: 'app-section-countdown',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, RouterLink, ScrollAnimateDirective],
   styles: [`

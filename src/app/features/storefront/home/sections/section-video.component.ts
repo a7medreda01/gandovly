@@ -1,4 +1,4 @@
-import { Component, Input, inject, computed } from '@angular/core';
+import { Component, Input, inject, computed , ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HomeSection } from '../../../../core/models/store-layout';
@@ -12,6 +12,7 @@ import { LanguageService } from '../../../../core/services/language.service';
  */
 @Component({
   selector: 'app-section-video',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, ScrollAnimateDirective],
   styles: [`

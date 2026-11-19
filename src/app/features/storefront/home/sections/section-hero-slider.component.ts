@@ -1,4 +1,4 @@
-import { Component, Input, inject, signal, computed } from '@angular/core';
+import { Component, Input, inject, signal, computed , ViewEncapsulation } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HomeSection, HomeSectionSlide } from '../../../../core/models/store-layout';
@@ -15,6 +15,7 @@ import { LanguageService } from '../../../../core/services/language.service';
  */
 @Component({
   selector: 'app-section-hero-slider',
+  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [CommonModule, RouterLink, ImageUrlPipe, ImageRevealDirective, ScrollAnimateDirective],
   styles: [`

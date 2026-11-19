@@ -1,6 +1,27 @@
 :host{display:block;
 background:color-mix(in srgb,var(--primary-color) 7%,var(--surface-color));
 color:var(--text-main)}
+
+app-section-hero,
+app-section-products,
+app-section-banner,
+app-section-features,
+app-section-brands,
+app-section-categories,
+app-section-product-carousel,
+app-section-testimonials,
+app-section-hero-slider,
+app-section-categories-grid,
+app-section-countdown,
+app-section-newsletter,
+app-section-stats,
+app-section-cta-full,
+app-section-video,
+app-section-markdown {
+  display: block;
+  grid-column: 1 / -1;
+  width: 100%;
+}
 .theme-masthead{padding:24px;
 border-radius:24px;
 background:var(--primary-color);
