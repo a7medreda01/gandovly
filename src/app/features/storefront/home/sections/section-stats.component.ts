@@ -1,4 +1,4 @@
-import { Component, Input, inject , ViewEncapsulation } from '@angular/core';
+import { Component, Input, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeSection } from '../../../../core/models/store-layout';
 import { StorefrontSettings } from '../../../../core/models/models';
@@ -7,7 +7,7 @@ import { LanguageService } from '../../../../core/services/language.service';
 
 /**
  * Stats / Numbers Section
- * Displays trust-building metrics (e.g. orders delivered, happy customers, product count)
+ * Displays luxury trust-building metrics (orders, happy clients, exclusive models, coverage)
  */
 @Component({
   selector: 'app-section-stats',
@@ -16,15 +16,16 @@ import { LanguageService } from '../../../../core/services/language.service';
   imports: [CommonModule, ScrollAnimateDirective],
   styles: [`
     .stats-section {
-      padding: 3rem 1.5rem;
+      padding: 2.75rem 1.25rem 2.25rem;
       border-radius: 1.5rem;
       margin-bottom: 2.5rem;
-      background: var(--surface-card, #f8fafc);
-      border: 1px solid var(--border-color, #e2e8f0);
+      background: linear-gradient(180deg, #ffffff 0%, #fcfaf6 100%);
+      border: 1px solid #efe4d2;
+      box-shadow: 0 4px 20px rgba(200, 138, 44, 0.04);
       text-align: center;
     }
     .stats-header {
-      margin-bottom: 2rem;
+      margin-bottom: 1.75rem;
     }
     .stats-badge {
       display: inline-flex;
@@ -32,18 +33,19 @@ import { LanguageService } from '../../../../core/services/language.service';
       gap: 0.4rem;
       padding: 0.35rem 0.85rem;
       border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      color: var(--primary-color, #c88a2c);
-      background: color-mix(in srgb, var(--primary-color, #c88a2c) 12%, transparent);
-      border: 1px solid color-mix(in srgb, var(--primary-color, #c88a2c) 25%, transparent);
-      margin-bottom: 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+      color: #b87a28;
+      background: #fbf5eb;
+      border: 1px solid #eed9b9;
+      margin-bottom: 0.65rem;
       text-transform: uppercase;
+      box-shadow: 0 2px 6px rgba(200, 138, 44, 0.08);
     }
     .stats-title {
-      font-size: 1.85rem;
-      font-weight: 800;
+      font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+      font-weight: 850;
       color: var(--text-main, #0f172a);
       margin: 0;
       letter-spacing: -0.01em;
@@ -51,69 +53,126 @@ import { LanguageService } from '../../../../core/services/language.service';
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
+      gap: 0.85rem;
+    }
+    @media (min-width: 768px) {
+      .stats-grid {
+        gap: 1.15rem;
+      }
     }
     @media (min-width: 992px) {
-      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+      }
     }
     .stat-card {
-      padding: 1.75rem 1.25rem;
+      padding: 1.35rem 0.85rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      background: var(--card-bg, #ffffff);
-      border: 1px solid var(--border-color, #e2e8f0);
-      border-radius: 1.25rem;
-      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+      background: #ffffff;
+      border: 1px solid #ede1cf;
+      border-radius: 1.15rem;
+      box-shadow: 0 4px 14px rgba(200, 138, 44, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
       transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #c88a2c, transparent);
+      opacity: 0;
+      transition: opacity 0.25s ease;
     }
     .stat-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 10px 26px color-mix(in srgb, var(--primary-color, #c88a2c) 16%, transparent);
-      border-color: color-mix(in srgb, var(--primary-color, #c88a2c) 35%, transparent);
+      box-shadow: 0 12px 28px rgba(200, 138, 44, 0.16);
+      border-color: #c88a2c;
+    }
+    .stat-card:hover::before {
+      opacity: 1;
     }
     .stat-icon-wrapper {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      background: color-mix(in srgb, var(--primary-color, #c88a2c) 12%, #ffffff);
-      color: var(--primary-color, #c88a2c);
-      border: 1.5px solid color-mix(in srgb, var(--primary-color, #c88a2c) 25%, transparent);
+      width: 46px;
+      height: 46px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #fef8ee 0%, #faedd3 100%);
+      color: #b87a28;
+      border: 1.5px solid #ebd4af;
+      box-shadow: 0 2px 8px rgba(200, 138, 44, 0.12);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.35rem;
       line-height: 1;
-      margin-bottom: 0.85rem;
+      margin-bottom: 0.65rem;
       transition: transform 0.25s ease;
     }
     .stat-card:hover .stat-icon-wrapper {
       transform: scale(1.1);
     }
     .stat-number {
-      font-size: 2.25rem;
-      font-weight: 850;
-      color: var(--primary-color, #c88a2c);
-      line-height: 1.1;
-      margin-bottom: 0.45rem;
+      font-size: clamp(1.65rem, 4vw, 2.25rem);
+      font-weight: 900;
+      color: #b87a28;
+      background: linear-gradient(135deg, #c88a2c 0%, #9a6519 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.15;
+      margin-bottom: 0.35rem;
       font-variant-numeric: tabular-nums;
       direction: ltr;
       display: inline-block;
     }
     .stat-label {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-main, #0f172a);
+      font-size: 0.88rem;
+      font-weight: 750;
+      color: #1e293b;
       margin: 0 0 0.25rem;
-      line-height: 1.45;
+      line-height: 1.35;
     }
     .stat-sub {
-      font-size: 0.8rem;
+      font-size: 0.74rem;
       color: #64748b;
       margin: 0;
-      line-height: 1.4;
+      line-height: 1.35;
+    }
+    @media (max-width: 767px) {
+      .stats-section {
+        padding: 1.75rem 0.85rem 1.5rem;
+        margin-bottom: 1.75rem;
+      }
+      .stat-card {
+        padding: 1.1rem 0.65rem;
+        border-radius: 14px;
+        min-height: 145px;
+      }
+      .stat-icon-wrapper {
+        width: 40px;
+        height: 40px;
+        font-size: 1.15rem;
+        border-radius: 11px;
+        margin-bottom: 0.45rem;
+      }
+      .stat-number {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+      .stat-label {
+        font-size: 0.8rem;
+        margin-bottom: 0.2rem;
+      }
+      .stat-sub {
+        font-size: 0.68rem;
+      }
     }
   `],
   template: `
@@ -170,22 +229,44 @@ export class SectionStatsComponent {
         // If title starts with a digit/symbol, it is definitely a metric number (e.g. "+75,000", "99.4%", "27", "+2,000")
         const isNumericTitle = /^[+0-9%.,\sKkMmBb]+$/.test(title) || /^[+0-9]/.test(title);
 
-        if (!number && isNumericTitle) {
-          number = title;
-          title = sub;
-          sub = '';
-        } else if (!number) {
-          // If title was non-numeric Arabic text, detect known Enarat stats by icon to restore numbers:
-          if (icon.includes('people')) { number = '+75,000'; }
-          else if (icon.includes('lamp')) { number = '+2,000'; }
-          else if (icon.includes('geo')) { number = '27'; }
-          else if (icon.includes('star')) { number = '99.4%'; }
-          else if (!isIconClass && rawIcon) { number = rawIcon; }
-          else { number = '+10K'; }
+        if (title === number || isNumericTitle) {
+          if (!number && isNumericTitle) {
+            number = title;
+          }
+          if (sub) {
+            title = sub;
+            sub = '';
+          }
+        }
+
+        // Rich Enarat presets based on icon and content
+        if (icon.includes('people') || title.includes('عميل')) {
+          number = number || '+75,000';
+          title = this.lang.text('عميل سعيد وموثوق', 'Happy Clients');
+          sub = sub || this.lang.text('في مصر والخليج العربي', 'Across Egypt & GCC');
+          icon = 'bi-people-fill';
+        } else if (icon.includes('lamp') || title.includes('موديل') || title.includes('طاولات') || title.includes('نجف')) {
+          number = number || '+2,000';
+          title = this.lang.text('موديل وتصميم حصري', 'Exclusive Designs');
+          sub = sub || this.lang.text('من النجف والطاولات والديكور', 'Lighting, Tables & Decor');
+          icon = 'bi-lamp-fill';
+        } else if (icon.includes('geo') || title.includes('محافظة')) {
+          number = number || '27';
+          title = this.lang.text('محافظة نصل إليها', 'Governorates Covered');
+          sub = sub || this.lang.text('توصيل سريع خلال 24 - 48 ساعة', 'Fast 24-48h Delivery');
+          icon = 'bi-geo-alt-fill';
+        } else if (icon.includes('star') || title.includes('رضا') || title.includes('تقييم')) {
+          number = number || '99.4%';
+          title = this.lang.text('نسبة رضا العملاء', 'Client Satisfaction');
+          sub = sub || this.lang.text('ضمان حقيقي وتقييمات إيجابية', 'Genuine Quality & Reviews');
+          icon = 'bi-star-fill';
+        } else {
+          number = number || (isNumericTitle ? title : '+10K');
+          icon = icon || 'bi-trophy-fill';
         }
 
         return {
-          icon: icon || 'bi-trophy',
+          icon,
           number,
           title: title || '',
           sub: sub || ''
@@ -193,10 +274,10 @@ export class SectionStatsComponent {
       });
     }
     return [
-      { icon: 'bi-box-seam', number: '+15,000', title: this.lang.text('طلب مكتمل', 'Orders Completed'), sub: this.lang.text('في كافة المناطق', 'Nationwide delivery') },
-      { icon: 'bi-star-fill', number: '99.4%', title: this.lang.text('رضا العملاء', 'Happy Customers'), sub: this.lang.text('تقييمات إيجابية', '5-star reviews') },
-      { icon: 'bi-shield-check', number: '+500', title: this.lang.text('منتج أصلي', 'Curated Products'), sub: this.lang.text('بأعلى معايير الجودة', 'Guaranteed quality') },
-      { icon: 'bi-headset', number: '24/7', title: this.lang.text('دعم فوري', 'Support Around Clock'), sub: this.lang.text('جاهزون لمساعدتك', 'Ready to assist') }
+      { icon: 'bi-people-fill', number: '+75,000', title: this.lang.text('عميل سعيد وموثوق', 'Happy Clients'), sub: this.lang.text('في مصر والخليج العربي', 'Across Egypt & GCC') },
+      { icon: 'bi-lamp-fill', number: '+2,000', title: this.lang.text('موديل وتصميم حصري', 'Exclusive Designs'), sub: this.lang.text('من النجف والطاولات والديكور', 'Lighting, Tables & Decor') },
+      { icon: 'bi-geo-alt-fill', number: '27', title: this.lang.text('محافظة نصل إليها', 'Governorates Covered'), sub: this.lang.text('توصيل سريع خلال 24 - 48 ساعة', 'Fast 24-48h Delivery') },
+      { icon: 'bi-star-fill', number: '99.4%', title: this.lang.text('نسبة رضا العملاء', 'Client Satisfaction'), sub: this.lang.text('ضمان حقيقي وتقييمات إيجابية', 'Genuine Quality & Reviews') }
     ];
   }
 }

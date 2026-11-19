@@ -53,7 +53,11 @@ export class ImageUrlPipe implements PipeTransform {
     let fullUrl = trimmed;
     // If absolute URL or data URL, keep it
     if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('data:')) {
-      if (trimmed.startsWith('/uploads') || trimmed.startsWith('uploads')) {
+      if (trimmed.startsWith('/uploads/branding/') || trimmed.startsWith('uploads/branding/')) {
+        // Branding and theme banners are available directly as frontend static assets
+        const filename = trimmed.replace(/^\/?uploads\/branding\//, '');
+        return `/assets/images/branding/${filename}`;
+      } else if (trimmed.startsWith('/uploads') || trimmed.startsWith('uploads')) {
         let apiHost = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
         if (!apiHost || apiHost.startsWith('/')) {
           apiHost = '';

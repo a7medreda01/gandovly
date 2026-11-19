@@ -99,7 +99,7 @@ export class AdminPackagesComponent implements OnInit {
     this.isImporting.set(true);
     this.toast.info('جاري رفع واستيراد حزمة المتجر وتوزيع الصور في قاعدة البيانات...');
 
-    this.adminService.importStorePackage(file, false, this.selectedTenantId).subscribe({
+    this.adminService.importStorePackage(file, clean, this.selectedTenantId).subscribe({
       next: res => {
         this.isImporting.set(false);
         input.value = '';

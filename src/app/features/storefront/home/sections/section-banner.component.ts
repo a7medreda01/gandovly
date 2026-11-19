@@ -25,7 +25,7 @@ import { ProductCardComponent } from '../../../../shared/components/product-card
   @if (s.imageUrl || s.mobileImageUrl) {
     <picture class="promo-media">
       @if (s.mobileImageUrl) { <source media="(max-width:767px)" [srcset]="s.mobileImageUrl | imageUrl:'banner'"> }
-      <img appImageReveal [src]="(s.imageUrl || s.mobileImageUrl) | imageUrl:'banner'" [alt]="title()" loading="lazy" decoding="async">
+      <img appImageReveal [src]="(s.imageUrl || s.mobileImageUrl) | imageUrl:'banner'" [alt]="title()" loading="lazy" decoding="async" (error)="onImgError($event)">
     </picture>
   } @else if (products.length) {
     <div class="spotlight"><app-product-card [product]="products[0]" (selectProduct)="selectProduct.emit($event)"></app-product-card></div>
@@ -67,6 +67,26 @@ export class SectionBannerComponent {
     const c = bg.replace('#','').trim(); if (c.length !== 6) return '#ffffff';
     return ((parseInt(c.substring(0,2),16)*299+parseInt(c.substring(2,4),16)*587+parseInt(c.substring(4,6),16)*114)/1000)>180?'#152138':'#ffffff';
   }
+  onImgError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    if (img && !img.dataset['fallback']) {
+      img.dataset['fallback'] = 'true';
+      // Attempt fallback to local static branding image or placeholder
+      const src = this.s.imageUrl || this.s.mobileImageUrl || '';
+      if (src.includes('promo-7')) {
+        img.src = '/assets/images/branding/promo-7-ar.jpg';
+      } else if (src.includes('promo-8')) {
+        img.src = '/assets/images/branding/promo-8-ar.jpg';
+      } else if (src.includes('promo-3')) {
+        img.src = '/assets/images/branding/promo-3-ar.jpg';
+      } else if (src.includes('banner-user-9')) {
+        img.src = '/assets/images/branding/banner-user-9-ar.jpg';
+      } else {
+        img.src = '/assets/images/branding/store-banner.svg';
+      }
+    }
+  }
+
   path() { return this.s.link.split('?')[0] || '/menu'; }
   queryParams() {
     const q: any = {page:null,search:null,product:null,category:null,sort:null,...Object.fromEntries(new URLSearchParams(this.s.link.split('?')[1]||''))};
