@@ -477,9 +477,17 @@
                     <label class="wide">رابط الفيديو (كمبيوتر) *
                       <input type="url" dir="ltr" [(ngModel)]="v.url" (ngModelChange)="changed()" placeholder="https://.../video.mp4">
                     </label>
+                    <label>رفع فيديو الكمبيوتر (MP4 / WebM — حتى 25MB)
+                      <input type="file" accept="video/mp4,video/webm,.mp4,.webm" (change)="uploadVideoFile($event,v,'url')" [disabled]="busy()">
+                    </label>
+                    @if(v.url){<small dir="ltr" class="text-success" style="word-break:break-all">✔ {{v.url}}</small>}
                     <label class="wide">رابط فيديو الموبايل (اختياري)
                       <input type="url" dir="ltr" [(ngModel)]="v.mobileUrl" (ngModelChange)="changed()" placeholder="https://.../video-vertical.mp4">
                     </label>
+                    <label>رفع فيديو الموبايل (اختياري)
+                      <input type="file" accept="video/mp4,video/webm,.mp4,.webm" (change)="uploadVideoFile($event,v,'mobileUrl')" [disabled]="busy()">
+                    </label>
+                    @if(v.mobileUrl){<small dir="ltr" class="text-success" style="word-break:break-all">✔ {{v.mobileUrl}}</small>}
                     <label>صورة الغلاف (Poster)
                       <input type="file" accept="image/*" (change)="upload($event,v,'posterUrl')" [disabled]="busy()">
                     </label>

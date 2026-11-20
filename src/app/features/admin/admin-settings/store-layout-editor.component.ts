@@ -161,6 +161,22 @@ export class StoreLayoutEditorComponent {
     this.changed();
   }
 
+  uploadVideoFile(event: Event, target: any, field: string) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    const maxMb = 25;
+    if (file.size > maxMb * 1024 * 1024) {
+      this.toast.error(`الحجم الأقصى للفيديو هو ${maxMb}MB.`);
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+    this.busy.set(true);
+    this.admin.uploadVideo(file).subscribe({
+      next: url => { target[field] = url; this.changed(); this.busy.set(false); },
+      error: (err) => { this.toast.error(err?.error?.message || 'تعذر رفع الفيديو.'); this.busy.set(false); }
+    });
+  }
+
   addTestimonial(s: HomeSection) {
     s.testimonials = s.testimonials || [];
     if (s.testimonials.length >= 15) {

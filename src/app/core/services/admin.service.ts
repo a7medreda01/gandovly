@@ -370,6 +370,14 @@ export class AdminService {
       .pipe(map((res: { success: boolean; data: string; message: string }) => res.data));
   }
 
+  uploadVideo(file: File): Observable<string> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'videos');
+    return this.http.post<{ success: boolean; data: string; message: string }>(`${this.api.baseUrl}/admin/media/upload-video`, formData)
+      .pipe(map(res => res.data));
+  }
+
   deleteImageIfUnused(path: string): Observable<boolean> {
     return this.http.delete<{ success: boolean; data: boolean; message: string }>(`${this.api.baseUrl}/admin/media`, { params: { path } })
       .pipe(map(res => res.data));
