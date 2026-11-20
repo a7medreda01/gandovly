@@ -5,7 +5,26 @@
   --store-border: var(--border-color, #e3e8ee);
   --store-nav-space: 88px;
   isolation: isolate;
-  app-header { display: block; position: sticky; top: 0; z-index: 1100; }
+  app-header { display: block; position: sticky; top: 0; z-index: 1100; background: transparent; }
+  .main-content { min-width: 0; }
+}
+
+html.navbar-rounded .storefront-wrapper {
+  app-header {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 10px);
+    inset-inline: 12px;
+    width: auto;
+    z-index: 1100;
+    background: transparent !important;
+  }
+
+  .main-content:not(:has(app-section-hero-slider)) {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 74px);
+  }
+}
+
+.storefront-wrapper {
   .store-skip-link { position: fixed; top: -100px; inset-inline-start: 12px; padding: 12px 18px; background: #fff; color: #182b38; z-index: 9000; border-radius: 10px; }
   .store-skip-link:focus { top: 8px; }
   .store-load-error { display: grid; justify-items: center; gap: 14px; padding: 32px 20px; margin-block: 24px; border: 1px solid #dce3eb; border-radius: 18px; background: #fff; text-align: center; }

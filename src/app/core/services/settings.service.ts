@@ -259,7 +259,9 @@ export class SettingsService {
     if (settings.warningColor) root.style.setProperty('--warning-color', this.sanitizeHexColor(settings.warningColor, '#D97706'));
 
     // Shapes & Border Radius
-    root.style.setProperty('--radius-navbar', settings.navbarBorderRadius || '0px');
+    const navRadius = settings.navbarBorderRadius || '0px';
+    root.style.setProperty('--radius-navbar', navRadius);
+    root.classList.toggle('navbar-rounded', (parseInt(navRadius, 10) || 0) > 0);
     root.style.setProperty('--radius-bottom-nav', settings.bottomNavBorderRadius || '28px');
     root.style.setProperty('--radius-product-card', settings.productCardBorderRadius || '18px');
     root.style.setProperty('--radius-search', settings.searchBorderRadius || '999px');
