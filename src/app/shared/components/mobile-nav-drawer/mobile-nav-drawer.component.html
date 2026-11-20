@@ -11,23 +11,48 @@
     <!-- iOS Dropdown Header -->
     <div class="mobile-menu-header">
       <div class="drawer-brand">
-        @if (settingsService.settings().logoUrl) {
+        @if (settingsService.settings().navbarBrandMode === 'logo_only' && settingsService.settings().logoUrl) {
           <img
             [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
-            [alt]="settingsService.settings().restaurantName"
-            class="drawer-logo-img"
+            [alt]="languageService.getStoreName()"
+            class="drawer-logo-img logo-only-mode"
           />
-        } @else {
+        } @else if (settingsService.settings().navbarBrandMode === 'name_only') {
+          <div class="drawer-titles">
+            <span class="drawer-restaurant-name">{{ languageService.getStoreName() }}</span>
+            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+              <span class="drawer-tagline">{{ languageService.getStoreTagline() }}</span>
+            }
+          </div>
+        } @else if (settingsService.settings().navbarBrandMode === 'icon_name') {
           <div class="drawer-logo-icon">
             <i class="bi bi-shop"></i>
           </div>
-        }
-        <div class="drawer-titles">
-          <span class="drawer-restaurant-name">{{ settingsService.settings().restaurantName }}</span>
-          @if (settingsService.settings().tagline) {
-            <span class="drawer-tagline">{{ settingsService.settings().tagline }}</span>
+          <div class="drawer-titles">
+            <span class="drawer-restaurant-name">{{ languageService.getStoreName() }}</span>
+            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+              <span class="drawer-tagline">{{ languageService.getStoreTagline() }}</span>
+            }
+          </div>
+        } @else {
+          @if (settingsService.settings().logoUrl) {
+            <img
+              [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
+              [alt]="languageService.getStoreName()"
+              class="drawer-logo-img"
+            />
+          } @else {
+            <div class="drawer-logo-icon">
+              <i class="bi bi-shop"></i>
+            </div>
           }
-        </div>
+          <div class="drawer-titles">
+            <span class="drawer-restaurant-name">{{ languageService.getStoreName() }}</span>
+            @if (settingsService.settings().showNavbarTagline && settingsService.settings().tagline) {
+              <span class="drawer-tagline">{{ languageService.getStoreTagline() }}</span>
+            }
+          </div>
+        }
       </div>
       <button type="button" class="drawer-close-btn" (click)="close()" aria-label="إغلاق">
         <i class="bi bi-x-lg"></i>

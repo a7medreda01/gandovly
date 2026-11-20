@@ -8,36 +8,36 @@
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: rgba(15, 23, 42, 0.34);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 99999;
-  animation: iosBackdropIn 0.28s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation: iosBackdropIn 0.22s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   overscroll-behavior: contain;
   touch-action: none;
 }
 
 .mobile-menu-content.ios-dropdown-sheet {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 64px);
+  top: calc(env(safe-area-inset-top, 0px) + 60px);
   left: 50%;
   transform: translateX(-50%);
-  width: min(370px, calc(100vw - 24px));
-  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 96px);
-  background: rgba(242, 242, 247, 0.88) !important;
-  backdrop-filter: blur(32px) saturate(190%);
-  -webkit-backdrop-filter: blur(32px) saturate(190%);
+  width: min(350px, calc(100vw - 24px));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 88px);
+  background: rgba(248, 249, 252, 0.84) !important;
+  backdrop-filter: blur(14px) saturate(145%);
+  -webkit-backdrop-filter: blur(14px) saturate(145%);
   color: var(--text-main, #1c1c1e);
-  border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.78);
   display: flex;
   flex-direction: column;
   box-shadow:
-    0 24px 60px rgba(15, 23, 42, 0.22),
-    0 6px 20px rgba(15, 23, 42, 0.08),
+    0 16px 40px rgba(15, 23, 42, 0.14),
+    0 4px 12px rgba(15, 23, 42, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
   transform-origin: top center;
-  animation: iosDropdownIn 0.34s cubic-bezier(0.22, 1.12, 0.36, 1) forwards;
+  animation: iosDropdownIn 0.28s cubic-bezier(0.22, 1.08, 0.36, 1) forwards;
   z-index: 100000;
   direction: rtl;
   overflow: hidden;
@@ -46,9 +46,9 @@
 }
 
 .mobile-menu-header {
-  padding: 14px 16px 12px;
-  background: rgba(255, 255, 255, 0.55);
-  border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+  padding: 12px 14px 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.1);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -58,32 +58,37 @@
   .drawer-brand {
     display: flex;
     align-items: center;
-    gap: 11px;
+    gap: 10px;
     min-width: 0;
 
     .drawer-logo-img {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #ffffff;
-      border: 0.5px solid rgba(60, 60, 67, 0.14);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+      width: var(--navbar-logo-width, auto);
+      height: var(--navbar-logo-height, 36px);
+      max-width: 140px;
+      max-height: 44px;
+      object-fit: contain;
+      display: block;
       flex-shrink: 0;
+
+      &.logo-only-mode {
+        height: var(--navbar-logo-height, 40px);
+        max-width: 180px;
+        max-height: 48px;
+      }
     }
 
     .drawer-logo-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 11px;
       background: linear-gradient(135deg, var(--primary-color, #007aff), var(--secondary-color, #5856d6));
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: #ffffff;
       flex-shrink: 0;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
     }
 
     .drawer-titles {
@@ -93,7 +98,7 @@
 
       .drawer-restaurant-name {
         font-weight: 800;
-        font-size: 1rem;
+        font-size: 0.96rem;
         color: #1c1c1e;
         line-height: 1.25;
         white-space: nowrap;
@@ -102,7 +107,7 @@
       }
 
       .drawer-tagline {
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         color: #6c6c70;
         font-weight: 500;
         margin-top: 1px;
@@ -114,23 +119,28 @@
   }
 
   .drawer-close-btn {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #6c6c70;
-    background: rgba(118, 118, 128, 0.14);
+    background: rgba(118, 118, 128, 0.12);
     border: none;
+    outline: none;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+    transition: transform 0.16s ease, background 0.16s ease, color 0.16s ease;
 
     &:hover {
-      background: rgba(118, 118, 128, 0.24);
+      background: rgba(118, 118, 128, 0.22);
       color: #1c1c1e;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.35);
     }
 
     &:active {
