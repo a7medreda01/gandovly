@@ -1,16 +1,16 @@
 @if (navService.isOpen()) {
 <div class="mobile-menu-overlay" (click)="close()">
   <div
-    class="mobile-menu-content"
+    class="mobile-menu-content ios-dropdown-sheet"
     id="store-mobile-menu"
     appStoreDialog
     aria-label="قائمة المتجر"
     (dialogDismiss)="close()"
     (click)="$event.stopPropagation()"
   >
-    <!-- Drawer Header -->
-    <div class="mobile-menu-header flex-between">
-      <div class="drawer-brand flex-center gap-2">
+    <!-- iOS Dropdown Header -->
+    <div class="mobile-menu-header">
+      <div class="drawer-brand">
         @if (settingsService.settings().logoUrl) {
           <img
             [src]="settingsService.settings().logoUrl | imageUrl:'logo'"
@@ -29,128 +29,134 @@
           }
         </div>
       </div>
-      <button class="drawer-close-btn" (click)="close()" aria-label="إغلاق">
+      <button type="button" class="drawer-close-btn" (click)="close()" aria-label="إغلاق">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
 
-    <!-- Language Switcher in Side Toolbar Only -->
-    @if (languageService.canSwitchLanguage()) {
-      <div class="drawer-lang-strip">
-        <div class="drawer-lang-card flex-between">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-globe2 text-primary fs-5"></i>
-            <span class="drawer-lang-title">لغة العرض / Language</span>
-          </div>
-          <button
-            type="button"
-            class="btn-drawer-lang"
-            (click)="languageService.toggleLanguage()"
-            [title]="languageService.currentLang() === 'ar' ? 'Switch to English' : 'التحويل للعربية'"
-          >
-            <span>{{ languageService.currentLang() === 'ar' ? 'English' : 'عربي' }}</span>
-            <i class="bi bi-arrow-left-right ms-1"></i>
-          </button>
-        </div>
-      </div>
-    }
-
-    <!-- Nav Links Container -->
+    <!-- Scrollable iOS Grouped Sections -->
     <div class="mobile-links-container">
-      <a
-        routerLink="/"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{exact: true}"
-        (click)="close()"
-        class="mobile-link-item"
-      >
-        <div class="link-left">
-          <div class="link-icon-box icon-home"><i class="bi bi-house-door"></i></div>
-          <span class="link-title">الرئيسية</span>
-        </div>
-        <i class="bi bi-chevron-left link-arrow"></i>
-      </a>
-
-      <a
-        routerLink="/menu"
-        routerLinkActive="active"
-        (click)="close()"
-        class="mobile-link-item"
-      >
-        <div class="link-left">
-          <div class="link-icon-box icon-menu"><i class="bi bi-grid"></i></div>
-          <span class="link-title">{{ settingsService.settings().labelProducts || 'كتالوج وتصنيفات المنتجات' }}</span>
-        </div>
-        <i class="bi bi-chevron-left link-arrow"></i>
-      </a>
-
-      <!-- Wishlist Link in Side Toolbar Only -->
-      @if (settingsService.settings().enableWishlist && settingsService.settings().showWishlistInSidebar !== false) {
+      <!-- Primary Navigation Group -->
+      <div class="ios-group-card">
         <a
-          routerLink="/wishlist"
+          routerLink="/"
           routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: true}"
           (click)="close()"
-          class="mobile-link-item wishlist-drawer-item"
+          class="mobile-link-item"
         >
           <div class="link-left">
-            <div class="link-icon-box icon-wishlist"><i class="bi bi-heart-fill"></i></div>
-            <span class="link-title">{{ settingsService.settings().labelWishlist || 'قائمة المفضلة' }}</span>
+            <div class="link-icon-box icon-home"><i class="bi bi-house-door-fill"></i></div>
+            <span class="link-title">الرئيسية</span>
           </div>
-          <div class="d-flex align-items-center gap-2">
-            @if (wishlistService.count() > 0) {
-              <span class="wishlist-counter-pill">{{ wishlistService.count() }}</span>
-            }
-            <i class="bi bi-chevron-left link-arrow"></i>
-          </div>
+          <i class="bi bi-chevron-left link-arrow"></i>
         </a>
-      }
-
-      <div class="drawer-divider"></div>
-
-      @if (settingsService.settings().storeLayout?.showOrdersPage !== false) { <a
-        routerLink="/account"
-        routerLinkActive="active"
-        (click)="close()"
-        class="mobile-link-item"
-      >
-        <div class="link-left">
-          <div class="link-icon-box icon-account"><i class="bi bi-person"></i></div>
-          <span class="link-title">{{ settingsService.settings().labelOrders || 'حسابي وطلباتي' }}</span>
-        </div>
-        <i class="bi bi-chevron-left link-arrow"></i>
-      </a>
-      }
-
-      @if (isKitchenAllowed) {
-        <div class="drawer-divider"></div>
 
         <a
-          routerLink="/admin/orders"
+          routerLink="/menu"
           routerLinkActive="active"
           (click)="close()"
           class="mobile-link-item"
         >
           <div class="link-left">
-            <div class="link-icon-box icon-kitchen"><i class="bi bi-gear-wide-connected"></i></div>
-            <span class="link-title">إدارة الطلبات</span>
+            <div class="link-icon-box icon-menu"><i class="bi bi-grid-fill"></i></div>
+            <span class="link-title">{{ settingsService.settings().labelProducts || 'كتالوج وتصنيفات المنتجات' }}</span>
           </div>
           <i class="bi bi-chevron-left link-arrow"></i>
         </a>
+
+        @if (settingsService.settings().enableWishlist && settingsService.settings().showWishlistInSidebar !== false) {
+          <a
+            routerLink="/wishlist"
+            routerLinkActive="active"
+            (click)="close()"
+            class="mobile-link-item wishlist-drawer-item"
+          >
+            <div class="link-left">
+              <div class="link-icon-box icon-wishlist"><i class="bi bi-heart-fill"></i></div>
+              <span class="link-title">{{ settingsService.settings().labelWishlist || 'قائمة المفضلة' }}</span>
+            </div>
+            <div class="link-right-meta">
+              @if (wishlistService.count() > 0) {
+                <span class="wishlist-counter-pill">{{ wishlistService.count() }}</span>
+              }
+              <i class="bi bi-chevron-left link-arrow"></i>
+            </div>
+          </a>
+        }
+      </div>
+
+      <!-- Account & Language Group -->
+      @if (settingsService.settings().storeLayout?.showOrdersPage !== false || languageService.canSwitchLanguage()) {
+        <div class="ios-group-card">
+          @if (settingsService.settings().storeLayout?.showOrdersPage !== false) {
+            <a
+              routerLink="/account"
+              routerLinkActive="active"
+              (click)="close()"
+              class="mobile-link-item"
+            >
+              <div class="link-left">
+                <div class="link-icon-box icon-account"><i class="bi bi-person-fill"></i></div>
+                <span class="link-title">{{ settingsService.settings().labelOrders || 'حسابي وطلباتي' }}</span>
+              </div>
+              <i class="bi bi-chevron-left link-arrow"></i>
+            </a>
+          }
+
+          @if (languageService.canSwitchLanguage()) {
+            <div class="mobile-link-item ios-lang-row">
+              <div class="link-left">
+                <div class="link-icon-box icon-lang"><i class="bi bi-globe2"></i></div>
+                <span class="link-title">لغة العرض</span>
+              </div>
+              <button
+                type="button"
+                class="ios-lang-pill"
+                (click)="languageService.toggleLanguage()"
+                [title]="languageService.currentLang() === 'ar' ? 'Switch to English' : 'التحويل للعربية'"
+              >
+                <span>{{ languageService.currentLang() === 'ar' ? 'English' : 'عربي' }}</span>
+                <i class="bi bi-arrow-left-right"></i>
+              </button>
+            </div>
+          }
+        </div>
       }
 
-      @if (isAdminAllowed) {
-        <a
-          routerLink="/admin"
-          routerLinkActive="active"
-          (click)="close()"
-          class="mobile-link-item"
-        >
-          <div class="link-left">
-            <div class="link-icon-box icon-admin"><i class="bi bi-gear"></i></div>
-            <span class="link-title">لوحة الإدارة</span>
-          </div>
-          <i class="bi bi-chevron-left link-arrow"></i>
-        </a>
+      <!-- Admin & Kitchen Group -->
+      @if (isKitchenAllowed || isAdminAllowed) {
+        <div class="ios-group-card">
+          @if (isKitchenAllowed) {
+            <a
+              routerLink="/admin/orders"
+              routerLinkActive="active"
+              (click)="close()"
+              class="mobile-link-item"
+            >
+              <div class="link-left">
+                <div class="link-icon-box icon-kitchen"><i class="bi bi-receipt-cutoff"></i></div>
+                <span class="link-title">إدارة الطلبات</span>
+              </div>
+              <i class="bi bi-chevron-left link-arrow"></i>
+            </a>
+          }
+
+          @if (isAdminAllowed) {
+            <a
+              routerLink="/admin"
+              routerLinkActive="active"
+              (click)="close()"
+              class="mobile-link-item"
+            >
+              <div class="link-left">
+                <div class="link-icon-box icon-admin"><i class="bi bi-sliders2"></i></div>
+                <span class="link-title">لوحة الإدارة</span>
+              </div>
+              <i class="bi bi-chevron-left link-arrow"></i>
+            </a>
+          }
+        </div>
       }
     </div>
   </div>
