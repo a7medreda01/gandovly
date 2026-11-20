@@ -130,12 +130,13 @@ export class HomeSectionsComponent {
   }
 
   open(product: Product) {
-    if (product) {
-      this.selected.set(product);
-      this.loadingProduct.set(false);
-    } else {
-      this.loadingProduct.set(true);
+    if (!product) return;
+    if (this.settings.settings()?.productDetailViewMode === 'page') {
+      this.router.navigate(['/product', product.id]);
+      return;
     }
+    this.selected.set(product);
+    this.loadingProduct.set(false);
     this.productRequest?.unsubscribe();
     this.productRequest = this.catalog.getProductById(product.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: p => {

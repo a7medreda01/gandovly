@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { WishlistService } from '../../../core/services/wishlist.service';
 import { CatalogService } from '../../../core/services/catalog.service';
 import { SettingsService } from '../../../core/services/settings.service';
@@ -261,6 +261,7 @@ export class WishlistComponent implements OnInit {
   catalogService = inject(CatalogService);
   settingsService = inject(SettingsService);
   languageService = inject(LanguageService);
+  private readonly router = inject(Router);
 
   get emptyWishlistDesc(): string {
     return this.languageService.text(
@@ -296,6 +297,11 @@ export class WishlistComponent implements OnInit {
   }
 
   openProductDetail(product: Product): void {
+    if (!product) return;
+    if (this.settingsService.settings()?.productDetailViewMode === 'page') {
+      this.router.navigate(['/product', product.id]);
+      return;
+    }
     this.selectedProduct.set(product);
   }
 

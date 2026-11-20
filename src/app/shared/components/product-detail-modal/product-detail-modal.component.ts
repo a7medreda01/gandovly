@@ -720,27 +720,28 @@ export class ProductDetailModalComponent implements OnInit {
     }, 2500);
   }
 
-  // ===== TOUCH GESTURES (SWIPE BETWEEN IMAGES + SWIPE DOWN TO DISMISS) =====
+  // ===== TOUCH GESTURES (SWIPE BETWEEN IMAGES + SMOOTH iOS FINGER DRAG) =====
   touchStartX = 0;
   touchCurrentX = 0;
   touchStartY = 0;
   touchCurrentY = 0;
   private touchStartTime = 0;
+  private bodyDragCandidate = false;
   isDragging = false;
   dragTranslateY = 0;
   isClosing = false;
 
   get backdropOpacity(): number {
     if (this.isClosing) return 0;
-    if (this.isDragging && this.dragTranslateY > 0) {
-      return Math.max(0.15, 1 - (this.dragTranslateY / 320));
+    if (this.dragTranslateY > 0) {
+      return Math.max(0.12, 1 - (this.dragTranslateY / 360));
     }
     return 1;
   }
 
   get modalTransform(): string | null {
     if (this.isClosing) return null;
-    if (this.dragTranslateY > 0) {
+    if (this.dragTranslateY !== 0) {
       return `translate3d(0, ${this.dragTranslateY}px, 0)`;
     }
     return null;
@@ -748,8 +749,53 @@ export class ProductDetailModalComponent implements OnInit {
 
   get modalTransition(): string {
     if (this.isDragging) return 'none';
-    if (this.isClosing) return 'transform 0.14s cubic-bezier(0.25, 1, 0.5, 1)';
-    return 'transform 0.16s cubic-bezier(0.16, 1, 0.3, 1)';
+    if (this.isClosing) return 'transform 0.18s cubic-bezier(0.32, 0.72, 0, 1)';
+    return 'transform 0.24s cubic-bezier(0.22, 1.08, 0.36, 1)';
+  }
+
+  onBodyTouchStart(event: TouchEvent, scrollEl: HTMLElement) {
+    if (event.touches.length !== 1) return;
+    this.bodyDragCandidate = scrollEl.scrollTop <= 1;
+    if (this.bodyDragCandidate) {
+      this.touchStartX = event.touches[0].clientX;
+      this.touchCurrentX = this.touchStartX;
+      this.touchStartY = event.touches[0].clientY;
+      this.touchCurrentY = this.touchStartY;
+      this.touchStartTime = performance.now();
+    }
+  }
+
+  onBodyTouchMove(event: TouchEvent, scrollEl: HTMLElement) {
+    if (!this.bodyDragCandidate || event.touches.length !== 1) return;
+    if (!this.isDragging && scrollEl.scrollTop > 1) {
+      this.bodyDragCandidate = false;
+      return;
+    }
+    this.touchCurrentX = event.touches[0].clientX;
+    this.touchCurrentY = event.touches[0].clientY;
+    const deltaX = this.touchCurrentX - this.touchStartX;
+    const deltaY = this.touchCurrentY - this.touchStartY;
+
+    // Only engage sheet drag when pulling downward at top of scroll
+    if (!this.isDragging) {
+      if (deltaY > 8 && Math.abs(deltaY) > Math.abs(deltaX)) {
+        this.isDragging = true;
+        this.touchStartY = this.touchCurrentY - 8;
+      } else if (deltaY < -6) {
+        this.bodyDragCandidate = false;
+        return;
+      } else {
+        return;
+      }
+    }
+
+    const activeDeltaY = this.touchCurrentY - this.touchStartY;
+    if (activeDeltaY > 0) {
+      this.dragTranslateY = activeDeltaY;
+      if (event.cancelable) event.preventDefault();
+    } else {
+      this.dragTranslateY = Math.max(-18, activeDeltaY * 0.2);
+    }
   }
 
   onTouchStart(event: TouchEvent) {
@@ -771,8 +817,7 @@ export class ProductDetailModalComponent implements OnInit {
     const deltaY = this.touchCurrentY - this.touchStartY;
 
     // Horizontal swipe on images: don't pull down modal
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      this.dragTranslateY = 0;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10 && this.dragTranslateY === 0) {
       if (event.cancelable) {
         event.preventDefault();
       }
@@ -781,15 +826,20 @@ export class ProductDetailModalComponent implements OnInit {
 
     if (deltaY > 0) {
       this.dragTranslateY = deltaY;
-      if (event.cancelable && deltaY > 6) {
+      if (event.cancelable && deltaY > 4) {
         event.preventDefault();
       }
     } else {
-      this.dragTranslateY = 0;
+      // Gentle iOS rubber-band pull-up elasticity
+      this.dragTranslateY = Math.max(-22, deltaY * 0.22);
+      if (event.cancelable && deltaY < -4) {
+        event.preventDefault();
+      }
     }
   }
 
   onTouchEnd() {
+    this.bodyDragCandidate = false;
     if (!this.isDragging) return;
     this.isDragging = false;
     const deltaX = this.touchCurrentX - this.touchStartX;
@@ -797,21 +847,19 @@ export class ProductDetailModalComponent implements OnInit {
     const deltaTime = performance.now() - this.touchStartTime;
 
     // 1. Horizontal swipe gesture between product images
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 35 && this.galleryImages.length > 1) {
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 35 && this.galleryImages.length > 1 && this.dragTranslateY === 0) {
       if (deltaX < -35) {
-        // Swiped left -> next image
         this.nextImage();
       } else if (deltaX > 35) {
-        // Swiped right -> previous image
         this.prevImage();
       }
       this.dragTranslateY = 0;
       return;
     }
 
-    // 2. Vertical swipe gesture to dismiss modal
-    const velocityY = deltaY / Math.max(1, deltaTime);
-    if (deltaY > 55 || (deltaY > 25 && velocityY > 0.35)) {
+    // 2. Vertical swipe gesture to dismiss modal (distance or fast flick)
+    const velocityY = this.dragTranslateY / Math.max(1, deltaTime);
+    if (this.dragTranslateY > 80 || (this.dragTranslateY > 32 && velocityY > 0.35)) {
       this.dismissModal();
     } else {
       this.dragTranslateY = 0;

@@ -250,12 +250,13 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openProductModal(product: Product) {
-    if (product) {
-      this.selectedProductForModal.set(product);
-      this.loadingProductDetail.set(false);
-    } else {
-      this.loadingProductDetail.set(true);
+    if (!product) return;
+    if (this.settingsService.settings()?.productDetailViewMode === 'page') {
+      this.router.navigate(['/product', product.id]);
+      return;
     }
+    this.selectedProductForModal.set(product);
+    this.loadingProductDetail.set(false);
     this.productDetailRequest?.unsubscribe();
     this.productDetailRequest = this.catalogService.getProductById(product.id).subscribe({
       next: details => {

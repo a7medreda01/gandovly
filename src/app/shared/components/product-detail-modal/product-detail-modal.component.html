@@ -9,6 +9,7 @@
     appStoreDialog [attr.aria-label]="languageService.getLocalizedName(product)" (dialogDismiss)="dismissModal()"
     (click)="$event.stopPropagation()"
     [class.is-closing]="isClosing"
+    [class.is-dragging]="isDragging"
     [style.transform]="modalTransform"
     [style.transition]="modalTransition"
   >
@@ -132,7 +133,14 @@
     </div>
 
     <!-- Modal Scrollable Body -->
-    <div class="modal-body">
+    <div
+      class="modal-body"
+      #modalBodyScroll
+      (touchstart)="onBodyTouchStart($event, modalBodyScroll)"
+      (touchmove)="onBodyTouchMove($event, modalBodyScroll)"
+      (touchend)="onTouchEnd()"
+      (touchcancel)="onTouchEnd()"
+    >
       <!-- Title & Price Banner -->
       <div class="product-intro-box">
         <div class="title-wrap">

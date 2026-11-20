@@ -32,41 +32,48 @@
   width: 100%;
   max-width: 580px;
   max-height: 92vh;
+  max-height: 92dvh;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   border-radius: 28px 28px 0 0;
   overflow: hidden;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
-  animation: slideUpMobile 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.28);
+  animation: slideUpMobile 0.24s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   will-change: transform;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
 
   @media (min-width: 768px) {
     border-radius: 28px;
     max-height: 88vh;
     box-shadow: 0 25px 60px rgba(10, 25, 41, 0.35);
-    animation: zoomInDesktop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: zoomInDesktop 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  &.is-dragging {
+    animation: none !important;
+    transition: none !important;
   }
 
   &.is-closing {
+    animation: none !important;
     transform: translate3d(0, 105%, 0) !important;
-    transition: transform 0.12s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1) !important;
     pointer-events: none !important;
   }
 }
 
 .mobile-drag-bar {
   position: absolute;
-  top: 8px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 15;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 8px 30px;
+  padding: 6px 36px;
   background: transparent;
   cursor: grab;
   touch-action: none;
@@ -76,11 +83,11 @@
   }
 
   .drag-pill {
-    width: 48px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-    border-radius: 10px;
+    width: 44px;
+    height: 4.5px;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
     transition: transform 0.2s ease, background 0.2s ease;
   }
 
@@ -126,7 +133,7 @@
 
   .hero-top-bar {
     position: absolute;
-    top: 14px;
+    top: 24px;
     left: 14px;
     right: 14px;
     display: flex;
