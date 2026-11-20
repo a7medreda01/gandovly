@@ -29,12 +29,12 @@ import { LanguageService } from '../../../../core/services/language.service';
     .avatar img { width:100%; height:100%; object-fit:cover; }
     .reviewer-info strong { color:var(--t-text,#ffffff); display:block; font-size:.9rem; }
     .reviewer-info span { color:color-mix(in srgb, var(--t-text,#ffffff) 62%, transparent); font-size:.78rem; }
-    .carousel-controls { display:flex; justify-content:center; align-items:center; gap:1rem; margin-top:1.5rem; }
-    .btn-arrow { width:2.25rem; height:2.25rem; border-radius:50%; border:1.5px solid color-mix(in srgb, var(--t-text,#ffffff) 30%, transparent); background:color-mix(in srgb, var(--t-text,#ffffff) 8%, transparent); color:var(--t-text,#ffffff); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.2s; }
-    .btn-arrow:hover { background:var(--primary-color,#38bdf8); border-color:var(--primary-color,#38bdf8); color:#fff; }
-    .dots { display:flex; gap:.5rem; }
-    .dot { width:.5rem; height:.5rem; border-radius:50%; background:color-mix(in srgb, var(--t-text,#ffffff) 28%, transparent); cursor:pointer; transition:.2s; }
-    .dot.active { background:var(--primary-color,#38bdf8); width:1.25rem; border-radius:.5rem; }
+    .testimonials-section .carousel-controls { display:flex; justify-content:center; align-items:center; gap:1rem; margin-top:1.5rem; }
+    .testimonials-section .btn-arrow { width:2.25rem; height:2.25rem; border-radius:50%; border:1.5px solid color-mix(in srgb, var(--t-text,#ffffff) 30%, transparent); background:color-mix(in srgb, var(--t-text,#ffffff) 8%, transparent); color:var(--t-text,#ffffff); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.2s; }
+    .testimonials-section .btn-arrow:hover { background:var(--primary-color,#38bdf8); border-color:var(--primary-color,#38bdf8); color:#fff; }
+    .testimonials-section .dots { display:flex; gap:.5rem; }
+    .testimonials-section .dot { width:.5rem; height:.5rem; border-radius:50%; background:color-mix(in srgb, var(--t-text,#ffffff) 28%, transparent); cursor:pointer; transition:.2s; }
+    .testimonials-section .dot.active { background:var(--primary-color,#38bdf8); width:1.25rem; border-radius:.5rem; }
   `],
   template: `
 @if (reviews().length) {
@@ -43,7 +43,9 @@ import { LanguageService } from '../../../../core/services/language.service';
   [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
   [style.background]="s.backgroundColor || null"
   [style.color]="effectiveTextColor()"
-  [style.--t-text]="effectiveTextColor()">
+  [style.--t-text]="effectiveTextColor()"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)">
   @if (eyebrow()) { <div class="testimonials-eyebrow">{{ eyebrow() }}</div> }
   <h2>{{ title() }}</h2>
   @if (subtitle()) { <p class="subtitle">{{ subtitle() }}</p> }
@@ -107,9 +109,16 @@ export class SectionTestimonialsComponent implements OnInit, OnDestroy {
   current() { return this.reviews()[this.idx()] ?? this.reviews()[0]; }
   starsArray() { return [1,2,3,4,5]; }
   initial() { return (this.current().name || '?').charAt(0).toUpperCase(); }
-  prev() { this.stopAutoplay(); this.idx.update(i => Math.max(0, i - 1)); this.startAutoplay(); }
-  next() { this.stopAutoplay(); this.idx.update(i => Math.min(this.reviews().length - 1, i + 1)); this.startAutoplay(); }
+  prev() { this.stopAutoplay(); this.idx.update(i => (i <= 0 ? this.reviews().length - 1 : i - 1)); this.startAutoplay(); }
+  next() { this.stopAutoplay(); this.idx.update(i => (i >= this.reviews().length - 1 ? 0 : i + 1)); this.startAutoplay(); }
   goTo(i: number) { this.stopAutoplay(); this.idx.set(i); this.startAutoplay(); }
+  private touchStartX = 0;
+  onTouchStart(e: TouchEvent) { if (e.touches.length === 1) this.touchStartX = e.touches[0].clientX; }
+  onTouchEnd(e: TouchEvent) {
+    if (!e.changedTouches.length || this.reviews().length <= 1) return;
+    const dx = e.changedTouches[0].clientX - this.touchStartX;
+    if (Math.abs(dx) > 35) { if (dx > 0) this.next(); else this.prev(); }
+  }
   title() { return this.lang.text(this.s.title, this.s.titleEn); }
   subtitle() { return this.lang.text(this.s.subtitle, this.s.subtitleEn); }
   eyebrow() { return this.lang.text(this.s.eyebrow || 'آراء العملاء', this.s.eyebrowEn || 'TESTIMONIALS'); }

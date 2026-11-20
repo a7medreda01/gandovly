@@ -22,8 +22,8 @@ import { LanguageService } from '../../../../core/services/language.service';
     .hero-slider-wrap {
       position: relative;
       width: 100%;
-      height: calc(100vh - 72px);
-      min-height: calc(100vh - 72px);
+      height: calc(100vh - 64px);
+      min-height: max(calc(100vh - 64px), 620px);
       max-height: none;
       overflow: hidden;
       border-radius: 0;
@@ -32,20 +32,21 @@ import { LanguageService } from '../../../../core/services/language.service';
       display: flex;
       align-items: center;
       justify-content: center;
+      touch-action: pan-y pinch-zoom;
     }
     @media (min-width: 768px) {
       .hero-slider-wrap {
-        height: calc(100vh - 72px);
-        min-height: calc(100vh - 72px);
+        height: calc(100vh - 64px);
+        min-height: max(calc(100vh - 64px), 620px);
         max-height: none;
       }
     }
     @media (max-width: 767px) {
       .hero-slider-wrap {
-        height: calc(100vh - 56px);
-        height: calc(100dvh - 56px);
-        min-height: calc(100vh - 56px);
-        min-height: calc(100dvh - 56px);
+        height: 100vh;
+        height: 100lvh;
+        min-height: max(100vh, 680px);
+        min-height: max(100lvh, 680px);
         max-height: none;
         margin-bottom: 0;
       }
@@ -192,7 +193,9 @@ import { LanguageService } from '../../../../core/services/language.service';
   template: `
 <section class="hero-slider-wrap"
   appScrollAnimate
-  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false">
+  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)">
 
   <div class="slide-bottom-gradient"></div>
 
@@ -318,6 +321,23 @@ export class SectionHeroSliderComponent implements OnInit, OnDestroy {
     }
     return this.hasContent() ? 35 : 0;
   });
+
+  private touchStartX = 0;
+
+  onTouchStart(e: TouchEvent) {
+    if (e.touches.length === 1) {
+      this.touchStartX = e.touches[0].clientX;
+    }
+  }
+
+  onTouchEnd(e: TouchEvent) {
+    if (!e.changedTouches.length || this.slidesList().length <= 1) return;
+    const dx = e.changedTouches[0].clientX - this.touchStartX;
+    if (Math.abs(dx) > 40) {
+      if (dx > 0) this.next();
+      else this.prev();
+    }
+  }
 
   prev() {
     this.stopAutoplay();

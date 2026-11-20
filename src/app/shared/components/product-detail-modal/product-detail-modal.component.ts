@@ -583,8 +583,9 @@ export class ProductDetailModalComponent implements OnInit {
     if(this.product.commerce?.mode==='Vehicle'){this.toast.info('استخدم نموذج طلب المعاينة أو العرض.');return;}
     if(this.product.commerce?.mode==='Booking'&&!this.booking){this.toast.error('اختر موعدًا متاحًا أولًا.');return;}
     if(this.product.variants?.length&&!this.selectedVariant){
+      const hasColors = this.product.variants.some(v => !!v.color?.trim());
       const hasSizes = this.product.variants.some(v => !!v.size?.trim());
-      this.toast.error(hasSizes ? 'اختر اللون والمقاس أولاً.' : 'اختر اللون أولاً.');
+      this.toast.error(hasColors && hasSizes ? 'اختر اللون والمقاس أولاً.' : hasSizes ? 'اختر المقاس أولاً.' : 'اختر اللون أولاً.');
       return;
     }
     // Validate required modifier groups

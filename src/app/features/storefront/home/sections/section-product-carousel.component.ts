@@ -127,74 +127,84 @@ import { LanguageService } from '../../../../core/services/language.service';
       font-size: 1.05rem;
       font-variant-numeric: tabular-nums;
     }
-    .carousel-controls {
+    .carousel-section .carousel-controls {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 1rem;
       margin-top: 1.5rem;
     }
-    .btn-arrow {
-      width: 2.4rem;
-      height: 2.4rem;
+    .carousel-section .btn-arrow {
+      width: 2.5rem;
+      height: 2.5rem;
       border-radius: 50%;
-      border: 1.5px solid var(--border-color, #e2e8f0);
-      background: var(--card-bg, #ffffff);
-      color: var(--text-main, #0f172a);
+      border: 1.5px solid color-mix(in srgb, var(--primary-color, #c88a2c) 45%, transparent);
+      background: color-mix(in srgb, var(--primary-color, #c88a2c) 12%, var(--card-bg, #ffffff));
+      color: var(--primary-color, #c88a2c);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color, #c88a2c) 14%, transparent);
     }
-    .btn-arrow:hover {
-      background: var(--primary-color, #c88a2c);
-      border-color: var(--primary-color, #c88a2c);
-      color: #ffffff;
-      transform: scale(1.05);
+    .carousel-section .btn-arrow:hover,
+    .carousel-section .btn-arrow:active {
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      border-color: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      color: var(--btn-primary-text, #ffffff);
+      transform: scale(1.06);
     }
-    .dots {
+    .carousel-section .dots {
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-    .dot {
+    .carousel-section .dot {
       width: 0.55rem;
       height: 0.55rem;
       border-radius: 50%;
-      background: #cbd5e1;
+      background: color-mix(in srgb, var(--primary-color, #c88a2c) 26%, #cbd5e1);
       transition: all 0.25s ease;
       cursor: pointer;
     }
-    .dot.active {
-      background: var(--primary-color, #c88a2c);
-      width: 1.4rem;
+    .carousel-section .dot.active {
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      width: 1.5rem;
       border-radius: 0.5rem;
     }
-    .cta-row {
+    .carousel-section .cta-row {
       text-align: center;
       margin-top: 1.75rem;
     }
-    .btn-view-all {
+    .carousel-section .btn-view-all {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      border: 1.5px solid var(--primary-color, #c88a2c);
+      border: 1.5px solid var(--btn-primary-bg, var(--primary-color, #c88a2c));
       border-radius: 3rem;
-      padding: 0.65rem 2rem;
-      color: var(--primary-color, #c88a2c);
-      background: transparent;
+      padding: 0.7rem 2.25rem;
+      color: var(--btn-primary-text, #ffffff);
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
       font-weight: 700;
       font-size: 0.95rem;
       text-decoration: none;
+      box-shadow: 0 4px 14px color-mix(in srgb, var(--primary-color, #c88a2c) 24%, transparent);
       transition: all 0.25s ease;
     }
-    .btn-view-all:hover {
-      background: var(--primary-color, #c88a2c);
-      color: #ffffff;
-      box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-color, #c88a2c) 25%, transparent);
+    .carousel-section .btn-view-all:hover {
+      filter: brightness(1.08);
+      box-shadow: 0 8px 22px color-mix(in srgb, var(--primary-color, #c88a2c) 35%, transparent);
       transform: translateY(-2px);
+    }
+    .carousel-track.is-dragging {
+      transition: none !important;
+      cursor: grabbing;
+    }
+    .carousel-wrap {
+      touch-action: pan-y pinch-zoom;
+      user-select: none;
+      -webkit-user-select: none;
     }
   `],
   template: `
@@ -204,9 +214,7 @@ import { LanguageService } from '../../../../core/services/language.service';
   [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
   [style.background]="s.backgroundColor || null"
   (mouseenter)="pauseAutoplay()"
-  (mouseleave)="resumeAutoplay()"
-  (touchstart)="pauseAutoplay()"
-  (touchend)="resumeAutoplay()">
+  (mouseleave)="resumeAutoplay()">
   <div class="carousel-header">
     <div>
       @if (eyebrow()) {
@@ -215,12 +223,18 @@ import { LanguageService } from '../../../../core/services/language.service';
       <h2>{{ title() }}</h2>
     </div>
   </div>
-  <div class="carousel-wrap">
-    <div class="carousel-track" [style.transform]="'translateX(' + (isRtl ? '' : '-') + (currentIndex() * slideWidth()) + 'px)'">
+  <div class="carousel-wrap"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()"
+    (touchcancel)="onTouchEnd()">
+    <div class="carousel-track"
+      [class.is-dragging]="isDragging()"
+      [style.transform]="trackTransform()">
       @for (p of products; track p.id) {
-        <div class="carousel-card" (click)="selectProduct.emit(p)">
+        <div class="carousel-card" (click)="onCardClick(p, $event)">
           <div class="carousel-img-wrap">
-            <img [src]="p.imageUrl" [alt]="lang.getLocalizedName(p)" loading="lazy">
+            <img [src]="p.imageUrl | imageUrl:'product'" [alt]="lang.getLocalizedName(p)" loading="lazy" draggable="false">
             @if (p.categoryNameAr) {
               <span class="cat-badge">{{ p.categoryNameAr }}</span>
             }
@@ -264,8 +278,67 @@ export class SectionProductCarouselComponent implements OnInit, OnDestroy {
   readonly lang = inject(LanguageService);
 
   currentIndex = signal(0);
+  isDragging = signal(false);
+  dragOffsetPx = signal(0);
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private hasSwiped = false;
   private autoplayTimer: any = null;
   private isPaused = false;
+
+  trackTransform(): string {
+    const base = (this.isRtl ? 1 : -1) * (this.currentIndex() * this.slideWidth());
+    const offset = this.dragOffsetPx();
+    return `translateX(${base + offset}px)`;
+  }
+
+  onTouchStart(e: TouchEvent) {
+    if (e.touches.length !== 1) return;
+    this.pauseAutoplay();
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+    this.hasSwiped = false;
+    this.isDragging.set(true);
+    this.dragOffsetPx.set(0);
+  }
+
+  onTouchMove(e: TouchEvent) {
+    if (!this.isDragging() || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - this.touchStartX;
+    const dy = e.touches[0].clientY - this.touchStartY;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      this.hasSwiped = true;
+      this.dragOffsetPx.set(dx);
+    }
+  }
+
+  onTouchEnd() {
+    if (!this.isDragging()) return;
+    const dx = this.dragOffsetPx();
+    this.isDragging.set(false);
+    this.dragOffsetPx.set(0);
+    const threshold = 35;
+    if (Math.abs(dx) >= threshold) {
+      if (this.isRtl) {
+        if (dx > 0) this.next();
+        else this.prev();
+      } else {
+        if (dx < 0) this.next();
+        else this.prev();
+      }
+    }
+    this.resumeAutoplay();
+  }
+
+  onCardClick(p: Product, e: MouseEvent) {
+    if (this.hasSwiped) {
+      e.preventDefault();
+      e.stopPropagation();
+      this.hasSwiped = false;
+      return;
+    }
+    this.selectProduct.emit(p);
+  }
 
   ngOnInit() {
     this.startAutoplay();

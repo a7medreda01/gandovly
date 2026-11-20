@@ -57,7 +57,7 @@
                       </button>
                     </div>
 
-                    @if(item.selectedVariant){<div class="variant-summary"><span class="variant-tag">@if(item.selectedVariant.colorHex){<span class="variant-swatch" [style.background-color]="item.selectedVariant.colorHex"></span>}<span class="variant-label">اللون:</span> {{item.selectedVariant.color}}</span><span class="variant-tag"><span class="variant-label">المقاس:</span> <bdi>{{item.selectedVariant.size}}</bdi></span></div>}
+                    @if(item.selectedVariant){<div class="variant-summary">@if(item.selectedVariant.color){<span class="variant-tag">@if(item.selectedVariant.colorHex){<span class="variant-swatch" [style.background-color]="item.selectedVariant.colorHex"></span>}<span class="variant-label">اللون:</span> {{item.selectedVariant.color}}</span>}@if(item.selectedVariant.size){<span class="variant-tag"><span class="variant-label">المقاس:</span> <bdi>{{item.selectedVariant.size}}</bdi></span>}</div>}
                     <!-- Prep Option & Sub-Badges -->
                     <div class="item-badges-row">
                       @if (item.selectedPrepOption) {

@@ -1,7 +1,7 @@
 <div class="layout-editor">
   @if (mode !== "home") {
-    <section>
-      <h2>كروت المنتجات والصور</h2>
+    <details class="settings-card settings-disclosure">
+      <summary><i class="bi bi-aspect-ratio text-primary me-2"></i> 4. أبعاد ومقاسات صور كروت المنتجات والمعاينة الحية <small>عدد الأعمدة ونسبة أبعاد الصور</small></summary>
       <p>تُطبق على الرئيسية وقائمة المنتجات. «كاملة» تحافظ على الصورة دون قص، وCover يملأ الإطار وقد يقص أطرافها.</p>
       <div class="fields">
         <label>منتجات في صف الموبايل
@@ -61,12 +61,12 @@
           <img [src]="previewImage()|imageUrl:'product'" alt="معاينة طريقة عرض الصورة">
         </div>
       </div>
-    </section>
+    </details>
   }
 
   @if (mode !== "cards") {
-    <section>
-      <h2>محتوى الصفحة الرئيسية</h2>
+    <details class="settings-card settings-disclosure">
+      <summary><i class="bi bi-layout-wtf text-primary me-2"></i> 3. سكشنات ومحتوى الصفحة الرئيسية ({{ layout.sections.length }}) <small>إضافة وترتيب وتخصيص السكشنات</small></summary>
       <p>رتّب السكشنات وتحكم في ظهورها وإعداداتها وصورها بالكامل. السكشن الفارغ يُخفى تلقائيًا.</p>
 
       <div class="d-flex flex-wrap gap-3 mb-3">
@@ -504,6 +504,6 @@
       }
 
       <p class="save-hint">كل التغييرات تُطبق عند الضغط على «حفظ إعدادات الرئيسية» أسفل الصفحة.</p>
-    </section>
+    </details>
   }
 </div>

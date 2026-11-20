@@ -34,205 +34,251 @@
     ></app-loading-state>
   } @else if (settings()) {
 
-    <!-- TAB 1: Discounts & Promotions -->
+    <!-- TAB 1: Home Layout -->
     @if(activeTab()==='layout'){
-<details class="settings-card home-theme-settings settings-disclosure" open>
-  <summary><i class="bi bi-palette2"></i> شكل واجهة المتجر <small>اختر القالب</small></summary>
-  <p class="text-muted">اختر طريقة العرض المناسبة. تغيير القالب لا يحذف ترتيب الأقسام أو محتواها.</p>
-  <div class="home-theme-options" role="radiogroup" aria-label="قوالب واجهة المتجر">
-    @for(theme of homeThemeOptions; track theme.id) {
-      <button type="button" class="home-theme-option" [class.selected]="layoutOptions.homeTheme === theme.id" role="radio" [attr.aria-checked]="layoutOptions.homeTheme === theme.id" (click)="selectHomeTheme(theme.id)">
-        <span class="theme-preview" [attr.data-preview-theme]="theme.id"><i [class]="theme.icon"></i><span></span><span></span><span></span></span>
-        <span class="theme-option-copy"><strong>{{theme.name}}</strong><small>{{theme.description}}</small></span>
-        @if(layoutOptions.homeTheme === theme.id) { <i class="bi bi-check-circle-fill theme-selected-mark" aria-hidden="true"></i> }
-      </button>
-    }
-  </div>
-</details>
-<details class="settings-card settings-disclosure" open>
-  <summary><i class="bi bi-image"></i> بانر واجهة المتجر وقوالب البانرات <small>خاص بقالب {{ selectedHomeThemeName }}</small></summary>
-  <div class="section-title-wrap mb-3">
-    <p class="section-desc">لكل قالب بانراته الخاصة وتنسيقه المخصص. يمكنك اختيار أحد البانرات المقترحة أو رفع وتصميم بانرك الخاص للقالب الحالي.</p>
-  </div>
+      <div class="tab-content animate-fade-in">
+        <details class="settings-card home-theme-settings settings-disclosure">
+          <summary><i class="bi bi-palette2 text-primary me-2"></i> 1. شكل واجهة المتجر (القالب الرئيسي) <small>قالب {{ selectedHomeThemeName }}</small></summary>
+          <p class="text-muted">اختر طريقة العرض المناسبة. تغيير القالب لا يحذف ترتيب الأقسام أو محتواها.</p>
+          <div class="home-theme-options" role="radiogroup" aria-label="قوالب واجهة المتجر">
+            @for(theme of homeThemeOptions; track theme.id) {
+              <button type="button" class="home-theme-option" [class.selected]="layoutOptions.homeTheme === theme.id" role="radio" [attr.aria-checked]="layoutOptions.homeTheme === theme.id" (click)="selectHomeTheme(theme.id)">
+                <span class="theme-preview" [attr.data-preview-theme]="theme.id"><i [class]="theme.icon"></i><span></span><span></span><span></span></span>
+                <span class="theme-option-copy"><strong>{{theme.name}}</strong><small>{{theme.description}}</small></span>
+                @if(layoutOptions.homeTheme === theme.id) { <i class="bi bi-check-circle-fill theme-selected-mark" aria-hidden="true"></i> }
+              </button>
+            }
+          </div>
+        </details>
 
-  <div class="row g-3 mb-3">
-    <div class="col-12 col-md-4">
-      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي في المتجر</label>
-    </div>
-    <div class="col-12 col-md-4">
-      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام السريع في الرئيسية</label>
-    </div>
-    <div class="col-12 col-md-4">
-      <label class="checkbox-label"><input type="checkbox" [ngModel]="layoutOptions.showHomeSearch !== false" (ngModelChange)="onHomeSearchToggle($event)"> إظهار شريط البحث في الصفحة الرئيسية</label>
-    </div>
-  </div>
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-image text-primary me-2"></i> 2. بانر واجهة المتجر وقوالب البانرات <small>خاص بقالب {{ selectedHomeThemeName }}</small></summary>
+          <div class="section-title-wrap mb-3">
+            <p class="section-desc">لكل قالب بانراته الخاصة وتنسيقه المخصص. يمكنك اختيار أحد البانرات المقترحة أو رفع وتصميم بانرك الخاص للقالب الحالي.</p>
+          </div>
 
-  <!-- Template Banners Presets Gallery -->
-  @if (activeThemePresets && activeThemePresets.length) {
-    <div class="theme-presets-section mb-4 p-3 border rounded-3 bg-light">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <h5 class="m-0 fs-6 fw-bold"><i class="bi bi-stars text-warning me-1"></i> بانرات مقترحة جاهزة لقالب ({{ selectedHomeThemeName }}):</h5>
-        <span class="text-muted small">اضغط لتطبيق أي بانر فورا</span>
-      </div>
-      <div class="preset-cards-grid">
-        @for (preset of activeThemePresets; track preset.id) {
-          @let isActivePreset = getActiveThemeBanner().desktopUrl === preset.desktopUrl;
-          <div class="preset-banner-card" [class.selected]="isActivePreset">
-            <div class="preset-thumb-wrap">
-              <img [src]="preset.desktopUrl | imageUrl:'banner'" [alt]="preset.name" loading="lazy" />
-              @if (isActivePreset) {
-                <span class="active-badge"><i class="bi bi-check-circle-fill me-1"></i> نشط حالياً</span>
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-4">
+              <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showHeroBanner"> إظهار البانر الرئيسي في المتجر</label>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام السريع في الرئيسية</label>
+            </div>
+            <div class="col-12 col-md-4">
+              <label class="checkbox-label"><input type="checkbox" [ngModel]="layoutOptions.showHomeSearch !== false" (ngModelChange)="onHomeSearchToggle($event)"> إظهار شريط البحث في الصفحة الرئيسية</label>
+            </div>
+          </div>
+
+          <!-- Template Banners Presets Gallery -->
+          @if (activeThemePresets && activeThemePresets.length) {
+            <div class="theme-presets-section mb-4 p-3 border rounded-3 bg-light">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <h5 class="m-0 fs-6 fw-bold"><i class="bi bi-stars text-warning me-1"></i> بانرات مقترحة جاهزة لقالب ({{ selectedHomeThemeName }}):</h5>
+                <span class="text-muted small">اضغط لتطبيق أي بانر فورا</span>
+              </div>
+              <div class="preset-cards-grid">
+                @for (preset of activeThemePresets; track preset.id) {
+                  @let isActivePreset = getActiveThemeBanner().desktopUrl === preset.desktopUrl;
+                  <div class="preset-banner-card" [class.selected]="isActivePreset">
+                    <div class="preset-thumb-wrap">
+                      <img [src]="preset.desktopUrl | imageUrl:'banner'" [alt]="preset.name" loading="lazy" />
+                      @if (isActivePreset) {
+                        <span class="active-badge"><i class="bi bi-check-circle-fill me-1"></i> نشط حالياً</span>
+                      }
+                    </div>
+                    <div class="preset-details">
+                      <div>
+                        <strong>{{ preset.name }}</strong>
+                        <p class="text-muted small mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ preset.title }}</p>
+                      </div>
+                      <button type="button" class="btn btn-sm" [class.btn-success]="isActivePreset" [class.btn-outline-primary]="!isActivePreset" (click)="applyThemeBannerPreset(preset)">
+                        <i class="bi" [class.bi-check2]="isActivePreset" [class.bi-palette]="!isActivePreset"></i>
+                        {{ isActivePreset ? 'البانر المختار' : 'استخدام هذا البانر' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Active Theme Banner Editor -->
+          @let themeBanner = getActiveThemeBanner();
+          <div class="home-banner-media mb-3">
+            <div class="p-3 border rounded-3 bg-light">
+              <h5 class="fs-6 fw-bold mb-3"><i class="bi bi-sliders me-1"></i> تخصيص صورة ونصوص بانر قالب ({{ selectedHomeThemeName }}):</h5>
+
+              <div class="banner-preview-box mb-3">
+                <img
+                  [src]="(themeBanner.desktopUrl || settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
+                  alt="Banner Preview"
+                  class="preview-banner-img"
+                />
+                <div class="banner-overlay-tag">معاينة بانر ({{ selectedHomeThemeName }})</div>
+              </div>
+
+              <div class="upload-controls-row flex-between flex-wrap gap-2 mb-3">
+                <input
+                  #bannerFileInput
+                  type="file"
+                  accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
+                  (change)="onBannerDesktopUpload($event)"
+                  style="display: none;"
+                />
+                <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
+                  <i class="bi bi-image-fill me-1"></i> رفع صورة البانر (كمبيوتر)
+                </button>
+
+                <input
+                  #bannerMobileFileInput
+                  type="file"
+                  accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
+                  (change)="onBannerMobileUpload($event)"
+                  style="display: none;"
+                />
+                <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
+                  <i class="bi bi-phone-fill me-1"></i> رفع صورة البانر (موبايل)
+                </button>
+
+                @if (themeBanner.desktopUrl) {
+                  <button type="button" class="btn-remove-link text-danger" (click)="themeBanner.desktopUrl=''; themeBanner.mobileUrl=''; saveSettings('branding', true)">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
+                  </button>
+                }
+              </div>
+
+              <div class="row g-2 mb-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold">رابط صورة البانر للكمبيوتر (Desktop):</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    dir="ltr"
+                    placeholder="/uploads/banners/hero-desktop.webp أو رابط خارجي"
+                    [(ngModel)]="themeBanner.desktopUrl"
+                  />
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold">رابط صورة البانر للموبايل (Mobile):</label>
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    dir="ltr"
+                    placeholder="/uploads/banners/hero-mobile.webp أو رابط خارجي"
+                    [(ngModel)]="themeBanner.mobileUrl"
+                  />
+                </div>
+              </div>
+
+              <div class="row g-2">
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold">عنوان البانر الرئيسي:</label>
+                  <input type="text" class="form-control" [(ngModel)]="themeBanner.title" placeholder="عنوان جذاب يعبر عن متجرك" />
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold">وصف البانر:</label>
+                  <input type="text" class="form-control" [(ngModel)]="themeBanner.subtitle" placeholder="وصف قصير للعروض والمنتجات" />
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold">نص زر البانر:</label>
+                  <input type="text" class="form-control" [(ngModel)]="themeBanner.buttonText" placeholder="تسوق الآن" />
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label small fw-bold">رابط الزر:</label>
+                  <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.buttonLink" placeholder="/menu" />
+                </div>
+              </div>
+
+              @if (settings()!.languageMode !== 'ar_only') {
+                <div class="row g-2 mt-2 pt-2 border-top">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold">Banner Title (English):</label>
+                    <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.titleEn" placeholder="Title in English" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold">Banner Subtitle (English):</label>
+                    <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.subtitleEn" placeholder="Subtitle in English" />
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label small fw-bold">Button Text (English):</label>
+                    <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.buttonTextEn" placeholder="Shop now" />
+                  </div>
+                </div>
               }
             </div>
-            <div class="preset-details">
-              <div>
-                <strong>{{ preset.name }}</strong>
-                <p class="text-muted small mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ preset.title }}</p>
-              </div>
-              <button type="button" class="btn btn-sm" [class.btn-success]="isActivePreset" [class.btn-outline-primary]="!isActivePreset" (click)="applyThemeBannerPreset(preset)">
-                <i class="bi" [class.bi-check2]="isActivePreset" [class.bi-palette]="!isActivePreset"></i>
-                {{ isActivePreset ? 'البانر المختار' : 'استخدام هذا البانر' }}
-              </button>
+          </div>
+        </details>
+
+        <app-store-layout-editor mode="home" #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor>
+
+        @if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-translate text-primary me-2"></i> 4. نصوص الرئيسية بالإنجليزية <small>English Titles</small></summary>
+            <div class="form-row">
+              <label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
+              <label class="form-group">وصف البانر<input type="text" dir="ltr" class="form-control" maxlength="600" [(ngModel)]="layoutOptions.homeSubtitleEn"></label>
+              <label class="form-group">زر البانر<input type="text" dir="ltr" class="form-control" maxlength="60" [(ngModel)]="layoutOptions.homeButtonTextEn"></label>
+              <label class="form-group">عنوان صف الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoriesTitleEn"></label>
+              <label class="form-group">عنوان المنتجات المختارة<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeFeaturedTitleEn"></label>
+              <label class="form-group">عنوان شبكة الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoryGridTitleEn"></label>
+            </div>
+          </details>
+        }
+
+        <div class="tab-save-footer mt-3 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-check-circle-fill text-success me-1"></i>
+            اضغط حفظ لتطبيق تغييرات القالب والبانر وسكشنات الصفحة الرئيسية فوراً.
+          </div>
+          <button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">
+            <i class="bi bi-floppy2-fill me-1"></i> {{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية'}}
+          </button>
+        </div>
+      </div>
+    }
+
+    @if(activeTab()==='integrations' || activeTab()==='performance') {
+      <div class="tab-content animate-fade-in">
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-graph-up-arrow text-primary me-2"></i> 1. Pixels السوشيال ميديا وأدوات القياس <small>Meta, TikTok, Snapchat</small></summary>
+          <p class="text-muted small mb-3">أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p>
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-4">
+              <label for="metaPixel" class="form-label fw-bold"><i class="bi bi-meta text-primary me-1"></i> Meta Pixel — Facebook وInstagram</label>
+              <input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345">
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="tiktokPixel" class="form-label fw-bold"><i class="bi bi-tiktok text-dark me-1"></i> TikTok Pixel</label>
+              <input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId" placeholder="CXXXXXXXXXXXXXXXXX">
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="snapPixel" class="form-label fw-bold"><i class="bi bi-snapchat text-warning me-1"></i> Snapchat Pixel</label>
+              <input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
             </div>
           </div>
-        }
-      </div>
-    </div>
-  }
+          <div class="p-3 rounded-3 bg-light border small text-muted">
+            <p class="mb-2"><strong>الأحداث المدعومة:</strong> زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p>
+            <p class="mb-0">الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p>
+          </div>
+        </details>
 
-  <!-- Active Theme Banner Editor -->
-  @let themeBanner = getActiveThemeBanner();
-  <div class="home-banner-media mb-3">
-    <div class="p-3 border rounded-3 bg-light">
-      <h5 class="fs-6 fw-bold mb-3"><i class="bi bi-sliders me-1"></i> تخصيص صورة ونصوص بانر قالب ({{ selectedHomeThemeName }}):</h5>
-
-      <div class="banner-preview-box mb-3">
-        <img
-          [src]="(themeBanner.desktopUrl || settings()!.heroBannerDesktopUrl || '/assets/images/banners/hero-desktop.jpg') | imageUrl:'banner'"
-          alt="Banner Preview"
-          class="preview-banner-img"
-        />
-        <div class="banner-overlay-tag">معاينة بانر ({{ selectedHomeThemeName }})</div>
-      </div>
-
-      <div class="upload-controls-row flex-between flex-wrap gap-2 mb-3">
-        <input
-          #bannerFileInput
-          type="file"
-          accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
-          (change)="onBannerDesktopUpload($event)"
-          style="display: none;"
-        />
-        <button type="button" class="btn-outline-upload" (click)="bannerFileInput.click()" [disabled]="isUploading()">
-          <i class="bi bi-image-fill me-1"></i> رفع صورة البانر (كمبيوتر)
-        </button>
-
-        <input
-          #bannerMobileFileInput
-          type="file"
-          accept="image/*,.jfif,.webg,.heic,.heif,.jxl"
-          (change)="onBannerMobileUpload($event)"
-          style="display: none;"
-        />
-        <button type="button" class="btn-outline-upload" (click)="bannerMobileFileInput.click()" [disabled]="isUploading()">
-          <i class="bi bi-phone-fill me-1"></i> رفع صورة البانر (موبايل)
-        </button>
-
-        @if (themeBanner.desktopUrl) {
-          <button type="button" class="btn-remove-link text-danger" (click)="themeBanner.desktopUrl=''; themeBanner.mobileUrl=''; saveSettings('branding', true)">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> استعادة الافتراضي
+        <div class="tab-save-footer mt-3 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-shield-check text-success me-1"></i> يتم تفعيل وحدات القياس فور حفظ المعرفات.
+          </div>
+          <button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="isSaving()">
+            <i class="bi bi-floppy2-fill me-1"></i> {{ isSaving() ? 'جاري الحفظ...' : 'حفظ إعدادات القياس' }}
           </button>
-        }
-      </div>
-
-      <div class="row g-2 mb-3">
-        <div class="col-12 col-md-6">
-          <label class="form-label small fw-bold">رابط صورة البانر للكمبيوتر (Desktop):</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            dir="ltr"
-            placeholder="/uploads/banners/hero-desktop.webp أو رابط خارجي"
-            [(ngModel)]="themeBanner.desktopUrl"
-          />
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label small fw-bold">رابط صورة البانر للموبايل (Mobile):</label>
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            dir="ltr"
-            placeholder="/uploads/banners/hero-mobile.webp أو رابط خارجي"
-            [(ngModel)]="themeBanner.mobileUrl"
-          />
         </div>
       </div>
+    }
 
-      <div class="row g-2">
-        <div class="col-12 col-md-6">
-          <label class="form-label small fw-bold">عنوان البانر الرئيسي:</label>
-          <input type="text" class="form-control" [(ngModel)]="themeBanner.title" placeholder="عنوان جذاب يعبر عن متجرك" />
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label small fw-bold">وصف البانر:</label>
-          <input type="text" class="form-control" [(ngModel)]="themeBanner.subtitle" placeholder="وصف قصير للعروض والمنتجات" />
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label small fw-bold">نص زر البانر:</label>
-          <input type="text" class="form-control" [(ngModel)]="themeBanner.buttonText" placeholder="تسوق الآن" />
-        </div>
-        <div class="col-12 col-md-6">
-          <label class="form-label small fw-bold">رابط الزر:</label>
-          <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.buttonLink" placeholder="/menu" />
-        </div>
-      </div>
-
-      @if (settings()!.languageMode !== 'ar_only') {
-        <div class="row g-2 mt-2 pt-2 border-top">
-          <div class="col-12 col-md-4">
-            <label class="form-label small fw-bold">Banner Title (English):</label>
-            <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.titleEn" placeholder="Title in English" />
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label small fw-bold">Banner Subtitle (English):</label>
-            <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.subtitleEn" placeholder="Subtitle in English" />
-          </div>
-          <div class="col-12 col-md-4">
-            <label class="form-label small fw-bold">Button Text (English):</label>
-            <input type="text" dir="ltr" class="form-control" [(ngModel)]="themeBanner.buttonTextEn" placeholder="Shop now" />
-          </div>
-        </div>
-      }
-    </div>
-  </div>
-</details>
-@if (settings()!.languageMode !== 'ar_only' && !layoutOptions.useCustomHome) {
-<details class="settings-card settings-disclosure" open><summary>نصوص الرئيسية بالإنجليزية</summary><div class="form-row">
-<label class="form-group">عنوان البانر<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeTitleEn"></label>
-<label class="form-group">وصف البانر<input type="text" dir="ltr" class="form-control" maxlength="600" [(ngModel)]="layoutOptions.homeSubtitleEn"></label>
-<label class="form-group">زر البانر<input type="text" dir="ltr" class="form-control" maxlength="60" [(ngModel)]="layoutOptions.homeButtonTextEn"></label>
-<label class="form-group">عنوان صف الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoriesTitleEn"></label>
-<label class="form-group">عنوان المنتجات المختارة<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeFeaturedTitleEn"></label>
-<label class="form-group">عنوان شبكة الأقسام<input type="text" dir="ltr" class="form-control" maxlength="160" [(ngModel)]="layoutOptions.homeCategoryGridTitleEn"></label>
-</div></details>
-}
-<app-store-layout-editor mode="home" #layoutEditor [layout]="settings()!.storeLayout" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor><button type="button" class="btn-primary" (click)="saveSettings('layout')" [disabled]="isSaving()||layoutEditor.busy()">{{isSaving()?'جاري الحفظ...':'حفظ إعدادات الرئيسية'}}</button>}
-    @if(activeTab()==='integrations' || activeTab()==='performance') {<section class="settings-card"><h3>Pixels السوشيال ميديا</h3><p>أدخل معرف Pixel فقط، وليس كود JavaScript. تترك الخانة فارغة لتعطيل المنصة.</p><label for="metaPixel">Meta Pixel — Facebook وInstagram</label><input id="metaPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.metaPixelId" placeholder="123456789012345"><label for="tiktokPixel">TikTok Pixel</label><input id="tiktokPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.tikTokPixelId"><label for="snapPixel">Snapchat Pixel</label><input id="snapPixel" class="form-control" dir="ltr" [(ngModel)]="settings()!.snapPixelId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"><p>الأحداث: زيارة الصفحات، مشاهدة المنتج، الإضافة للسلة، بدء إتمام الطلب، والشراء عند نجاح إنشاء الطلب. إرسال الأحداث يبدأ بعد موافقة الزائر على التتبع. لا يتم إرسال الاسم أو الهاتف أو العنوان أو رابط تتبع الطلب.</p><p>الشراء هنا يعني إنشاء الطلب، بما فيه الدفع عند الاستلام، ولا يعني تحصيل المبلغ. استخدم أدوات Test Events في كل منصة للتحقق؛ حظر الإعلانات أو رفض الموافقة قد يمنع الإرسال.</p></section><button type="button" class="btn-primary" (click)="saveSettings()" [disabled]="isSaving()">حفظ إعدادات القياس</button>}
     @if (activeTab() === 'discounts') {
       <div class="tab-content animate-fade-in">
-        <div class="settings-card glass-panel highlight-border">
-          <div class="flex-between align-center mb-3">
-            <div>
-              <h3 class="card-title text-accent m-0">
-                <i class="bi bi-gift-fill me-2"></i> إدارة العروض والخصومات والتوصيل المجاني
-              </h3>
-              <p class="card-subtitle text-muted small mt-1">تُطبق الخصومات والعروض تلقائياً للعملاء أثناء إتمام الطلب وتظهر في ملخص الفاتورة التقديرية</p>
-            </div>
-            <span class="badge bg-primary px-3 py-2">تحكم فوري</span>
-          </div>
-
-          <!-- Free Delivery Rule -->
-          <div class="discount-rule-box p-3 mb-3">
+        <!-- 1. Free Delivery Rule -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-truck text-success me-2"></i> 1. ميزة التوصيل المجاني <small>{{ settings()!.isFreeDeliveryEnabled ? 'نشط الآن' : 'معطل' }}</small></summary>
+          <div class="discount-rule-box p-3">
             <div class="flex-between align-center mb-2">
               <label class="checkbox-label font-bold text-success d-flex align-items-center cursor-pointer m-0">
                 <input type="checkbox" [(ngModel)]="settings()!.isFreeDeliveryEnabled" />
@@ -254,9 +300,12 @@
               </div>
             }
           </div>
+        </details>
 
-          <!-- Tiered Threshold Discount Rule -->
-          <div class="discount-rule-box p-3 mb-3">
+        <!-- 2. Tiered Threshold Discount Rule -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-graph-up-arrow text-primary me-2"></i> 2. خصم الشرائح عند وصول الطلب لمبلغ معين <small>{{ settings()!.isTieredDiscountEnabled ? 'نشط الآن' : 'معطل' }}</small></summary>
+          <div class="discount-rule-box p-3">
             <div class="flex-between align-center mb-2">
               <label class="checkbox-label font-bold text-primary d-flex align-items-center cursor-pointer m-0">
                 <input type="checkbox" [(ngModel)]="settings()!.isTieredDiscountEnabled" />
@@ -287,9 +336,12 @@
               </div>
             }
           </div>
+        </details>
 
-          <!-- Flat Discount on All Orders -->
-          <div class="discount-rule-box p-3 mb-3">
+        <!-- 3. Flat Discount on All Orders -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-percent text-warning me-2"></i> 3. خصم نسبة مئوية عامة على أي طلب <small>{{ settings()!.isFlatDiscountEnabled ? 'نشط الآن' : 'معطل' }}</small></summary>
+          <div class="discount-rule-box p-3">
             <div class="flex-between align-center mb-2">
               <label class="checkbox-label font-bold text-warning d-flex align-items-center cursor-pointer m-0">
                 <input type="checkbox" [(ngModel)]="settings()!.isFlatDiscountEnabled" />
@@ -311,19 +363,22 @@
               </div>
             }
           </div>
+        </details>
 
-          <!-- Active Promotion Banner Text -->
+        <!-- 4. Active Promotion Banner Text -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-megaphone-fill text-danger me-2"></i> 4. شريط الإعلان الترويجي العلوي (Promo Banner) <small>{{ settings()!.activePromotionBanner ? 'مفعّل' : 'فارغ' }}</small></summary>
           <div class="form-group mb-3">
             <label class="font-bold mb-1">
-              <i class="bi bi-megaphone-fill text-danger me-1"></i> شريط الإعلان الترويجي العلوي (Active Promotion Banner):
+              نص شريط الإعلان الترويجي العلوي (بالعربية):
             </label>
             <input
               type="text"
               class="form-control"
-              placeholder="مثال: خصم 10% على باقات التمديد وخزانات الغاز لفترة محدودة! 🔥"
+              placeholder="مثال: خصم 10% على جميع المنتجات لفترة محدودة! 🔥"
               [(ngModel)]="settings()!.activePromotionBanner"
             />
-            <small class="text-muted mt-1 d-block">يظهر هذا النص كشريط متحرك أو بارز في أعلى المتجر للعملاء لجذب الانتباه للعروض.</small>
+            <small class="text-muted mt-1 d-block">يظهر هذا النص كشريط بارز في أعلى المتجر للعملاء لجذب الانتباه للعروض.</small>
           </div>
           @if (settings()?.enableEnglish) {
             <div class="form-group mb-3">
@@ -347,10 +402,10 @@
               </div>
             }
           </div>
-        </div>
+        </details>
 
         <!-- Separate Save Button for Discounts -->
-        <div class="tab-save-footer mt-4 flex-between">
+        <div class="tab-save-footer mt-3 flex-between">
           <div class="save-hint text-muted small">
             <i class="bi bi-check-circle-fill text-success me-1"></i>
             يتم تطبيق العروض والخصومات فوراً في حسابات السلة والدفع للعملاء.
@@ -375,7 +430,7 @@
 
 @if (activeTab() === 'branding') {
         <!-- 1. LOGO, HERO BANNERS & MEDIA ASSETS -->
-        <details class="settings-card settings-disclosure" open><summary>شعار المتجر وأيقونته</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-award text-primary me-2"></i> 1. شعار المتجر وأيقونته (Logo & Favicon) <small>الشعار وأبعاده وأيقونة المتصفح</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في الشعار الرسمي وبانرات الواجهة الرئيسية على أجهزة الكمبيوتر والموبايل.</p>
           </div>
@@ -469,8 +524,8 @@
         </details>
 
         <!-- 1.2 IMAGE COMPRESSION & PERFORMANCE SETTINGS -->
-        <details class="settings-card settings-disclosure" open>
-          <summary><i class="bi bi-file-earmark-zip text-primary me-2"></i> ضغط الصور وتحسين سرعة وأداء المتجر</summary>
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-file-earmark-zip text-primary me-2"></i> 2. ضغط الصور وتحسين سرعة وأداء المتجر <small>{{ layoutOptions.enableImageCompression !== false ? (layoutOptions.maxImageCompressionKb || 150) + ' KB' : 'معطل' }}</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في تفعيل ضغط الصور التلقائي عند الرفع وتحديد الحجم الأقصى بالكيلوبايت (KB) لتسريع تحميل المتجر وتقليل استهلاك باقة الإنترنت للعملاء.</p>
           </div>
@@ -534,7 +589,7 @@
         </details>
 
         <!-- 2. BRAND PRESENTATION MODE IN NAVBAR -->
-        <details class="settings-card settings-disclosure"><summary>2. الهيدر وطريقة عرض العلامة التجارية (Brand Mode)</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-window-dock text-primary me-2"></i> 3. الهيدر وطريقة عرض العلامة التجارية والشريط السفلي <small>Navbar & Bottom Nav</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">حدد كيف يظهر اسم المتجر واللوجو في شريط الهيدر العلوي، والتحكم في ظهور عناصر الواجهة.</p>
           </div>
@@ -577,7 +632,7 @@
         </details>
 
         <!-- 3. EXTENDED COLOR STUDIO -->
-        <details class="settings-card settings-disclosure"><summary>3. استوديو الألوان الموسّع (Color Studio)</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-palette-fill text-primary me-2"></i> 4. استوديو الألوان الموسّع (Color Studio) <small>ألوان الهوية والهيدر والأزرار</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم كامل في لوحة الألوان عبر الموقع بالكامل. التغييرات تُطبق فورياً في المتجر.</p>
           </div>
@@ -716,7 +771,7 @@
         </details>
 
         <!-- 4. TYPOGRAPHY & SHAPES -->
-        <details class="settings-card settings-disclosure"><summary>4. الخطوط وتناسق الأحجام والزوايا</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-type text-primary me-2"></i> 5. الخطوط وتناسق الأحجام والظلال <small>{{ settings()!.fontFamily || 'Cairo' }}</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في نوع الخط العربي، حجم الخط الأساسي، انحناءات البطاقات والأزرار والظلال.</p>
           </div>
@@ -798,7 +853,7 @@
           </div>
         </details>
 
-        <details class="settings-card settings-disclosure"><summary>حواف واجهة المتجر</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-bounding-box-circles text-primary me-2"></i> 6. حواف وزوايا واجهة المتجر <small>الشريطين وكارت المنتج والبحث</small></summary>
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3"><button type="button" class="btn btn-outline" (click)="restoreStorefrontShapes()">استعادة الشكل الافتراضي</button></div>
           <p class="text-muted mb-3">إعدادات مستقلة للشريطين وكارت المنتج والبحث. القيم بالبكسل؛ 999 تجعل البحث بشكل كبسولة. ألوانك وخطك وشعارك لا تتغير.</p>
           <div class="form-row">
@@ -810,7 +865,7 @@
         </details>
 
         <!-- 5. MULTI-LANGUAGE & LOCALIZATION -->
-        <details class="settings-card settings-disclosure"><summary>5. نظام اللغات والترجمة (Multi-Language Engine)</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-translate text-primary me-2"></i> 7. نظام اللغات والترجمة (Multi-Language Engine) <small>{{ settings()!.defaultLanguage === 'en' ? 'English' : 'العربية' }}</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في نمط اللغات المدعومة بالمتجر، واللغة الافتراضية، وظهور زر التبديل وحقول الترجمة.</p>
           </div>
@@ -857,7 +912,7 @@
 }
 @if (activeTab() === 'branding') {
         <!-- 6. ELEMENTS VISIBILITY & FLOATING ACTION BUTTON (FAB) -->
-        <details class="settings-card settings-disclosure"><summary>6. التحكم في ظهور أقسام وعناصر الواجهة</summary>
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-sliders2 text-primary me-2"></i> 8. التحكم في ظهور عناصر الواجهة والأزرار العائمة <small>المفضلة، واتساب العائم، شراء الآن</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في إظهار أو إخفاء عناصر الصفحة الرئيسية والمفضلة وزر الواتساب العائم على الشاشة.</p>
           </div>
@@ -940,8 +995,8 @@
 }
 @if (activeTab() === 'menu') {
         <!-- IMAGE COMPRESSION & PERFORMANCE SETTINGS (MENU TAB) -->
-        <details class="settings-card settings-disclosure" open>
-          <summary><i class="bi bi-file-earmark-zip text-primary me-2"></i> ضغط صور المنتجات وتحسين سرعة وأداء المتجر</summary>
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-file-earmark-zip text-primary me-2"></i> 1. ضغط صور المنتجات وتحسين سرعة وأداء المتجر <small>{{ layoutOptions.enableImageCompression !== false ? (layoutOptions.maxImageCompressionKb || 150) + ' KB' : 'معطل' }}</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في تفعيل ضغط صور المنتجات التلقائي عند الرفع وتحديد الحجم الأقصى بالكيلوبايت (KB) لتسريع تحميل المتجر وتقليل استهلاك باقة الإنترنت للعملاء.</p>
           </div>
@@ -1003,8 +1058,11 @@
             }
           </div>
         </details>
-<details class="settings-card settings-disclosure" open><summary>طريقة عرض المنتج</summary>          <!-- Product Details Display Mode -->
-          <div class="product-view-mode-card p-3 border rounded-3 bg-white mt-3 mb-2">
+
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-window-stack text-primary me-2"></i> 2. طريقة فتح وعرض تفاصيل المنتج <small>{{ (settings()?.productDetailViewMode || 'modal') === 'page' ? 'صفحة مستقلة' : 'نافذة منبثقة Modal' }}</small></summary>
+          <!-- Product Details Display Mode -->
+          <div class="product-view-mode-card p-3 border rounded-3 bg-white mt-2 mb-2">
             <div class="fw-bold text-dark mb-1">
               <i class="bi bi-window-stack text-primary me-1"></i> طريقة فتح وعرض تفاصيل المنتج (Product Detail View Mode):
             </div>
@@ -1038,12 +1096,10 @@
             </div>
           </div>
         </details>
-
-
 }
 @if (activeTab() === 'checkout') {
-        <!-- 7. CHECKOUT PAGE CUSTOMIZATION -->
-        <details class="settings-card settings-disclosure"><summary>7. تخصيص تجربة وخيارات إتمام الطلب (Checkout)</summary>
+        <!-- 1. CHECKOUT PAGE CUSTOMIZATION -->
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-credit-card-2-front text-primary me-2"></i> 1. خيارات التسليم وطرق الدفع والمحافظ الإلكترونية <small>التوصيل، الفرع، الدفع عند الاستلام والمحافظ</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تحكم في خيارات التسليم المتاحة، جدولة المواعيد، طرق الدفع وبيانات المحافظ الإلكترونية.</p>
           </div>
@@ -1123,8 +1179,6 @@
             </div>
           </div>
 
-
-
           <!-- Checkout Page Custom Titles & Button -->
           <div class="form-row">
             <div class="form-group flex-1">
@@ -1141,16 +1195,14 @@
             </div>
           </div>
         </details>
-
-
 }
 @if (activeTab() === 'menu') {
-<details class="settings-card settings-disclosure"><summary>الكروت ونافذة تفاصيل المنتج</summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div>
+<details class="settings-card settings-disclosure"><summary><i class="bi bi-card-image text-primary me-2"></i> 3. تصميم الكروت ونافذة تفاصيل المنتج والأنيميشن <small>نمط الكارت وشارة الخصم والحركات</small></summary><div class="row g-3"><div class="col-md-4"><label class="form-group">طريقة ملاءمة صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageFit" (ngModelChange)="onColorChange()"><option value="contain">احتواء داخل الإطار (Contain)</option><option value="cover">ملء الإطار بالكامل (Cover)</option></select></label></div><div class="col-md-4"><label class="form-group">نسبة أبعاد صورة المنتج<select class="form-control" [(ngModel)]="layoutOptions.detailImageAspect" (ngModelChange)="onColorChange()"><option value="square">مربع (1:1)</option><option value="portrait">عمودي (3:4)</option><option value="landscape">عريض (4:3)</option><option value="auto">تلقائي (Auto)</option></select></label></div><div class="col-md-4"><label class="form-group">ارتفاع مساحة صورة المنتج بالبكسل (0 تلقائي)<input class="form-control" type="number" min="0" max="900" step="1" [(ngModel)]="layoutOptions.modalImageHeight" (ngModelChange)="onColorChange()"></label></div></div>
 <div class="row g-3 mt-1"><div class="col-md-6"><label class="form-group">نمط وتصميم كارت المنتج (Card Style Preset)<select class="form-control" [(ngModel)]="layoutOptions.productCardStyle" (ngModelChange)="onColorChange()"><option value="modern">عصري بارز مع ظل ناعم (Modern Floating)</option><option value="bordered">محدد بإطار أنيق هادئ (Bordered Minimal)</option><option value="minimal">شفاف بسيط بدون حدود (Ultra Minimal)</option></select></label></div><div class="col-md-6"><label class="form-group">طريقة عرض شارة الخصم (Discount Badge)<select class="form-control" [(ngModel)]="layoutOptions.discountBadgeMode" (ngModelChange)="onColorChange()"><option value="percent">نسبة مئوية (مثال: خصم 20%)</option><option value="amount">مبلغ التوفير (مثال: وفر 50 ج.م)</option><option value="both">النسبة والمبلغ معاً</option></select></label></div></div>
 <label class="form-group d-flex align-items-center gap-2 mt-3 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductPageAnimations !== false" (ngModelChange)="layoutOptions.enableProductPageAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن وحركات الدخول في صفحة المنتج (Entrance Animations)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableProductCardAnimations !== false" (ngModelChange)="layoutOptions.enableProductCardAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن تركيز وظهور صور المنتجات في الرئيسية وصفحة الأصناف (Card Image Focus Animation)</span></label><label class="form-group d-flex align-items-center gap-2 mt-2 cursor-pointer"><input type="checkbox" [ngModel]="layoutOptions.enableHomeSectionAnimations !== false" (ngModelChange)="layoutOptions.enableHomeSectionAnimations=$event; onColorChange()"><span class="fw-bold">تفعيل أنيميشن حركات ظهور أقسام الصفحة الرئيسية (Fade In Up: الظهور مع الطلوع من تحت)</span></label></details>
         <app-store-layout-editor mode="cards" [layout]="layoutOptions" (layoutChange)="settings()!.storeLayout=$event"></app-store-layout-editor>
-        <!-- 8. CUSTOM LABELS -->
-        <details class="settings-card settings-disclosure"><summary>8. تخصيص المسميات والنصوص (Custom Labels)</summary>
+        <!-- 5. CUSTOM LABELS -->
+        <details class="settings-card settings-disclosure"><summary><i class="bi bi-input-cursor-text text-primary me-2"></i> 5. تخصيص مسميات المنتجات والأقسام والبحث <small>Custom Labels</small></summary>
           <div class="section-title-wrap mb-3">
             <p class="section-desc">تخصيص كامل لمسميات الأقسام والصفحات والأزرار لتناسب علامتك ونوع نشاطك التجاري.</p>
           </div>
@@ -1189,8 +1241,8 @@
         </details>
 }
 @if (activeTab() === 'cart') {
-<section class="settings-card">
-  <h3>عرض السلة والمفضلة</h3>
+<details class="settings-card settings-disclosure">
+  <summary><i class="bi bi-bag-check text-primary me-2"></i> 1. عرض ومسميات السلة والمفضلة <small>{{ settings()!.labelCart || 'السلة' }}</small></summary>
   <div class="row g-3 mb-3">
     <div class="col-md-6">
       <label class="form-group">مسمى السلة<input class="form-control" [(ngModel)]="settings()!.labelCart"></label>
@@ -1219,17 +1271,38 @@
       </div>
     }
   </div>
-</section>
+</details>
+}
+@if (activeTab() === 'cart') {
+  <details class="settings-card settings-disclosure">
+    <summary><i class="bi bi-toggle-on text-primary me-2"></i> 2. تشغيل السلة واستقبال الطلبات أونلاين <small>{{ layoutOptions.onlineOrdering !== false ? 'مفعّل' : 'متوقف' }}</small></summary>
+    <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light"><input type="checkbox" [ngModel]="layoutOptions.onlineOrdering !== false" (ngModelChange)="layoutOptions.onlineOrdering=$event"> <span>تفعيل السلة وإتمام الطلب أونلاين</span></label>
+    <p class="text-muted small mb-0 mt-2">عند الإيقاف يظل الكتالوج متاحًا للتصفح وتظل الطلبات السابقة قابلة للمتابعة.</p>
+  </details>
 }
 @if (activeTab() === 'checkout') {
-<section class="settings-card"><h3>مسميات التسليم</h3><label>مسمى التوصيل<input class="form-control" [(ngModel)]="settings()!.labelDelivery"></label><label>مسمى الاستلام<input class="form-control" [(ngModel)]="settings()!.labelPickup"></label></section>
+<details class="settings-card settings-disclosure">
+  <summary><i class="bi bi-tags text-primary me-2"></i> 2. مسميات خيارات التسليم (التوصيل والاستلام) <small>تخصيص النصوص</small></summary>
+  <div class="form-row">
+    <label class="form-group flex-1">مسمى التوصيل<input class="form-control" [(ngModel)]="settings()!.labelDelivery" placeholder="توصيل للعنوان"></label>
+    <label class="form-group flex-1">مسمى الاستلام<input class="form-control" [(ngModel)]="settings()!.labelPickup" placeholder="استلام من الفرع"></label>
+  </div>
+</details>
+<details class="settings-card settings-disclosure">
+  <summary><i class="bi bi-person-check text-primary me-2"></i> 3. صلاحيات إتمام الطلب وتسجيل الدخول <small>{{ layoutOptions.guestCheckout !== false ? 'الطلب كضيف متاح' : 'يتطلب تسجيل دخول' }}</small></summary>
+  <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light"><input type="checkbox" [ngModel]="layoutOptions.guestCheckout !== false" (ngModelChange)="layoutOptions.guestCheckout=$event" [disabled]="layoutOptions.onlineOrdering === false"> <span>السماح بالطلب كضيف بدون تسجيل دخول</span></label>
+  <p class="text-muted small mb-0 mt-2">عند السماح للضيف، يمكن إتمام الطلب دون إنشاء حساب. بيانات الطلب تظل قابلة للمتابعة من رابط الطلب.</p>
+</details>
 }
 @if (activeTab() === 'branding') {
-<section class="settings-card"><label>مسمى المفضلة<input class="form-control" [(ngModel)]="settings()!.labelWishlist"></label></section>
+<details class="settings-card settings-disclosure">
+  <summary><i class="bi bi-heart text-danger me-2"></i> 9. مسمى قائمة المفضلة <small>{{ settings()!.labelWishlist || 'المفضلة' }}</small></summary>
+  <label class="form-group">مسمى المفضلة في القوائم والواجهة<input class="form-control" [(ngModel)]="settings()!.labelWishlist" placeholder="المفضلة"></label>
+</details>
 }
-@if (activeTab() === 'branding' || activeTab() === 'menu') {
+@if (activeTab() === 'branding' || activeTab() === 'menu' || activeTab() === 'cart' || activeTab() === 'checkout') {
         <!-- Unified Save Button for Branding & UI -->
-        <div class="tab-save-footer mt-4 flex-between">
+        <div class="tab-save-footer mt-3 flex-between">
           <div class="save-hint text-muted small">
             <i class="bi bi-info-circle me-1"></i> عاين التغييرات، ثم اضغط حفظ لتطبيقها على المتجر.
           </div>
@@ -1246,136 +1319,139 @@
     }
 
     <!-- TAB 3: Operating Policies & Weights -->
-    @if (activeTab() === 'policies' || activeTab() === 'cart' || activeTab() === 'checkout' || activeTab() === 'account') {
-      @if (activeTab() === 'policies') { <section class="settings-card">
-        <h3>ابدأ بإعدادات تناسب نشاطك</h3>
-        <p>القالب يجهّز نوع النشاط وطريقة عرض المنتج والكروت للمراجعة قبل الحفظ.</p>
-        <div class="d-flex flex-wrap gap-2 mb-3">
-          <button type="button" class="btn-outline" (click)="applyStorePreset('clothing')">قالب الملابس</button>
-          <button type="button" class="btn-outline" (click)="applyStorePreset('supermarket')">قالب السوبر ماركت</button>
-        </div>
-        <ol>
-          <li>اضبط اسم المتجر واللوجو من «تصميم المتجر».</li>
-          <li><a routerLink="../catalog" queryParamsHandling="preserve">جهّز المنتجات</a> مع الألوان والمقاسات للملابس، أو سعر القطعة والوزن للسوبر ماركت.</li>
-          <li><a routerLink="../delivery-zones" queryParamsHandling="preserve">اضبط تغطية الشحن والرسوم</a> ثم راجع طرق الاستلام والدفع.</li>
-        </ol>
-      </section> }
-      @if (activeTab() === 'policies') { <section class="settings-card"><h3>ترقيم الطلبات</h3>
-        <div class="form-row">
-          <label class="form-group">ترقيم الطلبات
-            <select class="form-control" [(ngModel)]="layoutOptions.orderNumberMode">
-              <option [ngValue]="null">الترقيم اليومي الحالي</option>
-              <option value="random">رمز عشوائي (حروف وأرقام)</option>
-              <option value="continuous">تسلسل مستمر</option>
-              <option value="daily">تسلسل يومي</option>
-              <option value="weekly">تسلسل أسبوعي</option>
-              <option value="monthly">تسلسل شهري</option>
-            </select>
-          </label>
-          @if (layoutOptions.orderNumberMode && layoutOptions.orderNumberMode !== 'random') {
-            <label class="form-group">بداية التسلسل<input class="form-control" type="number" min="1" max="999999999" step="1" [ngModel]="layoutOptions.orderNumberStart ?? 400" (ngModelChange)="layoutOptions.orderNumberStart = $event ?? 400"></label>
-          }
-        </div>
-        <p>الترقيم الدوري يضيف تاريخ الفترة إلى الرقم. يبدأ الأسبوع يوم الاثنين. يسري الإعداد على الطلبات الجديدة.</p>
-      </section> }
-@if (activeTab() === 'cart') {
-<section class="settings-card"><h3>تشغيل السلة</h3>        <label><input type="checkbox" [ngModel]="layoutOptions.onlineOrdering !== false" (ngModelChange)="layoutOptions.onlineOrdering=$event"> تفعيل السلة وإتمام الطلب</label>
-        <p>عند الإيقاف يظل الكتالوج متاحًا للتصفح وتظل الطلبات السابقة قابلة للمتابعة.</p>
-</section>
-}
-      @if (activeTab() === 'account') { <section class="settings-card"><h3>الحساب وطلباتي</h3>
-        <label><input type="checkbox" [ngModel]="layoutOptions.showOrdersPage !== false" (ngModelChange)="layoutOptions.showOrdersPage=$event"> إظهار صفحة طلباتي وحساب العميل</label>
-        <p>عند إيقافها يُخفى رابط «حسابي وطلباتي» من القوائم، وتظل روابط تتبع الطلبات التي يفتحها العميل مباشرة متاحة.</p>
-      </section> }
-      @if (activeTab() === 'checkout') { <section class="settings-card"><h3>إتمام الطلب والدخول</h3>
-        <label><input type="checkbox" [ngModel]="layoutOptions.guestCheckout !== false" (ngModelChange)="layoutOptions.guestCheckout=$event" [disabled]="layoutOptions.onlineOrdering === false"> السماح بالطلب بدون تسجيل دخول</label>
-        <p>عند السماح للضيف، يمكن إتمام الطلب دون إنشاء حساب. بيانات الطلب تظل قابلة للمتابعة من رابط الطلب.</p>
-      </section> }
+    @if (activeTab() === 'policies' || activeTab() === 'account') {
       <div class="tab-content animate-fade-in">
-        @if (activeTab() === 'policies') { <div class="settings-card glass-panel">
-          <h3 class="card-title"><i class="bi bi-shield-check text-primary me-2"></i> سياسات العمل والطلب والوزن التقديري</h3>
+        @if (activeTab() === 'account') {
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-person-lines-fill text-primary me-2"></i> 1. إعدادات صفحة الحساب وطلباتي <small>{{ layoutOptions.showOrdersPage !== false ? 'ظاهرة للعملاء' : 'مخفية' }}</small></summary>
+            <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light"><input type="checkbox" [ngModel]="layoutOptions.showOrdersPage !== false" (ngModelChange)="layoutOptions.showOrdersPage=$event"> <span>إظهار صفحة طلباتي وحساب العميل في قوائم المتجر</span></label>
+            <p class="text-muted small mb-0 mt-2">عند إيقافها يُخفى رابط «حسابي وطلباتي» من القوائم، وتظل روابط تتبع الطلبات التي يفتحها العميل مباشرة متاحة.</p>
+          </details>
+        }
+        @if (activeTab() === 'policies') {
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-shield-check text-primary me-2"></i> 1. سياسات العمل واستقبال الطلبات والحد الأدنى <small>{{ settings()!.isOrdersOpen ? 'المتجر مفتوح' : 'المتجر مغلق مؤقتاً' }}</small></summary>
 
-          <div class="form-group mb-4">
-            <div class="store-status-toggle-box p-3 rounded d-flex align-items-center justify-content-between">
-              <div>
-                <strong class="d-block mb-1">حالة استقبال الطلبات أونلاين:</strong>
-                <small class="text-muted">عند الإيقاف، لن يتمكن العملاء من إرسال طلبات جديدة وسيظهر لهم رسالة التوقف المؤقت.</small>
+            <div class="form-group mb-4">
+              <div class="store-status-toggle-box p-3 rounded d-flex align-items-center justify-content-between">
+                <div>
+                  <strong class="d-block mb-1">حالة استقبال الطلبات أونلاين:</strong>
+                  <small class="text-muted">عند الإيقاف، لن يتمكن العملاء من إرسال طلبات جديدة وسيظهر لهم رسالة التوقف المؤقت.</small>
+                </div>
+                <button
+                  type="button"
+                  class="badge-toggle"
+                  [class.available]="settings()!.isOrdersOpen"
+                  [class.unavailable]="!settings()!.isOrdersOpen"
+                  (click)="settings()!.isOrdersOpen = !settings()!.isOrdersOpen"
+                >
+                  <i class="bi" [class.bi-check-circle-fill]="settings()!.isOrdersOpen" [class.bi-x-circle-fill]="!settings()!.isOrdersOpen"></i>
+                  <span>{{ settings()!.isOrdersOpen ? 'المتجر مفتوح لاستقبال الطلبات' : 'المتجر مغلق حالياً' }}</span>
+                </button>
               </div>
-              <button
-                type="button"
-                class="badge-toggle"
-                [class.available]="settings()!.isOrdersOpen"
-                [class.unavailable]="!settings()!.isOrdersOpen"
-                (click)="settings()!.isOrdersOpen = !settings()!.isOrdersOpen"
-              >
-                <i class="bi" [class.bi-check-circle-fill]="settings()!.isOrdersOpen" [class.bi-x-circle-fill]="!settings()!.isOrdersOpen"></i>
-                <span>{{ settings()!.isOrdersOpen ? 'المتجر مفتوح لاستقبال الطلبات' : 'المتجر مغلق حالياً' }}</span>
-              </button>
             </div>
-          </div>
 
-          @if (!settings()!.isOrdersOpen) {
-            <div class="form-group animate-fade-in">
-              <label for="setPauseMsg">رسالة التوقف المؤقت للعملاء:</label>
-              <input
-                id="setPauseMsg"
-                type="text"
-                class="form-control"
-                placeholder="مثال: نعتذر، نستقبل الطلبات يومياً من 11 صباحاً حتى 11 مساءً."
-                [(ngModel)]="settings()!.pauseMessage"
-              />
-            </div>
-          }
-
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label for="setMinOrd">الحد الأدنى لقيمة الطلب ({{ settings()!.currencySymbol || 'ج.م' }}) *</label>
-              <div class="input-with-unit">
-                <input id="setMinOrd" type="number" class="form-control" [(ngModel)]="settings()!.minimumOrderAmount" />
-                <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
+            @if (!settings()!.isOrdersOpen) {
+              <div class="form-group animate-fade-in">
+                <label for="setPauseMsg">رسالة التوقف المؤقت للعملاء:</label>
+                <input
+                  id="setPauseMsg"
+                  type="text"
+                  class="form-control"
+                  placeholder="مثال: نعتذر، نستقبل الطلبات يومياً من 11 صباحاً حتى 11 مساءً."
+                  [(ngModel)]="settings()!.pauseMessage"
+                />
               </div>
-              <small class="text-muted">أقل قيمة طلب يُسمح للعميل بإرسالها للمتجر.</small>
-            </div>
+            }
 
-            <div class="form-group flex-1">
-              <label for="setDefFee">رسوم التوصيل والخدمة الافتراضية ({{ settings()!.currencySymbol || 'ج.م' }}) *</label>
-              <div class="input-with-unit">
-                <input id="setDefFee" type="number" class="form-control" [(ngModel)]="settings()!.defaultDeliveryFee" />
-                <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="setMinOrd">الحد الأدنى لقيمة الطلب ({{ settings()!.currencySymbol || 'ج.م' }}) *</label>
+                <div class="input-with-unit">
+                  <input id="setMinOrd" type="number" class="form-control" [(ngModel)]="settings()!.minimumOrderAmount" />
+                  <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
+                </div>
+                <small class="text-muted">أقل قيمة طلب يُسمح للعميل بإرسالها للمتجر.</small>
               </div>
-              <small class="text-muted">تُطبق للمناطق التي لم يُحدد لها رسوم خاصة.</small>
-            </div>
-          </div>
 
-          <div class="form-row">
-            <div class="form-group flex-1">
-              <label for="setDiscl">نص إقرار وضمان الجودة وسياسة المتجر (بالعربية):</label>
-              <textarea
-                id="setDiscl"
-                class="form-control"
-                rows="2"
-                placeholder="جميع المنتجات أصلية وتخضع لأعلى معايير الجودة والسلامة..."
-                [(ngModel)]="settings()!.estimatedWeightDisclaimer"
-              ></textarea>
-              <small class="text-muted">يظهر للعملاء في السلة وصفحة الدفع (بالعربية).</small>
+              <div class="form-group flex-1">
+                <label for="setDefFee">رسوم التوصيل والخدمة الافتراضية ({{ settings()!.currencySymbol || 'ج.م' }}) *</label>
+                <div class="input-with-unit">
+                  <input id="setDefFee" type="number" class="form-control" [(ngModel)]="settings()!.defaultDeliveryFee" />
+                  <span class="unit-text">{{ settings()!.currencySymbol || 'ج.م' }}</span>
+                </div>
+                <small class="text-muted">تُطبق للمناطق التي لم يُحدد لها رسوم خاصة.</small>
+              </div>
             </div>
-            <div class="form-group flex-1">
-              <label for="setDisclEn">Quality & Store Policy Notice (English):</label>
-              <textarea
-                id="setDisclEn"
-                dir="ltr"
-                class="form-control"
-                rows="2"
-                placeholder="All items meet strict quality & safety standards..."
-                [(ngModel)]="layoutOptions.estimatedWeightDisclaimerEn"
-              ></textarea>
-              <small class="text-muted">Shown to customers on cart & checkout (English).</small>
-            </div>
-          </div>
-        </div> }
-        <!-- Separate Save Button for Policies -->
-        <div class="tab-save-footer mt-4 flex-between">
 
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="setDiscl">نص إقرار وضمان الجودة وسياسة المتجر (بالعربية):</label>
+                <textarea
+                  id="setDiscl"
+                  class="form-control"
+                  rows="2"
+                  placeholder="جميع المنتجات أصلية وتخضع لأعلى معايير الجودة والسلامة..."
+                  [(ngModel)]="settings()!.estimatedWeightDisclaimer"
+                ></textarea>
+                <small class="text-muted">يظهر للعملاء في السلة وصفحة الدفع (بالعربية).</small>
+              </div>
+              <div class="form-group flex-1">
+                <label for="setDisclEn">Quality & Store Policy Notice (English):</label>
+                <textarea
+                  id="setDisclEn"
+                  dir="ltr"
+                  class="form-control"
+                  rows="2"
+                  placeholder="All items meet strict quality & safety standards..."
+                  [(ngModel)]="layoutOptions.estimatedWeightDisclaimerEn"
+                ></textarea>
+                <small class="text-muted">Shown to customers on cart & checkout (English).</small>
+              </div>
+            </div>
+          </details>
+
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-hash text-primary me-2"></i> 2. نظام ترقيم الطلبات وبداية التسلسل <small>تخصيص أرقام الفواتير</small></summary>
+            <div class="form-row">
+              <label class="form-group flex-1">طريقة ترقيم الطلبات
+                <select class="form-control" [(ngModel)]="layoutOptions.orderNumberMode">
+                  <option [ngValue]="null">الترقيم اليومي الحالي</option>
+                  <option value="random">رمز عشوائي (حروف وأرقام)</option>
+                  <option value="continuous">تسلسل مستمر</option>
+                  <option value="daily">تسلسل يومي</option>
+                  <option value="weekly">تسلسل أسبوعي</option>
+                  <option value="monthly">تسلسل شهري</option>
+                </select>
+              </label>
+              @if (layoutOptions.orderNumberMode && layoutOptions.orderNumberMode !== 'random') {
+                <label class="form-group flex-1">بداية التسلسل<input class="form-control" type="number" min="1" max="999999999" step="1" [ngModel]="layoutOptions.orderNumberStart ?? 400" (ngModelChange)="layoutOptions.orderNumberStart = $event ?? 400"></label>
+              }
+            </div>
+            <p class="text-muted small mb-0 mt-2">الترقيم الدوري يضيف تاريخ الفترة إلى الرقم. يبدأ الأسبوع يوم الاثنين. يسري الإعداد على الطلبات الجديدة.</p>
+          </details>
+
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-magic text-primary me-2"></i> 3. قوالب الإعداد السريع حسب النشاط <small>ملابس أو سوبر ماركت</small></summary>
+            <p class="text-muted small mb-3">القالب يجهّز نوع النشاط وطريقة عرض المنتج والكروت للمراجعة قبل الحفظ.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+              <button type="button" class="btn-outline" (click)="applyStorePreset('clothing')">قالب الملابس</button>
+              <button type="button" class="btn-outline" (click)="applyStorePreset('supermarket')">قالب السوبر ماركت</button>
+            </div>
+            <ol class="small text-muted mb-0">
+              <li>اضبط اسم المتجر واللوجو من «الهوية والتصميم».</li>
+              <li><a routerLink="../catalog" queryParamsHandling="preserve">جهّز المنتجات</a> مع الألوان والمقاسات للملابس، أو سعر القطعة والوزن للسوبر ماركت.</li>
+              <li><a routerLink="../delivery-zones" queryParamsHandling="preserve">اضبط تغطية الشحن والرسوم</a> ثم راجع طرق الاستلام والدفع.</li>
+            </ol>
+          </details>
+        }
+
+        <!-- Separate Save Button for Policies / Cart / Checkout / Account -->
+        <div class="tab-save-footer mt-3 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-check-circle-fill text-success me-1"></i>
+            اضغط حفظ لتطبيق الإعدادات على المتجر فوراً.
+          </div>
           <button class="btn-primary" (click)="saveSettings('policies')" [disabled]="isSaving() || isUploading()">
             @if (isSaving()) {
               <i class="bi bi-hourglass-split me-1"></i> جاري الحفظ...
@@ -1388,13 +1464,14 @@
     }
 
     @if (activeTab() === 'domain') {
-      <section class="settings-card domain-settings">
-          <h3 class="card-title"><i class="bi bi-globe2 text-primary me-2"></i> ربط دومين المتجر المخصص (Custom Domain)</h3>
+      <div class="tab-content animate-fade-in">
+        <!-- 1. Dual Active Links Card -->
+        <details class="settings-card settings-disclosure domain-settings">
+          <summary><i class="bi bi-link-45deg text-primary me-2"></i> 1. روابط المتجر الفعّالة وحالة الاتصال <small>{{ customDomain() || defaultStoreUrl }}</small></summary>
           <p class="text-muted small mb-3">
-            ربط دومين مدفوع خاص بمتجرك (مثل <code>{{ effectiveDomain || 'gandovly.com' }}</code>). يعمل الدومين المخصص ورابط مي كارت الأساسي معاً في نفس الوقت بتزامن كامل ودون أي تعارض.
+            يعمل الدومين المخصص ورابط مي كارت الأساسي معاً في نفس الوقت بتزامن كامل ودون أي تعارض.
           </p>
 
-          <!-- Dual Active Links Card -->
           <div class="dual-urls-card">
             <div class="dual-urls-header">
               <i class="bi bi-link-45deg text-primary fs-5"></i>
@@ -1468,8 +1545,11 @@
               <span>يتم استقبال كافة الزيارات والطلبات عبر كلا الرابطين معاً دون الحاجة للاختيار بينهما.</span>
             </div>
           </div>
+        </details>
 
-          <!-- Dynamic Hostinger DNS Records Card -->
+        <!-- 2. Dynamic Hostinger DNS Records Card -->
+        <details class="settings-card settings-disclosure domain-settings">
+          <summary><i class="bi bi-globe2 text-primary me-2"></i> 2. ربط الدومين المخصص وسجلات DNS (Hostinger) <small>إعداد A Record و CNAME</small></summary>
           <div class="hostinger-records-card">
             <div class="records-card-header">
               <h4>
@@ -1607,174 +1687,133 @@
               </p>
             </div>
           </div>
-      </section>
+        </details>
+      </div>
     }
 
     <!-- TAB 4: Business Info & Contacts -->
     @if (activeTab() === 'info') {
       <div class="tab-content animate-fade-in">
-        <details class="settings-card settings-disclosure"><summary>نشاط المتجر</summary>
-          <h3 class="card-title">تخصص ونشاط المتجر الأساسي</h3>
-          <p class="text-muted small mb-2">يحدد التبويبات المتاحة في صفحة تشغيل النشاط، والخصائص ونمط التشغيل المقترح تلقائيًا للمنتجات الجديدة.</p>
-          <select class="form-control mb-2" [(ngModel)]="settings()!.activityPreset">
-            <option value="all">متجر شامل — يضم كافة المجالات والخيارات (افتراضي)</option>
-            <option value="">حسب المجال الأساسي للمتجر</option>
-            @for(preset of activityPresets;track preset.id){
-              <option [value]="preset.id">{{preset.name}}</option>
-            }
-          </select>
-          <p class="small text-muted mb-4">اختيار "متجر شامل" يتيح لك كافة الأدوات والخصائص بدون أي قيود.</p>
+        <!-- 1. Basic Institution Info -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-shop text-primary me-2"></i> 1. بيانات المؤسسة الأساسية <small>{{ settings()!.restaurantName || 'اسم المتجر ووصفه' }}</small></summary>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setRestName"><i class="bi bi-translate text-primary me-1"></i> اسم المؤسسة / المتجر (بالعربية) *</label>
+              <input id="setRestName" type="text" class="form-control" [(ngModel)]="settings()!.restaurantName" placeholder="مثال: متجر السعادة" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="setRestNameEn"><i class="bi bi-globe text-primary me-1"></i> اسم المتجر (English)</label>
+              <input id="setRestNameEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Happiness Store" [(ngModel)]="layoutOptions.restaurantNameEn" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setTagline">الشعار اللفظي (بالعربية)</label>
+              <input id="setTagline" type="text" class="form-control" placeholder="مثال: تسوق أفضل المنتجات بأعلى جودة" [(ngModel)]="settings()!.tagline" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="setTaglineEn">الشعار اللفظي (English)</label>
+              <input id="setTaglineEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Best products, highest quality" [(ngModel)]="layoutOptions.taglineEn" />
+            </div>
+          </div>
+
+          <div class="form-row mb-0">
+            <div class="form-group flex-1">
+              <label for="setDesc">وصف تعريفي للمؤسسة (بالعربية)</label>
+              <textarea id="setDesc" class="form-control" rows="3" placeholder="منصة تجارة شاملة ومتكاملة تقدم أفضل المنتجات..." [(ngModel)]="settings()!.description"></textarea>
+            </div>
+            <div class="form-group flex-1">
+              <label for="setDescEn">وصف تعريفي (English)</label>
+              <textarea id="setDescEn" dir="ltr" class="form-control" rows="3" placeholder="A comprehensive e-commerce platform..." [(ngModel)]="layoutOptions.descriptionEn"></textarea>
+            </div>
+          </div>
         </details>
-        <div class="row g-4">
-          <div class="col-12 col-lg-6">
 
-        <details class="settings-card glass-panel h-100 settings-disclosure" open>
-              <summary>بيانات المؤسسة الأساسية <small>اسم المتجر ووصفه</small></summary>
+        <!-- 2. Contact & Address -->
+        <details class="settings-card contact-settings-card settings-disclosure">
+          <summary><i class="bi bi-telephone-inbound text-primary me-2"></i> 2. وسائل الاتصال والعنوان <small>الهاتف، واتساب، المدينة والعنوان</small></summary>
 
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="setRestName"><i class="bi bi-translate text-primary me-1"></i> اسم المؤسسة / المتجر (بالعربية) *</label>
-                  <input id="setRestName" type="text" class="form-control" [(ngModel)]="settings()!.restaurantName" placeholder="مثال: متجر السعادة" />
-                </div>
-                <div class="form-group flex-1">
-                  <label for="setRestNameEn"><i class="bi bi-globe text-primary me-1"></i> اسم المتجر (English)</label>
-                  <input id="setRestNameEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Happiness Store" [(ngModel)]="layoutOptions.restaurantNameEn" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="setTagline">الشعار اللفظي (بالعربية)</label>
-                  <input id="setTagline" type="text" class="form-control" placeholder="مثال: تسوق أفضل المنتجات بأعلى جودة" [(ngModel)]="settings()!.tagline" />
-                </div>
-                <div class="form-group flex-1">
-                  <label for="setTaglineEn">الشعار اللفظي (English)</label>
-                  <input id="setTaglineEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Best products, highest quality" [(ngModel)]="layoutOptions.taglineEn" />
-                </div>
-              </div>
-
-              <div class="form-row mb-0">
-                <div class="form-group flex-1">
-                  <label for="setDesc">وصف تعريفي للمؤسسة (بالعربية)</label>
-                  <textarea id="setDesc" class="form-control" rows="3" placeholder="منصة تجارة شاملة ومتكاملة تقدم أفضل المنتجات..." [(ngModel)]="settings()!.description"></textarea>
-                </div>
-                <div class="form-group flex-1">
-                  <label for="setDescEn">وصف تعريفي (English)</label>
-                  <textarea id="setDescEn" dir="ltr" class="form-control" rows="3" placeholder="A comprehensive e-commerce platform..." [(ngModel)]="layoutOptions.descriptionEn"></textarea>
-                </div>
-              </div>
-            </details>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <details class="settings-card glass-panel h-100 contact-settings-card settings-disclosure" open>
-              <summary>وسائل الاتصال والعنوان <small>الهاتف والبريد والموقع</small></summary>
-
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="setPhone">رقم الهاتف للاتصال *</label>
-                  <app-phone-input inputId="setPhone" [(ngModel)]="settings()!.phone"></app-phone-input>
-                </div>
-                <div class="form-group flex-1">
-                  <label for="setWa">رقم واتساب للطلبات *</label>
-                  <app-phone-input inputId="setWa" [(ngModel)]="settings()!.whatsapp"></app-phone-input>
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="setCity">المدينة / المحافظة (بالعربية) *</label>
-                  <input id="setCity" type="text" class="form-control" [(ngModel)]="settings()!.city" />
-                </div>
-                <div class="form-group flex-1">
-                  <label for="setCityEn">City (English)</label>
-                  <input id="setCityEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Cairo" [(ngModel)]="layoutOptions.cityEn" />
-                </div>
-              </div>
-
-              <div class="form-row">
-                <div class="form-group flex-1">
-                  <label for="setAddr">العنوان بالتفصيل (بالعربية) *</label>
-                  <input id="setAddr" type="text" class="form-control" [(ngModel)]="settings()!.address" />
-                </div>
-                <div class="form-group flex-1">
-                  <label for="setAddrEn">Address (English)</label>
-                  <input id="setAddrEn" type="text" dir="ltr" class="form-control" placeholder="e.g. 123 Main St" [(ngModel)]="layoutOptions.addressEn" />
-                </div>
-              </div>
-            </details>
-          </div>
-
-
-
-          <!-- Social Media & Location Links Full Width Card -->
-          <details class="settings-card settings-disclosure" open><summary>روابط التواصل وموقع المتجر</summary>
-          <div class="col-12 mt-2">
-            <div class="settings-card glass-panel">
-              <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom flex-wrap gap-2">
-                <div>
-                  <h3 class="card-title text-primary m-0 border-0 p-0">
-                    <i class="bi bi-share-fill me-2"></i> حسابات التواصل الاجتماعي وروابط المتجر الرسمية 🌐
-                  </h3>
-                  <p class="card-subtitle text-muted small mt-1 mb-0">روابط المنصات والحسابات الاجتماعية وموقع المتجر على خرائط جوجل</p>
-                </div>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5">
-                  <i class="bi bi-link-45deg me-1"></i> روابط المنصات
-                </span>
-              </div>
-
-              <div class="settings-form-grid">
-                <div class="form-group">
-                  <label for="setFb" class="form-label fw-bold"><i class="bi bi-facebook text-primary me-1"></i> فيسبوك (Facebook):</label>
-                  <input id="setFb" type="url" class="form-control" placeholder="https://facebook.com/..." [(ngModel)]="settings()!.facebookUrl" />
-                </div>
-                <div class="form-group">
-                  <label for="setInsta" class="form-label fw-bold"><i class="bi bi-instagram text-danger me-1"></i> إنستغرام (Instagram):</label>
-                  <input id="setInsta" type="url" class="form-control" placeholder="https://instagram.com/..." [(ngModel)]="settings()!.instagramUrl" />
-                </div>
-                <div class="form-group">
-                  <label for="setTiktok" class="form-label fw-bold"><i class="bi bi-tiktok text-dark me-1"></i> تيك توك (TikTok):</label>
-                  <input id="setTiktok" type="url" class="form-control" placeholder="https://tiktok.com/@..." [(ngModel)]="settings()!.tikTokUrl" />
-                </div>
-                <div class="form-group">
-                  <label for="setYt" class="form-label fw-bold"><i class="bi bi-youtube text-danger me-1"></i> يوتيوب (YouTube):</label>
-                  <input id="setYt" type="url" class="form-control" placeholder="https://youtube.com/@..." [(ngModel)]="settings()!.youTubeUrl" />
-                </div>
-                <div class="form-group">
-                  <label for="setTw" class="form-label fw-bold"><i class="bi bi-twitter-x text-dark me-1"></i> منصة إكس / تويتر (X):</label>
-                  <input id="setTw" type="url" class="form-control" placeholder="https://x.com/..." [(ngModel)]="settings()!.twitterUrl" />
-                </div>
-                <div class="form-group">
-                  <label for="setSnap" class="form-label fw-bold"><i class="bi bi-snapchat text-warning me-1"></i> سناب شات (Snapchat):</label>
-                  <input id="setSnap" type="url" class="form-control" placeholder="https://snapchat.com/add/..." [(ngModel)]="settings()!.snapchatUrl" />
-                </div>
-                <div class="form-group col-span-full">
-                  <label for="setLoc" class="form-label fw-bold"><i class="bi bi-geo-alt-fill text-danger me-1"></i> رابط الموقع على خرائط جوجل (Google Maps Location):</label>
-                  <input id="setLoc" type="url" class="form-control" placeholder="https://maps.google.com/?q=..." [(ngModel)]="settings()!.locationUrl" />
-                </div>
-              </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setPhone">رقم الهاتف للاتصال *</label>
+              <app-phone-input inputId="setPhone" [(ngModel)]="settings()!.phone"></app-phone-input>
+            </div>
+            <div class="form-group flex-1">
+              <label for="setWa">رقم واتساب للطلبات *</label>
+              <app-phone-input inputId="setWa" [(ngModel)]="settings()!.whatsapp"></app-phone-input>
             </div>
           </div>
-          </details>
 
-        </div>
-
-        <!-- Country, Localization & Currency Engine -->
-        <div class="settings-card glass-panel mt-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h3 class="card-title text-primary m-0">
-                <i class="bi bi-globe-americas me-2"></i> الدولة، العملة والنطاق الزمني للمتجر 🌍
-              </h3>
-              <p class="card-subtitle text-muted small mt-1">تحديد بلد المتجر، العملة الرسمية المعتمدة، كود الدولة للهواتف، والتوقيت المحلي</p>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setCity">المدينة / المحافظة (بالعربية) *</label>
+              <input id="setCity" type="text" class="form-control" [(ngModel)]="settings()!.city" />
             </div>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
-              <i class="bi bi-cash-coin me-1"></i> محرك التدويل
-            </span>
+            <div class="form-group flex-1">
+              <label for="setCityEn">City (English)</label>
+              <input id="setCityEn" type="text" dir="ltr" class="form-control" placeholder="e.g. Cairo" [(ngModel)]="layoutOptions.cityEn" />
+            </div>
           </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="setAddr">العنوان بالتفصيل (بالعربية) *</label>
+              <input id="setAddr" type="text" class="form-control" [(ngModel)]="settings()!.address" />
+            </div>
+            <div class="form-group flex-1">
+              <label for="setAddrEn">Address (English)</label>
+              <input id="setAddrEn" type="text" dir="ltr" class="form-control" placeholder="e.g. 123 Main St" [(ngModel)]="layoutOptions.addressEn" />
+            </div>
+          </div>
+        </details>
+
+        <!-- 3. Social Media & Location Links -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-share-fill text-primary me-2"></i> 3. حسابات التواصل الاجتماعي وموقع المتجر <small>فيسبوك، إنستغرام، تيك توك، الخريطة</small></summary>
+          <p class="card-subtitle text-muted small mb-2">روابط المنصات والحسابات الاجتماعية وموقع المتجر على خرائط جوجل</p>
+
+          <div class="settings-form-grid">
+            <div class="form-group">
+              <label for="setFb" class="form-label fw-bold"><i class="bi bi-facebook text-primary me-1"></i> فيسبوك (Facebook):</label>
+              <input id="setFb" type="url" class="form-control" placeholder="https://facebook.com/..." [(ngModel)]="settings()!.facebookUrl" />
+            </div>
+            <div class="form-group">
+              <label for="setInsta" class="form-label fw-bold"><i class="bi bi-instagram text-danger me-1"></i> إنستغرام (Instagram):</label>
+              <input id="setInsta" type="url" class="form-control" placeholder="https://instagram.com/..." [(ngModel)]="settings()!.instagramUrl" />
+            </div>
+            <div class="form-group">
+              <label for="setTiktok" class="form-label fw-bold"><i class="bi bi-tiktok text-dark me-1"></i> تيك توك (TikTok):</label>
+              <input id="setTiktok" type="url" class="form-control" placeholder="https://tiktok.com/@..." [(ngModel)]="settings()!.tikTokUrl" />
+            </div>
+            <div class="form-group">
+              <label for="setYt" class="form-label fw-bold"><i class="bi bi-youtube text-danger me-1"></i> يوتيوب (YouTube):</label>
+              <input id="setYt" type="url" class="form-control" placeholder="https://youtube.com/@..." [(ngModel)]="settings()!.youTubeUrl" />
+            </div>
+            <div class="form-group">
+              <label for="setTw" class="form-label fw-bold"><i class="bi bi-twitter-x text-dark me-1"></i> منصة إكس / تويتر (X):</label>
+              <input id="setTw" type="url" class="form-control" placeholder="https://x.com/..." [(ngModel)]="settings()!.twitterUrl" />
+            </div>
+            <div class="form-group">
+              <label for="setSnap" class="form-label fw-bold"><i class="bi bi-snapchat text-warning me-1"></i> سناب شات (Snapchat):</label>
+              <input id="setSnap" type="url" class="form-control" placeholder="https://snapchat.com/add/..." [(ngModel)]="settings()!.snapchatUrl" />
+            </div>
+            <div class="form-group col-span-full">
+              <label for="setLoc" class="form-label fw-bold"><i class="bi bi-geo-alt-fill text-danger me-1"></i> رابط الموقع على خرائط جوجل (Google Maps Location):</label>
+              <input id="setLoc" type="url" class="form-control" placeholder="https://maps.google.com/?q=..." [(ngModel)]="settings()!.locationUrl" />
+            </div>
+          </div>
+        </details>
+
+        <!-- 4. Country, Localization & Currency Engine -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-globe-americas text-primary me-2"></i> 4. الدولة، العملة والنطاق الزمني للمتجر <small>{{ settings()!.countryCode || 'EG' }} — {{ settings()!.currencySymbol || 'ج.م' }}</small></summary>
+          <p class="card-subtitle text-muted small mb-3">تحديد بلد المتجر، العملة الرسمية المعتمدة، كود الدولة للهواتف، والتوقيت المحلي</p>
 
           <!-- Quick Country Selector Buttons -->
-          <div class="country-presets-bar mb-4 p-3 rounded border" style="background: rgba(255, 255, 255, 0.7);">
+          <div class="country-presets-bar mb-3 p-3 rounded border bg-light">
             <label class="form-label fw-bold d-block mb-2">
               <i class="bi bi-lightning-charge-fill text-warning me-1"></i> اختيار سريع لدولة المتجر (يضبط العملة، كود الهاتف والتوقيت تلقائياً):
             </label>
@@ -1838,21 +1877,12 @@
               <small class="text-muted">تنسيق الأرقام والتواريخ</small>
             </div>
           </div>
-        </div>
+        </details>
 
-        <!-- Multi-Domain & Business Activities Configuration Card -->
-        <div class="settings-card glass-panel mt-4">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-              <h3 class="card-title text-primary m-0">
-                <i class="bi bi-briefcase-fill me-2"></i> إعدادات نوع النشاط والمجال التجاري والعملة
-              </h3>
-              <p class="card-subtitle text-muted small mt-1">تحديد نوع النشاط الأساسي للمتجر، تفعيل التعدد في الأنشطة، والعملة المعتمدة</p>
-            </div>
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
-              <i class="bi bi-gear-fill me-1"></i> إعدادات الأنشطة
-            </span>
-          </div>
+        <!-- 5. Multi-Domain & Business Activities Configuration Card -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-briefcase-fill text-primary me-2"></i> 5. إعدادات نوع النشاط والمجال التجاري <small>تخصص المتجر وتعدد الأنشطة</small></summary>
+          <p class="card-subtitle text-muted small mb-3">تحديد نوع النشاط الأساسي للمتجر، تفعيل التعدد في الأنشطة، والعملة المعتمدة</p>
 
           <div class="form-row">
             <div class="form-group flex-1">
@@ -1866,8 +1896,8 @@
             </div>
 
             <div class="form-group flex-1">
-              <label for="setCurrSym"><i class="bi bi-cash me-1 text-success"></i> رمز العملة المعروضة (Currency Symbol):</label>
-              <input id="setCurrSym" type="text" class="form-control fw-bold" placeholder="مثال: ج.م أو ر.س أو $" [(ngModel)]="settings()!.currencySymbol" />
+              <label for="setCurrSym2"><i class="bi bi-cash me-1 text-success"></i> رمز العملة المعروضة (Currency Symbol):</label>
+              <input id="setCurrSym2" type="text" class="form-control fw-bold" placeholder="مثال: ج.م أو ر.س أو $" [(ngModel)]="settings()!.currencySymbol" />
               <small class="text-muted">الرمز الذي يظهر بجانب جميع أسعار المنتجات والفواتير وسلة الشراء.</small>
             </div>
           </div>
@@ -1888,10 +1918,24 @@
               <small class="text-muted">عند التفعيل، يمكن للمتجر استضافة أقسام من مجالات مختلفة في نفس الوقت.</small>
             </div>
           </div>
-        </div>
+        </details>
+
+        <!-- 6. Activity Preset -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-sliders text-primary me-2"></i> 6. تخصص ونشاط المتجر الأساسي (Activity Preset) <small>{{ settings()!.activityPreset === 'all' || !settings()!.activityPreset ? 'متجر شامل' : settings()!.activityPreset }}</small></summary>
+          <p class="text-muted small mb-2">يحدد التبويبات المتاحة في صفحة تشغيل النشاط، والخصائص ونمط التشغيل المقترح تلقائيًا للمنتجات الجديدة.</p>
+          <select class="form-control mb-2" [(ngModel)]="settings()!.activityPreset">
+            <option value="all">متجر شامل — يضم كافة المجالات والخيارات (افتراضي)</option>
+            <option value="">حسب المجال الأساسي للمتجر</option>
+            @for(preset of activityPresets;track preset.id){
+              <option [value]="preset.id">{{preset.name}}</option>
+            }
+          </select>
+          <p class="small text-muted mb-0">اختيار "متجر شامل" يتيح لك كافة الأدوات والخصائص بدون أي قيود.</p>
+        </details>
 
         <!-- Separate Save Button for Info -->
-        <div class="tab-save-footer mt-4 flex-between">
+        <div class="tab-save-footer mt-3 flex-between">
           <div class="save-hint text-muted small">
             <i class="bi bi-info-circle me-1"></i> تظهر بيانات الاتصال في تذييل الموقع وفي إشعارات واتساب للعملاء.
           </div>
@@ -1908,15 +1952,13 @@
 
     <!-- TAB 5: Mecart Store Packages & Seed Engine -->
     @if (activeTab() === 'packages') {
-      <div class="settings-tab-pane animate-fade-in">
-
-        <div class="card p-4 mb-4 border-0 shadow-sm" style="border-radius: 16px; background: #fff;">
-          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="tab-content animate-fade-in">
+        <!-- 1. Live Store Statistics & Guide -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-bar-chart-fill text-primary me-2"></i> 1. ملخص وإحصائيات بيانات المتجر وإرشادات التجهيز <small>v1.3.0 التحديث الشامل</small></summary>
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3 p-3 border rounded-3 bg-light">
             <div>
-              <div class="d-flex align-items-center gap-2 mb-1">
-                <h3 class="fw-bold mb-0" style="color: #0F172A;">نسخ وإدارة بيانات المتجر (Store Packages)</h3>
-                <span class="badge bg-primary-subtle text-primary fw-bold px-2 py-1" style="font-size: 0.8rem;">v1.3.0 التحديث الشامل</span>
-              </div>
+              <h5 class="fw-bold mb-1" style="color: #0F172A;">نسخ وإدارة بيانات المتجر (Store Packages)</h5>
               <p class="text-muted small mb-0">تصدير نسخة احتياطية أو قالب متكامل يشمل المنتجات والأقسام، الـ 16 نوع سكشن للرئيسية، بانرات القوالب المستقلة، إعدادات ضغط الصور وزر الشراء، أو استيراد حزمة إلى متجر فارغ أو مزامنتها مع المتجر الحالي.</p>
             </div>
             <div>
@@ -1925,160 +1967,125 @@
               </a>
             </div>
           </div>
-        </div>
 
-        <!-- Live Store Statistics Cards -->
-        @if (packageStats()) {
-          <div class="row g-3 mb-4">
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-bag-check-fill text-success" style="font-size: 1.6rem;"></i>
-                <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().productsCount }}</div>
-                <div class="text-muted small">إجمالي المنتجات</div>
-              </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-grid-fill text-primary" style="font-size: 1.6rem;"></i>
-                <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().categoriesCount }}</div>
-                <div class="text-muted small">أقسام المتجر</div>
-              </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-geo-alt-fill text-warning" style="font-size: 1.6rem;"></i>
-                <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().zonesCount }}</div>
-                <div class="text-muted small">مناطق التوصيل @if (packageStats().branchesCount) { ({{ packageStats().branchesCount }} فرع) }</div>
-              </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-images text-danger" style="font-size: 1.6rem;"></i>
-                <div class="fw-bold fs-5 mt-1" style="color: #0F172A;">{{ packageStats().uploadsFilesCount }}</div>
-                <div class="text-muted small">{{ packageStats().uploadsSizeMb }} MB وسائط</div>
-              </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-layout-text-window-reverse text-info" style="font-size: 1.6rem;"></i>
-                <div class="fw-bold fs-5 mt-1" style="color: #0F172A;">{{ packageStats().sectionsCount ?? layoutOptions.sections.length }} سكشن</div>
-                <div class="text-muted small">القالب: {{ getThemeLabel(packageStats().homeTheme || layoutOptions.homeTheme) }}</div>
-              </div>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-              <div class="card p-3 text-center border-0 shadow-sm h-100" style="border-radius: 12px; background: #fff;">
-                <i class="bi bi-lightning-charge-fill text-warning" style="font-size: 1.6rem;"></i>
-                <div class="fw-bold fs-6 mt-1" style="color: #0F172A;">{{ (packageStats().enableImageCompression ?? layoutOptions.enableImageCompression) !== false ? (packageStats().maxImageCompressionKb || layoutOptions.maxImageCompressionKb || 150) + ' KB' : 'بدون ضغط' }}</div>
-                <div class="text-muted small">شراء الآن: {{ (packageStats().enableBuyNow ?? settings()?.enableBuyNow) ? 'مفعّل' : 'معطّل' }}</div>
-              </div>
-            </div>
-          </div>
-        }
-
-        <!-- Actions Grid: Export vs Import -->
-        <div class="row g-4">
-
-          <!-- Column 1: Export Package -->
-          <div class="col-12 col-lg-6">
-            <div class="card p-4 h-100 shadow-sm" style="border-radius: 16px; border: 1px solid #E2E8F0;">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: #EFF6FF; color: #2563EB; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                  <i class="bi bi-cloud-arrow-down-fill"></i>
-                </div>
-                <div>
-                  <h4 class="fw-bold mb-0" style="color: #1E293B;">تصدير حزمة المتجر (Export Package)</h4>
-                  <small class="text-muted">تنزيل نسخة احتياطية أو قالب جاهز للاستخدام الفوري (v1.3.0)</small>
+          @if (packageStats()) {
+            <div class="row g-3">
+              <div class="col-6 col-md-4 col-lg-2">
+                <div class="card p-3 text-center border shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                  <i class="bi bi-bag-check-fill text-success" style="font-size: 1.6rem;"></i>
+                  <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().productsCount }}</div>
+                  <div class="text-muted small">إجمالي المنتجات</div>
                 </div>
               </div>
-
-              <p class="text-muted small mb-3">
-                يقوم النظام بتجميع كافة المنتجات، الأقسام، خيارات التجهيز، مناطق التوصيل، الإعدادات والهوية البصرية مع مجلد الصور المنظم، ويخرجها في ملف ZIP مضغوط متوافق مع كافة الإصدارات.
-              </p>
-
-              <div class="bg-light p-3 rounded-3 mb-4 small">
-                <div class="fw-bold text-dark mb-2"><i class="bi bi-check2-circle text-success me-1"></i> تتضمن الحزمة المُصدّرة:</div>
-                <ul class="mb-0 ps-3 text-muted" style="line-height: 1.8;">
-                  <li>كافة الكتالوجات (المنتجات، الأقسام، المتغيرات، خيارات التجهيز، مناطق التوصيل، الفروع).</li>
-                  <li>القالب المختار وبانرات كل قالب المستقلة (Theme Banners) المعدة في <code>storeLayout</code>.</li>
-                  <li>جميع سكاشن الرئيسية (16 نوعاً: سلايدر الهيرو، كاروسيل المنتجات، آراء العملاء، شبكة الأقسام، العداد التنازلي...).</li>
-                  <li>إعدادات ضغط الصور وتحسين الأداء وزر الشراء السريع وكافة ألوان وهويات المتجر.</li>
-                  <li>ملفات الوسائط والصور المرفوعة مضغوطة ومنظمة مع ملف التعريف <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>.</li>
-                </ul>
+              <div class="col-6 col-md-4 col-lg-2">
+                <div class="card p-3 text-center border shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                  <i class="bi bi-grid-fill text-primary" style="font-size: 1.6rem;"></i>
+                  <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().categoriesCount }}</div>
+                  <div class="text-muted small">أقسام المتجر</div>
+                </div>
               </div>
-
-              <div class="mt-auto">
-                <button
-                  type="button"
-                  class="btn w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center"
-                  style="background: #10B981; color: #fff; border-radius: 12px; font-size: 1.05rem;"
-                  (click)="onExportPackage()"
-                  [disabled]="isExporting()"
-                >
-                  @if (isExporting()) {
-                    <i class="bi bi-hourglass-split me-2 animate-spin"></i> جاري تحزيم ملفات المتجر والوسائط...
-                  } @else {
-                    <i class="bi bi-download me-2"></i> تنزيل حزمة المتجر الكاملة (.ZIP)
-                  }
-                </button>
+              <div class="col-6 col-md-4 col-lg-2">
+                <div class="card p-3 text-center border shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                  <i class="bi bi-geo-alt-fill text-warning" style="font-size: 1.6rem;"></i>
+                  <div class="fw-bold fs-4 mt-1" style="color: #0F172A;">{{ packageStats().zonesCount }}</div>
+                  <div class="text-muted small">مناطق التوصيل @if (packageStats().branchesCount) { ({{ packageStats().branchesCount }} فرع) }</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-2">
+                <div class="card p-3 text-center border shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                  <i class="bi bi-images text-danger" style="font-size: 1.6rem;"></i>
+                  <div class="fw-bold fs-5 mt-1" style="color: #0F172A;">{{ packageStats().uploadsFilesCount }}</div>
+                  <div class="text-muted small">{{ packageStats().uploadsSizeMb }} MB وسائط</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-2">
+                <div class="card p-3 text-center border shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                  <i class="bi bi-layout-text-window-reverse text-info" style="font-size: 1.6rem;"></i>
+                  <div class="fw-bold fs-5 mt-1" style="color: #0F172A;">{{ packageStats().sectionsCount ?? layoutOptions.sections.length }} سكشن</div>
+                  <div class="text-muted small">القالب: {{ getThemeLabel(packageStats().homeTheme || layoutOptions.homeTheme) }}</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-2">
+                <div class="card p-3 text-center border shadow-sm h-100" style="border-radius: 12px; background: #fff;">
+                  <i class="bi bi-lightning-charge-fill text-warning" style="font-size: 1.6rem;"></i>
+                  <div class="fw-bold fs-6 mt-1" style="color: #0F172A;">{{ (packageStats().enableImageCompression ?? layoutOptions.enableImageCompression) !== false ? (packageStats().maxImageCompressionKb || layoutOptions.maxImageCompressionKb || 150) + ' KB' : 'بدون ضغط' }}</div>
+                  <div class="text-muted small">شراء الآن: {{ (packageStats().enableBuyNow ?? settings()?.enableBuyNow) ? 'مفعّل' : 'معطّل' }}</div>
+                </div>
               </div>
             </div>
+          }
+        </details>
+
+        <!-- 2. Export Package -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-cloud-arrow-down-fill text-success me-2"></i> 2. تصدير حزمة المتجر الكاملة (Export Package .ZIP) <small>تنزيل نسخة احتياطية شاملة</small></summary>
+          <p class="text-muted small mb-3">
+            يقوم النظام بتجميع كافة المنتجات، الأقسام، خيارات التجهيز، مناطق التوصيل، الإعدادات والهوية البصرية مع مجلد الصور المنظم، ويخرجها في ملف ZIP مضغوط متوافق مع كافة الإصدارات.
+          </p>
+
+          <div class="bg-light p-3 rounded-3 mb-3 small">
+            <div class="fw-bold text-dark mb-2"><i class="bi bi-check2-circle text-success me-1"></i> تتضمن الحزمة المُصدّرة:</div>
+            <ul class="mb-0 ps-3 text-muted" style="line-height: 1.8;">
+              <li>كافة الكتالوجات (المنتجات، الأقسام، المتغيرات، خيارات التجهيز، مناطق التوصيل، الفروع).</li>
+              <li>القالب المختار وبانرات كل قالب المستقلة (Theme Banners) المعدة في <code>storeLayout</code>.</li>
+              <li>جميع سكاشن الرئيسية (16 نوعاً: سلايدر الهيرو، كاروسيل المنتجات، آراء العملاء، شبكة الأقسام، العداد التنازلي...).</li>
+              <li>إعدادات ضغط الصور وتحسين الأداء وزر الشراء السريع وكافة ألوان وهويات المتجر.</li>
+              <li>ملفات الوسائط والصور المرفوعة مضغوطة ومنظمة مع ملف التعريف <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>.</li>
+            </ul>
           </div>
 
-          <!-- Column 2: Import & Seed Package -->
-          <div class="col-12 col-lg-6">
-            <div class="card p-4 h-100 shadow-sm" style="border-radius: 16px; border: 1px solid #E2E8F0;">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <div style="width: 48px; height: 48px; border-radius: 12px; background: #FDF2F8; color: #DB2777; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-                  <i class="bi bi-cloud-arrow-up-fill"></i>
-                </div>
-                <div>
-                  <h4 class="fw-bold mb-0" style="color: #1E293B;">استيراد بيانات المتجر (Import & Seed)</h4>
-                  <small class="text-muted">زرع وتثبيت بيانات وصور متجر جديد أو مزامنة متجر حالي</small>
-                </div>
-              </div>
+          <button
+            type="button"
+            class="btn w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center"
+            style="background: #10B981; color: #fff; border-radius: 12px; font-size: 1.05rem;"
+            (click)="onExportPackage()"
+            [disabled]="isExporting()"
+          >
+            @if (isExporting()) {
+              <i class="bi bi-hourglass-split me-2 animate-spin"></i> جاري تحزيم ملفات المتجر والوسائط...
+            } @else {
+              <i class="bi bi-download me-2"></i> تنزيل حزمة المتجر الكاملة (.ZIP)
+            }
+          </button>
+        </details>
 
-              <p class="text-muted small mb-3">
-                ارفع ملف حزمة المتجر بصيغة <code>.zip</code> لاستيراد المنتجات والأقسام والصور والسكاشن تلقائيًا.
-              </p>
+        <!-- 3. Import & Seed Package -->
+        <details class="settings-card settings-disclosure">
+          <summary><i class="bi bi-cloud-arrow-up-fill text-primary me-2"></i> 3. استيراد وزرع بيانات المتجر (Import & Seed .ZIP) <small>استيراد حزمة أو مزامنة المتجر</small></summary>
+          <p class="text-muted small mb-3">
+            ارفع ملف حزمة المتجر بصيغة <code>.zip</code> لاستيراد المنتجات والأقسام والصور والسكاشن تلقائيًا.
+          </p>
 
-              <div class="bg-light p-3 rounded-3 mb-4 small">
-                <div class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-primary me-1"></i> مميزات وآليات الاستيراد الذكي:</div>
-                <ul class="mb-0 ps-3 text-muted" style="line-height: 1.8;">
-                  <li>يدعم حزم الإصدارات <code>1.0.0</code> و <code>1.1.0</code> و <code>1.2.0</code> و <code>1.3.0</code> الحديثة.</li>
-                  <li><strong>للمتجر الفارغ:</strong> زرع كامل للكتالوج والسكاشن وتوليد المعرفات ونقل الصور تلقائياً.</li>
-                  <li><strong>للمتجر القائم:</strong> دمج ومزامنة ذكية لتحديث الهوية والسكاشن والبانرات والترجمات الإنجليزية بدون حذف الطلبات التاريخية.</li>
-                  <li>إعادة توجيه الروابط وترقيم الأصناف والأقسام داخل السكاشن لضمان عمل كافة الأزرار بسلاسة.</li>
-                </ul>
-              </div>
-
-              <!-- Upload Input Button -->
-              <div class="mt-auto">
-                <label
-                  class="btn w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center cursor-pointer"
-                  style="background: #2563EB; color: #fff; border-radius: 12px; font-size: 1.05rem;"
-                  [class.disabled]="isImporting()"
-                >
-                  @if (isImporting()) {
-                    <i class="bi bi-hourglass-split me-2 animate-spin"></i> جاري استيراد الحزمة وتطبيقها...
-                  } @else {
-                    <i class="bi bi-file-earmark-zip me-2"></i> اختر ملف الحزمة (.ZIP) وابدأ الزرع
-                  }
-                  <input
-                    type="file"
-                    accept=".zip"
-                    class="d-none"
-                    (change)="onImportPackage($event)"
-                    [disabled]="isImporting()"
-                  />
-                </label>
-              </div>
-            </div>
+          <div class="bg-light p-3 rounded-3 mb-3 small">
+            <div class="fw-bold text-dark mb-2"><i class="bi bi-shield-check text-primary me-1"></i> مميزات وآليات الاستيراد الذكي:</div>
+            <ul class="mb-0 ps-3 text-muted" style="line-height: 1.8;">
+              <li>يدعم حزم الإصدارات <code>1.0.0</code> و <code>1.1.0</code> و <code>1.2.0</code> و <code>1.3.0</code> الحديثة.</li>
+              <li><strong>للمتجر الفارغ:</strong> زرع كامل للكتالوج والسكاشن وتوليد المعرفات ونقل الصور تلقائياً.</li>
+              <li><strong>للمتجر القائم:</strong> دمج ومزامنة ذكية لتحديث الهوية والسكاشن والبانرات والترجمات الإنجليزية بدون حذف الطلبات التاريخية.</li>
+              <li>إعادة توجيه الروابط وترقيم الأصناف والأقسام داخل السكاشن لضمان عمل كافة الأزرار بسلاسة.</li>
+            </ul>
           </div>
 
-        </div>
-
-        <p class="text-muted mt-4 small"><i class="bi bi-info-circle me-1"></i> لحماية بيانات المتجر، إعادة التهيئة المدمرة غير متاحة. الحزم تحافظ على أعلى معايير أمان البيانات وعزل المستأجرين (Tenant Isolation).</p>
-
+          <label
+            class="btn w-100 py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center cursor-pointer"
+            style="background: #2563EB; color: #fff; border-radius: 12px; font-size: 1.05rem;"
+            [class.disabled]="isImporting()"
+          >
+            @if (isImporting()) {
+              <i class="bi bi-hourglass-split me-2 animate-spin"></i> جاري استيراد الحزمة وتطبيقها...
+            } @else {
+              <i class="bi bi-file-earmark-zip me-2"></i> اختر ملف الحزمة (.ZIP) وابدأ الزرع
+            }
+            <input
+              type="file"
+              accept=".zip"
+              class="d-none"
+              (change)="onImportPackage($event)"
+              [disabled]="isImporting()"
+            />
+          </label>
+          <p class="text-muted mt-3 mb-0 small"><i class="bi bi-info-circle me-1"></i> لحماية بيانات المتجر، إعادة التهيئة المدمرة غير متاحة. الحزم تحافظ على أعلى معايير أمان البيانات وعزل المستأجرين (Tenant Isolation).</p>
+        </details>
       </div>
     }
 

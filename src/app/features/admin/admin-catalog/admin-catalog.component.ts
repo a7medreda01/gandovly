@@ -535,7 +535,10 @@ export class AdminCatalogComponent implements OnInit {
       }
     }
     this.productImages = imgs;
-    this.variantRows=JSON.parse(JSON.stringify(prod.variants||[]));
+    this.variantRows = JSON.parse(JSON.stringify(prod.variants || [])).map((v: any) => ({
+      ...v,
+      variantMode: v.color?.trim() && v.size?.trim() ? 'both' : (v.size?.trim() && !v.color?.trim() ? 'size' : 'color')
+    }));
 
     const cat = this.categories().find(c => c.id === prod.categoryId);
     const domain = prod.domain || cat?.domain || 'Supermarket';
@@ -861,11 +864,40 @@ export class AdminCatalogComponent implements OnInit {
 
   variantRows:any[]=[];
   editingProductVersion?:string;
-  addVariant(){this.variantRows.push({id:crypto.randomUUID(),color:'',colorId:crypto.randomUUID(),colorHex:'#171717',size:'',sku:'',price:null,stockQuantity:null,isAvailable:true,images:[]});}
+  addVariant(mode: 'size' | 'color' | 'both' = 'size') {
+    this.variantRows.push({
+      id: crypto.randomUUID(),
+      variantMode: mode,
+      color: '',
+      colorId: mode === 'size' ? 'size-only' : crypto.randomUUID(),
+      colorHex: mode === 'size' ? null : '#171717',
+      size: '',
+      sku: '',
+      price: null,
+      stockQuantity: null,
+      isAvailable: true,
+      images: []
+    });
+  }
+  setVariantMode(row: any, mode: 'size' | 'color' | 'both') {
+    row.variantMode = mode;
+    if (mode === 'size') {
+      row.color = '';
+      row.colorId = 'size-only';
+      row.colorHex = null;
+    } else if (mode === 'color') {
+      row.size = '';
+      if (!row.colorId || row.colorId === 'size-only') row.colorId = crypto.randomUUID();
+      if (!row.colorHex) row.colorHex = '#171717';
+    } else {
+      if (!row.colorId || row.colorId === 'size-only') row.colorId = crypto.randomUUID();
+      if (!row.colorHex) row.colorHex = '#171717';
+    }
+  }
   toggleVariantImage(row:any,url:string){row.images=row.images.includes(url)?row.images.filter((x:string)=>x!==url):[...row.images,url];this.syncVariantImages(row);}
-  syncVariantColor(row:any){const same=this.variantRows.find(v=>v!==row&&v.color.trim()===row.color.trim());if(same){row.colorId=same.colorId;row.colorHex=same.colorHex;}else row.colorId ||= crypto.randomUUID();}
-  updateVariantColor(row:any){row.colorId ||= crypto.randomUUID();for(const v of this.variantRows)if(v===row||(v.colorId&&v.colorId===row.colorId)||v.color.trim()===row.color.trim()){v.colorId=row.colorId;v.colorHex=row.colorHex;v.color=row.color;}}
-  syncVariantImages(row:any){for(const v of this.variantRows)if(v.color.trim()===row.color.trim())v.images=[...row.images];}
+  syncVariantColor(row:any){if(!row.color?.trim()){row.colorId='size-only';row.colorHex=null;return;}const same=this.variantRows.find(v=>v!==row&&v.color?.trim()===row.color.trim());if(same){row.colorId=same.colorId;row.colorHex=same.colorHex;}else if(!row.colorId||row.colorId==='size-only')row.colorId=crypto.randomUUID();}
+  updateVariantColor(row:any){if(!row.color?.trim())return;if(!row.colorId||row.colorId==='size-only')row.colorId=crypto.randomUUID();for(const v of this.variantRows)if(v===row||(v.colorId&&v.colorId!=='size-only'&&v.colorId===row.colorId)||(v.color?.trim()&&v.color.trim()===row.color.trim())){v.colorId=row.colorId;v.colorHex=row.colorHex;v.color=row.color;}}
+  syncVariantImages(row:any){if(!row.color?.trim())return;for(const v of this.variantRows)if(v.color?.trim()===row.color.trim())v.images=[...row.images];}
   saveProduct() {
     if (!this.productForm.nameAr.trim()) {
       this.toast.error('يرجى إدخال اسم الصنف باللغة العربية.');
@@ -905,10 +937,30 @@ export class AdminCatalogComponent implements OnInit {
     const prepIds = Array.from(new Set((this.productForm.preparationOptionGroupIds || []).map(Number).filter(id => id > 0)));
     const modIds = Array.from(new Set((this.productForm.modifierGroupIds || []).map(Number).filter(id => id > 0)));
 
+    const cleanedVariants = (this.variantRows || [])
+      .map((v: any) => {
+        const mode = v.variantMode || (v.color?.trim() && v.size?.trim() ? 'both' : v.size?.trim() ? 'size' : 'color');
+        const color = mode === 'size' ? '' : (v.color || '').trim();
+        const size = mode === 'color' ? '' : (v.size || '').trim();
+        return {
+          id: v.id || crypto.randomUUID(),
+          color,
+          colorId: color ? (v.colorId && v.colorId !== 'size-only' ? v.colorId : crypto.randomUUID()) : 'size-only',
+          colorHex: color ? (v.colorHex || '#171717') : null,
+          size,
+          sku: v.sku?.trim() || null,
+          price: v.price !== null && v.price !== undefined && v.price !== '' ? Number(v.price) : null,
+          stockQuantity: v.stockQuantity !== null && v.stockQuantity !== undefined && v.stockQuantity !== '' ? Number(v.stockQuantity) : null,
+          isAvailable: v.isAvailable !== false,
+          images: Array.isArray(v.images) ? v.images : []
+        };
+      })
+      .filter((v: any) => v.color.length > 0 || v.size.length > 0);
+
     const payload: any = {
       categoryId: this.productForm.categoryId,
       activityPreset:this.productActivityPreset,commerce:this.productCommerce,
-      variants: this.variantRows,
+      variants: cleanedVariants,
       version: this.editingProductVersion,
       nameAr: this.productForm.nameAr.trim(),
       nameEn: this.productForm.nameEn?.trim() || null,
