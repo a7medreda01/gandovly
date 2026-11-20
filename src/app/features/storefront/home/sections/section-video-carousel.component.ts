@@ -12,17 +12,17 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 
 /**
  * Modern Video Carousel / Slider Section (Products Slider Style)
- * - Smart Lazy Loading: Buffers ONLY the active front card and immediate adjacent cards,
- *   reducing initial network consumption by ~75% and speeding up playback by 3x-4x!
- * - Plays ONLY when user scrolls down to its section (IntersectionObserver).
- * - Pauses immediately when scrolled away to save data & battery.
+ * - Background Preloading: Videos buffer immediately when the site opens (preload="auto"),
+ *   so they are 100% pre-buffered and start playing INSTANTLY with zero waiting time!
+ * - Scroll-Triggered Playback: Videos stay paused until the user scrolls down to the section (IntersectionObserver).
+ * - Pauses immediately when scrolled away to save battery & data.
  * - Plays with SOUND if s.videoMuted === false (unchecked "بدء التشغيل بدون صوت").
  * - Exactly ONE video has sound (the active front/center card); all other videos are muted.
  * - Audio follows the active card on scroll/slide seamlessly.
  * - Desktop/Mobile fallback: uploading desktop video alone works everywhere!
  * - Stream query parameter: guarantees zero 2-byte poisoned proxy cache issues.
  * - Smooth translateX sliding matching product-carousel with touch swipe & arrow controls.
- * - Zero black frames: sets currentTime=0.05 on metadata load to paint the first frame.
+ * - Zero black frames: sets currentTime=0.05 on metadata load to paint the first frame immediately.
  */
 @Component({
   selector: 'app-section-video-carousel',
@@ -305,14 +305,14 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
           [class.is-loading]="!readyCards().has($index)"
           (click)="onCardClick($index, $event)">
           <video #videoEl
-            [src]="shouldLoadVideo($index) ? getVideoSrc(v) : null"
+            [src]="getVideoSrc(v)"
             [poster]="v.posterUrl ? (v.posterUrl | imageUrl:'banner') : null"
             muted
             [muted]="true"
             playsinline
             webkit-playsinline
             loop
-            [preload]="getPreloadMode($index)"
+            preload="auto"
             (loadedmetadata)="onMetaLoaded(videoEl, $index)"
             (canplay)="onVideoCanPlay(videoEl, $index)"
             (error)="onVideoError($event, $index)">
@@ -380,9 +380,6 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   readonly activeSoundIndex = signal<number>(-1);
   readonly isDragging = signal(false);
   readonly dragOffsetPx = signal(0);
-
-  // Smart Lazy Loading signals: Set of card indices that should load video data
-  readonly loadedIndices = signal<Set<number>>(new Set([0]));
   readonly readyCards = signal<Set<number>>(new Set());
 
   private autoplayTimer: any = null;
@@ -426,26 +423,6 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
     const out: Record<string, string> = {};
     new URLSearchParams(q).forEach((v, k) => out[k] = v);
     return out;
-  }
-
-  /**
-   * Smart Lazy Loading check: returns true if the card is in the active/adjacent window
-   */
-  shouldLoadVideo(index: number): boolean {
-    return this.loadedIndices().has(index);
-  }
-
-  /**
-   * Bandwidth optimization:
-   * Active card gets 'auto' (100% network priority).
-   * Adjacent visible cards get 'metadata'.
-   * Distant cards get 'none' to save mobile bandwidth.
-   */
-  getPreloadMode(index: number): 'auto' | 'metadata' | 'none' {
-    if (!this.isInView) return 'none';
-    if (index === this.currentIndex()) return 'auto';
-    if (this.shouldLoadVideo(index)) return 'metadata';
-    return 'none';
   }
 
   /**
@@ -570,8 +547,8 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   }
 
   /**
-   * Sets currentTime = 0.05 on metadata load so browser hardware decodes
-   * and displays the first video frame immediately (guarantees NO black boxes).
+   * Pre-paints the first frame on metadata load so the card is never a black box.
+   * Keeps video paused if the section is not in view yet.
    */
   onMetaLoaded(videoEl: HTMLVideoElement, index: number) {
     this.readyCards.update(set => new Set(set).add(index));
@@ -579,6 +556,9 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
       try {
         videoEl.currentTime = 0.05;
       } catch (_) {}
+    }
+    if (!this.isInView && videoEl && !videoEl.paused) {
+      videoEl.pause();
     }
   }
 
@@ -589,6 +569,8 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
       if (index === this.currentIndex() && this.wantsSound) {
         this.applySoundToActiveCard();
       }
+    } else if (videoEl && !videoEl.paused) {
+      videoEl.pause();
     }
   }
 
@@ -596,9 +578,7 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
     console.warn(`[VideoCarousel] Video #${index} error:`, event);
   }
 
-  ngOnInit() {
-    this.updateLoadedCards();
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     if (typeof window === 'undefined') return;
@@ -628,14 +608,6 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
     this.gestureListener = gestureUnlock;
     window.addEventListener('click', gestureUnlock, { passive: true });
     window.addEventListener('touchstart', gestureUnlock, { passive: true });
-
-    // 3. React when video elements are dynamically populated
-    this.videoEls.changes.subscribe(() => {
-      if (this.isInView) {
-        this.playLoadedVideos();
-        this.applySoundToActiveCard();
-      }
-    });
   }
 
   ngOnDestroy() {
@@ -648,41 +620,14 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   }
 
   /**
-   * Expands the loaded card window to include current, adjacent, and next cards
-   */
-  private updateLoadedCards() {
-    const current = this.currentIndex();
-    const visible = this.visibleCardsCount();
-    const total = this.validVideos().length;
-    if (total === 0) return;
-
-    this.loadedIndices.update(set => {
-      const nextSet = new Set(set);
-      // Always include current card
-      nextSet.add(current);
-      // Include visible cards + 1 ahead to pre-warm
-      for (let i = 0; i <= visible; i++) {
-        const idx = (current + i) % total;
-        nextSet.add(idx);
-      }
-      // Include previous card for smooth back-swiping
-      const prevIdx = (current - 1 + total) % total;
-      nextSet.add(prevIdx);
-      return nextSet;
-    });
-  }
-
-  /**
-   * User reaches this section: Start playback & apply sound to center video
+   * User reaches this section: Start playback & apply sound to center video.
+   * Since videos have been buffering in background (preload="auto"), they start INSTANTLY!
    */
   private onSectionEnter() {
     this.isInView = true;
-    this.updateLoadedCards();
-    setTimeout(() => {
-      this.playLoadedVideos();
-      this.applySoundToActiveCard();
-      this.startAutoplay();
-    }, 60);
+    this.playAllVideos();
+    this.applySoundToActiveCard();
+    this.startAutoplay();
   }
 
   /**
@@ -701,11 +646,10 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
     });
   }
 
-  private playLoadedVideos() {
-    const loaded = this.loadedIndices();
-    this.videoEls?.forEach((vRef, idx) => {
+  private playAllVideos() {
+    this.videoEls?.forEach(vRef => {
       const el = vRef.nativeElement;
-      if (el && loaded.has(idx) && el.paused) {
+      if (el && el.paused) {
         el.muted = true;
         el.play()?.catch(() => {});
       }
@@ -800,11 +744,7 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
       if (i <= 0) return this.maxIndex();
       return i - 1;
     });
-    this.updateLoadedCards();
-    setTimeout(() => {
-      this.playLoadedVideos();
-      this.applySoundToActiveCard();
-    }, 40);
+    this.applySoundToActiveCard();
   }
 
   next() {
@@ -812,20 +752,12 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
       if (i >= this.maxIndex()) return 0;
       return i + 1;
     });
-    this.updateLoadedCards();
-    setTimeout(() => {
-      this.playLoadedVideos();
-      this.applySoundToActiveCard();
-    }, 40);
+    this.applySoundToActiveCard();
   }
 
   goTo(i: number) {
     this.currentIndex.set(Math.min(i, this.maxIndex()));
-    this.updateLoadedCards();
-    setTimeout(() => {
-      this.playLoadedVideos();
-      this.applySoundToActiveCard();
-    }, 40);
+    this.applySoundToActiveCard();
   }
 
   dotArray(): any[] {
