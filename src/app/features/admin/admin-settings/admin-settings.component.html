@@ -63,7 +63,7 @@
       <label class="checkbox-label"><input type="checkbox" [(ngModel)]="settings()!.showCategoriesRow"> إظهار شريط الأقسام السريع في الرئيسية</label>
     </div>
     <div class="col-12 col-md-4">
-      <label class="checkbox-label"><input type="checkbox" [(ngModel)]="layoutOptions.showHomeSearch" (ngModelChange)="onHomeSearchToggle($event)"> إظهار شريط البحث في الصفحة الرئيسية</label>
+      <label class="checkbox-label"><input type="checkbox" [ngModel]="layoutOptions.showHomeSearch !== false" (ngModelChange)="onHomeSearchToggle($event)"> إظهار شريط البحث في الصفحة الرئيسية</label>
     </div>
   </div>
 
@@ -478,7 +478,7 @@
           <div class="compression-settings-box p-3 border rounded-3 bg-light">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
               <label class="checkbox-label d-flex align-items-center gap-2 m-0 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="layoutOptions.enableImageCompression" />
+                <input type="checkbox" [ngModel]="layoutOptions.enableImageCompression !== false" (ngModelChange)="layoutOptions.enableImageCompression = $event" />
                 <span class="fw-bold fs-6">تفعيل ضغط الصور التلقائي عند الرفع (موصى به)</span>
               </label>
               @if (layoutOptions.enableImageCompression !== false) {
@@ -570,7 +570,7 @@
               <span class="ms-2">إظهار زر الاتصال الهاتفي في الهيدر العلوي</span>
             </label>
             <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
-              <input type="checkbox" [(ngModel)]="settings()!.showMobileBottomNav" />
+              <input type="checkbox" [ngModel]="layoutOptions.showMobileBottomNav !== false" (ngModelChange)="onMobileBottomNavToggle($event)" />
               <span class="ms-2">إظهار شريط التنقل السفلي في الموبايل (Bottom Navbar)</span>
             </label>
           </div>
@@ -949,7 +949,7 @@
           <div class="compression-settings-box p-3 border rounded-3 bg-light mb-3">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
               <label class="checkbox-label d-flex align-items-center gap-2 m-0 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="layoutOptions.enableImageCompression" />
+                <input type="checkbox" [ngModel]="layoutOptions.enableImageCompression !== false" (ngModelChange)="layoutOptions.enableImageCompression = $event" />
                 <span class="fw-bold fs-6">تفعيل ضغط الصور التلقائي عند الرفع (موصى به)</span>
               </label>
               @if (layoutOptions.enableImageCompression !== false) {

@@ -539,25 +539,40 @@ export class AdminSettingsComponent implements OnInit {
     this.loadDomain();
   }
 
+  private normalizeSettingsState(s: StorefrontSettings): StorefrontSettings {
+    const normalized: StorefrontSettings = { ...s };
+    if ((s as any).whatsApp && !normalized.whatsapp) {
+      normalized.whatsapp = (s as any).whatsApp;
+    }
+    const layout = { ...defaultStoreLayout(), ...(s.storeLayout ?? {}) };
+    const showMobileBottomNav = s.showMobileBottomNav !== false && layout.showMobileBottomNav !== false;
+    const showHomeSearch = s.showSearchBar !== false && layout.showHomeSearch !== false;
+    layout.showMobileBottomNav = showMobileBottomNav;
+    layout.showHomeSearch = showHomeSearch;
+    layout.enableImageCompression = layout.enableImageCompression !== false;
+    normalized.showMobileBottomNav = showMobileBottomNav;
+    normalized.showSearchBar = showHomeSearch;
+    normalized.storeLayout = layout;
+
+    const colorFields = [
+      'primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor',
+      'navbarBgColor', 'navbarTextColor', 'footerBgColor', 'footerTextColor',
+      'cardBgColor', 'borderColor', 'btnPrimaryBg', 'btnPrimaryText',
+      'btnAccentBg', 'btnAccentText', 'successColor', 'errorColor', 'warningColor'
+    ] as const;
+    for (const k of colorFields) {
+      if ((normalized as any)[k]) {
+        (normalized as any)[k] = this.settingsService.sanitizeHexColor((normalized as any)[k], (normalized as any)[k]);
+      }
+    }
+    return normalized;
+  }
+
   loadSettings() {
     this.isLoading.set(true);
     this.adminService.getSettings().subscribe({
       next: s => {
-        const normalized = { ...s };
-        if ((s as any).whatsApp && !normalized.whatsapp) {
-          normalized.whatsapp = (s as any).whatsApp;
-        }
-        const colorFields = [
-          'primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor',
-          'navbarBgColor', 'navbarTextColor', 'footerBgColor', 'footerTextColor',
-          'cardBgColor', 'borderColor', 'btnPrimaryBg', 'btnPrimaryText',
-          'btnAccentBg', 'btnAccentText', 'successColor', 'errorColor', 'warningColor'
-        ] as const;
-        for (const k of colorFields) {
-          if ((normalized as any)[k]) {
-            (normalized as any)[k] = this.settingsService.sanitizeHexColor((normalized as any)[k], (normalized as any)[k]);
-          }
-        }
+        const normalized = this.normalizeSettingsState(s);
         this.settings.set(normalized);
         this.isLoading.set(false);
       },
@@ -636,18 +651,29 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
+  onMobileBottomNavToggle(enabled: boolean) {
+    this.layoutOptions.showMobileBottomNav = enabled;
+    if (this.settings()) {
+      this.settings()!.showMobileBottomNav = enabled;
+    }
+  }
+
   saveSettings(section?: string, silent = false) {
     const current = this.settings();
     if (!current) return;
 
     const layout = this.layoutOptions;
     delete (layout as any).enableBuyNowButton;
-    layout.showMobileBottomNav = current.showMobileBottomNav !== false;
-    current.showSearchBar = layout.showHomeSearch !== false;
+    const showMobileBottomNav = layout.showMobileBottomNav !== false;
+    const showHomeSearch = layout.showHomeSearch !== false;
+    layout.showMobileBottomNav = showMobileBottomNav;
+    layout.showHomeSearch = showHomeSearch;
+    current.showMobileBottomNav = showMobileBottomNav;
+    current.showSearchBar = showHomeSearch;
     const payload = {
       ...current,
-      showSearchBar: layout.showHomeSearch !== false,
-      showMobileBottomNav: current.showMobileBottomNav !== false,
+      showSearchBar: showHomeSearch,
+      showMobileBottomNav,
       enableBuyNow: !!current.enableBuyNow,
       storeLayout: layout,
       restaurantNameEn: layout.restaurantNameEn || current.restaurantNameEn || '',
@@ -683,10 +709,7 @@ export class AdminSettingsComponent implements OnInit {
     this.adminService.updateSettings(payload).subscribe({
       next: updated => {
         this.isSaving.set(false);
-        const normalized = { ...updated };
-        if ((updated as any).whatsApp && !normalized.whatsapp) {
-          normalized.whatsapp = (updated as any).whatsApp;
-        }
+        const normalized = this.normalizeSettingsState(updated);
         this.settings.set(normalized);
         this.settingsService.settings.set(normalized);
         this.settingsService.applyCssThemeVariables(normalized);

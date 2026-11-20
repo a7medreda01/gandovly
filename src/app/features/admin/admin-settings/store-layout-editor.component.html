@@ -75,7 +75,7 @@
           <strong>استخدام السكشنات المخصصة بدل ترتيب الرئيسية الافتراضي</strong>
         </label>
         <label class="check">
-          <input type="checkbox" [(ngModel)]="layout.showHomeSearch" (ngModelChange)="changed()">
+          <input type="checkbox" [ngModel]="layout.showHomeSearch !== false" (ngModelChange)="layout.showHomeSearch = $event; changed()">
           <span>إظهار شريط البحث في الصفحة الرئيسية</span>
         </label>
       </div>

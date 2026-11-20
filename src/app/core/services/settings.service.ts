@@ -73,6 +73,20 @@ export class SettingsService {
       map(data => {
         if (!data || isPlatformContext()) return data;
         const clean = { ...data };
+        if ((data as any).whatsApp && !clean.whatsapp) {
+          clean.whatsapp = (data as any).whatsApp;
+        }
+        const showMobileBottomNav = clean.showMobileBottomNav !== false && clean.storeLayout?.showMobileBottomNav !== false;
+        const showHomeSearch = clean.showSearchBar !== false && clean.storeLayout?.showHomeSearch !== false;
+        clean.showMobileBottomNav = showMobileBottomNav;
+        clean.showSearchBar = showHomeSearch;
+        if (clean.storeLayout) {
+          clean.storeLayout = {
+            ...clean.storeLayout,
+            showMobileBottomNav,
+            showHomeSearch
+          };
+        }
         for (const key of ['logoUrl', 'heroBannerDesktopUrl', 'heroBannerMobileUrl', 'faviconUrl'] as const) {
           if (/mecart|mecard|runx/i.test(clean[key] || '')) clean[key] = '';
         }
