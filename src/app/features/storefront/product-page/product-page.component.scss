@@ -1214,8 +1214,8 @@
   width: 100%;
   padding: 8px 14px;
   border-radius: 18px;
-  background: color-mix(in srgb, var(--primary-color, #0d2b45) 4%, #f5f3ee);
-  border: 1px solid color-mix(in srgb, var(--primary-color, #0d2b45) 8%, #eae6dc);
+  background: color-mix(in srgb, var(--primary-color, #0d2b45) 4%, var(--surface-color, #f8fafd));
+  border: 1px solid var(--border-color, #e2e8f0);
 }
 
 .product-page-grid .purchase-controls-unified:not(.weighted) .qty-total-row .quantity-panel {
@@ -1227,8 +1227,8 @@
   }
 
   .stepper-box {
-    background: #ffffff;
-    border: 1px solid rgba(15, 23, 42, 0.06);
+    background: var(--card-bg, #ffffff);
+    border: 1px solid var(--border-color, #e2e8f0);
     border-radius: 999px;
     height: 42px;
     padding: 3px 6px;
@@ -1238,7 +1238,7 @@
       height: 34px;
       min-height: 34px;
       border-radius: 50%;
-      color: var(--text-main, #0f172a);
+      color: var(--primary-color, var(--text-main, #0f172a));
     }
 
     .step-value {
@@ -1591,8 +1591,8 @@
   gap: 8px;
   padding: 10px 12px;
   border-radius: 12px;
-  background: #f8fafc;
-  border: 1px solid #eef2f6;
+  background: var(--surface-color, #f8fafd);
+  border: 1px solid var(--border-color, #eef2f6);
   margin-top: 2px;
 
   .trust-item {
