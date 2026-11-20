@@ -281,7 +281,7 @@
             }
           </div>
         }
-@if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls" [class.has-buy-now]="settingsService.settings().enableBuyNow" [class.weighted]="isWeighedProduct">        <!-- Quantity & Weight Card -->
+@if(settingsService.settings().storeLayout?.onlineOrdering !== false && product()!.commerce?.mode!=='Vehicle'){<div class="purchase-controls purchase-controls-unified" [class.has-buy-now]="settingsService.settings().enableBuyNow" [class.weighted]="isWeighedProduct"><div class="qty-total-row">        <!-- Quantity & Weight Card -->
         <div class="quantity-panel">
           <h4 class="card-sec-title"><i class="bi bi-sliders2-vertical text-primary me-2"></i> {{ languageService.text('الكمية', 'Quantity') }}</h4>
 
@@ -356,15 +356,17 @@
           }
         </div>
 
+        <div class="total-summary-col inline-total-col">
+          <span class="caption text-muted small d-block">{{ languageService.text('الإجمالي:', 'Total:') }}</span>
+          <div class="amount-wrap d-flex align-items-baseline gap-1">
+            <span class="amount-val fw-bold">{{ calculatedEstimatedTotal|number:'1.0-2' }}</span>
+            <span class="amount-curr fw-bold small text-primary">{{ currencySymbol }}</span>
+          </div>
+        </div>
+        </div>
+
         <!-- Sticky Bottom CTA Purchase Bar -->
         <div class="page-purchase-bar" [class.has-buy-now]="settingsService.settings().enableBuyNow">
-          <div class="total-summary-col">
-            <span class="caption text-muted small d-block">{{ languageService.text('الإجمالي:', 'Total:') }}</span>
-            <div class="amount-wrap d-flex align-items-baseline gap-1">
-              <span class="amount-val fw-bold">{{ calculatedEstimatedTotal|number:'1.0-2' }}</span>
-              <span class="amount-curr fw-bold small text-primary">{{ currencySymbol }}</span>
-            </div>
-          </div>
 
           <button
             type="button"
