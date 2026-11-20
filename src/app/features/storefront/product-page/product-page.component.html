@@ -122,15 +122,51 @@
             />
             </button>
 
+            <!-- Floating Glass Top Controls (Mobile & Hero Overlay) -->
+            <div class="hero-floating-nav">
+              <button type="button" class="hero-glass-btn" (click)="goBack()" [attr.aria-label]="languageService.text('رجوع', 'Back')" title="رجوع">
+                <i class="bi bi-arrow-right"></i>
+              </button>
+              <div class="hero-floating-actions">
+                @if (settingsService.settings().enableWishlist && product()) {
+                  <button
+                    type="button"
+                    class="hero-glass-btn"
+                    [class.is-wishlisted]="wishlistService.isInWishlist(product()!.id)"
+                    (click)="toggleWishlist()"
+                    [attr.aria-label]="languageService.text('المفضلة', 'Wishlist')"
+                    [title]="wishlistService.isInWishlist(product()!.id) ? 'إزالة من المفضلة' : 'إضافة للمفضلة'"
+                  >
+                    <i class="bi" [class.bi-heart-fill]="wishlistService.isInWishlist(product()!.id)" [class.bi-heart]="!wishlistService.isInWishlist(product()!.id)"></i>
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="hero-glass-btn"
+                  (click)="onShareProduct()"
+                  [attr.aria-label]="languageService.text('مشاركة', 'Share')"
+                  title="مشاركة الرابط"
+                >
+                  @if (isCopied()) {
+                    <i class="bi bi-check2 text-success"></i>
+                  } @else {
+                    <i class="bi bi-share"></i>
+                  }
+                </button>
+              </div>
+            </div>
+
             <!-- Badges -->
             <div class="badges-overlay">
-
+              @if (discountPercent > 0) {
+                <span class="badge-discount-pill">{{ languageService.text('خصم ' + discountPercent + '%', discountPercent + '% OFF') }}</span>
+              }
               @if (!product()!.isAvailable) {
-                <span class="badge badge-out-stock">غير متوفر حالياً</span>
+                <span class="badge badge-out-stock">{{ languageService.text('غير متوفر حالياً', 'Out of stock') }}</span>
               }
             </div>
 
-            <!-- Arrows -->
+            <!-- Arrows & Dots -->
             @if (galleryImages.length > 1) {
               <button type="button" class="btn-gallery-arrow prev-arrow flex-center" aria-label="الصورة السابقة" (click)="prevImage()">
                 <i class="bi bi-chevron-right"></i>
@@ -138,6 +174,11 @@
               <button type="button" class="btn-gallery-arrow next-arrow flex-center" aria-label="الصورة التالية" (click)="nextImage()">
                 <i class="bi bi-chevron-left"></i>
               </button>
+              <div class="hero-dots-indicator">
+                @for (img of galleryImages; track $index) {
+                  <button type="button" class="hero-dot" [class.active]="activeImageIndex === $index" (click)="activeImageIndex = $index" [attr.aria-label]="'صورة ' + ($index + 1)"></button>
+                }
+              </div>
             }
           </div>
 
@@ -162,33 +203,43 @@
 
       <!-- Product overview, options and purchase -->
       <div class="details-column">
-        <div class="product-summary">
-          @if (product()!.brand) { <div class="product-meta"><span class="brand-label">{{product()!.brand}}</span></div> }
-          <div class="title-mask-wrap">
-            <h1 class="product-h1">{{languageService.getLocalizedName(product()!)}}</h1>
-          </div>
-          @if(languageService.isRtl() && product()!.nameEn&&product()!.nameEn!==product()!.nameAr){<p class="product-subtitle-en">{{product()!.nameEn}}</p>}
-        @if(product()!.variants?.length){<app-variant-picker [variants]="product()!.variants||[]" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>}
-          <div class="summary-price-row">
-            <div class="price-banner-box">
-              <span class="price-val">{{ (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice) | number:'1.0-2' }}</span>
-              <span class="price-curr">{{currencySymbol}}</span>
-              @if(isWeighedProduct){<span class="unit-label">{{ languageService.text('لكل كجم', '/ kg') }}</span>}
-              @if(product()!.originalPrice && product()!.originalPrice! > (isWeighedProduct ? (product()!.pricePerKg || product()!.pricePerUnit) : variantPrice)){
-                <del class="price-original">{{product()!.originalPrice}} {{currencySymbol}}</del>
-              }
-            </div>
-            <span class="stock-status" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable">
-              @if (product()!.isAvailable) {
-                <svg class="stock-check-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
-                  <path class="stock-check-path" d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              } @else {
-                <i class="bi bi-x-circle" aria-hidden="true"></i>
-              }
+        <div class="product-summary luxury-summary">
+          <div class="product-meta-bar">
+            @if (product()!.brand) {
+              <span class="brand-pill">{{ product()!.brand }}</span>
+            } @else {
+              <span></span>
+            }
+            <span class="stock-pill" [class.available]="product()!.isAvailable" [class.unavailable]="!product()!.isAvailable">
+              <span class="stock-dot" aria-hidden="true"></span>
               <span>{{ product()!.isAvailable ? languageService.text('متوفر', 'In stock') : languageService.text('غير متوفر', 'Out of stock') }}</span>
             </span>
           </div>
+
+          <div class="title-mask-wrap">
+            <h1 class="product-h1">{{ languageService.getLocalizedName(product()!) }}</h1>
+          </div>
+          @if (languageService.isRtl() && product()!.nameEn && product()!.nameEn !== product()!.nameAr) {
+            <p class="product-subtitle-en">{{ product()!.nameEn }}</p>
+          }
+
+          <div class="luxury-price-row">
+            <div class="price-banner-box">
+              <span class="price-val">{{ effectiveUnitPrice | number:'1.0-2' }}</span>
+              <span class="price-curr">{{ currencySymbol }}</span>
+              @if (isWeighedProduct) {
+                <span class="unit-label">{{ languageService.text('لكل كجم', '/ kg') }}</span>
+              }
+            </div>
+            @if (savingsAmount > 0) {
+              <del class="price-original">{{ product()!.originalPrice | number:'1.0-2' }} {{ currencySymbol }}</del>
+              <span class="save-amount-pill">{{ languageService.text('وفر ' + (savingsAmount | number:'1.0-0') + ' ' + currencySymbol, 'Save ' + (savingsAmount | number:'1.0-0') + ' ' + currencySymbol) }}</span>
+            }
+          </div>
+
+          @if (product()!.variants?.length) {
+            <app-variant-picker [variants]="product()!.variants || []" (selected)="selectedVariant=$event" (colorImages)="variantImages=$event;activeImageIndex=0"></app-variant-picker>
+          }
         </div>
 
         @if(product()!.commerce?.mode && product()!.commerce?.mode!=='Physical' || product()!.commerce?.prescriptionRequired){<app-product-commerce [product]="product()!" [quantity]="piecesCount" (booking)="booking=$event"></app-product-commerce>}
@@ -388,27 +439,56 @@
               <i class="bi bi-lightning-charge-fill"></i>{{ languageService.text('شراء الآن', 'Buy now') }}
             </button>
           }
-        </div></div>}
-@if(languageService.getLocalizedDesc(product()!)){<section class="description-panel"><h2>{{ languageService.text('الوصف', 'Description') }}</h2><p class="product-description">{{languageService.getLocalizedDesc(product()!)}}</p></section>}
-<details class="product-disclosure"><summary>{{ languageService.text('ملاحظات للطلب', 'Order notes') }} <span>{{ languageService.text('اختياري', 'Optional') }}</span></summary>          <textarea
-            class="product-notes-textarea"
-            rows="2"
-            [placeholder]="languageService.text('مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة...', 'e.g. Preparation instructions, preferred substitutes, or special requests...')"
-            [(ngModel)]="specialInstructions"
-          ></textarea></details>        <!-- Specifications Table (if any) -->
-        @if (parsedKeySpecs.length > 0) {
-          <details class="product-disclosure" open>
-            <summary>{{ languageService.text('المواصفات', 'Specifications') }}</summary>
-            <div class="specs-grid mt-2">
-              @for (spec of parsedKeySpecs; track spec.label) {
-                <div class="spec-row flex-between py-2 border-bottom">
-                  <span class="spec-label text-muted"><i class="bi me-1 text-primary" [class]="spec.icon || 'bi-dot'"></i> {{ spec.label }}</span>
-                  <span class="spec-val fw-bold text-dark">{{ spec.value }}</span>
-                </div>
-              }
-            </div>
-          </details>
-        }
+        </div>
+        <div class="product-trust-strip" aria-label="مميزات الشراء">
+          <span class="trust-item"><i class="bi bi-shield-check"></i> {{ languageService.text('جودة مضمونة', 'Quality Guaranteed') }}</span>
+          <span class="trust-item"><i class="bi bi-truck"></i> {{ languageService.text('توصيل سريع', 'Fast Delivery') }}</span>
+          <span class="trust-item"><i class="bi bi-lock"></i> {{ languageService.text('دفع آمن', 'Secure Checkout') }}</span>
+        </div>
+      </div>}
+@if(languageService.getLocalizedDesc(product()!)){
+  <section class="description-panel luxury-card-box">
+    <div class="desc-header-row">
+      <h2>{{ languageService.text('الوصف', 'Description') }}</h2>
+      @if (product()!.sku) {
+        <span class="sku-chip" dir="ltr">{{ product()!.sku }}</span>
+      }
+    </div>
+    <p class="product-description">{{ languageService.getLocalizedDesc(product()!) }}</p>
+  </section>
+}
+<details class="product-disclosure luxury-disclosure">
+  <summary>
+    <span class="disclosure-title-wrap"><i class="bi bi-chat-square-text"></i> {{ languageService.text('ملاحظات للطلب', 'Order notes') }} <small>{{ languageService.text('اختياري', 'Optional') }}</small></span>
+    <i class="bi bi-chevron-down disclosure-chevron"></i>
+  </summary>
+  <textarea
+    class="product-notes-textarea"
+    rows="2"
+    [placeholder]="languageService.text('مثال: تعليمات التجهيز، بدائل مفضلة في حال النفاد، أو أي تفاصيل خاصة...', 'e.g. Preparation instructions, preferred substitutes, or special requests...')"
+    [(ngModel)]="specialInstructions"
+  ></textarea>
+</details>
+<!-- Specifications Table (if any) -->
+@if (parsedKeySpecs.length > 0) {
+  <details class="product-disclosure luxury-disclosure luxury-specs-card" open>
+    <summary>
+      <span class="disclosure-title-wrap"><i class="bi bi-list-check"></i> {{ languageService.text('المواصفات', 'Specifications') }}</span>
+      <i class="bi bi-chevron-down disclosure-chevron"></i>
+    </summary>
+    <div class="luxury-specs-table">
+      @for (spec of parsedKeySpecs; track spec.label) {
+        <div class="luxury-spec-row">
+          <span class="luxury-spec-label">
+            <span class="spec-icon-circle"><i class="bi" [class]="spec.icon || 'bi-check2'"></i></span>
+            <span>{{ spec.label }}</span>
+          </span>
+          <span class="luxury-spec-val">{{ spec.value }}</span>
+        </div>
+      }
+    </div>
+  </details>
+}
 
 
       </div>

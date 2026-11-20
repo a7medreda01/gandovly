@@ -173,6 +173,25 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     return this.piecesCount * avg;
   }
 
+  get effectiveUnitPrice(): number {
+    const p = this.product();
+    if (!p) return 0;
+    return this.isWeighedProduct ? (p.pricePerKg || p.pricePerUnit || 0) : (this.variantPrice || 0);
+  }
+
+  get savingsAmount(): number {
+    const orig = this.product()?.originalPrice || 0;
+    const curr = this.effectiveUnitPrice;
+    return orig > curr ? Math.round(orig - curr) : 0;
+  }
+
+  get discountPercent(): number {
+    const orig = this.product()?.originalPrice || 0;
+    const curr = this.effectiveUnitPrice;
+    if (orig <= curr || orig <= 0) return 0;
+    return Math.round(((orig - curr) / orig) * 100);
+  }
+
   get calculatedEstimatedTotal(): number {
     const p = this.product();
     if (!p) return 0;

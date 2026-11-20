@@ -1309,3 +1309,410 @@
     box-shadow: none;
   }
 }
+
+/* ===== LUXURY PRODUCT PAGE REDESIGN ===== */
+@media (max-width: 991px) {
+  .product-page-top-nav {
+    display: none !important;
+  }
+
+  .product-page-container {
+    padding-top: 10px !important;
+  }
+
+  .gallery-column .gallery-main-card {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .gallery-column .hero-image-wrap {
+    border-radius: 22px !important;
+    overflow: hidden;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+  }
+}
+
+.hero-floating-nav {
+  position: absolute;
+  top: 12px;
+  inset-inline: 12px;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+
+  @media (min-width: 992px) {
+    display: none;
+  }
+}
+
+.hero-floating-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hero-glass-btn {
+  pointer-events: auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.84);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #0f172a;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+  transition: transform 0.16s ease, background-color 0.16s ease;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  &.is-wishlisted {
+    color: #ef4444;
+    background: rgba(255, 241, 242, 0.94);
+  }
+}
+
+.gallery-column .hero-image-wrap .badges-overlay {
+  top: auto !important;
+  bottom: 12px !important;
+  inset-inline-start: 12px !important;
+  z-index: 7;
+  display: flex;
+  gap: 6px;
+}
+
+.badge-discount-pill {
+  background: #e11d48;
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.28);
+}
+
+.hero-dots-indicator {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.34);
+  backdrop-filter: blur(6px);
+}
+
+.hero-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 0;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: width 0.2s ease, background-color 0.2s ease;
+
+  &.active {
+    width: 18px;
+    border-radius: 999px;
+    background: #ffffff;
+  }
+}
+
+.luxury-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-meta-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.brand-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color, #0d2b45) 8%, #ffffff);
+  color: var(--primary-color, #0d2b45);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+
+  .stock-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  &.available {
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  &.unavailable {
+    background: #fef2f2;
+    color: #dc2626;
+  }
+}
+
+.luxury-summary .product-h1 {
+  margin: 0 !important;
+  font-size: clamp(22px, 2.5vw, 32px) !important;
+  font-weight: 850 !important;
+  line-height: 1.4 !important;
+  color: var(--text-main, #0f172a);
+}
+
+.luxury-price-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 2px;
+
+  .price-banner-box {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    margin: 0;
+
+    .price-val {
+      font-size: 1.85rem !important;
+      font-weight: 900 !important;
+      color: var(--primary-color, #0d2b45);
+      line-height: 1.1;
+    }
+
+    .price-curr {
+      font-size: 1rem !important;
+      font-weight: 800;
+      color: var(--primary-color, #0d2b45);
+    }
+  }
+
+  .price-original {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .save-amount-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #fff1f2;
+    color: #e11d48;
+    border: 1px solid #fecdd3;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+}
+
+.product-trust-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #eef2f6;
+  margin-top: 2px;
+
+  .trust-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #475569;
+
+    i {
+      color: var(--primary-color, #0d2b45);
+      font-size: 0.92rem;
+    }
+  }
+}
+
+.luxury-card-box {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e6ecf2);
+  border-radius: 18px;
+  padding: 16px 18px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.025);
+
+  .desc-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+
+    h2 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-main, #0f172a);
+    }
+
+    .sku-chip {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+  }
+}
+
+.product-disclosure.luxury-disclosure {
+  border: 1px solid var(--border-color, #e6ecf2) !important;
+  border-radius: 18px !important;
+  background: var(--card-bg, #ffffff);
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.025);
+
+  > summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-main, #0f172a);
+    cursor: pointer;
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    .disclosure-title-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      i {
+        color: var(--primary-color, #0d2b45);
+        font-size: 1.05rem;
+      }
+
+      small {
+        font-size: 0.74rem;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+    }
+
+    .disclosure-chevron {
+      font-size: 0.9rem;
+      color: #64748b;
+      transition: transform 0.2s ease;
+    }
+  }
+
+  &[open] > summary {
+    border-bottom: 1px solid #f1f5f9;
+
+    .disclosure-chevron {
+      transform: rotate(180deg);
+    }
+  }
+
+  .product-notes-textarea {
+    width: calc(100% - 28px);
+    margin: 12px 14px 14px;
+    border-radius: 12px;
+    border: 1px solid #dce3ed;
+    padding: 10px 12px;
+    background: #f8fafc;
+  }
+}
+
+.luxury-specs-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.luxury-spec-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 16px;
+  font-size: 0.88rem;
+
+  &:nth-child(odd) {
+    background: #f8fafc;
+  }
+
+  &:nth-child(even) {
+    background: #ffffff;
+  }
+
+  .luxury-spec-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: #475569;
+    font-weight: 600;
+    min-width: 0;
+
+    .spec-icon-circle {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--primary-color, #0d2b45) 9%, #ffffff);
+      color: var(--primary-color, #0d2b45);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+  }
+
+  .luxury-spec-val {
+    font-weight: 800;
+    color: #0f172a;
+    text-align: end;
+    max-width: 58%;
+    overflow-wrap: anywhere;
+  }
+}
