@@ -453,6 +453,12 @@ export class CheckoutComponent implements OnInit {
 
   // OTP Flow
   requestAuthOtp(isRetry: boolean = false) {
+    const resolvedName = (this.authFullName || this.customerName || '').trim();
+    if (!isRetry && !resolvedName) {
+      this.toast.error('يرجى إدخال الاسم بالكامل.');
+      return;
+    }
+
     if (!this.authPhone.trim()) {
       this.toast.error('يرجى إدخال رقم الهاتف / الواتساب.');
       return;
@@ -460,7 +466,6 @@ export class CheckoutComponent implements OnInit {
 
     if (!this.requireWhatsAppOtp) {
       this.isRequestingOtp.set(true);
-      const resolvedName = (this.authFullName || this.customerName || '').trim();
       this.authService.verifyOtp(this.authPhone.trim(), '', resolvedName).subscribe({
         next: (res) => {
           this.isRequestingOtp.set(false);

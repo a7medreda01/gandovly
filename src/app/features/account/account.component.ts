@@ -335,6 +335,11 @@ export class AccountComponent implements OnInit, OnDestroy {
   }
 
   sendOtp(isRetry: boolean = false) {
+    if (!isRetry && !this.fullName.trim()) {
+      this.toast.error('يرجى إدخال الاسم بالكامل.');
+      return;
+    }
+
     if (!this.phoneNumber.trim()) {
       this.toast.error('يرجى إدخال رقم الهاتف.');
       return;

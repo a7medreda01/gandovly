@@ -39,7 +39,7 @@
           <header class="guest-login-header">
             <div>
               <h2>{{ isOtpSent() ? 'رمز التحقق' : 'تسجيل الدخول' }}</h2>
-              <p>{{ isOtpSent() ? 'أدخل الرمز المكوّن من ٦ أرقام.' : 'هيوصلك رمز دخول على واتساب.' }}</p>
+              <p>{{ isOtpSent() ? 'أدخل الرمز المكوّن من ٦ أرقام.' : (requireWhatsAppOtp ? 'أدخل اسمك ورقم موبايلك لاستلام رمز الدخول على واتساب.' : 'أدخل اسمك ورقم موبايلك لتسجيل الدخول.') }}</p>
             </div>
             <button type="button" class="guest-refresh" aria-label="إغلاق" (click)="showGuestLogin.set(false)">
               <i class="bi bi-x-lg" aria-hidden="true"></i>
@@ -48,10 +48,26 @@
       <div class="auth-box-body">
         @if (!isOtpSent()) {
           <div class="auth-form">
+            <div class="form-group mb-3">
+              <label for="pFullName" class="auth-input-label text-end d-flex align-items-center justify-content-between mb-2">
+                <span>
+                  <i class="bi bi-person-fill me-1 text-primary"></i> الاسم بالكامل <span class="text-danger">*</span>
+                </span>
+              </label>
+              <input
+                id="pFullName"
+                type="text"
+                class="form-control auth-text-input"
+                placeholder="اكتب اسمك بالكامل..."
+                [(ngModel)]="fullName"
+                autocomplete="name"
+              />
+            </div>
+
             <div class="form-group mb-4">
               <label for="pPhone" class="auth-input-label text-end d-flex align-items-center justify-content-between mb-2">
                 <span>
-                  <i class="bi bi-phone-fill me-1 text-primary"></i> رقم الهاتف المحمول
+                  <i class="bi bi-phone-fill me-1 text-primary"></i> رقم الهاتف المحمول <span class="text-danger">*</span>
                 </span>
 
               </label>
@@ -60,11 +76,10 @@
                 inputId="pPhone"
                 [(ngModel)]="phoneNumber"
                 (enterPressed)="sendOtp()"
-                [autoFocus]="true"
               ></app-phone-input>
             </div>
 
-            <button class="btn-auth-submit" (click)="sendOtp()" [disabled]="isLoading() || !phoneNumber.trim()">
+            <button class="btn-auth-submit" (click)="sendOtp()" [disabled]="isLoading() || !fullName.trim() || !phoneNumber.trim()">
               @if (isLoading()) { 
                 <span class="d-flex align-items-center justify-content-center gap-2">
                   <span class="spinner-border spinner-border-sm" role="status"></span>

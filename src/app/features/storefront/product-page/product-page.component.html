@@ -443,7 +443,9 @@
         <div class="product-trust-strip" aria-label="مميزات الشراء">
           <span class="trust-item"><i class="bi bi-shield-check"></i> {{ languageService.text('جودة مضمونة', 'Quality Guaranteed') }}</span>
           <span class="trust-item"><i class="bi bi-truck"></i> {{ languageService.text('توصيل سريع', 'Fast Delivery') }}</span>
-          <span class="trust-item"><i class="bi bi-lock"></i> {{ languageService.text('دفع آمن', 'Secure Checkout') }}</span>
+          @if (isOnlinePaymentEnabled) {
+            <span class="trust-item"><i class="bi bi-lock"></i> {{ languageService.text('دفع آمن', 'Secure Checkout') }}</span>
+          }
         </div>
       </div>}
 @if(languageService.getLocalizedDesc(product()!)){

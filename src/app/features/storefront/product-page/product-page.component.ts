@@ -87,6 +87,13 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     return p.pricingType === 'ByWeight' || (p.pricingType as any) === 1 || (p.pricingType as any) === 'WeightedByKilo';
   }
 
+  get isOnlinePaymentEnabled(): boolean {
+    const s = this.settingsService.settings();
+    const hasWallet = s.paymentEnableWalletTransfer !== false && Boolean(s.vodafoneCashNumber?.trim() || s.instaPayAccount?.trim());
+    const hasCard = s.paymentEnableOnlineCard === true;
+    return hasWallet || hasCard;
+  }
+
   private readonly pixels=inject(MarketingPixelsService);
   booking:any=null;
   selectedVariant:ProductVariant|null=null;
