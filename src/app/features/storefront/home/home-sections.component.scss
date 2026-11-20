@@ -275,7 +275,7 @@ section {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(270deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.15) 100%);
+    background: linear-gradient(270deg, rgba(0, 0, 0, var(--overlay, 0.55)) 0%, rgba(0, 0, 0, calc(var(--overlay, 0.55) * 0.65)) 55%, rgba(0, 0, 0, calc(var(--overlay, 0.55) * 0.25)) 100%);
     z-index: -1;
   }
 
@@ -296,7 +296,7 @@ section {
 
 :host-context([dir="ltr"]) .promo.overlay::after,
 [dir="ltr"] .promo.overlay::after {
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.45) 55%, rgba(0, 0, 0, 0.15) 100%);
+  background: linear-gradient(90deg, rgba(0, 0, 0, var(--overlay, 0.55)) 0%, rgba(0, 0, 0, calc(var(--overlay, 0.55) * 0.65)) 55%, rgba(0, 0, 0, calc(var(--overlay, 0.55) * 0.25)) 100%);
 }
 
 .promo.no-image {

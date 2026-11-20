@@ -80,8 +80,9 @@ import { LanguageService } from '../../../../core/services/language.service';
     .slide-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.35);
+      background: #0f172a;
       z-index: 1;
+      pointer-events: none;
     }
 
     .hero-content {
@@ -311,8 +312,9 @@ export class SectionHeroSliderComponent implements OnInit, OnDestroy {
 
   overlayOpacityPercent = computed(() => {
     const cs = this.currentSlide();
-    if (cs.overlayOpacity !== undefined && cs.overlayOpacity !== null) {
-      return cs.overlayOpacity;
+    if (cs.overlayOpacity !== undefined && cs.overlayOpacity !== null && cs.overlayOpacity !== ('' as any)) {
+      const n = Number(cs.overlayOpacity);
+      if (!Number.isNaN(n)) return Math.max(0, Math.min(90, n));
     }
     return this.hasContent() ? 35 : 0;
   });

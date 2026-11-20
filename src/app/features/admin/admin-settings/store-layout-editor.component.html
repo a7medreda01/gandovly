@@ -394,7 +394,7 @@
               }
 
               <!-- BACKGROUND & TEXT COLORS -->
-              @if(s.kind==='hero'||s.kind==='banner'||s.kind==='features'||s.kind==='brands'||s.kind==='cta_full'||s.kind==='countdown'||s.kind==='newsletter'||s.kind==='stats'||s.kind==='markdown'){
+              @if(s.kind==='hero'||s.kind==='banner'||s.kind==='features'||s.kind==='brands'||s.kind==='cta_full'||s.kind==='countdown'||s.kind==='testimonials'||s.kind==='newsletter'||s.kind==='stats'||s.kind==='markdown'){
                 <div class="fields mt-3">
                   <label>لون الخلفية
                     <input type="color" [ngModel]="s.backgroundColor||'#f7f8fc'" (ngModelChange)="s.backgroundColor=$event;changed()">

@@ -21,7 +21,7 @@ import { LanguageService } from '../../../../core/services/language.service';
       border-radius: 1.5rem;
       margin-bottom: 2rem;
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      color: #ffffff;
+      color: var(--cd-text, #ffffff);
       text-align: center;
       position: relative;
       overflow: hidden;
@@ -30,9 +30,9 @@ import { LanguageService } from '../../../../core/services/language.service';
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(239, 68, 68, 0.18);
+      background: rgba(239, 68, 68, 0.16);
       border: 1px solid rgba(239, 68, 68, 0.35);
-      color: #f87171;
+      color: #ef4444;
       padding: 0.35rem 1rem;
       border-radius: 9999px;
       font-size: 0.8rem;
@@ -43,9 +43,10 @@ import { LanguageService } from '../../../../core/services/language.service';
       font-size: 1.85rem;
       font-weight: 800;
       margin: 0 0 0.5rem;
+      color: var(--cd-text, #ffffff);
     }
     .countdown-subtitle {
-      color: rgba(255,255,255,0.75);
+      color: color-mix(in srgb, var(--cd-text, #ffffff) 76%, transparent);
       font-size: 0.95rem;
       max-width: 500px;
       margin: 0 auto 1.75rem;
@@ -57,8 +58,8 @@ import { LanguageService } from '../../../../core/services/language.service';
       margin-bottom: 1.75rem;
     }
     .timer-box {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
+      background: color-mix(in srgb, var(--cd-text, #ffffff) 10%, transparent);
+      border: 1px solid color-mix(in srgb, var(--cd-text, #ffffff) 18%, transparent);
       border-radius: 1rem;
       min-width: 65px;
       padding: 0.75rem 0.5rem;
@@ -67,13 +68,13 @@ import { LanguageService } from '../../../../core/services/language.service';
     .timer-num {
       font-size: 1.75rem;
       font-weight: 800;
-      color: #ffffff;
+      color: var(--cd-text, #ffffff);
       line-height: 1;
       font-variant-numeric: tabular-nums;
     }
     .timer-label {
       font-size: 0.7rem;
-      color: rgba(255,255,255,0.6);
+      color: color-mix(in srgb, var(--cd-text, #ffffff) 68%, transparent);
       text-transform: uppercase;
       margin-top: 0.35rem;
       display: block;
@@ -82,8 +83,8 @@ import { LanguageService } from '../../../../core/services/language.service';
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: var(--primary-color, #ef4444);
-      color: #ffffff;
+      background: var(--btn-primary-bg, var(--primary-color, #ef4444));
+      color: var(--btn-primary-text, #ffffff);
       padding: 0.75rem 2rem;
       border-radius: 9999px;
       font-weight: 700;
@@ -99,7 +100,9 @@ import { LanguageService } from '../../../../core/services/language.service';
 <section class="countdown-section container"
   appScrollAnimate
   [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
-  [style.background]="s.backgroundColor || null">
+  [style.background]="s.backgroundColor || null"
+  [style.color]="effectiveTextColor()"
+  [style.--cd-text]="effectiveTextColor()">
   <div class="countdown-badge">
     <i class="bi bi-lightning-charge-fill"></i>
     <span>{{ eyebrow() }}</span>
@@ -153,6 +156,17 @@ export class SectionCountdownComponent implements OnInit, OnDestroy {
   subtitle() { return this.lang.text(this.s.subtitle || 'سارع بالاستفادة من الخصومات قبل انتهاء الوقت', this.s.subtitleEn || 'Grab exclusive deals before time runs out'); }
   eyebrow() { return this.lang.text(this.s.eyebrow || 'عرض فلاش', this.s.eyebrowEn || 'FLASH SALE'); }
   buttonText() { return this.lang.text(this.s.buttonText || 'تسوق العرض الآن', this.s.buttonTextEn || 'Shop the Deal'); }
+  effectiveTextColor(): string {
+    if (this.s.textColor?.trim()) return this.s.textColor.trim();
+    if (this.s.backgroundColor?.trim()) {
+      const hex = this.s.backgroundColor.replace('#', '').trim();
+      if (hex.length === 6) {
+        const b = (parseInt(hex.slice(0, 2), 16) * 299 + parseInt(hex.slice(2, 4), 16) * 587 + parseInt(hex.slice(4, 6), 16) * 114) / 1000;
+        return b >= 150 ? '#152138' : '#ffffff';
+      }
+    }
+    return '#ffffff';
+  }
 
   ngOnInit() {
     this.updateTime();
