@@ -666,8 +666,10 @@ export class AdminSettingsComponent implements OnInit {
     delete (layout as any).enableBuyNowButton;
     const showMobileBottomNav = layout.showMobileBottomNav !== false;
     const showHomeSearch = layout.showHomeSearch !== false;
+    const showOrdersPage = layout.showOrdersPage !== false;
     layout.showMobileBottomNav = showMobileBottomNav;
     layout.showHomeSearch = showHomeSearch;
+    layout.showOrdersPage = showOrdersPage;
     current.showMobileBottomNav = showMobileBottomNav;
     current.showSearchBar = showHomeSearch;
     const payload = {

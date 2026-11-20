@@ -1,27 +1,57 @@
 @if (cartService.isDrawerOpen() && settingsService.settings().storeLayout?.onlineOrdering !== false) {
-  <div class="drawer-backdrop" (click)="cartService.closeDrawer()">
-    <div class="drawer-panel" appStoreDialog aria-label="سلة طلباتك" (dialogDismiss)="cartService.closeDrawer()" (click)="$event.stopPropagation()">
-      <!-- Mobile Drag Handle -->
-      <div class="sheet-drag-handle d-md-none"></div>
+  <div
+    class="drawer-backdrop"
+    [class.is-closing]="isClosing"
+    [style.opacity]="backdropOpacity"
+    (click)="dismissDrawer()"
+  >
+    <div
+      class="drawer-panel"
+      appStoreDialog
+      aria-label="سلة طلباتك"
+      (dialogDismiss)="dismissDrawer()"
+      (click)="$event.stopPropagation()"
+      [class.is-closing]="isClosing"
+      [class.is-dragging]="isDragging"
+      [style.transform]="drawerTransform"
+      [style.transition]="drawerTransition"
+    >
+      <!-- Mobile Drag Handle + Header (Swipe Down / Up with Finger) -->
+      <div
+        class="drawer-drag-zone"
+        (touchstart)="onTouchStart($event)"
+        (touchmove)="onTouchMove($event)"
+        (touchend)="onTouchEnd()"
+        (touchcancel)="onTouchEnd()"
+      >
+        <div class="sheet-drag-handle d-md-none" (click)="dismissDrawer()" title="مرر لأسفل للإغلاق"></div>
 
-      <!-- Header -->
-      <div class="drawer-header flex-between">
-        <div class="header-title d-flex align-items-center gap-2">
-          <div class="cart-title-icon">
-            <i class="bi bi-bag-check-fill"></i>
+        <!-- Header -->
+        <div class="drawer-header flex-between">
+          <div class="header-title d-flex align-items-center gap-2">
+            <div class="cart-title-icon">
+              <i class="bi bi-bag-check-fill"></i>
+            </div>
+            <div>
+              <h2 class="title-text mb-0">{{ languageService.text('سلة طلباتك', 'Your Cart') }}</h2>
+              <span class="items-count">{{ cartService.totalItemsCount() }} {{ languageService.text('صنف مضاف', 'items added') }}</span>
+            </div>
           </div>
-          <div>
-            <h2 class="title-text mb-0">{{ languageService.text('سلة طلباتك', 'Your Cart') }}</h2>
-            <span class="items-count">{{ cartService.totalItemsCount() }} {{ languageService.text('صنف مضاف', 'items added') }}</span>
-          </div>
+          <button class="btn-close" (click)="dismissDrawer()" [attr.aria-label]="languageService.text('إغلاق', 'Close')">
+            <i class="bi bi-x-lg"></i>
+          </button>
         </div>
-        <button class="btn-close" (click)="cartService.closeDrawer()" [attr.aria-label]="languageService.text('إغلاق', 'Close')">
-          <i class="bi bi-x-lg"></i>
-        </button>
       </div>
 
       <!-- Body / Items List -->
-      <div class="drawer-body">
+      <div
+        class="drawer-body"
+        #drawerBodyScroll
+        (touchstart)="onBodyTouchStart($event, drawerBodyScroll)"
+        (touchmove)="onBodyTouchMove($event, drawerBodyScroll)"
+        (touchend)="onTouchEnd()"
+        (touchcancel)="onTouchEnd()"
+      >
         @if (cartService.items().length === 0) {
           <div class="empty-cart flex-center">
             <div class="empty-cart-icon-ring">

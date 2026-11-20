@@ -628,6 +628,10 @@
               <input type="checkbox" [ngModel]="layoutOptions.showMobileBottomNav !== false" (ngModelChange)="onMobileBottomNavToggle($event)" />
               <span class="ms-2">إظهار شريط التنقل السفلي في الموبايل (Bottom Navbar)</span>
             </label>
+            <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
+              <input type="checkbox" [ngModel]="layoutOptions.showOrdersPage !== false" (ngModelChange)="layoutOptions.showOrdersPage = $event" />
+              <span class="ms-2">إظهار أيقونة الحساب وطلباتي (علامة الشخص) في الهيدر والقوائم</span>
+            </label>
           </div>
         </details>
 
