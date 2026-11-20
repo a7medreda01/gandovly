@@ -37,7 +37,7 @@
               <span class="items-count">{{ cartService.totalItemsCount() }} {{ languageService.text('صنف مضاف', 'items added') }}</span>
             </div>
           </div>
-          <button class="btn-close" (click)="dismissDrawer()" [attr.aria-label]="languageService.text('إغلاق', 'Close')">
+          <button type="button" class="btn-close" (touchstart)="$event.stopPropagation()" (click)="$event.stopPropagation(); dismissDrawer()" [attr.aria-label]="languageService.text('إغلاق', 'Close')">
             <i class="bi bi-x-lg"></i>
           </button>
         </div>

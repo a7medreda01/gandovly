@@ -76,6 +76,7 @@ export class CartDrawerComponent {
 
   onTouchStart(event: TouchEvent) {
     if (!this.isMobileViewport() || event.touches.length !== 1) return;
+    if ((event.target as HTMLElement)?.closest('button, a, input, select, textarea')) return;
     this.touchStartX = event.touches[0].clientX;
     this.touchCurrentX = this.touchStartX;
     this.touchStartY = event.touches[0].clientY;
