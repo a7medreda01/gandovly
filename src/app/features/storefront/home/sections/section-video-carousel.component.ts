@@ -1,6 +1,6 @@
 import {
   AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, QueryList,
-  ViewChildren, ViewEncapsulation, computed, inject, signal
+  ViewChild, ViewChildren, ViewEncapsulation, computed, inject, signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -12,8 +12,9 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 
 /**
  * Video Carousel / Slider Section (Products Slider Style)
- * Modern borderless multi-card video carousel with touch swipe, autoplay,
- * individual card sound toggles, and responsive card sizing (like product carousel).
+ * Uses native CSS scroll snap for pixel-perfect card alignment (no half-cut cards),
+ * robust autoplay with fallback frame decoding (no black screens),
+ * and desktop/mobile fallback so videos play everywhere.
  */
 @Component({
   selector: 'app-section-video-carousel',
@@ -32,7 +33,7 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       padding-inline: 0.5rem;
     }
     .vcar-eyebrow {
@@ -57,32 +58,31 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       font-size: 0.92rem;
     }
 
-    .vcar-wrap {
-      position: relative;
-      overflow: hidden;
-      border: none !important;
-      touch-action: pan-y pinch-zoom;
-      user-select: none;
-      -webkit-user-select: none;
-      padding: 0.5rem 0.25rem 1rem;
-    }
+    /* Track with CSS Scroll Snap: Guarantee no cards cut in half */
     .vcar-track {
       display: flex;
       gap: 1rem;
-      transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
-      will-change: transform;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
       border: none !important;
+      padding: 0.5rem 0.25rem 1rem;
+      touch-action: pan-x pan-y;
     }
-    .vcar-track.is-dragging {
-      transition: none !important;
-      cursor: grabbing;
+    .vcar-track::-webkit-scrollbar {
+      display: none;
     }
 
-    /* Video Card - No border, clean modern shadow */
+    /* Video Card - No border, clean modern shadow, exact snapping */
     .vcar-card {
       position: relative;
       flex: 0 0 calc(50% - 0.5rem);
       min-width: calc(50% - 0.5rem);
+      max-width: calc(50% - 0.5rem);
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
       border-radius: 1.25rem;
       overflow: hidden;
       background: #0f172a;
@@ -92,6 +92,8 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       transition: transform 0.25s ease, box-shadow 0.25s ease;
       aspect-ratio: var(--vcar-aspect, 9 / 16);
       cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .vcar-card:hover {
       transform: translateY(-4px);
@@ -99,20 +101,23 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
     }
     @media (max-width: 480px) {
       .vcar-card {
-        flex: 0 0 calc(62% - 0.5rem);
-        min-width: calc(62% - 0.5rem);
+        flex: 0 0 calc(50% - 0.5rem);
+        min-width: calc(50% - 0.5rem);
+        max-width: calc(50% - 0.5rem);
       }
     }
     @media (min-width: 768px) {
       .vcar-card {
         flex: 0 0 calc(33.333% - 0.67rem);
         min-width: calc(33.333% - 0.67rem);
+        max-width: calc(33.333% - 0.67rem);
       }
     }
     @media (min-width: 1024px) {
       .vcar-card {
         flex: 0 0 calc(25% - 0.75rem);
         min-width: calc(25% - 0.75rem);
+        max-width: calc(25% - 0.75rem);
       }
     }
 
@@ -136,7 +141,7 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       height: 34px;
       border-radius: 50%;
       border: none;
-      background: rgba(15, 23, 42, 0.55);
+      background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       color: #ffffff;
@@ -149,10 +154,10 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
     }
     .vcar-card-sound:hover {
       transform: scale(1.1);
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
     }
 
-    /* Pause/Play indicator */
+    /* Floating Play/Pause Indicator */
     .vcar-play-badge {
       position: absolute;
       top: 50%;
@@ -161,21 +166,17 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
-      color: #fff;
+      color: #ffffff;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
       pointer-events: none;
       z-index: 3;
-      animation: vcarPulse 1.4s infinite;
-    }
-    @keyframes vcarPulse {
-      0%, 100% { transform: translate(-50%, -50%) scale(1); }
-      50% { transform: translate(-50%, -50%) scale(1.08); }
+      transition: opacity 0.2s ease;
     }
 
     /* Bottom Gradient Overlay */
@@ -295,59 +296,55 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
     </div>
   }
 
-  <div class="vcar-wrap"
-    (touchstart)="onTouchStart($event)"
-    (touchmove)="onTouchMove($event)"
-    (touchend)="onTouchEnd()"
-    (touchcancel)="onTouchEnd()">
-    <div class="vcar-track"
-      [class.is-dragging]="isDragging()"
-      [style.transform]="trackTransform()">
+  <div class="vcar-track" #trackRef (scroll)="onScroll()">
+    @for (v of validVideos(); track $index) {
+      <div class="vcar-card" (click)="onCardClick($index, $event)">
+        <video #videoEl
+          [src]="getVideoSrc(v)"
+          [poster]="v.posterUrl ? (v.posterUrl | imageUrl:'banner') : null"
+          playsinline webkit-playsinline
+          [muted]="true"
+          [attr.muted]="''"
+          autoplay loop preload="auto"
+          (loadedmetadata)="onMetadataLoaded(videoEl, $index)"
+          (play)="onVideoPlay($index)"
+          (pause)="onVideoPause($index)"
+          (error)="onVideoError($event, $index)">
+        </video>
 
-      @for (v of validVideos(); track $index) {
-        <div class="vcar-card" (click)="onCardClick($index, $event)">
-          <video #videoEl
-            [src]="resolveVideoUrl(v)"
-            [poster]="v.posterUrl ? (v.posterUrl | imageUrl:'banner') : null"
-            playsinline webkit-playsinline
-            muted autoplay loop preload="auto"
-            (error)="onVideoError($event, $index)">
-          </video>
+        <!-- Floating Sound Toggle Button -->
+        <button type="button" class="vcar-card-sound"
+          [attr.aria-label]="isCardMuted($index) ? lang.text('تشغيل الصوت', 'Unmute') : lang.text('كتم الصوت', 'Mute')"
+          (click)="toggleSound($index, $event)">
+          <i class="bi" [class.bi-volume-mute-fill]="isCardMuted($index)" [class.bi-volume-up-fill]="!isCardMuted($index)"></i>
+        </button>
 
-          <!-- Floating Sound Toggle Button -->
-          <button type="button" class="vcar-card-sound"
-            [attr.aria-label]="isCardMuted($index) ? lang.text('تشغيل الصوت', 'Unmute') : lang.text('كتم الصوت', 'Mute')"
-            (click)="toggleSound($index, $event)">
-            <i class="bi" [class.bi-volume-mute-fill]="isCardMuted($index)" [class.bi-volume-up-fill]="!isCardMuted($index)"></i>
-          </button>
+        <!-- Play/Pause indicator when video is paused -->
+        @if (isCardPaused($index)) {
+          <div class="vcar-play-badge">
+            <i class="bi bi-play-fill"></i>
+          </div>
+        }
 
-          <!-- Play/Pause indicator if paused -->
-          @if (isCardPaused($index)) {
-            <div class="vcar-play-badge">
-              <i class="bi bi-play-fill"></i>
-            </div>
-          }
-
-          <!-- Overlay details -->
-          @if (cardTitle(v) || v.link) {
-            <div class="vcar-overlay">
-              @if (cardTitle(v)) {
-                <h3 class="vcar-card-title">{{ cardTitle(v) }}</h3>
-              }
-              @if (v.link) {
-                <a class="vcar-card-cta"
-                  [routerLink]="linkPath(v.link)"
-                  [queryParams]="linkQuery(v.link)"
-                  (click)="$event.stopPropagation()">
-                  <span>{{ lang.text(s.buttonText || 'تسوق الآن', s.buttonTextEn || 'Shop now') }}</span>
-                  <i class="bi" [class.bi-arrow-left]="lang.isRtl()" [class.bi-arrow-right]="!lang.isRtl()"></i>
-                </a>
-              }
-            </div>
-          }
-        </div>
-      }
-    </div>
+        <!-- Overlay details -->
+        @if (cardTitle(v) || v.link) {
+          <div class="vcar-overlay">
+            @if (cardTitle(v)) {
+              <h3 class="vcar-card-title">{{ cardTitle(v) }}</h3>
+            }
+            @if (v.link) {
+              <a class="vcar-card-cta"
+                [routerLink]="linkPath(v.link)"
+                [queryParams]="linkQuery(v.link)"
+                (click)="$event.stopPropagation()">
+                <span>{{ lang.text(s.buttonText || 'تسوق الآن', s.buttonTextEn || 'Shop now') }}</span>
+                <i class="bi" [class.bi-arrow-left]="lang.isRtl()" [class.bi-arrow-right]="!lang.isRtl()"></i>
+              </a>
+            }
+          </div>
+        }
+      </div>
+    }
   </div>
 
   @if (validVideos().length > 1) {
@@ -372,23 +369,18 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
+  @ViewChild('trackRef') trackRef?: ElementRef<HTMLElement>;
   @ViewChildren('videoEl') videoEls!: QueryList<ElementRef<HTMLVideoElement>>;
 
   readonly lang = inject(LanguageService);
 
   readonly currentIndex = signal(0);
-  readonly isDragging = signal(false);
-  readonly dragOffsetPx = signal(0);
-
-  // Per-card state
   readonly mutedMap = signal<Record<number, boolean>>({});
   readonly pausedMap = signal<Record<number, boolean>>({});
 
-  private touchStartX = 0;
-  private touchStartY = 0;
-  private hasSwiped = false;
   private autoplayTimer: any = null;
   private isPaused = false;
+  private unlockListener?: () => void;
 
   validVideos = computed(() => {
     return (this.s?.videos || []).filter(v => !!(v.url || v.mobileUrl));
@@ -399,7 +391,7 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   eyebrow() { return this.lang.text(this.s?.eyebrow, this.s?.eyebrowEn); }
   cardTitle(v: HomeSectionVideo) { return this.lang.text(v.title || '', v.titleEn || ''); }
 
-  aspectCss(a: string) { return a.replace('/', ' / '); }
+  aspectCss(a: string) { return (a || '9/16').replace('/', ' / '); }
 
   linkPath(link: string) { return (link || '').split('?')[0] || '/menu'; }
   linkQuery(link: string) {
@@ -410,15 +402,24 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
     return out;
   }
 
-  resolveVideoUrl(v: HomeSectionVideo): string {
+  /**
+   * Robust URL resolution:
+   * 1. If mobile and mobileUrl is set, use mobileUrl; otherwise fallback to url.
+   * 2. If desktop and url is set, use url; otherwise fallback to mobileUrl.
+   * If only ONE of them is uploaded, it is automatically used everywhere!
+   */
+  getVideoSrc(v: HomeSectionVideo): string {
+    if (!v) return '';
     const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
-    const raw = (isMobile && v.mobileUrl) ? v.mobileUrl : (v.url || v.mobileUrl || '');
-    if (!raw) return '';
-    const trimmed = raw.trim();
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
-      return trimmed;
+    let url = isMobile
+      ? (v.mobileUrl?.trim() || v.url?.trim() || '')
+      : (v.url?.trim() || v.mobileUrl?.trim() || '');
+
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
+      return url;
     }
-    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return url.startsWith('/') ? url : `/${url}`;
   }
 
   isCardMuted(index: number): boolean {
@@ -428,6 +429,36 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
 
   isCardPaused(index: number): boolean {
     return !!this.pausedMap()[index];
+  }
+
+  onVideoPlay(index: number) {
+    this.pausedMap.update(p => ({ ...p, [index]: false }));
+  }
+
+  onVideoPause(index: number) {
+    this.pausedMap.update(p => ({ ...p, [index]: true }));
+  }
+
+  onMetadataLoaded(video: HTMLVideoElement, index: number) {
+    if (!video) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    // Attempt muted autoplay
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        this.pausedMap.update(p => ({ ...p, [index]: false }));
+      }).catch(() => {
+        // Autoplay was blocked by browser MEI policy:
+        // Seek slightly to force the browser to render the first video frame (prevents black box)
+        try {
+          if (video.currentTime === 0) {
+            video.currentTime = 0.05;
+          }
+        } catch (_) {}
+        this.pausedMap.update(p => ({ ...p, [index]: true }));
+      });
+    }
   }
 
   toggleSound(index: number, event: Event) {
@@ -446,12 +477,6 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   }
 
   onCardClick(index: number, event: MouseEvent) {
-    if (this.hasSwiped) {
-      event.preventDefault();
-      event.stopPropagation();
-      this.hasSwiped = false;
-      return;
-    }
     const video = this.videoEls?.toArray()[index]?.nativeElement;
     if (!video) return;
     if (video.paused) {
@@ -464,51 +489,7 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   }
 
   onVideoError(event: any, index: number) {
-    console.warn(`[VideoCarousel] Failed to play video #${index}:`, event);
-  }
-
-  trackTransform(): string {
-    const base = (this.isRtl ? 1 : -1) * (this.currentIndex() * this.slideWidth());
-    const offset = this.dragOffsetPx();
-    return `translateX(${base + offset}px)`;
-  }
-
-  onTouchStart(e: TouchEvent) {
-    if (e.touches.length !== 1) return;
-    this.pauseAutoplay();
-    this.touchStartX = e.touches[0].clientX;
-    this.touchStartY = e.touches[0].clientY;
-    this.hasSwiped = false;
-    this.isDragging.set(true);
-    this.dragOffsetPx.set(0);
-  }
-
-  onTouchMove(e: TouchEvent) {
-    if (!this.isDragging() || e.touches.length !== 1) return;
-    const dx = e.touches[0].clientX - this.touchStartX;
-    const dy = e.touches[0].clientY - this.touchStartY;
-    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
-      this.hasSwiped = true;
-      this.dragOffsetPx.set(dx);
-    }
-  }
-
-  onTouchEnd() {
-    if (!this.isDragging()) return;
-    const dx = this.dragOffsetPx();
-    this.isDragging.set(false);
-    this.dragOffsetPx.set(0);
-    const threshold = 35;
-    if (Math.abs(dx) >= threshold) {
-      if (this.isRtl) {
-        if (dx > 0) this.next();
-        else this.prev();
-      } else {
-        if (dx < 0) this.next();
-        else this.prev();
-      }
-    }
-    this.resumeAutoplay();
+    console.warn(`[VideoCarousel] Video #${index} failed:`, event);
   }
 
   ngOnInit() {
@@ -516,35 +497,132 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
   }
 
   ngAfterViewInit() {
-    // Ensure all videos start playing muted immediately
     if (typeof window === 'undefined') return;
+
+    // Start all videos muted immediately
     setTimeout(() => {
-      this.videoEls?.forEach((vRef, idx) => {
-        const el = vRef.nativeElement;
-        if (el) {
-          el.muted = true;
-          el.play()?.catch(() => {
-            // Autoplay fallback
-            el.muted = true;
-            el.play()?.catch(() => {});
-          });
-        }
-      });
+      this.playAllVideos();
     }, 150);
+
+    // Global one-time interaction listener to unblock autoplay on any user interaction
+    const unlock = () => {
+      this.playAllVideos();
+      window.removeEventListener('click', unlock);
+      window.removeEventListener('scroll', unlock);
+      window.removeEventListener('touchstart', unlock);
+    };
+    this.unlockListener = unlock;
+    window.addEventListener('click', unlock, { once: true, passive: true });
+    window.addEventListener('scroll', unlock, { once: true, passive: true });
+    window.addEventListener('touchstart', unlock, { once: true, passive: true });
   }
 
   ngOnDestroy() {
     this.stopAutoplay();
+    if (typeof window !== 'undefined' && this.unlockListener) {
+      window.removeEventListener('click', this.unlockListener);
+      window.removeEventListener('scroll', this.unlockListener);
+      window.removeEventListener('touchstart', this.unlockListener);
+    }
+  }
+
+  private playAllVideos() {
+    this.videoEls?.forEach((vRef, idx) => {
+      const el = vRef.nativeElement;
+      if (el) {
+        el.muted = true;
+        el.defaultMuted = true;
+        el.play()?.then(() => {
+          this.pausedMap.update(p => ({ ...p, [idx]: false }));
+        }).catch(() => {
+          try {
+            if (el.currentTime === 0) el.currentTime = 0.05;
+          } catch (_) {}
+        });
+      }
+    });
+  }
+
+  get isRtl(): boolean {
+    return typeof document !== 'undefined' ? document.dir === 'rtl' : true;
+  }
+
+  onScroll() {
+    const track = this.trackRef?.nativeElement;
+    if (!track) return;
+    const cards = track.querySelectorAll('.vcar-card');
+    if (!cards.length) return;
+    const cardEl = cards[0] as HTMLElement;
+    const step = cardEl.offsetWidth + 16;
+    if (step <= 0) return;
+    const scrollLeft = Math.abs(track.scrollLeft);
+    const index = Math.round(scrollLeft / step);
+    this.currentIndex.set(Math.min(index, this.validVideos().length - 1));
+  }
+
+  scrollByStep(direction: number) {
+    const track = this.trackRef?.nativeElement;
+    if (!track) return;
+    const cards = track.querySelectorAll('.vcar-card');
+    if (!cards.length) return;
+    const cardEl = cards[0] as HTMLElement;
+    const step = cardEl.offsetWidth + 16; // card width + gap
+    // In RTL, standard scrollLeft can be negative or positive depending on browser.
+    // Modern smooth scrollBy in RTL works with direction * step * (isRtl ? -1 : 1)
+    const sign = this.isRtl ? -1 : 1;
+    track.scrollBy({ left: direction * step * sign, behavior: 'smooth' });
+  }
+
+  next() {
+    const track = this.trackRef?.nativeElement;
+    if (!track) return;
+    const maxScroll = track.scrollWidth - track.clientWidth;
+    const currentScroll = Math.abs(track.scrollLeft);
+    if (currentScroll >= maxScroll - 25) {
+      // Wrap around smoothly to start
+      track.scrollTo({ left: 0, behavior: 'smooth' });
+      this.currentIndex.set(0);
+    } else {
+      this.scrollByStep(1);
+    }
+  }
+
+  prev() {
+    const track = this.trackRef?.nativeElement;
+    if (!track) return;
+    const currentScroll = Math.abs(track.scrollLeft);
+    if (currentScroll <= 25) {
+      // Wrap to end
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      const sign = this.isRtl ? -1 : 1;
+      track.scrollTo({ left: maxScroll * sign, behavior: 'smooth' });
+    } else {
+      this.scrollByStep(-1);
+    }
+  }
+
+  goTo(i: number) {
+    const track = this.trackRef?.nativeElement;
+    if (!track) return;
+    const cards = track.querySelectorAll('.vcar-card');
+    if (!cards.length || !cards[i]) return;
+    const card = cards[i] as HTMLElement;
+    card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    this.currentIndex.set(i);
+  }
+
+  dotArray(): any[] {
+    return Array.from({ length: this.validVideos().length });
   }
 
   startAutoplay() {
     this.stopAutoplay();
     if (typeof window === 'undefined') return;
     this.autoplayTimer = setInterval(() => {
-      if (!this.isPaused && this.validVideos().length > this.visibleCardsCount()) {
+      if (!this.isPaused && this.validVideos().length > 1) {
         this.next();
       }
-    }, 4200);
+    }, 4500);
   }
 
   stopAutoplay() {
@@ -556,60 +634,4 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
 
   pauseAutoplay() { this.isPaused = true; }
   resumeAutoplay() { this.isPaused = false; }
-
-  get isRtl() {
-    return typeof document !== 'undefined' ? document.dir === 'rtl' : true;
-  }
-
-  visibleCardsCount(): number {
-    if (typeof window === 'undefined') return 4;
-    const w = window.innerWidth;
-    if (w < 480) return 1.6;
-    if (w < 768) return 2;
-    if (w < 1024) return 3;
-    return 4;
-  }
-
-  maxIndex(): number {
-    const total = this.validVideos().length;
-    return Math.max(0, total - Math.floor(this.visibleCardsCount()));
-  }
-
-  slideWidth(): number {
-    if (typeof window === 'undefined') return 240;
-    const w = window.innerWidth;
-    if (w < 480) {
-      return ((w - 32) * 0.62) + 16;
-    }
-    if (w < 768) {
-      return ((w - 32) / 2) + 16;
-    }
-    if (w < 1024) {
-      return 240 + 16;
-    }
-    return 260 + 16;
-  }
-
-  dotArray(): any[] {
-    const count = this.maxIndex() + 1;
-    return Array.from({ length: Math.min(count, 8) });
-  }
-
-  prev() {
-    this.currentIndex.update(i => {
-      if (i <= 0) return this.maxIndex();
-      return i - 1;
-    });
-  }
-
-  next() {
-    this.currentIndex.update(i => {
-      if (i >= this.maxIndex()) return 0;
-      return i + 1;
-    });
-  }
-
-  goTo(i: number) {
-    this.currentIndex.set(Math.min(i, this.maxIndex()));
-  }
 }
