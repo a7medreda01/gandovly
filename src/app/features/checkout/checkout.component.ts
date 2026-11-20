@@ -447,10 +447,34 @@ export class CheckoutComponent implements OnInit {
   }
 
 
+  get requireWhatsAppOtp(): boolean {
+    return this.settingsService.settings().storeLayout?.requireWhatsAppOtp === true;
+  }
+
   // OTP Flow
   requestAuthOtp(isRetry: boolean = false) {
     if (!this.authPhone.trim()) {
       this.toast.error('يرجى إدخال رقم الهاتف / الواتساب.');
+      return;
+    }
+
+    if (!this.requireWhatsAppOtp) {
+      this.isRequestingOtp.set(true);
+      const resolvedName = (this.authFullName || this.customerName || '').trim();
+      this.authService.verifyOtp(this.authPhone.trim(), '', resolvedName).subscribe({
+        next: (res) => {
+          this.isRequestingOtp.set(false);
+          this.toast.success('تم تسجيل الدخول بنجاح ✅');
+          this.customerName = resolvedName || res.fullName || '';
+          this.customerPhone = this.authPhone.trim();
+          this.showAuthModal.set(false);
+          this.loadSavedAddresses(res.userId || this.customerPhone);
+        },
+        error: (err) => {
+          this.isRequestingOtp.set(false);
+          this.toast.error(err?.error?.message || 'تعذر تسجيل الدخول. حاول مرة أخرى.');
+        }
+      });
       return;
     }
 

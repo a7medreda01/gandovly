@@ -294,6 +294,38 @@
     /* 6-Digit OTP Box Grid */
     .otp-section {
       margin-top: 1rem;
+
+      .otp-single-input {
+        display: block;
+        width: 100%;
+        min-height: 56px;
+        height: 56px;
+        padding: 0 14px 0 calc(14px + 0.55em);
+        font-size: 1.65rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.55em;
+        text-align: center;
+        color: #0f172a;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        border-radius: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+
+        &::placeholder {
+          color: #94a3b8;
+          letter-spacing: 0.35em;
+          font-size: 1.25rem;
+        }
+
+        &:focus {
+          outline: none;
+          background: #ffffff;
+          border-color: var(--primary-color, #0d2b45);
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary-color, #0d2b45) 14%, transparent);
+        }
+      }
     }
 
     .otp-boxes-grid {

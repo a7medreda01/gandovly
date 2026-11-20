@@ -426,7 +426,7 @@
         </div>
         @if (authStep() === 'info') {
           <h3 class="modal-title">تسجيل الدخول</h3>
-          <p class="modal-sub">أدخل رقم موبايلك لاستلام رمز التحقق على واتساب.</p>
+          <p class="modal-sub">{{ requireWhatsAppOtp ? 'أدخل رقم موبايلك لاستلام رمز التحقق على واتساب.' : 'أدخل اسمك ورقم موبايلك لتسجيل الدخول ومتابعة طلباتك.' }}</p>
         } @else {
           <h3 class="modal-title">أدخل رمز التحقق (OTP)</h3>
           <p class="modal-sub">رمز التحقق على رقم: <strong>{{ authPhone }}</strong></p>

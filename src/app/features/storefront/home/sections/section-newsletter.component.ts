@@ -87,7 +87,7 @@ import { LanguageService } from '../../../../core/services/language.service';
 
   @if (buttonText()) {
     <div class="newsletter-actions">
-      <a class="btn-newsletter" [routerLink]="s.link || '/menu'">
+      <a class="btn-newsletter" [routerLink]="linkPath()" [queryParams]="linkQuery()">
         <span>{{ buttonText() }}</span>
         <i class="bi bi-arrow-left"></i>
       </a>
@@ -104,6 +104,11 @@ export class SectionNewsletterComponent {
   title() { return this.lang.text(this.s.title || 'اشترك في عروضنا الحصرية', this.s.titleEn || 'Join Our Exclusive Offers'); }
   subtitle() { return this.lang.text(this.s.subtitle || 'اكتشف أحدث العروض والمنتجات المميزة في متجرنا', this.s.subtitleEn || 'Discover the latest offers and featured products in our store'); }
   buttonText() { return this.lang.text(this.s.buttonText || 'تسوق الآن', this.s.buttonTextEn || 'Shop Now'); }
+  linkPath(): string { return (this.s.link || '/menu').split('?')[0] || '/menu'; }
+  linkQuery(): Record<string, string> {
+    const q = (this.s.link || '').split('?')[1];
+    return q ? Object.fromEntries(new URLSearchParams(q)) : {};
+  }
   effectiveTextColor(): string {
     if (this.s.textColor?.trim()) return this.s.textColor.trim();
     if (this.s.backgroundColor?.trim()) {

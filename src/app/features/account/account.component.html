@@ -68,11 +68,11 @@
               @if (isLoading()) { 
                 <span class="d-flex align-items-center justify-content-center gap-2">
                   <span class="spinner-border spinner-border-sm" role="status"></span>
-                  جاري إرسال رمز التحقق...
+                  {{ requireWhatsAppOtp ? 'جاري إرسال رمز التحقق...' : 'جاري تسجيل الدخول...' }}
                 </span> 
               } @else { 
                 <span class="d-flex align-items-center justify-content-center gap-2">
-                  <span>إرسال كود التحقق</span>
+                  <span>{{ requireWhatsAppOtp ? 'إرسال كود التحقق' : 'تسجيل الدخول' }}</span>
                   <i class="bi bi-arrow-left"></i>
                 </span> 
               }
@@ -139,8 +139,8 @@
                 </button>
               </div>
 
-              <input type="text" class="form-control text-center" inputmode="numeric"
-                autocomplete="one-time-code" dir="ltr" maxlength="6"
+              <input type="text" class="form-control otp-single-input text-center" inputmode="numeric"
+                autocomplete="one-time-code" dir="ltr" maxlength="6" placeholder="• • • • • •"
                 aria-label="رمز التحقق المكون من ستة أرقام"
                 [ngModel]="otpCode" (ngModelChange)="setDigitsFromCode($event)"
                 (keyup.enter)="verifyOtp()" />

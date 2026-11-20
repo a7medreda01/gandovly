@@ -330,9 +330,31 @@ export class AccountComponent implements OnInit, OnDestroy {
     }, 1000);
   }
 
+  get requireWhatsAppOtp(): boolean {
+    return this.settingsService.settings().storeLayout?.requireWhatsAppOtp === true;
+  }
+
   sendOtp(isRetry: boolean = false) {
     if (!this.phoneNumber.trim()) {
       this.toast.error('يرجى إدخال رقم الهاتف.');
+      return;
+    }
+
+    if (!this.requireWhatsAppOtp) {
+      this.isLoading.set(true);
+      this.authService.verifyOtp(this.phoneNumber.trim(), '', this.fullName.trim()).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+          this.showGuestLogin.set(false);
+          this.toast.success('تم تسجيل الدخول بنجاح ✅');
+          this.checkCurrentProfile();
+          if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
+        },
+        error: (err: any) => {
+          this.isLoading.set(false);
+          this.toast.error(err?.error?.message || 'تعذر تسجيل الدخول. حاول مرة أخرى.');
+        }
+      });
       return;
     }
 

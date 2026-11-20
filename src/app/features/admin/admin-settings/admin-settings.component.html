@@ -1292,11 +1292,6 @@
     <label class="form-group flex-1">مسمى الاستلام<input class="form-control" [(ngModel)]="settings()!.labelPickup" placeholder="استلام من الفرع"></label>
   </div>
 </details>
-<details class="settings-card settings-disclosure">
-  <summary><i class="bi bi-person-check text-primary me-2"></i> 3. صلاحيات إتمام الطلب وتسجيل الدخول <small>{{ layoutOptions.guestCheckout !== false ? 'الطلب كضيف متاح' : 'يتطلب تسجيل دخول' }}</small></summary>
-  <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light"><input type="checkbox" [ngModel]="layoutOptions.guestCheckout !== false" (ngModelChange)="layoutOptions.guestCheckout=$event" [disabled]="layoutOptions.onlineOrdering === false"> <span>السماح بالطلب كضيف بدون تسجيل دخول</span></label>
-  <p class="text-muted small mb-0 mt-2">عند السماح للضيف، يمكن إتمام الطلب دون إنشاء حساب. بيانات الطلب تظل قابلة للمتابعة من رابط الطلب.</p>
-</details>
 }
 @if (activeTab() === 'branding') {
 <details class="settings-card settings-disclosure">
@@ -1329,7 +1324,30 @@
           <details class="settings-card settings-disclosure">
             <summary><i class="bi bi-person-lines-fill text-primary me-2"></i> 1. إعدادات صفحة الحساب وطلباتي <small>{{ layoutOptions.showOrdersPage !== false ? 'ظاهرة للعملاء' : 'مخفية' }}</small></summary>
             <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light"><input type="checkbox" [ngModel]="layoutOptions.showOrdersPage !== false" (ngModelChange)="layoutOptions.showOrdersPage=$event"> <span>إظهار صفحة طلباتي وحساب العميل في قوائم المتجر</span></label>
-            <p class="text-muted small mb-0 mt-2">عند إيقافها يُخفى رابط «حسابي وطلباتي» من القوائم، وتظل روابط تتبع الطلبات التي يفتحها العميل مباشرة متاحة.</p>
+            <p class="text-muted small mb-0 mt-2">عند إيقافها يُخفى رابط «حسابي وطلباتي» وأيقونة الحساب من الهيدر والقوائم، وتظل روابط تتبع الطلبات التي يفتحها العميل مباشرة متاحة.</p>
+          </details>
+
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-whatsapp text-success me-2"></i> 2. تأكيد رقم الهاتف بكود واتساب (WhatsApp OTP) <small>{{ layoutOptions.requireWhatsAppOtp === true ? 'مفعّل' : 'غير مفعّل' }}</small></summary>
+            <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light">
+              <input type="checkbox" [ngModel]="layoutOptions.requireWhatsAppOtp === true" (ngModelChange)="layoutOptions.requireWhatsAppOtp = $event" />
+              <span>تفعيل إرسال كود تأكيد رقم الهاتف عبر واتساب عند تسجيل الدخول</span>
+            </label>
+            <div class="alert alert-warning py-2 px-3 mt-3 mb-0 small d-flex align-items-start gap-2">
+              <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+              <div>
+                <strong>ملاحظة هامة:</strong> يجب مراجعة <a routerLink="../whatsapp" queryParamsHandling="preserve" class="fw-bold text-decoration-underline">إعدادات بوابة الواتساب</a> لربط رقم المتجر والتأكد من اتصال البوابة قبل تفعيل هذه الميزة. عند إيقافها يدخل العميل برقم هاتفه مباشرة بدون إرسال كود.
+              </div>
+            </div>
+          </details>
+
+          <details class="settings-card settings-disclosure">
+            <summary><i class="bi bi-person-check text-primary me-2"></i> 3. السماح بالطلب كضيف بدون تسجيل دخول <small>{{ layoutOptions.guestCheckout !== false ? 'الطلب كضيف متاح' : 'يتطلب تسجيل دخول' }}</small></summary>
+            <label class="checkbox-label d-flex align-items-center gap-2 p-2 border rounded bg-light">
+              <input type="checkbox" [ngModel]="layoutOptions.guestCheckout !== false" (ngModelChange)="layoutOptions.guestCheckout=$event" [disabled]="layoutOptions.onlineOrdering === false">
+              <span>السماح بالطلب كضيف بدون تسجيل دخول</span>
+            </label>
+            <p class="text-muted small mb-0 mt-2">عند السماح للضيف، يمكن إتمام الطلب دون إنشاء حساب. بيانات الطلب تظل قابلة للمتابعة من رابط الطلب.</p>
           </details>
         }
         @if (activeTab() === 'policies') {

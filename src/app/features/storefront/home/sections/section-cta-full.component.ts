@@ -84,7 +84,7 @@ import { LanguageService } from '../../../../core/services/language.service';
     <p class="cta-desc">{{ subtitle() }}</p>
   }
   <div>
-    <a class="btn-action-light" [routerLink]="s.link || '/menu'">
+    <a class="btn-action-light" [routerLink]="linkPath()" [queryParams]="linkQuery()">
       <span>{{ buttonText() }}</span>
       <i class="bi bi-arrow-left"></i>
     </a>
@@ -101,4 +101,9 @@ export class SectionCtaFullComponent {
   subtitle() { return this.lang.text(this.s.subtitle || 'فريقنا مستعد لتلبية كافة متطلباتك ومساعدتك على مدار الساعة', this.s.subtitleEn || 'Our team is ready to fulfill all your needs 24/7'); }
   eyebrow() { return this.lang.text(this.s.eyebrow, this.s.eyebrowEn); }
   buttonText() { return this.lang.text(this.s.buttonText || 'تواصل معنا الآن', this.s.buttonTextEn || 'Contact Us Now'); }
+  linkPath(): string { return (this.s.link || '/menu').split('?')[0] || '/menu'; }
+  linkQuery(): Record<string, string> {
+    const q = (this.s.link || '').split('?')[1];
+    return q ? Object.fromEntries(new URLSearchParams(q)) : {};
+  }
 }

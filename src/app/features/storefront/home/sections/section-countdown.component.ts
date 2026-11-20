@@ -133,7 +133,7 @@ import { LanguageService } from '../../../../core/services/language.service';
   </div>
 
   <div>
-    <a class="btn-countdown-cta" [routerLink]="s.link || '/menu'">
+    <a class="btn-countdown-cta" [routerLink]="linkPath()" [queryParams]="linkQuery()">
       <span>{{ buttonText() }}</span>
       <i class="bi bi-arrow-left"></i>
     </a>
@@ -156,6 +156,11 @@ export class SectionCountdownComponent implements OnInit, OnDestroy {
   subtitle() { return this.lang.text(this.s.subtitle || 'سارع بالاستفادة من الخصومات قبل انتهاء الوقت', this.s.subtitleEn || 'Grab exclusive deals before time runs out'); }
   eyebrow() { return this.lang.text(this.s.eyebrow || 'عرض فلاش', this.s.eyebrowEn || 'FLASH SALE'); }
   buttonText() { return this.lang.text(this.s.buttonText || 'تسوق العرض الآن', this.s.buttonTextEn || 'Shop the Deal'); }
+  linkPath(): string { return (this.s.link || '/menu').split('?')[0] || '/menu'; }
+  linkQuery(): Record<string, string> {
+    const q = (this.s.link || '').split('?')[1];
+    return q ? Object.fromEntries(new URLSearchParams(q)) : {};
+  }
   effectiveTextColor(): string {
     if (this.s.textColor?.trim()) return this.s.textColor.trim();
     if (this.s.backgroundColor?.trim()) {

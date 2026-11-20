@@ -223,7 +223,7 @@ import { LanguageService } from '../../../../core/services/language.service';
         <p class="hero-subtitle">{{ currentSlide().subtitle }}</p>
       }
       @if (currentSlide().buttonText) {
-        <a class="btn-hero-cta" [routerLink]="currentSlide().link || '/menu'">
+        <a class="btn-hero-cta" [routerLink]="slidePath(currentSlide().link)" [queryParams]="slideQuery(currentSlide().link)">
           <span>{{ currentSlide().buttonText }}</span>
           <i class="bi bi-arrow-left"></i>
         </a>
@@ -254,6 +254,15 @@ export class SectionHeroSliderComponent implements OnInit, OnDestroy {
   readonly lang = inject(LanguageService);
   currentIndex = signal(0);
   private autoplayTimer: ReturnType<typeof setInterval> | null = null;
+
+  slidePath(link?: string): string {
+    return (link || '/menu').split('?')[0] || '/menu';
+  }
+
+  slideQuery(link?: string): Record<string, string> {
+    const q = (link || '').split('?')[1];
+    return q ? Object.fromEntries(new URLSearchParams(q)) : {};
+  }
 
   ngOnInit() {
     this.startAutoplay();
