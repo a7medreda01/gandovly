@@ -78,13 +78,16 @@ export class SettingsService {
         }
         const showMobileBottomNav = clean.showMobileBottomNav !== false && clean.storeLayout?.showMobileBottomNav !== false;
         const showHomeSearch = clean.showSearchBar !== false && clean.storeLayout?.showHomeSearch !== false;
+        const showNavbarSearch = clean.showNavbarSearch === true || clean.storeLayout?.showNavbarSearch === true;
         clean.showMobileBottomNav = showMobileBottomNav;
         clean.showSearchBar = showHomeSearch;
+        clean.showNavbarSearch = showNavbarSearch;
         if (clean.storeLayout) {
           clean.storeLayout = {
             ...clean.storeLayout,
             showMobileBottomNav,
-            showHomeSearch
+            showHomeSearch,
+            showNavbarSearch
           };
         }
         for (const key of ['logoUrl', 'heroBannerDesktopUrl', 'heroBannerMobileUrl', 'faviconUrl'] as const) {

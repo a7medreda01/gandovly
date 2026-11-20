@@ -136,6 +136,7 @@ export interface StorefrontSettings {
   showWhatsAppInNavbar?: boolean;
   showPhoneInNavbar?: boolean;
   showSearchBar?: boolean;
+  showNavbarSearch?: boolean;
   showCartBadge?: boolean;
   showMobileBottomNav?: boolean;
 

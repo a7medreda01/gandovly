@@ -104,6 +104,18 @@
           {{ languageService.text('EN', 'عربي') }}
         </button>
       }
+
+      <!-- Navbar Live Search Button -->
+      @if (isNavbarSearchEnabled) {
+        <button type="button" class="account-btn header-search-btn flex-center"
+          [class.active]="isSearchOpen()"
+          (click)="toggleSearch()"
+          [title]="languageService.text('البحث عن منتج', 'Search products')"
+          [attr.aria-label]="languageService.text('البحث عن منتج', 'Search products')">
+          <i class="bi" [class.bi-search]="!isSearchOpen()" [class.bi-x-lg]="isSearchOpen()"></i>
+        </button>
+      }
+
       <!-- WhatsApp CTA -->
       @if (settingsService.settings().showWhatsAppInNavbar && settingsService.settings().whatsapp) {
       <a [href]="whatsappUrl" target="_blank" rel="noopener noreferrer"
@@ -150,4 +162,85 @@
       }
     </div>
   </div>
+
+  <!-- Navbar Live Search Dropdown Panel -->
+  @if (isSearchOpen()) {
+    <div class="live-search-backdrop" (click)="closeSearch()"></div>
+    <div class="live-search-panel" (click)="$event.stopPropagation()">
+      <div class="container live-search-container">
+        <!-- Search Input Box -->
+        <div class="live-search-input-box" [style.border-color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
+          <i class="bi bi-search search-box-icon" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'"></i>
+          <input #liveSearchInput type="text"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="onSearchInput($event)"
+            (keydown.escape)="closeSearch()"
+            (keydown.enter)="onSearchEnter()"
+            [placeholder]="languageService.text('ابحث عن منتج بالاسم، القسم، أو الموديل...', 'Search products by name, category, or model...')"
+            [attr.aria-label]="languageService.text('البحث المباشر في المتجر', 'Live store search')"
+            autocomplete="off"
+            spellcheck="false" />
+          @if (searchQuery()) {
+            <button type="button" class="btn-clear-search" (click)="clearSearch()" [attr.aria-label]="languageService.text('مسح', 'Clear')">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          }
+          @if (isSearching()) {
+            <div class="search-mini-spinner" aria-hidden="true"></div>
+          }
+        </div>
+
+        <!-- Live Results Dropdown -->
+        @if (hasSearched() || isSearching()) {
+          <div class="live-search-results">
+            @if (isSearching() && !searchResults().length) {
+              <div class="live-search-loading">
+                <div class="search-mini-spinner"></div>
+                <span>{{ languageService.text('جاري البحث في المنتجات...', 'Searching products...') }}</span>
+              </div>
+            } @else if (searchResults().length > 0) {
+              <div class="live-results-list">
+                @for (p of searchResults(); track p.id) {
+                  <div class="live-result-item" (click)="openProduct(p)">
+                    <div class="result-img-wrapper">
+                      @if (p.imageUrl) {
+                        <img [src]="p.imageUrl | imageUrl:'product'" [alt]="productName(p)" loading="lazy" />
+                      } @else {
+                        <div class="result-img-placeholder">
+                          <i class="bi bi-image"></i>
+                        </div>
+                      }
+                    </div>
+                    <div class="result-info">
+                      <h4 class="result-name">{{ productName(p) }}</h4>
+                      @if (p.categoryNameAr || p.brand) {
+                        <span class="result-category">{{ p.categoryNameAr || p.brand }}</span>
+                      }
+                    </div>
+                    <div class="result-price" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
+                      <span class="price-val">{{ p.pricePerUnit || 0 }}</span>
+                      <span class="currency">{{ currencySymbol() }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <div class="live-results-footer">
+                <a [routerLink]="['/menu']" [queryParams]="{ search: searchQuery() }" (click)="closeSearch()" class="btn-view-all-results">
+                  <span>{{ languageService.text('عرض جميع نتائج البحث لـ "' + searchQuery() + '"', 'View all results for "' + searchQuery() + '"') }}</span>
+                  <i class="bi" [class.bi-arrow-left]="languageService.isRtl()" [class.bi-arrow-right]="!languageService.isRtl()"></i>
+                </a>
+              </div>
+            } @else if (hasSearched() && !isSearching()) {
+              <div class="live-search-empty">
+                <i class="bi bi-search"></i>
+                <p>{{ languageService.text('لم يتم العثور على أي منتج يطابق "' + searchQuery() + '"', 'No products found matching "' + searchQuery() + '"') }}</p>
+                <small>{{ languageService.text('جرب البحث بكلمات أخرى أو تصفح الأقسام', 'Try searching with different keywords or browse categories') }}</small>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
 </header>

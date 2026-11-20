@@ -143,6 +143,7 @@ export interface StoreLayout {
     detailImageAspect?: 'square' | 'portrait' | 'landscape' | 'auto';
     onlineOrdering?: boolean;
     showOrdersPage?: boolean;
+    showNavbarSearch?: boolean;
     requireWhatsAppOtp?: boolean;
     guestCheckout?: boolean;
     showFooterStoreName?: boolean;

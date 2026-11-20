@@ -58,7 +58,7 @@
             }
           }
           @case ('products') {
-            <app-section-products [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-products>
+            <app-section-products [s]="s" [settings]="settings.settings()" [products]="row.products" [isFirst]="i === 0 || i === 1" (selectProduct)="open($event)"></app-section-products>
           }
           @case ('banner') {
             <app-section-banner [s]="s" [settings]="settings.settings()" [products]="row.products" (selectProduct)="open($event)"></app-section-banner>

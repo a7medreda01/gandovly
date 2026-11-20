@@ -667,16 +667,20 @@ export class AdminSettingsComponent implements OnInit {
     const showMobileBottomNav = layout.showMobileBottomNav !== false;
     const showHomeSearch = layout.showHomeSearch !== false;
     const showOrdersPage = layout.showOrdersPage !== false;
+    const showNavbarSearch = layout.showNavbarSearch === true;
     const requireWhatsAppOtp = layout.requireWhatsAppOtp === true;
     layout.showMobileBottomNav = showMobileBottomNav;
     layout.showHomeSearch = showHomeSearch;
     layout.showOrdersPage = showOrdersPage;
+    layout.showNavbarSearch = showNavbarSearch;
     layout.requireWhatsAppOtp = requireWhatsAppOtp;
     current.showMobileBottomNav = showMobileBottomNav;
     current.showSearchBar = showHomeSearch;
+    current.showNavbarSearch = showNavbarSearch;
     const payload = {
       ...current,
       showSearchBar: showHomeSearch,
+      showNavbarSearch,
       showMobileBottomNav,
       enableBuyNow: !!current.enableBuyNow,
       storeLayout: layout,

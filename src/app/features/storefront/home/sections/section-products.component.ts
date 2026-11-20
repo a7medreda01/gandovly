@@ -15,7 +15,8 @@ import { ProductCardComponent } from '../../../../shared/components/product-card
   template: `
 @if (products.length) {
 <section class="collection"
-  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
+  [class.first-collection]="isFirst"
+  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false && !isFirst"
   appScrollAnimate>
   <header>
     <div>
@@ -41,6 +42,7 @@ export class SectionProductsComponent {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
   @Input() products: Product[] = [];
+  @Input() isFirst = false;
   @Output() selectProduct = new EventEmitter<Product>();
   readonly lang = inject(LanguageService);
   title() { return this.lang.text(this.s.title, this.s.titleEn); }
