@@ -39,7 +39,7 @@ export interface HomeSection {
     id: string;
     kind: 'hero' | 'products' | 'banner' | 'features' | 'brands' | 'categories'
         | 'product_carousel' | 'testimonials' | 'hero_slider' | 'categories_grid'
-        | 'countdown' | 'newsletter' | 'stats' | 'cta_full' | 'video' | 'markdown';
+        | 'countdown' | 'newsletter' | 'stats' | 'cta_full' | 'video' | 'video_carousel' | 'markdown';
     enabled: boolean;
     title: string;
     subtitle: string;
@@ -67,6 +67,23 @@ export interface HomeSection {
     testimonials?: HomeSectionTestimonial[];
     /** slides list (for hero_slider) */
     slides?: HomeSectionSlide[];
+    /** video carousel */
+    videos?: HomeSectionVideo[];
+    videoAspect?: '16/9' | '9/16' | '1/1' | '4/5' | '21/9' | '4/3';
+    videoMobileAspect?: '' | '16/9' | '9/16' | '1/1' | '4/5' | '21/9' | '4/3';
+    videoFit?: 'cover' | 'contain';
+    videoWidth?: 'container' | 'full';
+    videoMuted?: boolean;
+    videoShowControls?: boolean;
+    videoLoop?: boolean;
+}
+export interface HomeSectionVideo {
+    url: string;
+    mobileUrl?: string;
+    posterUrl?: string;
+    title?: string;
+    titleEn?: string;
+    link?: string;
 }
 export interface HomeThemeBannerConfig {
     desktopUrl?: string;
@@ -162,6 +179,7 @@ export function newHomeSection(kind: HomeSection['kind']): HomeSection {
         stats: 'أرقام وإنجازات',
         cta_full: 'تواصل معنا الآن',
         video: 'شاهد الفيديو',
+        video_carousel: 'شاهد منتجاتنا',
         markdown: 'محتوى مخصص',
     };
     const s: HomeSection = {
@@ -189,6 +207,15 @@ export function newHomeSection(kind: HomeSection['kind']): HomeSection {
         s.slides = [
             { title: '', subtitle: '', buttonText: 'تسوق الآن', link: '/menu', imageUrl: '', mobileImageUrl: '', overlayOpacity: 30 }
         ];
+    } else if (kind === 'video_carousel') {
+        s.videos = [{ url: '', mobileUrl: '', posterUrl: '', title: '', link: '' }];
+        s.videoAspect = '16/9';
+        s.videoMobileAspect = '9/16';
+        s.videoFit = 'cover';
+        s.videoWidth = 'container';
+        s.videoMuted = true;
+        s.videoShowControls = false;
+        s.videoLoop = true;
     } else if (kind === 'testimonials') {
         s.testimonials = [
             { name: '', role: 'عميل موثق', text: '', rating: 5 }

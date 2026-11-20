@@ -55,6 +55,7 @@ export class StoreLayoutEditorComponent {
     { id: 'stats', name: 'أرقام وإحصائيات المتجر' },
     { id: 'cta_full', name: 'بانر دعوة للتواصل / اتخاذ إجراء' },
     { id: 'video', name: 'فيديو تعريفي' },
+    { id: 'video_carousel', name: 'كاروسيل فيديوهات (تشغيل تلقائي)' },
     { id: 'markdown', name: 'محتوى / قصة مخصصة' }
   ];
 
@@ -134,6 +135,29 @@ export class StoreLayoutEditorComponent {
   removeSlide(s: HomeSection, i: number) {
     if (!s.slides) return;
     s.slides.splice(i, 1);
+    this.changed();
+  }
+
+  addVideo(s: HomeSection) {
+    s.videos = s.videos || [];
+    if (s.videos.length >= 8) {
+      this.toast.info('الحد الأقصى 8 فيديوهات');
+      return;
+    }
+    s.videos.push({ url: '', mobileUrl: '', posterUrl: '', title: '', link: '' });
+    this.changed();
+  }
+
+  removeVideo(s: HomeSection, i: number) {
+    s.videos?.splice(i, 1);
+    this.changed();
+  }
+
+  moveVideo(s: HomeSection, i: number, dir: number) {
+    const list = s.videos || [];
+    const j = i + dir;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
     this.changed();
   }
 

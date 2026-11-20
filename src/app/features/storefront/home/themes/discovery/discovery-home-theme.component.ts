@@ -34,6 +34,7 @@ import { SectionNewsletterComponent } from '../../sections/section-newsletter.co
 import { SectionStatsComponent } from '../../sections/section-stats.component';
 import { SectionCtaFullComponent } from '../../sections/section-cta-full.component';
 import { SectionVideoComponent } from '../../sections/section-video.component';
+import { SectionVideoCarouselComponent } from '../../sections/section-video-carousel.component';
 import { SectionMarkdownComponent } from '../../sections/section-markdown.component';
 
 @Component({
@@ -48,7 +49,7 @@ import { SectionMarkdownComponent } from '../../sections/section-markdown.compon
     SectionProductCarouselComponent, SectionTestimonialsComponent,
     SectionHeroSliderComponent, SectionCategoriesGridComponent,
     SectionCountdownComponent, SectionNewsletterComponent, SectionStatsComponent,
-    SectionCtaFullComponent, SectionVideoComponent, SectionMarkdownComponent
+    SectionCtaFullComponent, SectionVideoComponent, SectionVideoCarouselComponent, SectionMarkdownComponent
   ],
   templateUrl: './discovery-home-theme.component.html',
   styleUrls: ['../../home-sections.component.scss', './discovery-home-theme.component.scss']

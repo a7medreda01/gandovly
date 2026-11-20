@@ -32,6 +32,7 @@ import { SectionNewsletterComponent } from './sections/section-newsletter.compon
 import { SectionStatsComponent } from './sections/section-stats.component';
 import { SectionCtaFullComponent } from './sections/section-cta-full.component';
 import { SectionVideoComponent } from './sections/section-video.component';
+import { SectionVideoCarouselComponent } from './sections/section-video-carousel.component';
 import { SectionMarkdownComponent } from './sections/section-markdown.component';
 
 @Component({
@@ -47,7 +48,7 @@ import { SectionMarkdownComponent } from './sections/section-markdown.component'
     SectionProductCarouselComponent, SectionTestimonialsComponent,
     SectionHeroSliderComponent, SectionCategoriesGridComponent,
     SectionCountdownComponent, SectionNewsletterComponent, SectionStatsComponent,
-    SectionCtaFullComponent, SectionVideoComponent, SectionMarkdownComponent
+    SectionCtaFullComponent, SectionVideoComponent, SectionVideoCarouselComponent, SectionMarkdownComponent
   ],
   templateUrl: './home-sections.component.html',
   styleUrl: './home-sections.component.scss'

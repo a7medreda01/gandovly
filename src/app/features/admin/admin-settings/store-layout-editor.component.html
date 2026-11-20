@@ -394,7 +394,7 @@
               }
 
               <!-- BACKGROUND & TEXT COLORS -->
-              @if(s.kind==='hero'||s.kind==='banner'||s.kind==='features'||s.kind==='brands'||s.kind==='cta_full'||s.kind==='countdown'||s.kind==='testimonials'||s.kind==='newsletter'||s.kind==='stats'||s.kind==='markdown'){
+              @if(s.kind==='hero'||s.kind==='banner'||s.kind==='features'||s.kind==='brands'||s.kind==='cta_full'||s.kind==='countdown'||s.kind==='testimonials'||s.kind==='newsletter'||s.kind==='stats'||s.kind==='markdown'||s.kind==='video_carousel'){
                 <div class="fields mt-3">
                   <label>لون الخلفية
                     <input type="color" [ngModel]="s.backgroundColor||'#f7f8fc'" (ngModelChange)="s.backgroundColor=$event;changed()">
@@ -423,6 +423,88 @@
                     <input type="url" [(ngModel)]="s.videoUrl" (ngModelChange)="changed()" placeholder="https://www.youtube.com/watch?v=..." dir="ltr">
                   </label>
                 </div>
+              }
+
+              <!-- VIDEO CAROUSEL -->
+              @if(s.kind==='video_carousel'){
+                <div class="fields mt-3">
+                  <label>مقاس الفيديو (كمبيوتر)
+                    <select [ngModel]="s.videoAspect||'16/9'" (ngModelChange)="s.videoAspect=$event;changed()">
+                      <option value="16/9">عريض 16:9</option>
+                      <option value="21/9">سينمائي 21:9</option>
+                      <option value="4/3">كلاسيكي 4:3</option>
+                      <option value="1/1">مربع 1:1</option>
+                      <option value="4/5">عمودي 4:5</option>
+                      <option value="9/16">طولي 9:16 (ريلز / ستوري)</option>
+                    </select>
+                  </label>
+                  <label>مقاس الفيديو (موبايل)
+                    <select [ngModel]="s.videoMobileAspect||''" (ngModelChange)="s.videoMobileAspect=$event;changed()">
+                      <option value="">نفس مقاس الكمبيوتر</option>
+                      <option value="16/9">عريض 16:9</option>
+                      <option value="4/3">كلاسيكي 4:3</option>
+                      <option value="1/1">مربع 1:1</option>
+                      <option value="4/5">عمودي 4:5</option>
+                      <option value="9/16">طولي 9:16 (ريلز / ستوري)</option>
+                    </select>
+                  </label>
+                  <label>ملاءمة الفيديو
+                    <select [ngModel]="s.videoFit||'cover'" (ngModelChange)="s.videoFit=$event;changed()">
+                      <option value="cover">ملء الإطار (قص الأطراف)</option>
+                      <option value="contain">إظهار الفيديو كامل</option>
+                    </select>
+                  </label>
+                  <label>عرض السكشن
+                    <select [ngModel]="s.videoWidth||'container'" (ngModelChange)="s.videoWidth=$event;changed()">
+                      <option value="container">داخل حدود الصفحة</option>
+                      <option value="full">بعرض الشاشة كاملة</option>
+                    </select>
+                  </label>
+                  <label>نص زر الفيديو
+                    <input [(ngModel)]="s.buttonText" maxlength="60" (ngModelChange)="changed()">
+                  </label>
+                </div>
+                <div class="fields mt-2">
+                  <label class="check"><input type="checkbox" [ngModel]="s.videoMuted!==false" (ngModelChange)="s.videoMuted=$event;changed()"> بدء التشغيل بدون صوت (مطلوب للتشغيل التلقائي)</label>
+                  <label class="check"><input type="checkbox" [ngModel]="s.videoLoop!==false" (ngModelChange)="s.videoLoop=$event;changed()"> إعادة التشغيل من الأول بعد آخر فيديو</label>
+                  <label class="check"><input type="checkbox" [ngModel]="!!s.videoShowControls" (ngModelChange)="s.videoShowControls=$event;changed()"> إظهار أدوات تحكم المتصفح</label>
+                </div>
+                <p class="text-muted small mt-2"><i class="bi bi-info-circle me-1"></i>استخدم روابط فيديو مباشرة (MP4 / WebM) تبدأ بـ https. يتم تحميل الفيديو الحالي فقط، وينتقل تلقائيًا للتالي عند انتهائه، ويتوقف عند الخروج من الشاشة. يُفضل أن يكون حجم الفيديو أقل من 8MB.</p>
+
+                <h3 class="mt-3"><i class="bi bi-collection-play me-1 text-primary"></i> الفيديوهات</h3>
+                @for(v of s.videos||[];track $index;let j=$index){
+                  <div class="item-fields mb-3 p-3 border rounded-3 bg-light">
+                    <label class="wide">رابط الفيديو (كمبيوتر) *
+                      <input type="url" dir="ltr" [(ngModel)]="v.url" (ngModelChange)="changed()" placeholder="https://.../video.mp4">
+                    </label>
+                    <label class="wide">رابط فيديو الموبايل (اختياري)
+                      <input type="url" dir="ltr" [(ngModel)]="v.mobileUrl" (ngModelChange)="changed()" placeholder="https://.../video-vertical.mp4">
+                    </label>
+                    <label>صورة الغلاف (Poster)
+                      <input type="file" accept="image/*" (change)="upload($event,v,'posterUrl')" [disabled]="busy()">
+                    </label>
+                    <label>رابط صورة الغلاف
+                      <input dir="ltr" [(ngModel)]="v.posterUrl" (ngModelChange)="changed()">
+                    </label>
+                    <label>عنوان يظهر على الفيديو
+                      <input [(ngModel)]="v.title" maxlength="160" (ngModelChange)="changed()">
+                    </label>
+                    @if(settings.settings().languageMode !== 'ar_only'){
+                      <label>العنوان بالإنجليزية
+                        <input dir="ltr" [(ngModel)]="v.titleEn" maxlength="160" (ngModelChange)="changed()">
+                      </label>
+                    }
+                    <label>رابط الزر (اختياري)
+                      <input dir="ltr" [(ngModel)]="v.link" (ngModelChange)="changed()" placeholder="/menu?sort=offers">
+                    </label>
+                    <div class="d-flex gap-2 mt-2">
+                      <button type="button" (click)="moveVideo(s,j,-1)" [disabled]="j===0" aria-label="تحريك لأعلى"><i class="bi bi-arrow-up"></i></button>
+                      <button type="button" (click)="moveVideo(s,j,1)" [disabled]="j===(s.videos||[]).length-1" aria-label="تحريك لأسفل"><i class="bi bi-arrow-down"></i></button>
+                      <button type="button" class="danger" (click)="removeVideo(s,j)"><i class="bi bi-trash"></i> حذف</button>
+                    </div>
+                  </div>
+                }
+                <button type="button" (click)="addVideo(s)"><i class="bi bi-plus-lg"></i> إضافة فيديو</button>
               }
 
               <!-- MARKDOWN CONTENT -->
