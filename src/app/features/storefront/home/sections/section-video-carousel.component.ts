@@ -1,6 +1,6 @@
 import {
-  AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild, ViewEncapsulation,
-  computed, inject, signal
+  AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, QueryList,
+  ViewChildren, ViewEncapsulation, computed, inject, signal
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -11,9 +11,9 @@ import { LanguageService } from '../../../../core/services/language.service';
 import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 
 /**
- * Video Carousel Section
- * Lightweight multi-video player: only the active clip is loaded, clips auto-advance
- * when they end, playback pauses when the section leaves the viewport.
+ * Video Carousel / Slider Section (Products Slider Style)
+ * Modern borderless multi-card video carousel with touch swipe, autoplay,
+ * individual card sound toggles, and responsive card sizing (like product carousel).
  */
 @Component({
   selector: 'app-section-video-carousel',
@@ -21,279 +21,595 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
   standalone: true,
   imports: [CommonModule, RouterLink, ScrollAnimateDirective, ImageUrlPipe],
   styles: [`
-    .vcar-section { padding: 2.5rem 0; background: var(--vcar-bg, transparent); color: var(--vcar-text, var(--text-main, #0f172a)); }
-    .vcar-section.is-full { padding-inline: 0; }
-    .vcar-header { text-align: center; margin-bottom: 1.5rem; padding-inline: 1rem; }
-    .vcar-eyebrow { display: inline-block; font-size: .78rem; font-weight: 800; letter-spacing: .04em; color: var(--primary-color); margin-bottom: .4rem; }
-    .vcar-title { font-size: clamp(1.4rem, 2.6vw, 1.95rem); font-weight: 800; margin: 0; color: inherit; }
-    .vcar-sub { margin: .5rem auto 0; max-width: 640px; opacity: .75; font-size: .95rem; }
-
-    .vcar-stage {
-      position: relative; width: 100%; margin: 0 auto; overflow: hidden;
-      aspect-ratio: var(--vcar-aspect, 16 / 9);
-      border-radius: var(--radius-card, 20px);
-      background: #000; box-shadow: 0 12px 32px rgba(15, 23, 42, .14);
-      max-height: 82vh; touch-action: pan-y;
+    .vcar-section {
+      padding: 2.25rem 0;
+      background: var(--vcar-bg, transparent);
+      color: var(--vcar-text, var(--text-main, #0f172a));
+      border: none !important;
+      box-shadow: none !important;
     }
-    .vcar-section:not(.is-full) .vcar-stage.is-portrait { max-width: 460px; }
-    .vcar-section.is-full .vcar-stage { border-radius: 0; box-shadow: none; }
-    @media (max-width: 767px) {
-      .vcar-stage { aspect-ratio: var(--vcar-aspect-m, var(--vcar-aspect, 16 / 9)); }
-      .vcar-section:not(.is-full) .vcar-stage.is-portrait-m { max-width: 100%; }
+    .vcar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+      padding-inline: 0.5rem;
+    }
+    .vcar-eyebrow {
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--primary-color, #c88a2c);
+      margin-bottom: 0.35rem;
+    }
+    .vcar-title {
+      font-size: clamp(1.3rem, 2.4vw, 1.75rem);
+      font-weight: 800;
+      margin: 0;
+      color: inherit;
+      line-height: 1.3;
+    }
+    .vcar-sub {
+      margin: 0.35rem 0 0;
+      opacity: 0.75;
+      font-size: 0.92rem;
     }
 
-    .vcar-video {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: var(--vcar-fit, cover); background: #000;
-      opacity: 0; transition: opacity .45s ease;
+    .vcar-wrap {
+      position: relative;
+      overflow: hidden;
+      border: none !important;
+      touch-action: pan-y pinch-zoom;
+      user-select: none;
+      -webkit-user-select: none;
+      padding: 0.5rem 0.25rem 1rem;
     }
-    .vcar-video.is-ready { opacity: 1; }
-    .vcar-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: var(--vcar-fit, cover); }
+    .vcar-track {
+      display: flex;
+      gap: 1rem;
+      transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
+      will-change: transform;
+      border: none !important;
+    }
+    .vcar-track.is-dragging {
+      transition: none !important;
+      cursor: grabbing;
+    }
 
-    .vcar-shade { position: absolute; inset: auto 0 0 0; height: 45%; pointer-events: none;
-      background: linear-gradient(to top, rgba(0,0,0,.55), transparent); }
+    /* Video Card - No border, clean modern shadow */
+    .vcar-card {
+      position: relative;
+      flex: 0 0 calc(50% - 0.5rem);
+      min-width: calc(50% - 0.5rem);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      background: #0f172a;
+      border: none !important;
+      outline: none !important;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      aspect-ratio: var(--vcar-aspect, 9 / 16);
+      cursor: pointer;
+    }
+    .vcar-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+    }
+    @media (max-width: 480px) {
+      .vcar-card {
+        flex: 0 0 calc(62% - 0.5rem);
+        min-width: calc(62% - 0.5rem);
+      }
+    }
+    @media (min-width: 768px) {
+      .vcar-card {
+        flex: 0 0 calc(33.333% - 0.67rem);
+        min-width: calc(33.333% - 0.67rem);
+      }
+    }
+    @media (min-width: 1024px) {
+      .vcar-card {
+        flex: 0 0 calc(25% - 0.75rem);
+        min-width: calc(25% - 0.75rem);
+      }
+    }
 
-    .vcar-progress { position: absolute; top: 12px; inset-inline: 14px; display: flex; gap: 5px; z-index: 3; }
-    .vcar-bar { flex: 1; height: 3px; border-radius: 3px; background: rgba(255,255,255,.35); overflow: hidden; border: 0; padding: 0; cursor: pointer; }
-    .vcar-bar > span { display: block; height: 100%; width: 0; background: #fff; transition: width .2s linear; }
-    .vcar-bar.done > span { width: 100%; }
+    .vcar-card video {
+      width: 100%;
+      height: 100%;
+      object-fit: var(--vcar-fit, cover);
+      display: block;
+      background: #0f172a;
+      pointer-events: auto;
+      border: none !important;
+    }
 
-    .vcar-caption { position: absolute; inset-inline: 16px; bottom: 16px; z-index: 3; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; color: #fff; }
-    .vcar-caption h3 { margin: 0; font-size: clamp(1rem, 2vw, 1.3rem); font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,.35); }
-    .vcar-cta { flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 999px;
-      background: var(--btn-primary-bg, var(--primary-color)); color: var(--btn-primary-text, #fff); font-weight: 800; font-size: .85rem; text-decoration: none; }
+    /* Floating Sound Button */
+    .vcar-card-sound {
+      position: absolute;
+      top: 10px;
+      inset-inline-end: 10px;
+      z-index: 4;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .vcar-card-sound:hover {
+      transform: scale(1.1);
+      background: rgba(15, 23, 42, 0.8);
+    }
 
-    .vcar-ctrl { position: absolute; z-index: 4; width: 38px; height: 38px; border-radius: 50%; border: 1px solid rgba(255,255,255,.4);
-      background: rgba(15,23,42,.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: #fff;
-      display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: transform .15s ease, background .15s ease; }
-    .vcar-ctrl:hover { background: rgba(15,23,42,.55); }
-    .vcar-ctrl:active { transform: scale(.92); }
-    .vcar-prev, .vcar-next { top: 50%; margin-top: -19px; opacity: 0; transition: opacity .2s ease; }
-    .vcar-stage:hover .vcar-prev, .vcar-stage:hover .vcar-next { opacity: 1; }
-    .vcar-prev { inset-inline-start: 12px; }
-    .vcar-next { inset-inline-end: 12px; }
-    .vcar-mute { top: 26px; inset-inline-end: 14px; }
-    .vcar-play { top: 26px; inset-inline-end: 60px; }
-    @media (hover: none) { .vcar-prev, .vcar-next { opacity: 1; width: 34px; height: 34px; margin-top: -17px; } }
+    /* Pause/Play indicator */
+    .vcar-play-badge {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      pointer-events: none;
+      z-index: 3;
+      animation: vcarPulse 1.4s infinite;
+    }
+    @keyframes vcarPulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.08); }
+    }
 
-    .vcar-thumbs { display: flex; justify-content: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .vcar-dot { width: 8px; height: 8px; border-radius: 999px; border: 0; padding: 0; background: color-mix(in srgb, currentColor 25%, transparent); cursor: pointer; transition: width .2s ease, background .2s ease; }
-    .vcar-dot.active { width: 22px; background: var(--primary-color); }
-    .vcar-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(255,255,255,.7); font-size: .9rem; }
+    /* Bottom Gradient Overlay */
+    .vcar-overlay {
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 55%;
+      pointer-events: none;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.45) 55%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1rem;
+      z-index: 3;
+      color: #ffffff;
+    }
+    .vcar-card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      line-height: 1.35;
+      margin: 0 0 0.5rem;
+      color: #ffffff;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .vcar-card-cta {
+      pointer-events: auto;
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      color: var(--btn-primary-text, #ffffff);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+    .vcar-card-cta:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    /* Carousel Controls (Same as Product Carousel) */
+    .vcar-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .vcar-controls .btn-arrow {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      border: 1.5px solid color-mix(in srgb, var(--primary-color, #c88a2c) 45%, transparent);
+      background: color-mix(in srgb, var(--primary-color, #c88a2c) 12%, var(--card-bg, #ffffff));
+      color: var(--primary-color, #c88a2c);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-color, #c88a2c) 14%, transparent);
+    }
+    .vcar-controls .btn-arrow:hover,
+    .vcar-controls .btn-arrow:active {
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      border-color: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      color: var(--btn-primary-text, #ffffff);
+      transform: scale(1.06);
+    }
+    .vcar-controls .dots {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .vcar-controls .dot {
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--primary-color, #c88a2c) 26%, #cbd5e1);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .vcar-controls .dot.active {
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
+      width: 1.5rem;
+      border-radius: 0.5rem;
+    }
   `],
   template: `
-@if (videos().length) {
-<section class="vcar-section"
-  [class.is-full]="s.videoWidth === 'full'"
+@if (validVideos().length) {
+<section class="vcar-section container"
   [style.--vcar-bg]="s.backgroundColor || null"
   [style.--vcar-text]="s.textColor || null"
-  [style.--vcar-aspect]="aspectCss(s.videoAspect || '16/9')"
-  [style.--vcar-aspect-m]="s.videoMobileAspect ? aspectCss(s.videoMobileAspect) : null"
+  [style.--vcar-aspect]="aspectCss(s.videoAspect || '9/16')"
   [style.--vcar-fit]="s.videoFit || 'cover'"
   appScrollAnimate
-  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false">
-  <div [class.container]="s.videoWidth !== 'full'">
-    @if (title() || subtitle() || eyebrow()) {
-      <div class="vcar-header">
+  [class.has-fade-in-up]="settings?.storeLayout?.enableHomeSectionAnimations !== false"
+  (mouseenter)="pauseAutoplay()"
+  (mouseleave)="resumeAutoplay()">
+
+  @if (title() || subtitle() || eyebrow()) {
+    <div class="vcar-header">
+      <div>
         @if (eyebrow()) { <span class="vcar-eyebrow">{{ eyebrow() }}</span> }
         @if (title()) { <h2 class="vcar-title">{{ title() }}</h2> }
         @if (subtitle()) { <p class="vcar-sub">{{ subtitle() }}</p> }
       </div>
-    }
+    </div>
+  }
 
-    <div class="vcar-stage" #stage
-      [class.is-portrait]="isPortrait(s.videoAspect)"
-      [class.is-portrait-m]="isPortrait(s.videoMobileAspect)"
-      (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
-      @if (current().posterUrl && !ready()) {
-        <img class="vcar-poster" [src]="current().posterUrl! | imageUrl:'banner'" alt="" loading="lazy" decoding="async">
-      }
-      <video #player class="vcar-video" [class.is-ready]="ready()"
-        playsinline webkit-playsinline preload="metadata"
-        [muted]="muted()" [controls]="!!s.videoShowControls"
-        [loop]="videos().length === 1 && s.videoLoop !== false"
-        [attr.poster]="current().posterUrl ? (current().posterUrl! | imageUrl:'banner') : null"
-        (loadeddata)="onLoaded()" (ended)="onEnded()" (timeupdate)="onTime()"
-        (play)="playing.set(true)" (pause)="playing.set(false)"></video>
-      <div class="vcar-shade"></div>
+  <div class="vcar-wrap"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()"
+    (touchcancel)="onTouchEnd()">
+    <div class="vcar-track"
+      [class.is-dragging]="isDragging()"
+      [style.transform]="trackTransform()">
 
-      @if (videos().length > 1) {
-        <div class="vcar-progress" role="tablist">
-          @for (v of videos(); track $index) {
-            <button type="button" class="vcar-bar" [class.done]="$index < index()"
-              [attr.aria-label]="lang.text('فيديو ', 'Video ') + ($index + 1)" (click)="go($index)">
-              <span [style.width.%]="$index === index() ? progress() : null"></span>
-            </button>
+      @for (v of validVideos(); track $index) {
+        <div class="vcar-card" (click)="onCardClick($index, $event)">
+          <video #videoEl
+            [src]="resolveVideoUrl(v)"
+            [poster]="v.posterUrl ? (v.posterUrl | imageUrl:'banner') : null"
+            playsinline webkit-playsinline
+            muted autoplay loop preload="auto"
+            (error)="onVideoError($event, $index)">
+          </video>
+
+          <!-- Floating Sound Toggle Button -->
+          <button type="button" class="vcar-card-sound"
+            [attr.aria-label]="isCardMuted($index) ? lang.text('تشغيل الصوت', 'Unmute') : lang.text('كتم الصوت', 'Mute')"
+            (click)="toggleSound($index, $event)">
+            <i class="bi" [class.bi-volume-mute-fill]="isCardMuted($index)" [class.bi-volume-up-fill]="!isCardMuted($index)"></i>
+          </button>
+
+          <!-- Play/Pause indicator if paused -->
+          @if (isCardPaused($index)) {
+            <div class="vcar-play-badge">
+              <i class="bi bi-play-fill"></i>
+            </div>
           }
-        </div>
-        <button type="button" class="vcar-ctrl vcar-prev" [attr.aria-label]="lang.text('السابق', 'Previous')" (click)="prev()">
-          <i class="bi" [class.bi-chevron-right]="lang.isRtl()" [class.bi-chevron-left]="!lang.isRtl()"></i>
-        </button>
-        <button type="button" class="vcar-ctrl vcar-next" [attr.aria-label]="lang.text('التالي', 'Next')" (click)="next()">
-          <i class="bi" [class.bi-chevron-left]="lang.isRtl()" [class.bi-chevron-right]="!lang.isRtl()"></i>
-        </button>
-      }
 
-      @if (!s.videoShowControls) {
-        <button type="button" class="vcar-ctrl vcar-mute" [attr.aria-label]="muted() ? lang.text('تشغيل الصوت', 'Unmute') : lang.text('كتم الصوت', 'Mute')" (click)="toggleMute()">
-          <i class="bi" [class.bi-volume-mute-fill]="muted()" [class.bi-volume-up-fill]="!muted()"></i>
-        </button>
-        <button type="button" class="vcar-ctrl vcar-play" [attr.aria-label]="playing() ? lang.text('إيقاف مؤقت', 'Pause') : lang.text('تشغيل', 'Play')" (click)="togglePlay()">
-          <i class="bi" [class.bi-pause-fill]="playing()" [class.bi-play-fill]="!playing()"></i>
-        </button>
-      }
-
-      @if (captionTitle() || current().link) {
-        <div class="vcar-caption">
-          <h3>{{ captionTitle() }}</h3>
-          @if (current().link) {
-            <a class="vcar-cta" [routerLink]="linkPath(current().link!)" [queryParams]="linkQuery(current().link!)">
-              {{ lang.text(s.buttonText || 'تسوق الآن', s.buttonTextEn || 'Shop now') }}
-            </a>
+          <!-- Overlay details -->
+          @if (cardTitle(v) || v.link) {
+            <div class="vcar-overlay">
+              @if (cardTitle(v)) {
+                <h3 class="vcar-card-title">{{ cardTitle(v) }}</h3>
+              }
+              @if (v.link) {
+                <a class="vcar-card-cta"
+                  [routerLink]="linkPath(v.link)"
+                  [queryParams]="linkQuery(v.link)"
+                  (click)="$event.stopPropagation()">
+                  <span>{{ lang.text(s.buttonText || 'تسوق الآن', s.buttonTextEn || 'Shop now') }}</span>
+                  <i class="bi" [class.bi-arrow-left]="lang.isRtl()" [class.bi-arrow-right]="!lang.isRtl()"></i>
+                </a>
+              }
+            </div>
           }
         </div>
       }
     </div>
   </div>
+
+  @if (validVideos().length > 1) {
+    <div class="vcar-controls">
+      <button type="button" class="btn-arrow" (click)="prev()" [attr.aria-label]="lang.text('السابق', 'Previous')">
+        <i class="bi" [class.bi-chevron-right]="lang.isRtl()" [class.bi-chevron-left]="!lang.isRtl()"></i>
+      </button>
+      <div class="dots">
+        @for (d of dotArray(); track $index) {
+          <span class="dot" [class.active]="currentIndex() === $index" (click)="goTo($index)"></span>
+        }
+      </div>
+      <button type="button" class="btn-arrow" (click)="next()" [attr.aria-label]="lang.text('التالي', 'Next')">
+        <i class="bi" [class.bi-chevron-left]="lang.isRtl()" [class.bi-chevron-right]="!lang.isRtl()"></i>
+      </button>
+    </div>
+  }
 </section>
 }
 `
 })
-export class SectionVideoCarouselComponent implements AfterViewInit, OnDestroy {
+export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
-  @ViewChild('player') playerRef?: ElementRef<HTMLVideoElement>;
-  @ViewChild('stage') stageRef?: ElementRef<HTMLElement>;
+  @ViewChildren('videoEl') videoEls!: QueryList<ElementRef<HTMLVideoElement>>;
+
   readonly lang = inject(LanguageService);
 
-  readonly index = signal(0);
-  readonly progress = signal(0);
-  readonly ready = signal(false);
-  readonly playing = signal(false);
-  readonly muted = signal(true);
-  private visible = false;
-  private userPaused = false;
-  private observer?: IntersectionObserver;
-  private mql?: MediaQueryList;
-  private touchX = 0;
+  readonly currentIndex = signal(0);
+  readonly isDragging = signal(false);
+  readonly dragOffsetPx = signal(0);
 
-  videos = () => (this.s?.videos || []).filter(v => !!(v.url || v.mobileUrl));
-  current = (): HomeSectionVideo => this.videos()[this.index()] || { url: '' };
+  // Per-card state
+  readonly mutedMap = signal<Record<number, boolean>>({});
+  readonly pausedMap = signal<Record<number, boolean>>({});
 
-  title() { return this.lang.text(this.s.title, this.s.titleEn); }
-  subtitle() { return this.lang.text(this.s.subtitle, this.s.subtitleEn); }
-  eyebrow() { return this.lang.text(this.s.eyebrow, this.s.eyebrowEn); }
-  captionTitle() { const c = this.current(); return this.lang.text(c.title || '', c.titleEn || ''); }
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private hasSwiped = false;
+  private autoplayTimer: any = null;
+  private isPaused = false;
+
+  validVideos = computed(() => {
+    return (this.s?.videos || []).filter(v => !!(v.url || v.mobileUrl));
+  });
+
+  title() { return this.lang.text(this.s?.title, this.s?.titleEn); }
+  subtitle() { return this.lang.text(this.s?.subtitle, this.s?.subtitleEn); }
+  eyebrow() { return this.lang.text(this.s?.eyebrow, this.s?.eyebrowEn); }
+  cardTitle(v: HomeSectionVideo) { return this.lang.text(v.title || '', v.titleEn || ''); }
 
   aspectCss(a: string) { return a.replace('/', ' / '); }
-  isPortrait(a?: string) { return a === '9/16' || a === '4/5'; }
 
-  linkPath(link: string) { return link.split('?')[0]; }
+  linkPath(link: string) { return (link || '').split('?')[0] || '/menu'; }
   linkQuery(link: string) {
-    const q = link.split('?')[1]; if (!q) return null;
+    const q = (link || '').split('?')[1];
+    if (!q) return null;
     const out: Record<string, string> = {};
     new URLSearchParams(q).forEach((v, k) => out[k] = v);
     return out;
   }
 
-  ngAfterViewInit() {
-    if (typeof window === 'undefined') return;
-    this.muted.set(this.s.videoMuted !== false);
-    this.mql = window.matchMedia('(max-width: 767px)');
-    this.mql.addEventListener?.('change', this.onBreakpoint);
-    const stage = this.stageRef?.nativeElement;
-    if (stage && 'IntersectionObserver' in window) {
-      this.observer = new IntersectionObserver(entries => {
-        this.visible = entries[0]?.isIntersecting ?? false;
-        if (this.visible) {
-          if (!this.playerRef?.nativeElement.currentSrc) this.load(); else if (!this.userPaused) this.play();
-        } else {
-          this.playerRef?.nativeElement.pause();
-        }
-      }, { threshold: 0.35 });
-      this.observer.observe(stage);
-    } else {
-      this.visible = true;
-      this.load();
+  resolveVideoUrl(v: HomeSectionVideo): string {
+    const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+    const raw = (isMobile && v.mobileUrl) ? v.mobileUrl : (v.url || v.mobileUrl || '');
+    if (!raw) return '';
+    const trimmed = raw.trim();
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) {
+      return trimmed;
+    }
+    return trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+  }
+
+  isCardMuted(index: number): boolean {
+    const map = this.mutedMap();
+    return map[index] !== undefined ? map[index] : true;
+  }
+
+  isCardPaused(index: number): boolean {
+    return !!this.pausedMap()[index];
+  }
+
+  toggleSound(index: number, event: Event) {
+    event.stopPropagation();
+    const current = this.isCardMuted(index);
+    const nextState = !current;
+    this.mutedMap.update(m => ({ ...m, [index]: nextState }));
+    const video = this.videoEls?.toArray()[index]?.nativeElement;
+    if (video) {
+      video.muted = nextState;
+      if (!nextState && video.paused) {
+        video.play()?.catch(() => {});
+        this.pausedMap.update(p => ({ ...p, [index]: false }));
+      }
     }
   }
 
+  onCardClick(index: number, event: MouseEvent) {
+    if (this.hasSwiped) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.hasSwiped = false;
+      return;
+    }
+    const video = this.videoEls?.toArray()[index]?.nativeElement;
+    if (!video) return;
+    if (video.paused) {
+      video.play()?.catch(() => {});
+      this.pausedMap.update(p => ({ ...p, [index]: false }));
+    } else {
+      video.pause();
+      this.pausedMap.update(p => ({ ...p, [index]: true }));
+    }
+  }
+
+  onVideoError(event: any, index: number) {
+    console.warn(`[VideoCarousel] Failed to play video #${index}:`, event);
+  }
+
+  trackTransform(): string {
+    const base = (this.isRtl ? 1 : -1) * (this.currentIndex() * this.slideWidth());
+    const offset = this.dragOffsetPx();
+    return `translateX(${base + offset}px)`;
+  }
+
+  onTouchStart(e: TouchEvent) {
+    if (e.touches.length !== 1) return;
+    this.pauseAutoplay();
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+    this.hasSwiped = false;
+    this.isDragging.set(true);
+    this.dragOffsetPx.set(0);
+  }
+
+  onTouchMove(e: TouchEvent) {
+    if (!this.isDragging() || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - this.touchStartX;
+    const dy = e.touches[0].clientY - this.touchStartY;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      this.hasSwiped = true;
+      this.dragOffsetPx.set(dx);
+    }
+  }
+
+  onTouchEnd() {
+    if (!this.isDragging()) return;
+    const dx = this.dragOffsetPx();
+    this.isDragging.set(false);
+    this.dragOffsetPx.set(0);
+    const threshold = 35;
+    if (Math.abs(dx) >= threshold) {
+      if (this.isRtl) {
+        if (dx > 0) this.next();
+        else this.prev();
+      } else {
+        if (dx < 0) this.next();
+        else this.prev();
+      }
+    }
+    this.resumeAutoplay();
+  }
+
+  ngOnInit() {
+    this.startAutoplay();
+  }
+
+  ngAfterViewInit() {
+    // Ensure all videos start playing muted immediately
+    if (typeof window === 'undefined') return;
+    setTimeout(() => {
+      this.videoEls?.forEach((vRef, idx) => {
+        const el = vRef.nativeElement;
+        if (el) {
+          el.muted = true;
+          el.play()?.catch(() => {
+            // Autoplay fallback
+            el.muted = true;
+            el.play()?.catch(() => {});
+          });
+        }
+      });
+    }, 150);
+  }
+
   ngOnDestroy() {
-    this.observer?.disconnect();
-    this.mql?.removeEventListener?.('change', this.onBreakpoint);
-    const el = this.playerRef?.nativeElement;
-    if (el) { el.pause(); el.removeAttribute('src'); el.load(); }
+    this.stopAutoplay();
   }
 
-  private onBreakpoint = () => this.load();
-
-  private srcFor(v: HomeSectionVideo) {
-    const mobile = this.mql?.matches;
-    return (mobile ? (v.mobileUrl || v.url) : (v.url || v.mobileUrl)) || '';
+  startAutoplay() {
+    this.stopAutoplay();
+    if (typeof window === 'undefined') return;
+    this.autoplayTimer = setInterval(() => {
+      if (!this.isPaused && this.validVideos().length > this.visibleCardsCount()) {
+        this.next();
+      }
+    }, 4200);
   }
 
-  private load() {
-    const el = this.playerRef?.nativeElement;
-    const v = this.current();
-    if (!el || !v) return;
-    this.ready.set(false);
-    this.progress.set(0);
-    el.src = this.srcFor(v);
-    el.load();
-    if (this.visible && !this.userPaused) this.play();
+  stopAutoplay() {
+    if (this.autoplayTimer) {
+      clearInterval(this.autoplayTimer);
+      this.autoplayTimer = null;
+    }
   }
 
-  private play() {
-    const el = this.playerRef?.nativeElement;
-    if (!el) return;
-    el.muted = this.muted();
-    el.play()?.catch(() => {
-      // Browsers block autoplay with sound: fall back to muted autoplay.
-      if (!el.muted) { this.muted.set(true); el.muted = true; el.play()?.catch(() => {}); }
+  pauseAutoplay() { this.isPaused = true; }
+  resumeAutoplay() { this.isPaused = false; }
+
+  get isRtl() {
+    return typeof document !== 'undefined' ? document.dir === 'rtl' : true;
+  }
+
+  visibleCardsCount(): number {
+    if (typeof window === 'undefined') return 4;
+    const w = window.innerWidth;
+    if (w < 480) return 1.6;
+    if (w < 768) return 2;
+    if (w < 1024) return 3;
+    return 4;
+  }
+
+  maxIndex(): number {
+    const total = this.validVideos().length;
+    return Math.max(0, total - Math.floor(this.visibleCardsCount()));
+  }
+
+  slideWidth(): number {
+    if (typeof window === 'undefined') return 240;
+    const w = window.innerWidth;
+    if (w < 480) {
+      return ((w - 32) * 0.62) + 16;
+    }
+    if (w < 768) {
+      return ((w - 32) / 2) + 16;
+    }
+    if (w < 1024) {
+      return 240 + 16;
+    }
+    return 260 + 16;
+  }
+
+  dotArray(): any[] {
+    const count = this.maxIndex() + 1;
+    return Array.from({ length: Math.min(count, 8) });
+  }
+
+  prev() {
+    this.currentIndex.update(i => {
+      if (i <= 0) return this.maxIndex();
+      return i - 1;
     });
   }
 
-  onLoaded() { this.ready.set(true); }
-
-  onTime() {
-    const el = this.playerRef?.nativeElement;
-    if (el && el.duration) this.progress.set(Math.min(100, (el.currentTime / el.duration) * 100));
+  next() {
+    this.currentIndex.update(i => {
+      if (i >= this.maxIndex()) return 0;
+      return i + 1;
+    });
   }
 
-  onEnded() {
-    const total = this.videos().length;
-    if (total <= 1) return;
-    if (this.index() === total - 1 && this.s.videoLoop === false) { this.progress.set(100); return; }
-    this.next();
-  }
-
-  go(i: number) {
-    const total = this.videos().length;
-    if (!total) return;
-    this.index.set((i + total) % total);
-    this.userPaused = false;
-    this.load();
-  }
-  next() { this.go(this.index() + 1); }
-  prev() { this.go(this.index() - 1); }
-
-  toggleMute() {
-    const el = this.playerRef?.nativeElement;
-    this.muted.set(!this.muted());
-    if (el) el.muted = this.muted();
-  }
-
-  togglePlay() {
-    const el = this.playerRef?.nativeElement;
-    if (!el) return;
-    if (el.paused) { this.userPaused = false; this.play(); } else { this.userPaused = true; el.pause(); }
-  }
-
-  onTouchStart(e: TouchEvent) { this.touchX = e.touches[0]?.clientX ?? 0; }
-  onTouchEnd(e: TouchEvent) {
-    const dx = (e.changedTouches[0]?.clientX ?? 0) - this.touchX;
-    if (Math.abs(dx) < 45 || this.videos().length < 2) return;
-    const forward = this.lang.isRtl() ? dx > 0 : dx < 0;
-    forward ? this.next() : this.prev();
+  goTo(i: number) {
+    this.currentIndex.set(Math.min(i, this.maxIndex()));
   }
 }
