@@ -11,6 +11,15 @@
       ]
     },
     {
+      "source": "/uploads/(.*)\\.(mp4|webm)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-transform"
+        }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {

@@ -11,10 +11,17 @@ import { LanguageService } from '../../../../core/services/language.service';
 import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 
 /**
- * Video Carousel / Slider Section (Products Slider Style)
- * Uses native CSS scroll snap for pixel-perfect card alignment (no half-cut cards),
- * robust autoplay with fallback frame decoding (no black screens),
- * and desktop/mobile fallback so videos play everywhere.
+ * Modern Video Carousel / Slider Section (Products Slider Style)
+ * - Borderless sleek cards with rounded corners.
+ * - Plays ONLY when user scrolls down to its section (IntersectionObserver).
+ * - Pauses immediately when scrolled away to save data & battery.
+ * - Plays with SOUND if s.videoMuted === false (unchecked "بدء التشغيل بدون صوت").
+ * - Exactly ONE video has sound (the active front/center card); all other videos are muted.
+ * - Audio follows the active card on scroll/slide seamlessly.
+ * - Desktop/Mobile fallback: uploading desktop video alone works everywhere!
+ * - Stream query parameter: guarantees zero 2-byte poisoned proxy cache issues.
+ * - Smooth translateX sliding matching product-carousel with touch swipe & arrow controls.
+ * - Zero black frames: sets currentTime=0.05 on metadata load to paint the first frame.
  */
 @Component({
   selector: 'app-section-video-carousel',
@@ -58,66 +65,56 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       font-size: 0.92rem;
     }
 
-    /* Track with CSS Scroll Snap: Guarantee no cards cut in half */
+    /* Wrap & Track - Products Slider Style with smooth transform */
+    .vcar-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.25rem;
+      border: none !important;
+      padding: 0.5rem 0.25rem 1rem;
+      user-select: none;
+      -webkit-user-select: none;
+    }
     .vcar-track {
       display: flex;
       gap: 1rem;
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
+      will-change: transform;
       border: none !important;
-      padding: 0.5rem 0.25rem 1rem;
-      touch-action: pan-x pan-y;
     }
-    .vcar-track::-webkit-scrollbar {
-      display: none;
+    .vcar-track.is-dragging {
+      transition: none;
     }
 
-    /* Video Card - No border, clean modern shadow, exact snapping */
+    /* Video Card - No border, clean modern shadow */
     .vcar-card {
       position: relative;
       flex: 0 0 calc(50% - 0.5rem);
       min-width: calc(50% - 0.5rem);
-      max-width: calc(50% - 0.5rem);
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
       border-radius: 1.25rem;
       overflow: hidden;
-      background: #0f172a;
+      background: #1e293b;
       border: none !important;
       outline: none !important;
-      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
       transition: transform 0.25s ease, box-shadow 0.25s ease;
       aspect-ratio: var(--vcar-aspect, 9 / 16);
       cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
     }
     .vcar-card:hover {
       transform: translateY(-4px);
-      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
-    }
-    @media (max-width: 480px) {
-      .vcar-card {
-        flex: 0 0 calc(50% - 0.5rem);
-        min-width: calc(50% - 0.5rem);
-        max-width: calc(50% - 0.5rem);
-      }
+      box-shadow: 0 14px 32px rgba(15, 23, 42, 0.18);
     }
     @media (min-width: 768px) {
       .vcar-card {
         flex: 0 0 calc(33.333% - 0.67rem);
         min-width: calc(33.333% - 0.67rem);
-        max-width: calc(33.333% - 0.67rem);
       }
     }
     @media (min-width: 1024px) {
       .vcar-card {
         flex: 0 0 calc(25% - 0.75rem);
         min-width: calc(25% - 0.75rem);
-        max-width: calc(25% - 0.75rem);
       }
     }
 
@@ -134,14 +131,14 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
     /* Floating Sound Button */
     .vcar-card-sound {
       position: absolute;
-      top: 10px;
-      inset-inline-end: 10px;
-      z-index: 4;
-      width: 34px;
-      height: 34px;
+      top: 12px;
+      inset-inline-end: 12px;
+      z-index: 5;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: none;
-      background: rgba(15, 23, 42, 0.65);
+      background: rgba(15, 23, 42, 0.7);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       color: #ffffff;
@@ -149,34 +146,17 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
       transition: transform 0.2s ease, background 0.2s ease;
     }
     .vcar-card-sound:hover {
       transform: scale(1.1);
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.9);
     }
-
-    /* Floating Play/Pause Indicator */
-    .vcar-play-badge {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+    .vcar-card-sound.has-sound {
+      background: var(--btn-primary-bg, var(--primary-color, #c88a2c));
       color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      pointer-events: none;
-      z-index: 3;
-      transition: opacity 0.2s ease;
     }
 
     /* Bottom Gradient Overlay */
@@ -226,7 +206,7 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
       transform: translateY(-2px);
     }
 
-    /* Carousel Controls (Same as Product Carousel) */
+    /* Controls (Same as Product Carousel) */
     .vcar-controls {
       display: flex;
       justify-content: center;
@@ -276,7 +256,7 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
   `],
   template: `
 @if (validVideos().length) {
-<section class="vcar-section container"
+<section #sectionRef class="vcar-section container"
   [style.--vcar-bg]="s.backgroundColor || null"
   [style.--vcar-text]="s.textColor || null"
   [style.--vcar-aspect]="aspectCss(s.videoAspect || '9/16')"
@@ -296,58 +276,61 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
     </div>
   }
 
-  <div class="vcar-track" #trackRef (scroll)="onScroll()">
-    @for (v of validVideos(); track $index) {
-      <div class="vcar-card" (click)="onCardClick($index, $event)">
-        <video #videoEl
-          [src]="getVideoSrc(v)"
-          [poster]="v.posterUrl ? (v.posterUrl | imageUrl:'banner') : null"
-          playsinline webkit-playsinline
-          [muted]="true"
-          [attr.muted]="''"
-          autoplay loop preload="auto"
-          (loadedmetadata)="onMetadataLoaded(videoEl, $index)"
-          (play)="onVideoPlay($index)"
-          (pause)="onVideoPause($index)"
-          (error)="onVideoError($event, $index)">
-        </video>
+  <div class="vcar-wrap"
+    (touchstart)="onTouchStart($event)"
+    (touchmove)="onTouchMove($event)"
+    (touchend)="onTouchEnd()"
+    (touchcancel)="onTouchEnd()">
+    <div class="vcar-track" #trackRef
+      [class.is-dragging]="isDragging()"
+      [style.transform]="trackTransform()">
+      @for (v of validVideos(); track $index) {
+        <div class="vcar-card" (click)="onCardClick($index, $event)">
+          <video #videoEl
+            [src]="getVideoSrc(v)"
+            [poster]="v.posterUrl ? (v.posterUrl | imageUrl:'banner') : null"
+            muted
+            [muted]="true"
+            playsinline
+            webkit-playsinline
+            loop
+            preload="metadata"
+            (loadedmetadata)="onMetaLoaded(videoEl)"
+            (canplay)="onVideoCanPlay(videoEl, $index)"
+            (error)="onVideoError($event, $index)">
+          </video>
 
-        <!-- Floating Sound Toggle Button -->
-        <button type="button" class="vcar-card-sound"
-          [attr.aria-label]="isCardMuted($index) ? lang.text('تشغيل الصوت', 'Unmute') : lang.text('كتم الصوت', 'Mute')"
-          (click)="toggleSound($index, $event)">
-          <i class="bi" [class.bi-volume-mute-fill]="isCardMuted($index)" [class.bi-volume-up-fill]="!isCardMuted($index)"></i>
-        </button>
+          <!-- Floating Sound Toggle Button -->
+          <button type="button" class="vcar-card-sound"
+            [class.has-sound]="isCardActiveSound($index)"
+            [attr.aria-label]="isCardActiveSound($index) ? lang.text('كتم الصوت', 'Mute') : lang.text('تشغيل الصوت', 'Unmute')"
+            (click)="toggleSound($index, $event)">
+            <i class="bi" [class.bi-volume-up-fill]="isCardActiveSound($index)" [class.bi-volume-mute-fill]="!isCardActiveSound($index)"></i>
+          </button>
 
-        <!-- Play/Pause indicator when video is paused -->
-        @if (isCardPaused($index)) {
-          <div class="vcar-play-badge">
-            <i class="bi bi-play-fill"></i>
-          </div>
-        }
-
-        <!-- Overlay details -->
-        @if (cardTitle(v) || v.link) {
-          <div class="vcar-overlay">
-            @if (cardTitle(v)) {
-              <h3 class="vcar-card-title">{{ cardTitle(v) }}</h3>
-            }
-            @if (v.link) {
-              <a class="vcar-card-cta"
-                [routerLink]="linkPath(v.link)"
-                [queryParams]="linkQuery(v.link)"
-                (click)="$event.stopPropagation()">
-                <span>{{ lang.text(s.buttonText || 'تسوق الآن', s.buttonTextEn || 'Shop now') }}</span>
-                <i class="bi" [class.bi-arrow-left]="lang.isRtl()" [class.bi-arrow-right]="!lang.isRtl()"></i>
-              </a>
-            }
-          </div>
-        }
-      </div>
-    }
+          <!-- Overlay details -->
+          @if (cardTitle(v) || v.link) {
+            <div class="vcar-overlay">
+              @if (cardTitle(v)) {
+                <h3 class="vcar-card-title">{{ cardTitle(v) }}</h3>
+              }
+              @if (v.link) {
+                <a class="vcar-card-cta"
+                  [routerLink]="linkPath(v.link)"
+                  [queryParams]="linkQuery(v.link)"
+                  (click)="$event.stopPropagation()">
+                  <span>{{ lang.text(s.buttonText || 'تسوق الآن', s.buttonTextEn || 'Shop now') }}</span>
+                  <i class="bi" [class.bi-arrow-left]="lang.isRtl()" [class.bi-arrow-right]="!lang.isRtl()"></i>
+                </a>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
   </div>
 
-  @if (validVideos().length > 1) {
+  @if (validVideos().length > visibleCardsCount()) {
     <div class="vcar-controls">
       <button type="button" class="btn-arrow" (click)="prev()" [attr.aria-label]="lang.text('السابق', 'Previous')">
         <i class="bi" [class.bi-chevron-right]="lang.isRtl()" [class.bi-chevron-left]="!lang.isRtl()"></i>
@@ -369,22 +352,43 @@ import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
 export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() s!: HomeSection;
   @Input() settings!: StorefrontSettings;
+  @ViewChild('sectionRef') sectionRef?: ElementRef<HTMLElement>;
   @ViewChild('trackRef') trackRef?: ElementRef<HTMLElement>;
   @ViewChildren('videoEl') videoEls!: QueryList<ElementRef<HTMLVideoElement>>;
 
   readonly lang = inject(LanguageService);
 
   readonly currentIndex = signal(0);
-  readonly mutedMap = signal<Record<number, boolean>>({});
-  readonly pausedMap = signal<Record<number, boolean>>({});
+  readonly activeSoundIndex = signal<number>(-1);
+  readonly isDragging = signal(false);
+  readonly dragOffsetPx = signal(0);
 
   private autoplayTimer: any = null;
   private isPaused = false;
-  private unlockListener?: () => void;
+  private isInView = false;
+  private observer?: IntersectionObserver;
+  private gestureListener?: () => void;
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private hasSwiped = false;
+  private userMutedAll = false;
 
   validVideos = computed(() => {
     return (this.s?.videos || []).filter(v => !!(v.url || v.mobileUrl));
   });
+
+  /**
+   * Sound policy:
+   * If s.videoMuted === false (unchecked "بدء التشغيل بدون صوت" in admin)
+   * and the user has not explicitly clicked mute, sound is enabled on the center video.
+   */
+  get wantsSound(): boolean {
+    return this.s?.videoMuted === false && !this.userMutedAll;
+  }
+
+  get isRtl(): boolean {
+    return typeof document !== 'undefined' ? document.dir === 'rtl' : true;
+  }
 
   title() { return this.lang.text(this.s?.title, this.s?.titleEn); }
   subtitle() { return this.lang.text(this.s?.subtitle, this.s?.subtitleEn); }
@@ -404,222 +408,349 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
 
   /**
    * Robust URL resolution:
-   * 1. If mobile and mobileUrl is set, use mobileUrl; otherwise fallback to url.
-   * 2. If desktop and url is set, use url; otherwise fallback to mobileUrl.
-   * If only ONE of them is uploaded, it is automatically used everywhere!
+   * 1. If mobile and mobileUrl is set, use mobileUrl; otherwise fallback to desktop url.
+   * 2. If desktop and desktop url is set, use url; otherwise fallback to mobileUrl.
+   * If only ONE is uploaded, it is automatically used everywhere.
+   * Appends '?v=stream' to bypass intermediate proxy cached partial range probes.
    */
   getVideoSrc(v: HomeSectionVideo): string {
     if (!v) return '';
     const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+    const desktopUrl = (v.url || '').trim();
+    const mobileUrl = (v.mobileUrl || '').trim();
+
     let url = isMobile
-      ? (v.mobileUrl?.trim() || v.url?.trim() || '')
-      : (v.url?.trim() || v.mobileUrl?.trim() || '');
+      ? (mobileUrl || desktopUrl)
+      : (desktopUrl || mobileUrl);
 
     if (!url) return '';
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:') || url.startsWith('blob:')) {
-      return url;
+    // Append stream cache buster to bypass any poisoned intermediate proxy cache
+    const separator = url.includes('?') ? '&' : '?';
+    const cleanUrl = url.includes('v=') ? url : `${url}${separator}v=stream`;
+
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:') || cleanUrl.startsWith('blob:')) {
+      return cleanUrl;
     }
-    return url.startsWith('/') ? url : `/${url}`;
+    return cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`;
   }
 
-  isCardMuted(index: number): boolean {
-    const map = this.mutedMap();
-    return map[index] !== undefined ? map[index] : true;
+  visibleCardsCount(): number {
+    if (typeof window === 'undefined') return 4;
+    if (window.innerWidth < 768) return 2;
+    if (window.innerWidth < 1024) return 3;
+    return 4;
   }
 
-  isCardPaused(index: number): boolean {
-    return !!this.pausedMap()[index];
+  maxIndex(): number {
+    const total = this.validVideos().length;
+    return Math.max(0, total - this.visibleCardsCount());
   }
 
-  onVideoPlay(index: number) {
-    this.pausedMap.update(p => ({ ...p, [index]: false }));
-  }
-
-  onVideoPause(index: number) {
-    this.pausedMap.update(p => ({ ...p, [index]: true }));
-  }
-
-  onMetadataLoaded(video: HTMLVideoElement, index: number) {
-    if (!video) return;
-    video.muted = true;
-    video.defaultMuted = true;
-    // Attempt muted autoplay
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        this.pausedMap.update(p => ({ ...p, [index]: false }));
-      }).catch(() => {
-        // Autoplay was blocked by browser MEI policy:
-        // Seek slightly to force the browser to render the first video frame (prevents black box)
-        try {
-          if (video.currentTime === 0) {
-            video.currentTime = 0.05;
-          }
-        } catch (_) {}
-        this.pausedMap.update(p => ({ ...p, [index]: true }));
-      });
+  slideWidth(): number {
+    const track = this.trackRef?.nativeElement;
+    const card = track?.querySelector('.vcar-card') as HTMLElement;
+    if (card && card.offsetWidth > 0) {
+      return card.offsetWidth + 16;
     }
+    if (typeof window === 'undefined') return 280;
+    const w = window.innerWidth;
+    if (w < 768) return ((w - 32) / 2);
+    if (w < 1024) return 260 + 16;
+    return 280 + 16;
   }
 
+  trackTransform(): string {
+    const step = this.slideWidth();
+    const base = (this.isRtl ? 1 : -1) * (this.currentIndex() * step);
+    const offset = this.dragOffsetPx();
+    return `translateX(${base + offset}px)`;
+  }
+
+  isCardActiveSound(index: number): boolean {
+    return this.activeSoundIndex() === index;
+  }
+
+  /**
+   * Sound toggle button clicked directly by user
+   */
   toggleSound(index: number, event: Event) {
     event.stopPropagation();
-    const current = this.isCardMuted(index);
-    const nextState = !current;
-    this.mutedMap.update(m => ({ ...m, [index]: nextState }));
-    const video = this.videoEls?.toArray()[index]?.nativeElement;
-    if (video) {
-      video.muted = nextState;
-      if (!nextState && video.paused) {
-        video.play()?.catch(() => {});
-        this.pausedMap.update(p => ({ ...p, [index]: false }));
+    const isCurrentlySound = this.isCardActiveSound(index);
+    const videoArray = this.videoEls?.toArray() || [];
+
+    if (isCurrentlySound) {
+      this.userMutedAll = true;
+      this.activeSoundIndex.set(-1);
+      videoArray.forEach(vRef => {
+        if (vRef.nativeElement) vRef.nativeElement.muted = true;
+      });
+    } else {
+      this.userMutedAll = false;
+      this.activeSoundIndex.set(index);
+      videoArray.forEach((vRef, idx) => {
+        const el = vRef.nativeElement;
+        if (!el) return;
+        if (idx === index) {
+          el.muted = false;
+          el.play()?.catch(() => {});
+        } else {
+          el.muted = true;
+        }
+      });
+      // Bring clicked card into focus if needed
+      if (index > this.maxIndex()) {
+        this.currentIndex.set(this.maxIndex());
+      } else {
+        this.currentIndex.set(index);
       }
     }
   }
 
   onCardClick(index: number, event: MouseEvent) {
-    const video = this.videoEls?.toArray()[index]?.nativeElement;
-    if (!video) return;
-    if (video.paused) {
-      video.play()?.catch(() => {});
-      this.pausedMap.update(p => ({ ...p, [index]: false }));
+    if (this.hasSwiped) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.hasSwiped = false;
+      return;
+    }
+    // Clicking a card focuses it and unmutes it
+    if (this.currentIndex() !== index && index <= this.maxIndex()) {
+      this.goTo(index);
     } else {
-      video.pause();
-      this.pausedMap.update(p => ({ ...p, [index]: true }));
+      const video = this.videoEls?.toArray()[index]?.nativeElement;
+      if (!video) return;
+      if (video.paused) {
+        video.play()?.catch(() => {});
+      } else {
+        video.pause();
+      }
+    }
+  }
+
+  /**
+   * Sets currentTime = 0.05 on metadata load so browser hardware decodes
+   * and displays the first video frame immediately (guarantees NO black boxes).
+   */
+  onMetaLoaded(videoEl: HTMLVideoElement) {
+    if (videoEl && videoEl.currentTime === 0) {
+      try {
+        videoEl.currentTime = 0.05;
+      } catch (_) {}
+    }
+  }
+
+  onVideoCanPlay(videoEl: HTMLVideoElement, index: number) {
+    if (this.isInView) {
+      videoEl.play()?.catch(() => {});
+      if (index === this.currentIndex() && this.wantsSound) {
+        this.applySoundToActiveCard();
+      }
     }
   }
 
   onVideoError(event: any, index: number) {
-    console.warn(`[VideoCarousel] Video #${index} failed:`, event);
+    console.warn(`[VideoCarousel] Video #${index} error:`, event);
   }
 
-  ngOnInit() {
-    this.startAutoplay();
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     if (typeof window === 'undefined') return;
 
-    // Start all videos muted immediately
-    setTimeout(() => {
-      this.playAllVideos();
-    }, 150);
-
-    // Global one-time interaction listener to unblock autoplay on any user interaction
-    const unlock = () => {
-      this.playAllVideos();
-      window.removeEventListener('click', unlock);
-      window.removeEventListener('scroll', unlock);
-      window.removeEventListener('touchstart', unlock);
-    };
-    this.unlockListener = unlock;
-    window.addEventListener('click', unlock, { once: true, passive: true });
-    window.addEventListener('scroll', unlock, { once: true, passive: true });
-    window.addEventListener('touchstart', unlock, { once: true, passive: true });
-  }
-
-  ngOnDestroy() {
-    this.stopAutoplay();
-    if (typeof window !== 'undefined' && this.unlockListener) {
-      window.removeEventListener('click', this.unlockListener);
-      window.removeEventListener('scroll', this.unlockListener);
-      window.removeEventListener('touchstart', this.unlockListener);
+    // 1. IntersectionObserver: Play ONLY when user reaches the section
+    const sectionEl = this.sectionRef?.nativeElement;
+    if (sectionEl && 'IntersectionObserver' in window) {
+      this.observer = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (entry && entry.isIntersecting) {
+          this.onSectionEnter();
+        } else {
+          this.onSectionLeave();
+        }
+      }, { threshold: 0.15 });
+      this.observer.observe(sectionEl);
+    } else {
+      this.onSectionEnter();
     }
-  }
 
-  private playAllVideos() {
-    this.videoEls?.forEach((vRef, idx) => {
-      const el = vRef.nativeElement;
-      if (el) {
-        el.muted = true;
-        el.defaultMuted = true;
-        el.play()?.then(() => {
-          this.pausedMap.update(p => ({ ...p, [idx]: false }));
-        }).catch(() => {
-          try {
-            if (el.currentTime === 0) el.currentTime = 0.05;
-          } catch (_) {}
-        });
+    // 2. User Gesture Unlock: As soon as user taps/clicks anywhere, unmute active video if desired
+    const gestureUnlock = () => {
+      if (this.isInView && this.wantsSound && this.activeSoundIndex() === -1) {
+        this.applySoundToActiveCard();
+      }
+    };
+    this.gestureListener = gestureUnlock;
+    window.addEventListener('click', gestureUnlock, { passive: true });
+    window.addEventListener('touchstart', gestureUnlock, { passive: true });
+
+    // 3. React when video elements are dynamically populated
+    this.videoEls.changes.subscribe(() => {
+      if (this.isInView) {
+        this.playAllVideos();
+        this.applySoundToActiveCard();
       }
     });
   }
 
-  get isRtl(): boolean {
-    return typeof document !== 'undefined' ? document.dir === 'rtl' : true;
-  }
-
-  onScroll() {
-    const track = this.trackRef?.nativeElement;
-    if (!track) return;
-    const cards = track.querySelectorAll('.vcar-card');
-    if (!cards.length) return;
-    const cardEl = cards[0] as HTMLElement;
-    const step = cardEl.offsetWidth + 16;
-    if (step <= 0) return;
-    const scrollLeft = Math.abs(track.scrollLeft);
-    const index = Math.round(scrollLeft / step);
-    this.currentIndex.set(Math.min(index, this.validVideos().length - 1));
-  }
-
-  scrollByStep(direction: number) {
-    const track = this.trackRef?.nativeElement;
-    if (!track) return;
-    const cards = track.querySelectorAll('.vcar-card');
-    if (!cards.length) return;
-    const cardEl = cards[0] as HTMLElement;
-    const step = cardEl.offsetWidth + 16; // card width + gap
-    // In RTL, standard scrollLeft can be negative or positive depending on browser.
-    // Modern smooth scrollBy in RTL works with direction * step * (isRtl ? -1 : 1)
-    const sign = this.isRtl ? -1 : 1;
-    track.scrollBy({ left: direction * step * sign, behavior: 'smooth' });
-  }
-
-  next() {
-    const track = this.trackRef?.nativeElement;
-    if (!track) return;
-    const maxScroll = track.scrollWidth - track.clientWidth;
-    const currentScroll = Math.abs(track.scrollLeft);
-    if (currentScroll >= maxScroll - 25) {
-      // Wrap around smoothly to start
-      track.scrollTo({ left: 0, behavior: 'smooth' });
-      this.currentIndex.set(0);
-    } else {
-      this.scrollByStep(1);
+  ngOnDestroy() {
+    this.observer?.disconnect();
+    this.stopAutoplay();
+    if (typeof window !== 'undefined' && this.gestureListener) {
+      window.removeEventListener('click', this.gestureListener);
+      window.removeEventListener('touchstart', this.gestureListener);
     }
+  }
+
+  /**
+   * User reaches this section: Start playback & apply sound to center video
+   */
+  private onSectionEnter() {
+    this.isInView = true;
+    this.playAllVideos();
+    this.applySoundToActiveCard();
+    this.startAutoplay();
+  }
+
+  /**
+   * User leaves this section: Pause all videos to save data, battery & mute sound
+   */
+  private onSectionLeave() {
+    this.isInView = false;
+    this.stopAutoplay();
+    this.activeSoundIndex.set(-1);
+    this.videoEls?.forEach(vRef => {
+      const el = vRef.nativeElement;
+      if (el) {
+        el.muted = true;
+        el.pause();
+      }
+    });
+  }
+
+  private playAllVideos() {
+    this.videoEls?.forEach(vRef => {
+      const el = vRef.nativeElement;
+      if (el && el.paused) {
+        el.muted = true;
+        el.play()?.catch(() => {});
+      }
+    });
+  }
+
+  /**
+   * Safely enables sound on the active front/center video.
+   * If browser autoplay policy rejects unmuted sound without prior user gesture,
+   * falls back gracefully to muted playback so video NEVER stays paused or black!
+   */
+  private applySoundToActiveCard() {
+    if (!this.isInView) return;
+    const activeIdx = this.currentIndex();
+    const videoArray = this.videoEls?.toArray() || [];
+    const shouldUnmute = this.wantsSound;
+
+    videoArray.forEach((vRef, idx) => {
+      const el = vRef.nativeElement;
+      if (!el) return;
+
+      if (idx === activeIdx && shouldUnmute) {
+        try {
+          el.muted = false;
+          if (el.paused) {
+            const p = el.play();
+            if (p !== undefined) {
+              p.then(() => {
+                this.activeSoundIndex.set(activeIdx);
+              }).catch(() => {
+                // Browser policy blocked unmuted playback without click
+                el.muted = true;
+                this.activeSoundIndex.set(-1);
+                el.play()?.catch(() => {});
+              });
+            } else {
+              this.activeSoundIndex.set(activeIdx);
+            }
+          } else {
+            this.activeSoundIndex.set(activeIdx);
+          }
+        } catch (_) {
+          el.muted = true;
+          this.activeSoundIndex.set(-1);
+        }
+      } else {
+        el.muted = true;
+      }
+    });
+  }
+
+  onTouchStart(e: TouchEvent) {
+    if (e.touches.length !== 1) return;
+    this.pauseAutoplay();
+    this.touchStartX = e.touches[0].clientX;
+    this.touchStartY = e.touches[0].clientY;
+    this.hasSwiped = false;
+    this.isDragging.set(true);
+    this.dragOffsetPx.set(0);
+  }
+
+  onTouchMove(e: TouchEvent) {
+    if (!this.isDragging() || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - this.touchStartX;
+    const dy = e.touches[0].clientY - this.touchStartY;
+    if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
+      this.hasSwiped = true;
+      this.dragOffsetPx.set(dx);
+    }
+  }
+
+  onTouchEnd() {
+    if (!this.isDragging()) return;
+    const dx = this.dragOffsetPx();
+    this.isDragging.set(false);
+    this.dragOffsetPx.set(0);
+    const threshold = 35;
+    if (Math.abs(dx) >= threshold) {
+      if (this.isRtl) {
+        if (dx > 0) this.next();
+        else this.prev();
+      } else {
+        if (dx < 0) this.next();
+        else this.prev();
+      }
+    }
+    this.resumeAutoplay();
   }
 
   prev() {
-    const track = this.trackRef?.nativeElement;
-    if (!track) return;
-    const currentScroll = Math.abs(track.scrollLeft);
-    if (currentScroll <= 25) {
-      // Wrap to end
-      const maxScroll = track.scrollWidth - track.clientWidth;
-      const sign = this.isRtl ? -1 : 1;
-      track.scrollTo({ left: maxScroll * sign, behavior: 'smooth' });
-    } else {
-      this.scrollByStep(-1);
-    }
+    this.currentIndex.update(i => {
+      if (i <= 0) return this.maxIndex();
+      return i - 1;
+    });
+    this.applySoundToActiveCard();
+  }
+
+  next() {
+    this.currentIndex.update(i => {
+      if (i >= this.maxIndex()) return 0;
+      return i + 1;
+    });
+    this.applySoundToActiveCard();
   }
 
   goTo(i: number) {
-    const track = this.trackRef?.nativeElement;
-    if (!track) return;
-    const cards = track.querySelectorAll('.vcar-card');
-    if (!cards.length || !cards[i]) return;
-    const card = cards[i] as HTMLElement;
-    card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-    this.currentIndex.set(i);
+    this.currentIndex.set(Math.min(i, this.maxIndex()));
+    this.applySoundToActiveCard();
   }
 
   dotArray(): any[] {
-    return Array.from({ length: this.validVideos().length });
+    const count = this.maxIndex() + 1;
+    return Array.from({ length: Math.min(count, 8) });
   }
 
   startAutoplay() {
     this.stopAutoplay();
     if (typeof window === 'undefined') return;
     this.autoplayTimer = setInterval(() => {
-      if (!this.isPaused && this.validVideos().length > 1) {
+      if (!this.isPaused && this.isInView && this.validVideos().length > this.visibleCardsCount()) {
         this.next();
       }
     }, 4500);
