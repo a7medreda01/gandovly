@@ -248,8 +248,7 @@ export class HomeSectionsComponent {
     const q = this.search.trim();
     this.closeHomeSearchDropdown();
     this.router.navigate(['/menu'], {
-      queryParams: { search: q || null, page: null, category: null, sort: null },
-      queryParamsHandling: 'merge'
+      queryParams: { search: q || null }
     });
   }
 

@@ -30,8 +30,9 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('catScrollContainer') catScrollContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('scrollSentinel') scrollSentinel?: ElementRef<HTMLDivElement>;
 
-  searchTerm: string = '';
-  private searchSubject = new Subject<string>();
+  readonly searchTerm = signal<string>('');
+  readonly isLiveSearching = signal<boolean>(false);
+  private readonly searchSubject = new Subject<string>();
 
   selectedCatId = signal<number | null>(null);
   selectedProductForModal = signal<Product | null>(null);
@@ -60,36 +61,60 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
       window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     }
 
-    // Debounce search input
+    // Initialize search term immediately from snapshot so it renders filled on initial page load!
+    const initSearch = this.route.snapshot.queryParams['search'] || '';
+    if (initSearch) {
+      this.searchTerm.set(initSearch);
+    }
+
+    // Debounce search input for instant live search (like navbar)
     this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(350),
+      debounceTime(280),
       distinctUntilChanged()
     ).subscribe(term => {
+      this.isLiveSearching.set(false);
       this.pageIndex.set(1);
-      this.updateQueryParams();
+      const clean = (term || '').trim();
+      const currentParam = this.route.snapshot.queryParams['search'] || '';
+      if (currentParam === clean) {
+        this.fetchProducts(true);
+      } else {
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: {
+            search: clean ? clean : null,
+            page: null
+          },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        });
+      }
     });
 
     // 1. Load Categories from backend
-    this.catalogService.loadCategories().subscribe(() => {
-      // 2. Read query params
-      this.routeSubscription = this.route.queryParams.subscribe(params => {
-        this.selectedCatId.set(params['category'] ? +params['category'] : null);
-        if (params['page']) {
-          this.pageIndex.set(+params['page'] || 1);
-        }
-        this.searchTerm = params['search'] || '';
-        this.sortBy=params['sort']||'';
+    this.catalogService.loadCategories().subscribe();
 
-        // Open modal if product query param is provided
-        if (params['product']) {
-          const prodId = +params['product'];
-          this.catalogService.getProductById(prodId).subscribe(p => {
-            if (p) this.selectedProductForModal.set(p);
-          });
-        }
+    // 2. Read query params independently
+    this.routeSubscription = this.route.queryParams.subscribe(params => {
+      this.selectedCatId.set(params['category'] ? +params['category'] : null);
+      if (params['page']) {
+        this.pageIndex.set(+params['page'] || 1);
+      }
+      const q = params['search'] || '';
+      if (this.searchTerm() !== q) {
+        this.searchTerm.set(q);
+      }
+      this.sortBy = params['sort'] || '';
 
-        this.fetchProducts(true);
-      });
+      // Open modal if product query param is provided
+      if (params['product']) {
+        const prodId = +params['product'];
+        this.catalogService.getProductById(prodId).subscribe(p => {
+          if (p) this.selectedProductForModal.set(p);
+        });
+      }
+
+      this.fetchProducts(true);
     });
   }
 
@@ -138,14 +163,30 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  onSearchInput(val: string) {
+    const clean = val || '';
+    this.searchTerm.set(clean);
+    this.isLiveSearching.set(true);
+    this.searchSubject.next(clean);
+  }
+
   onSearchChange(term: string) {
-    this.searchSubject.next(term);
+    this.onSearchInput(term);
   }
 
   clearSearch() {
-    this.searchTerm = '';
+    this.searchTerm.set('');
+    this.isLiveSearching.set(false);
     this.pageIndex.set(1);
-    this.updateQueryParams();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        search: null,
+        page: null
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   selectCategory(id: number | null) {
@@ -169,10 +210,10 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
     this.productsRequest = this.catalogService.getProducts({
       cardsOnly: true,
       categoryId: this.selectedCatId(),
-      search: this.searchTerm,
+      search: this.searchTerm(),
       page: this.pageIndex(),
-      sortBy:this.sortBy,
-        pageSize: this.pageSize()
+      sortBy: this.sortBy,
+      pageSize: this.pageSize()
     }).subscribe({
       next: (res) => {
         if (res) {
@@ -224,8 +265,9 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private updateQueryParams() {
+    const term = this.searchTerm().trim();
     const current = this.route.snapshot.queryParamMap;
-    if ((current.get('category') || '') === (this.selectedCatId()?.toString() || '') && (current.get('search') || '') === this.searchTerm.trim()) {
+    if ((current.get('category') || '') === (this.selectedCatId()?.toString() || '') && (current.get('search') || '') === term) {
       this.fetchProducts(true); return;
     }
     this.router.navigate([], {
@@ -233,7 +275,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
       queryParams: {
         category: this.selectedCatId(),
         page: null,
-        search: this.searchTerm.trim() ? this.searchTerm.trim() : null
+        search: term ? term : null
       },
       queryParamsHandling: 'merge',
       replaceUrl: true

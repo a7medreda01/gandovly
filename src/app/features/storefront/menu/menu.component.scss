@@ -75,17 +75,35 @@
       background: transparent;
       border: none;
       color: #94a3b8;
-      font-size: 1rem;
+      font-size: 1.15rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 0.2rem;
+      transition: color 0.15s ease;
 
       &:hover {
         color: #0d2b45;
       }
     }
+
+    .search-mini-spinner {
+      position: absolute;
+      left: 40px;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-top-color: var(--primary-color, #00875a);
+      border-radius: 50%;
+      animation: searchSpin 0.6s linear infinite;
+      pointer-events: none;
+    }
   }
+}
+
+@keyframes searchSpin {
+  to { transform: rotate(360deg); }
 }
 
 /* 2. Horizontal Categories Row (Matching Home Exactly) */

@@ -2,17 +2,24 @@
   <div class="menu-inner container">
     <!-- 1. Search Bar Capsule -->
     <div class="menu-search-wrap">
-      <div class="search-capsule">
-        <i class="bi bi-search search-icon"></i>
+      <div class="search-capsule" [style.border-color]="searchTerm() ? (settingsService.settings().primaryColor || 'var(--primary-color)') : null">
+        <i class="bi bi-search search-icon" [style.color]="searchTerm() ? (settingsService.settings().primaryColor || 'var(--primary-color)') : null"></i>
         <input
+          #menuSearchInput
           type="search"
           [attr.aria-label]="language.text('البحث في المنتجات', 'Search products')"
           class="search-input"
           [placeholder]="language.text('ابحث عن منتج، ماركة، صنف أو تصنيف...', 'Search by product, brand, item or category...')"
-          [(ngModel)]="searchTerm"
-          (ngModelChange)="onSearchChange($event)"
+          [value]="searchTerm()"
+          (input)="onSearchInput($any($event.target).value)"
+          (compositionend)="onSearchInput($any($event.target).value)"
+          autocomplete="off"
+          spellcheck="false"
         />
-        @if (searchTerm) {
+        @if (isLiveSearching()) {
+          <div class="search-mini-spinner" aria-hidden="true" [style.border-top-color]="settingsService.settings().primaryColor || 'var(--primary-color)'"></div>
+        }
+        @if (searchTerm()) {
           <button type="button" class="btn-clear-search" (click)="clearSearch()" [attr.aria-label]="language.text('مسح', 'Clear')">
             <i class="bi bi-x-circle-fill"></i>
           </button>
@@ -70,13 +77,23 @@
     <div class="menu-results-header">
       <div class="header-titles">
         <h1 class="menu-active-title">
-          @if(sortBy==='latest'||sortBy==='offers'||sortBy==='bestsellers'){<span>{{sortBy==='latest'?language.text('وصل حديثًا','New arrivals'):sortBy==='offers'?language.text('عروض وخصومات','Offers'):language.text('الأكثر مبيعًا','Bestsellers')}}</span>}@else if (selectedCatId() === null) {
+          @if (searchTerm().trim()) {
+            <span>{{ language.text('نتائج البحث عن: "' + searchTerm() + '"', 'Search results for: "' + searchTerm() + '"') }}</span>
+          } @else if(sortBy==='latest'||sortBy==='offers'||sortBy==='bestsellers'){
+            <span>{{sortBy==='latest'?language.text('وصل حديثًا','New arrivals'):sortBy==='offers'?language.text('عروض وخصومات','Offers'):language.text('الأكثر مبيعًا','Bestsellers')}}</span>
+          } @else if (selectedCatId() === null) {
             <span>{{language.text('جميع المنتجات والأصناف', 'All products')}}</span>
           } @else {
             <span>{{ selectedCategoryName }}</span>
           }
         </h1>
-        <span class="results-count">{{ totalCount() }} {{ language.text('منتج متاح', 'products available') }}</span>@if(sortBy){<a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">{{ language.text('إزالة فلتر المجموعة', 'Clear group filter') }}</a>}
+        <span class="results-count">{{ totalCount() }} {{ language.text('منتج متاح', 'products available') }}</span>
+        @if(searchTerm()){
+          <a role="button" class="cursor-pointer text-danger ms-2" (click)="clearSearch()">{{ language.text('إلغاء البحث', 'Clear search') }}</a>
+        }
+        @if(sortBy){
+          <a routerLink="/menu" [queryParams]="{sort:null,page:null}" queryParamsHandling="merge">{{ language.text('إزالة فلتر المجموعة', 'Clear group filter') }}</a>
+        }
       </div>
 
     </div>
