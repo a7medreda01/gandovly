@@ -416,6 +416,7 @@ section {
 
 .promo.hero {
   min-height: 440px;
+  margin-top: 20px;
 }
 
 .promo-media {
@@ -907,6 +908,10 @@ img.image-pending {
   .promo.hero {
     grid-template-columns: 1fr;
     min-height: 0;
+  }
+
+  .promo.hero {
+    margin-top: 14px;
   }
 
   .promo-media {

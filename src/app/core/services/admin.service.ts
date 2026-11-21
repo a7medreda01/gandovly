@@ -148,8 +148,8 @@ export class AdminService {
     return this.api.get<DeliveryZone[]>('admin/delivery-zones');
   }
 
-  addEgyptGovernorates() {
-    return this.api.post<number>('admin/delivery-zones/presets/egypt', {});
+  addEgyptGovernorates(payload?: { deliveryFee?: number; isActive?: boolean; updateExisting?: boolean }) {
+    return this.api.post<number>('admin/delivery-zones/presets/egypt', payload ?? {});
   }
 
   createDeliveryZone(dto: any) {

@@ -55,6 +55,35 @@ export class AdminLayoutComponent {
     this.isSidebarOpen = false;
   }
 
+  formatSupportSessionExpiry(dateVal: any): string {
+    if (!dateVal) return '';
+    let d: Date;
+    if (typeof dateVal === 'string') {
+      const s = dateVal.trim();
+      const hasTz = s.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(s);
+      d = new Date(hasTz ? s : s + 'Z');
+    } else {
+      d = new Date(dateVal);
+    }
+    if (isNaN(d.getTime())) return '';
+
+    const storeTz = this.settingsService.settings()?.timeZone || 'Africa/Cairo';
+    try {
+      return new Intl.DateTimeFormat('ar-EG', {
+        timeZone: storeTz,
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      }).format(d);
+    } catch {
+      try {
+        return d.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true });
+      } catch {
+        return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+      }
+    }
+  }
+
   logout() {
     this.authService.revokeAdminSession().subscribe({
       next: () => { this.authService.logoutAdmin(); this.router.navigate(['/admin/login']); },

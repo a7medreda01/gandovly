@@ -62,21 +62,44 @@ export class AdminDeliveryZonesComponent implements OnInit {
   }
 
   readonly importingGovernorates = signal(false);
+  readonly showEgyptModal = signal(false);
+  egyptUnifiedFee: number = 50;
+  egyptSetActive: boolean = true;
+  egyptUpdateExisting: boolean = true;
 
-  addEgyptGovernorates() {
+  openEgyptPresetModal() {
+    this.showEgyptModal.set(true);
+  }
+
+  closeEgyptPresetModal() {
+    this.showEgyptModal.set(false);
+  }
+
+  confirmAddEgyptGovernorates() {
     if (this.importingGovernorates()) return;
     this.importingGovernorates.set(true);
-    this.adminService.addEgyptGovernorates().subscribe({
+    const fee = Math.max(0, Number(this.egyptUnifiedFee) || 0);
+    this.adminService.addEgyptGovernorates({
+      deliveryFee: fee,
+      isActive: this.egyptSetActive,
+      updateExisting: this.egyptUpdateExisting
+    }).subscribe({
       next: count => {
         this.importingGovernorates.set(false);
-        this.toast.success(count ? 'تمت إضافة ' + count + ' محافظة غير مفعّلة.' : 'كل المحافظات موجودة بالفعل.');
+        this.showEgyptModal.set(false);
+        const statusText = this.egyptSetActive ? `وتفعيلها بنجاح بسعر شحن ${fee} ${this.currencySymbol}` : '';
+        this.toast.success(count ? `تم بنجاح إضافة وتحديث ${count} محافظة ${statusText}!` : 'المحافظات موجودة وتم تحديث بياناتها بنجاح!');
         this.loadZones();
       },
       error: error => {
         this.importingGovernorates.set(false);
-        this.toast.error(error?.error?.message || 'تعذرت إضافة المحافظات. حاول مرة أخرى.');
+        this.toast.error(error?.error?.message || 'تعذرت إضافة وتفعيل المحافظات. حاول مرة أخرى.');
       }
     });
+  }
+
+  addEgyptGovernorates() {
+    this.openEgyptPresetModal();
   }
 
   loadZones() {

@@ -80,7 +80,7 @@ export class HomeSectionsComponent {
 
   readonly isFirstSectionHero = computed(() => {
     const s = this.sections();
-    return s.length > 0 && (s[0].config.kind === 'hero_slider' || s[0].config.kind === 'hero');
+    return s.length > 0 && s[0].config.kind === 'hero_slider';
   });
 
   loading = signal(true);
