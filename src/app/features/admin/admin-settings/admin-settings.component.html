@@ -625,7 +625,7 @@
               <span class="ms-2">إظهار زر الاتصال الهاتفي في الهيدر العلوي</span>
             </label>
             <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">
-              <input type="checkbox" [ngModel]="layoutOptions.showNavbarSearch === true" (ngModelChange)="layoutOptions.showNavbarSearch = $event; (settings()!.showNavbarSearch = $event)" />
+              <input type="checkbox" [ngModel]="layoutOptions.showNavbarSearch === true" (ngModelChange)="onNavbarSearchToggle($event)" />
               <span class="ms-2">إظهار أيقونة البحث المباشر في الهيدر العلوي (Navbar Live Search)</span>
             </label>
             <label class="checkbox-label flex-center flex-1 p-2 border rounded bg-light">

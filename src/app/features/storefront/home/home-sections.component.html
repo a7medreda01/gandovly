@@ -6,13 +6,8 @@
 
   <!-- Top Search Bar (when hero is NOT the first element and search is enabled) -->
   @if (showHomeSearch() && !isFirstSectionHero()) {
-    <div class="container home-search-wrap">
-      <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()">
-        <input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج أو قسم', 'Search products')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')">
-        <a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')">
-          <i class="bi bi-search" aria-hidden="true"></i>
-        </a>
-      </form>
+    <div class="container">
+      <ng-container *ngTemplateOutlet="homeSearchTpl; context: { isUnderHero: false }"></ng-container>
     </div>
   }
 
@@ -31,13 +26,8 @@
 
       <!-- If hero slider was at top and search is enabled, place search bar right below hero slider with luxury styling -->
       @if (showHomeSearch() && i === 0) {
-        <div class="container home-search-wrap search-under-hero">
-          <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()">
-            <input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج أو قسم أو طاولة...', 'Search products or categories...')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')">
-            <a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')">
-              <i class="bi bi-search" aria-hidden="true"></i>
-            </a>
-          </form>
+        <div class="container">
+          <ng-container *ngTemplateOutlet="homeSearchTpl; context: { isUnderHero: true }"></ng-container>
         </div>
       }
     } @else {
@@ -47,14 +37,7 @@
           @case ('hero') {
             <app-section-hero [s]="s" [settings]="settings.settings()"></app-section-hero>
             @if (showHomeSearch() && i === 0) {
-              <div class="home-search-wrap search-under-hero" style="margin-top: 1rem; margin-bottom: 1.5rem;">
-                <form class="home-search" action="/menu" (submit)="$event.preventDefault();goSearch()">
-                  <input type="search" [(ngModel)]="search" name="search" [placeholder]="language.text('ابحث عن منتج أو قسم...', 'Search products or categories...')" [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')">
-                  <a [routerLink]="['/menu']" [queryParams]="{search:search||null,page:null,category:null,sort:null}" queryParamsHandling="merge" [style.background]="settings.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')">
-                    <i class="bi bi-search" aria-hidden="true"></i>
-                  </a>
-                </form>
-              </div>
+              <ng-container *ngTemplateOutlet="homeSearchTpl; context: { isUnderHero: true }"></ng-container>
             }
           }
           @case ('products') {
@@ -109,5 +92,82 @@
 
   @if(loadingProduct()){<div class="product-opening" role="status">جاري تحميل تفاصيل المنتج...</div>}
   @if(selected()){<app-product-detail-modal [product]="selected()!" (closeModal)="selected.set(null)"></app-product-detail-modal>}
+
+  <!-- Reusable Luxury Full-Width Home Search Template -->
+  <ng-template #homeSearchTpl let-isUnderHero="isUnderHero">
+    <div class="home-search-wrap" [class.search-under-hero]="isUnderHero">
+      <form class="home-search" action="/menu" (submit)="$event.preventDefault(); goSearch()">
+        <div class="search-lead-icon" aria-hidden="true">
+          <i class="bi bi-search"></i>
+        </div>
+        <input
+          type="search"
+          [ngModel]="search"
+          (ngModelChange)="onHomeSearchInput($event)"
+          (focus)="onHomeSearchFocus()"
+          name="search"
+          [placeholder]="language.text('ابحث عن منتج أو قسم...', 'Search products or categories...')"
+          [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')"
+          autocomplete="off"
+        />
+        @if (search.trim()) {
+          <button type="button" class="btn-clear-search" (click)="clearHomeLiveSearch()" [attr.aria-label]="language.text('مسح', 'Clear')">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        }
+        <button
+          type="submit"
+          class="btn-search-action"
+          [style.background]="settings.settings().primaryColor || 'var(--primary-color)'"
+          [style.color]="'#ffffff'"
+          [attr.aria-label]="language.text('عرض نتائج البحث', 'Show search results')"
+        >
+          <i class="bi bi-search"></i>
+          <span class="btn-search-text">{{ language.text('بحث', 'Search') }}</span>
+        </button>
+      </form>
+
+      <!-- Live Search Autocomplete Dropdown -->
+      @if (isHomeSearchDropdownOpen() && (isHomeSearching() || homeSearchResults().length > 0 || (hasHomeSearched() && search.trim()))) {
+        <div class="home-live-search-dropdown shadow-lg" (click)="$event.stopPropagation()">
+          @if (isHomeSearching()) {
+            <div class="home-search-loading">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" [style.color]="settings.settings().primaryColor || 'var(--primary-color)'"></span>
+              <span>{{ language.text('جاري البحث في المتجر...', 'Searching the store...') }}</span>
+            </div>
+          } @else if (homeSearchResults().length > 0) {
+            <div class="home-search-results-list">
+              @for (p of homeSearchResults(); track p.id) {
+                <div class="home-search-item" (click)="openProductFromHomeSearch(p)">
+                  <div class="home-search-item-thumb">
+                    <img [src]="(p.imageUrl || '') | imageUrl:'product'" [alt]="productName(p)" loading="lazy" />
+                  </div>
+                  <div class="home-search-item-info">
+                    <div class="home-search-item-title">{{ productName(p) }}</div>
+                    <div class="home-search-item-meta">
+                      @if (p.categoryNameAr || p.brand) {
+                        <span class="home-search-item-cat">{{ p.categoryNameAr || p.brand }}</span>
+                      }
+                      <span class="home-search-item-price">{{ p.pricePerUnit || 0 }} {{ currencySymbol() }}</span>
+                    </div>
+                  </div>
+                  <i class="bi bi-chevron-left home-search-item-arrow" aria-hidden="true"></i>
+                </div>
+              }
+            </div>
+            <div class="home-search-dropdown-footer" (click)="goSearch()">
+              <span>{{ language.text('عرض جميع النتائج لـ', 'View all results for') }} "<strong>{{ search.trim() }}</strong>"</span>
+              <i class="bi bi-arrow-left ms-2" aria-hidden="true"></i>
+            </div>
+          } @else if (hasHomeSearched() && search.trim()) {
+            <div class="home-search-empty">
+              <i class="bi bi-search me-2 text-muted"></i>
+              <span>{{ language.text('لا توجد منتجات مطابقة للبحث', 'No products match your search') }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </ng-template>
 </div>
 }

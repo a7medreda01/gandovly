@@ -2,9 +2,9 @@ import { LanguageService } from '../../../core/services/language.service';
 import { ImageRevealDirective } from '../../../shared/directives/image-reveal.directive';
 import { ScrollAnimateDirective } from '../../../shared/directives/scroll-animate.directive';
 import { HomeSkeletonComponent } from './home-skeleton.component';
-import { Subscription } from 'rxjs';
+import { Subscription, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Component, DestroyRef, inject, signal, computed, ViewEncapsulation } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed, ViewEncapsulation, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
@@ -88,6 +88,23 @@ export class HomeSectionsComponent {
   selected = signal<Product | null>(null);
   search = '';
 
+  // Live Home Search
+  isHomeSearchDropdownOpen = signal(false);
+  isHomeSearching = signal(false);
+  hasHomeSearched = signal(false);
+  homeSearchResults = signal<Product[]>([]);
+  private homeSearchSubject = new Subject<string>();
+
+  constructor() {
+    this.homeSearchSubject.pipe(
+      debounceTime(250),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(query => {
+      this.executeHomeLiveSearch(query);
+    });
+  }
+
   ngOnInit() {
     this.load();
   }
@@ -151,9 +168,87 @@ export class HomeSectionsComponent {
     });
   }
 
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.home-search-wrap')) {
+      this.closeHomeSearchDropdown();
+    }
+  }
+
+  onHomeSearchInput(val: string) {
+    this.search = val;
+    if (val && val.trim()) {
+      this.isHomeSearchDropdownOpen.set(true);
+      this.homeSearchSubject.next(val);
+    } else {
+      this.clearHomeLiveSearch();
+    }
+  }
+
+  onHomeSearchFocus() {
+    if (this.search && this.search.trim() && (this.homeSearchResults().length > 0 || this.hasHomeSearched())) {
+      this.isHomeSearchDropdownOpen.set(true);
+    }
+  }
+
+  clearHomeLiveSearch() {
+    this.search = '';
+    this.homeSearchResults.set([]);
+    this.hasHomeSearched.set(false);
+    this.isHomeSearching.set(false);
+    this.isHomeSearchDropdownOpen.set(false);
+  }
+
+  closeHomeSearchDropdown() {
+    this.isHomeSearchDropdownOpen.set(false);
+  }
+
+  openProductFromHomeSearch(p: Product) {
+    this.closeHomeSearchDropdown();
+    this.router.navigate(['/product', p.id]);
+  }
+
+  productName(p: any): string {
+    if (this.language.currentLang() === 'en') {
+      return p.nameEn || p.name || p.nameAr || '';
+    }
+    return p.nameAr || p.name || p.nameEn || '';
+  }
+
+  currencySymbol(): string {
+    return this.settings.settings().currencySymbol || 'ج.م';
+  }
+
+  private executeHomeLiveSearch(query: string) {
+    const q = (query || '').trim();
+    if (!q) {
+      this.homeSearchResults.set([]);
+      this.hasHomeSearched.set(false);
+      this.isHomeSearching.set(false);
+      return;
+    }
+
+    this.isHomeSearching.set(true);
+    this.catalog.getProducts({ search: q, pageSize: 6 }).subscribe({
+      next: res => {
+        this.homeSearchResults.set(res.items || []);
+        this.isHomeSearching.set(false);
+        this.hasHomeSearched.set(true);
+      },
+      error: () => {
+        this.homeSearchResults.set([]);
+        this.isHomeSearching.set(false);
+        this.hasHomeSearched.set(true);
+      }
+    });
+  }
+
   goSearch() {
+    const q = this.search.trim();
+    this.closeHomeSearchDropdown();
     this.router.navigate(['/menu'], {
-      queryParams: { search: this.search.trim() || null, page: null, category: null, sort: null },
+      queryParams: { search: q || null, page: null, category: null, sort: null },
       queryParamsHandling: 'merge'
     });
   }

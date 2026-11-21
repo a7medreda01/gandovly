@@ -547,11 +547,14 @@ export class AdminSettingsComponent implements OnInit {
     const layout = { ...defaultStoreLayout(), ...(s.storeLayout ?? {}) };
     const showMobileBottomNav = s.showMobileBottomNav !== false && layout.showMobileBottomNav !== false;
     const showHomeSearch = s.showSearchBar !== false && layout.showHomeSearch !== false;
+    const showNavbarSearch = s.showNavbarSearch === true || layout.showNavbarSearch === true;
     layout.showMobileBottomNav = showMobileBottomNav;
     layout.showHomeSearch = showHomeSearch;
+    layout.showNavbarSearch = showNavbarSearch;
     layout.enableImageCompression = layout.enableImageCompression !== false;
     normalized.showMobileBottomNav = showMobileBottomNav;
     normalized.showSearchBar = showHomeSearch;
+    normalized.showNavbarSearch = showNavbarSearch;
     normalized.storeLayout = layout;
 
     const colorFields = [
@@ -655,6 +658,13 @@ export class AdminSettingsComponent implements OnInit {
     this.layoutOptions.showMobileBottomNav = enabled;
     if (this.settings()) {
       this.settings()!.showMobileBottomNav = enabled;
+    }
+  }
+
+  onNavbarSearchToggle(enabled: boolean) {
+    this.layoutOptions.showNavbarSearch = enabled;
+    if (this.settings()) {
+      this.settings()!.showNavbarSearch = enabled;
     }
   }
 
