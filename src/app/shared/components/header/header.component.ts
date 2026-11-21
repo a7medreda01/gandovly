@@ -37,6 +37,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly isSearchOpen = signal(false);
   readonly searchQuery = signal('');
   readonly searchResults = signal<Product[]>([]);
+  readonly totalSearchCount = signal(0);
   readonly isSearching = signal(false);
   readonly hasSearched = signal(false);
 
@@ -45,7 +46,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.searchSubscription = this.searchSubject.pipe(
-      debounceTime(350),
+      debounceTime(250),
       distinctUntilChanged()
     ).subscribe(query => {
       this.executeLiveSearch(query);
@@ -85,8 +86,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     if (nextState) {
       this.closeMobileMenu();
       setTimeout(() => {
-        this.liveSearchInput?.nativeElement?.focus();
-      }, 80);
+        try {
+          this.liveSearchInput?.nativeElement?.focus({ preventScroll: true });
+        } catch {
+          this.liveSearchInput?.nativeElement?.focus();
+        }
+      }, 60);
     } else {
       this.clearSearch();
     }
@@ -100,13 +105,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
   clearSearch() {
     this.searchQuery.set('');
     this.searchResults.set([]);
+    this.totalSearchCount.set(0);
     this.hasSearched.set(false);
     this.isSearching.set(false);
   }
 
   onSearchInput(val: string) {
-    this.searchQuery.set(val);
-    this.searchSubject.next(val);
+    const clean = val || '';
+    this.searchQuery.set(clean);
+    if (!clean.trim()) {
+      this.searchResults.set([]);
+      this.totalSearchCount.set(0);
+      this.hasSearched.set(false);
+      this.isSearching.set(false);
+      return;
+    }
+    this.isSearching.set(true);
+    this.searchSubject.next(clean);
   }
 
   onSearchEnter() {
@@ -137,6 +152,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const q = (query || '').trim();
     if (!q) {
       this.searchResults.set([]);
+      this.totalSearchCount.set(0);
       this.hasSearched.set(false);
       this.isSearching.set(false);
       return;
@@ -146,11 +162,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.catalogService.getProducts({ search: q, pageSize: 8 }).subscribe({
       next: res => {
         this.searchResults.set(res.items || []);
+        this.totalSearchCount.set(res.totalCount || (res.items || []).length);
         this.isSearching.set(false);
         this.hasSearched.set(true);
       },
       error: () => {
         this.searchResults.set([]);
+        this.totalSearchCount.set(0);
         this.isSearching.set(false);
         this.hasSearched.set(true);
       }

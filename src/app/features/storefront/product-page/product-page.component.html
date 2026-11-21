@@ -219,9 +219,6 @@
           <div class="title-mask-wrap">
             <h1 class="product-h1">{{ languageService.getLocalizedName(product()!) }}</h1>
           </div>
-          @if (languageService.isRtl() && product()!.nameEn && product()!.nameEn !== product()!.nameAr) {
-            <p class="product-subtitle-en">{{ product()!.nameEn }}</p>
-          }
 
           <div class="luxury-price-row">
             <div class="price-banner-box">

@@ -163,17 +163,17 @@
     </div>
   </div>
 
-  <!-- Navbar Live Search Dropdown Panel -->
+  <!-- Navbar Live Search Row (Firmly under navbar row) -->
   @if (isSearchOpen()) {
-    <div class="live-search-backdrop" (click)="closeSearch()"></div>
-    <div class="live-search-panel" (click)="$event.stopPropagation()">
-      <div class="container live-search-container">
+    <div class="navbar-search-row" (click)="$event.stopPropagation()">
+      <div class="container search-row-container">
         <!-- Search Input Box -->
         <div class="live-search-input-box" [style.border-color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
           <i class="bi bi-search search-box-icon" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'"></i>
-          <input #liveSearchInput type="text"
-            [ngModel]="searchQuery()"
-            (ngModelChange)="onSearchInput($event)"
+          <input #liveSearchInput type="search"
+            [value]="searchQuery()"
+            (input)="onSearchInput($any($event.target).value)"
+            (compositionend)="onSearchInput($any($event.target).value)"
             (keydown.escape)="closeSearch()"
             (keydown.enter)="onSearchEnter()"
             [placeholder]="languageService.text('ابحث عن منتج بالاسم، القسم، أو الموديل...', 'Search products by name, category, or model...')"
@@ -186,16 +186,16 @@
             </button>
           }
           @if (isSearching()) {
-            <div class="search-mini-spinner" aria-hidden="true"></div>
+            <div class="search-mini-spinner" aria-hidden="true" [style.border-top-color]="settingsService.settings().primaryColor || 'var(--primary-color)'"></div>
           }
         </div>
 
-        <!-- Live Results Dropdown -->
+        <!-- Floating Live Results Dropdown Under the Input -->
         @if (hasSearched() || isSearching()) {
-          <div class="live-search-results">
+          <div class="live-search-results-dropdown shadow-lg">
             @if (isSearching() && !searchResults().length) {
               <div class="live-search-loading">
-                <div class="search-mini-spinner"></div>
+                <div class="search-mini-spinner" [style.border-top-color]="settingsService.settings().primaryColor || 'var(--primary-color)'"></div>
                 <span>{{ languageService.text('جاري البحث في المنتجات...', 'Searching products...') }}</span>
               </div>
             } @else if (searchResults().length > 0) {
@@ -218,7 +218,7 @@
                       }
                     </div>
                     <div class="result-price" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
-                      <span class="price-val">{{ p.pricePerUnit || 0 }}</span>
+                      <span class="price-val">{{ (p.pricingType === 'ByWeight' ? (p.pricePerKg || p.pricePerUnit) : p.pricePerUnit) || 0 }}</span>
                       <span class="currency">{{ currencySymbol() }}</span>
                     </div>
                   </div>
@@ -226,8 +226,8 @@
               </div>
 
               <div class="live-results-footer">
-                <a [routerLink]="['/menu']" [queryParams]="{ search: searchQuery() }" (click)="closeSearch()" class="btn-view-all-results">
-                  <span>{{ languageService.text('عرض جميع نتائج البحث لـ "' + searchQuery() + '"', 'View all results for "' + searchQuery() + '"') }}</span>
+                <a [routerLink]="['/menu']" [queryParams]="{ search: searchQuery() }" (click)="closeSearch()" class="btn-view-all-results" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
+                  <span>{{ languageService.text('عرض جميع نتائج البحث لـ "' + searchQuery() + '" (' + totalSearchCount() + ' منتج)', 'View all results for "' + searchQuery() + '" (' + totalSearchCount() + ' products)') }}</span>
                   <i class="bi" [class.bi-arrow-left]="languageService.isRtl()" [class.bi-arrow-right]="!languageService.isRtl()"></i>
                 </a>
               </div>
@@ -244,3 +244,8 @@
     </div>
   }
 </header>
+
+<!-- Backdrop when search is active -->
+@if (isSearchOpen()) {
+  <div class="live-search-backdrop" (click)="closeSearch()"></div>
+}
