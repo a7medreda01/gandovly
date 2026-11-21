@@ -5,7 +5,7 @@ import { NotificationService } from '../../../core/services/notification.service
 import { HomeSectionsComponent } from './home-sections.component';
 import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterModule } from '@angular/router';
+import { RouterLink, RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../../core/services/settings.service';
 import { CatalogService } from '../../../core/services/catalog.service';
@@ -31,6 +31,7 @@ export class HomeContentComponent implements OnInit, OnDestroy {
   readonly catalogService = inject(CatalogService);
   readonly authService = inject(AuthService);
   readonly languageService = inject(LanguageService);
+  private readonly router = inject(Router);
 
   readonly activeThemeBanner = computed(() => {
     const s = this.settingsService.settings();
@@ -171,8 +172,22 @@ export class HomeContentComponent implements OnInit, OnDestroy {
 
   }
 
+  onSearchInput(val: string) {
+    const clean = val || '';
+    this.searchQuery.set(clean);
+    this.searchSubject.next(clean);
+  }
+
   onSearchChange(val: string) {
-    this.searchSubject.next(val);
+    this.onSearchInput(val);
+  }
+
+  goSearch(directQuery?: string) {
+    const q = (directQuery !== undefined ? directQuery : this.searchQuery()).trim();
+    this.router.navigate(['/menu'], {
+      queryParams: { search: q || null },
+      queryParamsHandling: ''
+    });
   }
 
   selectCategory(id: number | null) {

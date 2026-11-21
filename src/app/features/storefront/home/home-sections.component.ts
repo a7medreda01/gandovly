@@ -177,10 +177,10 @@ export class HomeSectionsComponent {
   }
 
   onHomeSearchInput(val: string) {
-    this.search = val;
-    if (val && val.trim()) {
+    this.search = val || '';
+    if (this.search && this.search.trim()) {
       this.isHomeSearchDropdownOpen.set(true);
-      this.homeSearchSubject.next(val);
+      this.homeSearchSubject.next(this.search);
     } else {
       this.clearHomeLiveSearch();
     }
@@ -244,11 +244,12 @@ export class HomeSectionsComponent {
     });
   }
 
-  goSearch() {
-    const q = this.search.trim();
+  goSearch(directQuery?: string) {
+    const q = (directQuery !== undefined ? directQuery : this.search).trim();
     this.closeHomeSearchDropdown();
     this.router.navigate(['/menu'], {
-      queryParams: { search: q || null }
+      queryParams: { search: q || null },
+      queryParamsHandling: ''
     });
   }
 

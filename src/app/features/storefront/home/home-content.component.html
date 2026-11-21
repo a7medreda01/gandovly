@@ -33,24 +33,34 @@
   <!-- 2. Search & Filter Bar (Overlapping Bottom of Banner or top-spaced when banner is disabled) -->
   @if (settingsService.settings().showSearchBar !== false && settingsService.settings().storeLayout?.showHomeSearch !== false) {
   <section class="search-filter-section container" [class.no-hero]="!settingsService.settings().showHeroBanner">
-    <div class="search-filter-row">
+    <form class="search-filter-row" (submit)="$event.preventDefault(); goSearch(homeSearchInput.value)">
       <!-- Search Button on Right (1st child in RTL) -->
-      <a routerLink="/menu" [queryParams]="{search: searchQuery() || null, category: null, page: null, product: null}" queryParamsHandling="merge" class="btn-filter-dark" [style.background]="settingsService.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
+      <button type="submit" class="btn-filter-dark" [style.background]="settingsService.settings().primaryColor || 'var(--primary-color)'" [style.color]="'#ffffff'" title="بحث في المنتجات" aria-label="عرض نتائج البحث">
         <i class="bi bi-search"></i>
-      </a>
+      </button>
 
       <!-- Search Capsule on Left (2nd child in RTL) -->
       <div class="search-capsule">
         <i class="bi bi-search search-icon"></i>
-        <input type="search" class="search-input" [attr.aria-label]="languageService.text('البحث في منتجات المتجر', 'Search the store')" [placeholder]="languageService.text('ابحث عن منتج أو علامة تجارية', 'Search for a product or brand')" [ngModel]="searchQuery()"
-          (ngModelChange)="onSearchChange($event)" />
+        <input
+          #homeSearchInput
+          type="search"
+          class="search-input"
+          [attr.aria-label]="languageService.text('البحث في منتجات المتجر', 'Search the store')"
+          [placeholder]="languageService.text('ابحث عن منتج أو علامة تجارية', 'Search for a product or brand')"
+          [value]="searchQuery()"
+          (input)="onSearchInput($any($event.target).value)"
+          (compositionend)="onSearchInput($any($event.target).value)"
+          (keydown.enter)="$event.preventDefault(); goSearch(homeSearchInput.value)"
+          autocomplete="off"
+        />
         @if (searchQuery()) {
-        <button type="button" class="btn-clear-search" aria-label="مسح البحث" (click)="searchQuery.set(''); onSearchChange('')">
+        <button type="button" class="btn-clear-search" aria-label="مسح البحث" (click)="searchQuery.set(''); onSearchInput('')">
           <i class="bi bi-x-circle-fill"></i>
         </button>
         }
       </div>
-    </div>
+    </form>
   </section>
   }
 

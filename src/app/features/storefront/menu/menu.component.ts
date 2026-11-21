@@ -29,6 +29,7 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('catScrollContainer') catScrollContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('scrollSentinel') scrollSentinel?: ElementRef<HTMLDivElement>;
+  @ViewChild('menuSearchInput') menuSearchInput?: ElementRef<HTMLInputElement>;
 
   readonly searchTerm = signal<string>('');
   readonly isLiveSearching = signal<boolean>(false);
@@ -104,6 +105,9 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
       if (this.searchTerm() !== q) {
         this.searchTerm.set(q);
       }
+      if (this.menuSearchInput?.nativeElement && this.menuSearchInput.nativeElement.value !== q) {
+        this.menuSearchInput.nativeElement.value = q;
+      }
       this.sortBy = params['sort'] || '';
 
       // Open modal if product query param is provided
@@ -120,6 +124,9 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this.setupIntersectionObserver();
+    if (this.menuSearchInput?.nativeElement && this.searchTerm()) {
+      this.menuSearchInput.nativeElement.value = this.searchTerm();
+    }
   }
 
   ngOnDestroy() { this.productDetailRequest?.unsubscribe();
@@ -176,6 +183,9 @@ export class MenuComponent implements OnInit, AfterViewInit, OnDestroy {
 
   clearSearch() {
     this.searchTerm.set('');
+    if (this.menuSearchInput?.nativeElement) {
+      this.menuSearchInput.nativeElement.value = '';
+    }
     this.isLiveSearching.set(false);
     this.pageIndex.set(1);
     this.router.navigate([], {

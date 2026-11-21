@@ -175,7 +175,7 @@
             (input)="onSearchInput($any($event.target).value)"
             (compositionend)="onSearchInput($any($event.target).value)"
             (keydown.escape)="closeSearch()"
-            (keydown.enter)="onSearchEnter()"
+            (keydown.enter)="onSearchEnter(liveSearchInput.value)"
             [placeholder]="languageService.text('ابحث عن منتج بالاسم، القسم، أو الموديل...', 'Search products by name, category, or model...')"
             [attr.aria-label]="languageService.text('البحث المباشر في المتجر', 'Live store search')"
             autocomplete="off"
@@ -226,7 +226,7 @@
               </div>
 
               <div class="live-results-footer">
-                <a [routerLink]="['/menu']" [queryParams]="{ search: searchQuery() }" (click)="closeSearch()" class="btn-view-all-results" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
+                <a [routerLink]="['/menu']" [queryParams]="{ search: searchQuery() }" queryParamsHandling="" (click)="closeSearch()" class="btn-view-all-results" [style.color]="settingsService.settings().primaryColor || 'var(--primary-color)'">
                   <span>{{ languageService.text('عرض جميع نتائج البحث لـ "' + searchQuery() + '" (' + totalSearchCount() + ' منتج)', 'View all results for "' + searchQuery() + '" (' + totalSearchCount() + ' products)') }}</span>
                   <i class="bi" [class.bi-arrow-left]="languageService.isRtl()" [class.bi-arrow-right]="!languageService.isRtl()"></i>
                 </a>

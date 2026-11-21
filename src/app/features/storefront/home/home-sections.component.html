@@ -96,15 +96,18 @@
   <!-- Reusable Luxury Full-Width Home Search Template -->
   <ng-template #homeSearchTpl let-isUnderHero="isUnderHero">
     <div class="home-search-wrap" [class.search-under-hero]="isUnderHero">
-      <form class="home-search" action="/menu" (submit)="$event.preventDefault(); goSearch()">
+      <form class="home-search" action="/menu" (submit)="$event.preventDefault(); goSearch(homeSectionSearchInput.value)">
         <div class="search-lead-icon" aria-hidden="true">
           <i class="bi bi-search"></i>
         </div>
         <input
+          #homeSectionSearchInput
           type="search"
-          [ngModel]="search"
-          (ngModelChange)="onHomeSearchInput($event)"
+          [value]="search"
+          (input)="onHomeSearchInput($any($event.target).value)"
+          (compositionend)="onHomeSearchInput($any($event.target).value)"
           (focus)="onHomeSearchFocus()"
+          (keydown.enter)="$event.preventDefault(); goSearch(homeSectionSearchInput.value)"
           name="search"
           [placeholder]="language.text('ابحث عن منتج أو قسم...', 'Search products or categories...')"
           [attr.aria-label]="language.text('البحث في المتجر', 'Search the store')"
@@ -155,7 +158,7 @@
                 </div>
               }
             </div>
-            <div class="home-search-dropdown-footer" (click)="goSearch()">
+            <div class="home-search-dropdown-footer" (click)="goSearch(homeSectionSearchInput.value)">
               <span>{{ language.text('عرض جميع النتائج لـ', 'View all results for') }} "<strong>{{ search.trim() }}</strong>"</span>
               <i class="bi bi-arrow-left ms-2" aria-hidden="true"></i>
             </div>
