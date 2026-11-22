@@ -1,1 +1,1 @@
-export const environment = { production: true, standalone: false, apiUrl: '/api/v1' };
+export const environment = { production: true, standalone: false, apiUrl: 'https://api.mecart.app/api/v1' };
