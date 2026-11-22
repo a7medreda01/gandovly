@@ -1,25 +1,12 @@
 <header class="ag-nav" [class.is-scrolled]="scrolled()">
   <div class="ag-nav-inner">
-    <!-- Start: MeCart + RunX Pill -->
-    <div class="ag-brand-cluster">
-      <a routerLink="/" class="ag-brand" (click)="closeMenu()">
-        <img src="/assets/images/branding/mecart-logo.png" alt="MeCart" class="ag-brand-logo-img" />
-        <span class="ag-brand-name">MeCart</span>
-      </a>
+    <!-- Brand: Minimal MeCart -->
+    <a routerLink="/" class="ag-brand" (click)="closeMenu()">
+      <img src="/assets/images/branding/mecart-logo.png" alt="MeCart" class="ag-brand-logo-img" />
+      <span class="ag-brand-name">MeCart</span>
+    </a>
 
-      <a
-        href="https://runxtech.com"
-        target="_blank"
-        rel="noopener"
-        class="ag-runx-pill"
-        [attr.title]="language.text('إحدى مشاريع RunX Tech', 'By RunX Tech')"
-      >
-        <img [src]="runxLogo" alt="RunX" class="ag-runx-icon" />
-        <span>RunX</span>
-      </a>
-    </div>
-
-    <!-- Center: Minimal Route Links -->
+    <!-- Center Links (Desktop only, minimal) -->
     <nav class="ag-nav-links" [attr.aria-label]="language.text('التنقل الرئيسي', 'Primary navigation')">
       <a
         routerLink="/"
@@ -37,7 +24,7 @@
       </a>
     </nav>
 
-    <!-- End: Language Switch + Obsidian CTA + Mobile Hamburger -->
+    <!-- End Actions: Minimal Lang + CTA + Mobile Toggle -->
     <div class="ag-nav-actions">
       <button
         type="button"
@@ -45,18 +32,11 @@
         (click)="toggleLang()"
         [attr.aria-label]="language.text('Switch to English', 'التبديل للعربية')"
       >
-        <i class="bi bi-translate" aria-hidden="true"></i>
         <span>{{ language.currentLang() === 'ar' ? 'EN' : 'عربي' }}</span>
       </button>
 
       <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-cta-pill">
         <span>{{ language.text('ابدأ متجرك', 'Start now') }}</span>
-        <i
-          class="bi"
-          [class.bi-arrow-left]="language.isRtl()"
-          [class.bi-arrow-right]="!language.isRtl()"
-          aria-hidden="true"
-        ></i>
       </a>
 
       <button
@@ -71,7 +51,7 @@
     </div>
   </div>
 
-  <!-- Mobile Dropdown Glass Panel -->
+  <!-- Mobile Dropdown: Minimal Sleek Glass Panel -->
   @if (menuOpen()) {
     <div class="ag-mobile-drawer">
       <nav class="ag-mobile-links">
