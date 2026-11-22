@@ -149,16 +149,51 @@
     </div>
   </section>
 
-  <!-- Minimal Dark Obsidian CTA Finale -->
-  <section class="ag-finale-wrap">
-    <div class="ag-finale-card">
+  <!-- Minimal Dark Obsidian CTA Finale with Scroll-driven Reveal -->
+  <section class="ag-finale-wrap" #finaleWrap>
+    <div
+      class="ag-finale-card"
+      [class.is-in-view]="finaleInView()"
+      (pointermove)="onFinalePointerMove($event)"
+      (pointerleave)="onFinalePointerLeave($event)"
+    >
+      <div class="ag-finale-shimmer" aria-hidden="true"></div>
       <div class="ag-finale-glow" aria-hidden="true"></div>
+      <div class="ag-finale-particles" aria-hidden="true">
+        <span class="ag-particle p1"></span>
+        <span class="ag-particle p2"></span>
+        <span class="ag-particle p3"></span>
+        <span class="ag-particle p4"></span>
+      </div>
+
       <div class="ag-finale-content">
-        <span class="ag-finale-eyebrow">{{ language.text('MeCart Cloud', 'MeCart Cloud') }}</span>
-        <h2 class="ag-finale-title">{{ language.text('جاهز للإطلاق؟', 'Ready for liftoff?') }}</h2>
+        <div class="ag-finale-badge">
+          <span class="ag-finale-badge-dot"></span>
+          <span class="ag-finale-eyebrow">{{ language.text('MeCart Cloud · الإصدار السحابي', 'MeCart Cloud · Next-Gen') }}</span>
+        </div>
+
+        <h2 class="ag-finale-title">
+          {{ language.text('جاهز للإطلاق؟', 'Ready for liftoff?') }}
+        </h2>
+
+        <p class="ag-finale-sub">
+          {{
+            language.text(
+              'أطلق متجرك الإلكتروني الفائق السرعة في دقائق، وانضم لأقوى العلامات التجارية السحابية.',
+              'Launch your high-speed online storefront in minutes with enterprise-grade cloud performance.'
+            )
+          }}
+        </p>
+
         <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-btn-white">
           <i class="bi bi-whatsapp" aria-hidden="true"></i>
           <span>{{ language.text('تواصل عبر واتساب', 'Start on WhatsApp') }}</span>
+          <i
+            class="bi"
+            [class.bi-arrow-left]="language.isRtl()"
+            [class.bi-arrow-right]="!language.isRtl()"
+            aria-hidden="true"
+          ></i>
         </a>
       </div>
     </div>

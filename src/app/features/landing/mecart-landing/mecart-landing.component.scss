@@ -417,34 +417,158 @@
 }
 
 /* ============================================================ */
-/* Dark Obsidian Finale Card                                    */
+/* Dark Obsidian Finale Card with Scroll-driven Reveal          */
 /* ============================================================ */
 .ag-finale-wrap {
   position: relative;
   z-index: 2;
   max-width: 1120px;
   margin: 0 auto;
-  padding: 24px 24px 80px;
+  padding: 32px 24px 88px;
 }
 
 .ag-finale-card {
   position: relative;
-  border-radius: 32px;
-  background: #0b0f19;
+  border-radius: 36px;
+  background: #090d16;
   color: #ffffff;
-  padding: 72px 32px;
+  padding: 80px 36px;
   text-align: center;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* Scroll-driven reveal initial state */
+  opacity: 0.2;
+  transform: perspective(1000px) translateY(55px) scale(0.93);
+  filter: blur(6px);
+  transition:
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.85s ease,
+    filter 0.85s ease,
+    box-shadow 0.6s ease;
+
+  /* In-view state triggered as user scrolls down */
+  &.is-in-view {
+    opacity: 1;
+    transform: perspective(1000px) rotateX(var(--rot-x, 0deg)) rotateY(var(--rot-y, 0deg)) translateY(0) scale(1);
+    filter: blur(0);
+    box-shadow:
+      0 35px 90px -20px rgba(0, 178, 89, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+}
+
+.ag-finale-shimmer {
+  position: absolute;
+  inset: -150%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(0, 178, 89, 0.35) 60deg,
+    transparent 120deg,
+    rgba(59, 130, 246, 0.25) 240deg,
+    transparent 300deg
+  );
+  animation: conicSpin 12s linear infinite;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+@keyframes conicSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .ag-finale-glow {
   position: absolute;
   inset: -40%;
   background:
-    radial-gradient(circle at 28% 35%, rgba(16, 185, 129, 0.22), transparent 48%),
-    radial-gradient(circle at 75% 65%, rgba(99, 102, 241, 0.24), transparent 48%);
+    radial-gradient(circle at calc(var(--fx, 50%) * 1) calc(var(--fy, 50%) * 1), rgba(0, 178, 89, 0.3), transparent 45%),
+    radial-gradient(circle at 28% 35%, rgba(16, 185, 129, 0.25), transparent 48%),
+    radial-gradient(circle at 75% 65%, rgba(99, 102, 241, 0.22), transparent 48%);
   pointer-events: none;
+  animation: glowFloat 10s ease-in-out infinite alternate;
+}
+
+@keyframes glowFloat {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.12) translate(-10px, 12px);
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+  }
+}
+
+.ag-finale-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+
+  .ag-particle {
+    position: absolute;
+    border-radius: 50%;
+
+    &.p1 {
+      top: 22%;
+      left: 14%;
+      width: 4px;
+      height: 4px;
+      background: #6ee7b7;
+      box-shadow: 0 0 10px #10b981;
+      animation: particleFloat 5s ease-in-out infinite alternate;
+    }
+    &.p2 {
+      bottom: 24%;
+      right: 16%;
+      width: 5px;
+      height: 5px;
+      background: #93c5fd;
+      box-shadow: 0 0 12px #60a5fa;
+      animation: particleFloat 6.5s ease-in-out infinite alternate-reverse;
+    }
+    &.p3 {
+      top: 32%;
+      right: 24%;
+      width: 3px;
+      height: 3px;
+      background: #a7f3d0;
+      box-shadow: 0 0 8px #34d399;
+      animation: particleFloat 4.2s ease-in-out infinite alternate;
+    }
+    &.p4 {
+      bottom: 28%;
+      left: 28%;
+      width: 4px;
+      height: 4px;
+      background: #c084fc;
+      box-shadow: 0 0 10px #a855f7;
+      animation: particleFloat 7s ease-in-out infinite alternate-reverse;
+    }
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-16px) scale(1.3);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-8px) scale(0.9);
+    opacity: 0.5;
+  }
 }
 
 .ag-finale-content {
@@ -453,43 +577,96 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
+}
+
+.ag-finale-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(8px);
+}
+
+.ag-finale-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00b259;
+  box-shadow: 0 0 8px #00b259;
+  animation: badgeDotPulse 2s infinite ease-in-out;
+}
+
+@keyframes badgeDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
 }
 
 .ag-finale-eyebrow {
   font-size: 0.78rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #cbd5e1;
   font-family: 'Inter', var(--font-family-base);
 }
 
 .ag-finale-title {
-  font-size: clamp(2rem, 4.4vw, 3.3rem);
+  font-size: clamp(2.2rem, 4.6vw, 3.4rem);
   font-weight: 800;
   letter-spacing: -0.03em;
   color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 60%, #a7f3d0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   font-family: 'Inter', var(--font-family-base);
+  margin: 0;
+}
+
+.ag-finale-sub {
+  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  line-height: 1.65;
+  color: #94a3b8;
+  max-width: 580px;
+  margin: 0;
 }
 
 .ag-btn-white {
-  margin-top: 6px;
-  height: 50px;
-  padding-inline: 28px;
+  margin-top: 8px;
+  height: 52px;
+  padding-inline: 32px;
   border-radius: 999px;
   background: #ffffff;
-  color: #0b0f19;
-  font-size: 0.96rem;
+  color: #080c15;
+  font-size: 0.98rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  animation: ctaGlowPulse 3s infinite ease-in-out;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(255, 255, 255, 0.22);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(255, 255, 255, 0.25);
+  }
+}
+
+@keyframes ctaGlowPulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(0, 178, 89, 0.4);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 0 12px rgba(0, 178, 89, 0);
   }
 }
 
