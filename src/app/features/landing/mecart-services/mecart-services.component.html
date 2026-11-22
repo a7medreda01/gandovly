@@ -1,0 +1,104 @@
+<div class="ag-services-page">
+  <app-antigravity-canvas mode="ambient" />
+  <app-platform-nav />
+
+  <main class="ag-services-main">
+    <!-- Minimal Page Header -->
+    <section class="ag-services-header">
+      <span class="ag-eyebrow">{{ language.text('الخدمات', 'Services') }}</span>
+      <h1 class="ag-page-title">
+        {{ language.text('كل ما يحتاجه متجرك.', 'Everything your store needs.') }}
+      </h1>
+      <p class="ag-page-sub">
+        {{ language.text('بنية سحابية مُدارة بالكامل من RunX Tech.', 'Fully managed cloud commerce by RunX Tech.') }}
+      </p>
+    </section>
+
+    <!-- Supported Store Verticals Strip -->
+    <section class="ag-verticals-section" [attr.aria-label]="language.text('الأنشطة المدعومة', 'Supported verticals')">
+      <div class="ag-verticals-grid">
+        @for (ind of industries; track ind.id) {
+          <div class="ag-vertical-pill">
+            <span class="ag-vertical-icon" aria-hidden="true">
+              <i [class]="'bi ' + ind.icon"></i>
+            </span>
+            <div class="ag-vertical-text">
+              <div class="ag-vertical-name">{{ language.text(ind.labelAr, ind.labelEn) }}</div>
+              <div class="ag-vertical-note">{{ language.text(ind.shortAr, ind.shortEn) }}</div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Cloud Capabilities Bento Grid -->
+    <section class="ag-bento-section">
+      <div class="ag-bento-grid">
+        @for (s of services; track s.id) {
+          <article
+            class="ag-service-card"
+            [style.--accent]="s.accent"
+            (pointermove)="onCardPointerMove($event)"
+          >
+            <div class="ag-service-head">
+              <span class="ag-service-icon" aria-hidden="true">
+                <i [class]="'bi ' + s.icon"></i>
+              </span>
+              <a
+                [href]="getServiceWhatsAppUrl(s)"
+                target="_blank"
+                rel="noopener"
+                class="ag-service-action"
+                [attr.aria-label]="language.text('طلب خدمة ' + s.titleAr, 'Request ' + s.titleEn)"
+              >
+                <span>{{ language.text('اطلب الخدمة', 'Request') }}</span>
+                <i
+                  class="bi"
+                  [class.bi-arrow-left]="language.isRtl()"
+                  [class.bi-arrow-right]="!language.isRtl()"
+                  aria-hidden="true"
+                ></i>
+              </a>
+            </div>
+
+            <h2 class="ag-service-title">{{ language.text(s.titleAr, s.titleEn) }}</h2>
+            <p class="ag-service-desc">{{ language.text(s.descAr, s.descEn) }}</p>
+
+            <div class="ag-service-tags">
+              @for (tag of (language.currentLang() === 'en' ? s.tagsEn : s.tagsAr); track tag) {
+                <span class="ag-micro-tag">{{ tag }}</span>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <!-- Minimal Dark Obsidian CTA Strip -->
+    <section class="ag-cta-section">
+      <div class="ag-cta-card">
+        <div class="ag-cta-glow" aria-hidden="true"></div>
+        <div class="ag-cta-text">
+          <h2>{{ language.text('متجرك جاهز خلال دقائق', 'Your store, live in minutes') }}</h2>
+        </div>
+        <div class="ag-cta-buttons">
+          <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-btn-white">
+            <i class="bi bi-whatsapp" aria-hidden="true"></i>
+            <span>{{ language.text('ابدأ عبر واتساب', 'Start on WhatsApp') }}</span>
+          </a>
+          <a routerLink="/projects" class="ag-btn-dark-ghost">
+            <span>{{ language.text('استعراض المشاريع', 'View Projects') }}</span>
+            <i
+              class="bi"
+              [class.bi-arrow-left]="language.isRtl()"
+              [class.bi-arrow-right]="!language.isRtl()"
+              aria-hidden="true"
+            ></i>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <app-platform-footer />
+</div>

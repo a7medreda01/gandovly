@@ -1,0 +1,134 @@
+:host {
+  display: block;
+  position: relative;
+  z-index: 2;
+}
+
+.ag-footer {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ag-footer-inner {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 40px 24px 28px;
+}
+
+.ag-footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 28px;
+}
+
+.ag-footer-brand {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.ag-footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #0b0f19;
+  font-weight: 700;
+  font-size: 1.08rem;
+  font-family: 'Inter', var(--font-family-base);
+}
+
+.ag-footer-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #0b0f19;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.92rem;
+}
+
+.ag-footer-dot {
+  color: #10b981;
+}
+
+.ag-footer-runx {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: color 0.2s ease, border-color 0.2s ease;
+
+  img {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    object-fit: contain;
+  }
+
+  &:hover {
+    color: #0b0f19;
+    border-color: rgba(15, 23, 42, 0.2);
+  }
+}
+
+.ag-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 22px;
+
+  a {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #0b0f19;
+    }
+  }
+}
+
+.ag-footer-bottom {
+  padding-top: 20px;
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #94a3b8;
+  font-size: 0.84rem;
+  font-family: 'Inter', var(--font-family-base);
+
+  a {
+    color: #64748b;
+
+    &:hover {
+      color: #0b0f19;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .ag-footer-inner {
+    padding: 32px 16px 24px;
+  }
+
+  .ag-footer-nav {
+    gap: 16px;
+  }
+}

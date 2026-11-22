@@ -13,7 +13,13 @@ export const platformRoutes: Routes = [
   },
 
   {
+    path: 'services',
+    canMatch: [() => !isTenantSubdomain()],
+    loadComponent: () => import('./features/landing/mecart-services/mecart-services.component').then(m => m.MecartServicesComponent)
+  },
+  {
     path: 'projects',
+    canMatch: [() => !isTenantSubdomain()],
     loadComponent: () => import('./features/landing/mecart-projects/mecart-projects.component').then(m => m.MecartProjectsComponent)
   },
 ];

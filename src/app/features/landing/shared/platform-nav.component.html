@@ -1,0 +1,105 @@
+<header class="ag-nav" [class.is-scrolled]="scrolled()">
+  <div class="ag-nav-inner">
+    <!-- Start: MeCart + RunX Pill -->
+    <div class="ag-brand-cluster">
+      <a routerLink="/" class="ag-brand" (click)="closeMenu()">
+        <span class="ag-brand-mark" aria-hidden="true">
+          <i class="bi bi-cart3"></i>
+        </span>
+        <span class="ag-brand-name">MeCart<span class="ag-brand-dot">.app</span></span>
+      </a>
+
+      <a
+        href="https://runxtech.com"
+        target="_blank"
+        rel="noopener"
+        class="ag-runx-pill"
+        [attr.title]="language.text('إحدى مشاريع RunX Tech', 'By RunX Tech')"
+      >
+        <img [src]="runxLogo" alt="RunX" class="ag-runx-icon" />
+        <span>RunX</span>
+      </a>
+    </div>
+
+    <!-- Center: Minimal Route Links -->
+    <nav class="ag-nav-links" [attr.aria-label]="language.text('التنقل الرئيسي', 'Primary navigation')">
+      <a
+        routerLink="/"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="ag-nav-link"
+      >
+        {{ language.text('الرئيسية', 'Home') }}
+      </a>
+      <a routerLink="/services" routerLinkActive="is-active" class="ag-nav-link">
+        {{ language.text('الخدمات', 'Services') }}
+      </a>
+      <a routerLink="/projects" routerLinkActive="is-active" class="ag-nav-link">
+        {{ language.text('المشاريع', 'Projects') }}
+      </a>
+    </nav>
+
+    <!-- End: Language Switch + Obsidian CTA + Mobile Hamburger -->
+    <div class="ag-nav-actions">
+      <button
+        type="button"
+        class="ag-lang-btn"
+        (click)="toggleLang()"
+        [attr.aria-label]="language.text('Switch to English', 'التبديل للعربية')"
+      >
+        <i class="bi bi-translate" aria-hidden="true"></i>
+        <span>{{ language.currentLang() === 'ar' ? 'EN' : 'عربي' }}</span>
+      </button>
+
+      <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-cta-pill">
+        <span>{{ language.text('ابدأ متجرك', 'Start now') }}</span>
+        <i
+          class="bi"
+          [class.bi-arrow-left]="language.isRtl()"
+          [class.bi-arrow-right]="!language.isRtl()"
+          aria-hidden="true"
+        ></i>
+      </a>
+
+      <button
+        type="button"
+        class="ag-menu-toggle"
+        (click)="toggleMenu()"
+        [attr.aria-expanded]="menuOpen()"
+        [attr.aria-label]="language.text('القائمة', 'Menu')"
+      >
+        <i class="bi" [class.bi-x-lg]="menuOpen()" [class.bi-list]="!menuOpen()"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Dropdown Glass Panel -->
+  @if (menuOpen()) {
+    <div class="ag-mobile-drawer">
+      <nav class="ag-mobile-links">
+        <a
+          routerLink="/"
+          routerLinkActive="is-active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="ag-mobile-link"
+          (click)="closeMenu()"
+        >
+          {{ language.text('الرئيسية', 'Home') }}
+        </a>
+        <a routerLink="/services" routerLinkActive="is-active" class="ag-mobile-link" (click)="closeMenu()">
+          {{ language.text('الخدمات', 'Services') }}
+        </a>
+        <a routerLink="/projects" routerLinkActive="is-active" class="ag-mobile-link" (click)="closeMenu()">
+          {{ language.text('المشاريع', 'Projects') }}
+        </a>
+      </nav>
+
+      <div class="ag-mobile-footer">
+        <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-mobile-cta" (click)="closeMenu()">
+          <i class="bi bi-whatsapp" aria-hidden="true"></i>
+          <span>{{ language.text('ابدأ متجرك الآن', 'Start now') }}</span>
+        </a>
+      </div>
+    </div>
+  }
+</header>

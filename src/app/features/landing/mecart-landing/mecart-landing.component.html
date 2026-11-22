@@ -1,279 +1,168 @@
-<!-- Top SaaS Navbar (Light Theme, Clean & Direct) -->
-<header class="mecart-nav">
-  <div class="nav-container">
-    <!-- Brand Logos: MeCart + RunX Tech -->
-    <div class="nav-brand-group">
-      <a routerLink="/" class="mecart-brand-link">
-        <div class="mecart-brand-badge">
-          <span class="brand-icon"><i class="bi bi-cart3"></i></span>
-          <div class="brand-names">
-            <span class="brand-main">MeCart<small>.app</small></span>
-            <span class="brand-desc">Cloud Hosting</span>
-          </div>
+<div class="ag-page">
+  <app-platform-nav />
+
+  <!-- Interactive 3D Hero -->
+  <section class="ag-hero">
+    <app-antigravity-canvas mode="hero" />
+
+    <div class="ag-hero-radial" aria-hidden="true"></div>
+
+    <div class="ag-hero-content">
+      <div class="ag-hero-pill">
+        <img [src]="runxLogo" alt="RunX" />
+        <span>{{ language.text('منظومة RunX السحابية', 'By RunX Tech') }}</span>
+      </div>
+
+      <h1 class="ag-hero-title">
+        {{ language.text('متجرك السحابي.', 'Cloud Commerce.') }}
+        <br />
+        <span class="ag-gradient">{{ language.text('بلا حدود.', 'Lifted.') }}</span>
+      </h1>
+
+      <p class="ag-hero-sub">
+        {{ language.text('أطلق متجرك الإلكتروني الفائق السرعة في دقائق.', 'Launch your high-speed online store in minutes.') }}
+      </p>
+
+      <div class="ag-hero-actions">
+        <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-btn-primary">
+          <i class="bi bi-whatsapp" aria-hidden="true"></i>
+          <span>{{ language.text('ابدأ متجرك الآن', 'Launch Store') }}</span>
+        </a>
+        <a routerLink="/projects" class="ag-btn-secondary">
+          <span>{{ language.text('استكشف المشاريع', 'Explore Projects') }}</span>
+          <i
+            class="bi"
+            [class.bi-arrow-left]="language.isRtl()"
+            [class.bi-arrow-right]="!language.isRtl()"
+            aria-hidden="true"
+          ></i>
+        </a>
+      </div>
+    </div>
+
+    <a
+      href="#explore-gateways"
+      class="ag-scroll-cue"
+      [attr.aria-label]="language.text('اكتشف المزيد', 'Scroll down')"
+    >
+      <i class="bi bi-chevron-down" aria-hidden="true"></i>
+    </a>
+  </section>
+
+  <!-- Minimal Metrics Ribbon -->
+  <section class="ag-metrics-wrap">
+    <div class="ag-metrics-bar">
+      @for (m of metrics; track m.value) {
+        <div class="ag-metric-item">
+          <div class="ag-metric-value">{{ m.value }}</div>
+          <div class="ag-metric-label">{{ language.text(m.labelAr, m.labelEn) }}</div>
         </div>
-      </a>
-
-      <div class="brand-divider"></div>
-
-      <a href="https://runxtech.com" target="_blank" rel="noopener" class="runx-badge" title="إحدى مشاريع RunX Tech">
-        <img [src]="runxLogo" alt="RunX Tech" class="runx-logo-img" />
-        <span class="runx-text">أحد مشاريع <strong>RunX</strong></span>
-      </a>
+      }
     </div>
+  </section>
 
-    <!-- Navigation Links -->
-    <nav class="nav-links">
-      <a href="#services">خدماتنا</a>
-      <a routerLink="/projects">مشاريعنا</a>
-      <a href="#about-cloud">عن الاستضافة</a>
-    </nav>
-
-    <!-- Nav Action Button (Purely Order Service via WhatsApp) -->
-    <div class="nav-actions">
-      <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="btn btn-order-service">
-        <i class="bi bi-whatsapp"></i>
-        <span>طلب خدمة</span>
-      </a>
-    </div>
-  </div>
-</header>
-
-<!-- Hero Section (Light, Simple, Direct) -->
-<section class="mecart-hero">
-  <div class="hero-container">
-    <!-- RunX Endorsement Pill -->
-    <div class="hero-pill">
-      <img [src]="runxLogo" alt="RunX" class="pill-runx-icon" />
-      <span>استضافة سحابية مدارة بالكامل للمتاجر الإلكترونية — من <strong>RunX Tech</strong></span>
-    </div>
-
-    <!-- Main Headline -->
-    <h1 class="hero-title">
-      استضافة سحابية فائقة السرعة<br>
-      <span class="gradient-text">لمتاجرك الإلكترونية</span> في دقائق
-    </h1>
-
-    <p class="hero-subtitle">
-      منظومة سحابية متكاملة تقدمها شركة <strong>RunX Tech</strong> لاستضافة وإدارة متاجرك الإلكترونية بنطاقك المخصص وسرعة فائقة، مع دعم كامل للنسخ الاحتياطي، وإشعارات واتساب، ومناطق التوصيل لمختلف الأنشطة التجارية.
-    </p>
-
-    <!-- CTAs: Pure Service Request & View Projects -->
-    <div class="hero-cta-group">
-      <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="btn btn-hero-whatsapp">
-        <i class="bi bi-whatsapp"></i>
-        <span>طلب خدمة عبر واتساب (+201080225502)</span>
-      </a>
-      <a routerLink="/projects" class="btn btn-hero-projects">
-        <i class="bi bi-grid-3x3-gap-fill"></i>
-        <span>تصفح مشاريعنا السحابية</span>
-      </a>
-    </div>
-
-    <!-- Clean Stats Strip -->
-    <div class="hero-stats-strip">
-      <div class="stat-box">
-        <div class="stat-value">99.99%</div>
-        <div class="stat-caption">استقرار السيرفرات السحابية</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat-box">
-        <div class="stat-value">&lt; 0.8 ثانية</div>
-        <div class="stat-caption">سرعة تحميل الصفحات وتصفح المنتجات</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat-box">
-        <div class="stat-value">1-Click</div>
-        <div class="stat-caption">محرك نقل وتصدير قواعد البيانات (Seed)</div>
-      </div>
-      <div class="stat-sep"></div>
-      <div class="stat-box">
-        <div class="stat-value">100%</div>
-        <div class="stat-caption">دعم النطاقات المخصصة وSSL مجاني</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Services Section (خدماتنا) -->
-<section id="services" class="services-section">
-  <div class="section-container">
-    <div class="section-heading">
-      <span class="section-badge">خدمات RunX السحابية</span>
-      <h2 class="section-title">خدماتنا</h2>
-      <p class="section-lead">نصمم ونجهّز متجرك الإلكتروني حسب نشاطك، مع إدارة المنتجات والطلبات والدفع والتوصيل من مكان واحد.</p>
-    </div>
-
-    <div class="store-types" aria-label="أنواع المتاجر">
-      @for (type of storeTypes; track type.label) { <div class="store-type"><i [class]="'bi ' + type.icon" aria-hidden="true"></i><span>{{ type.label }}</span></div> }
-    </div>
-    <div class="services-grid">
-      @for (s of services; track s.id) {
-      <div class="service-card">
-        <div class="service-icon-box">
-          <i class="bi" [class]="s.icon"></i>
+  <!-- Two Sculpted Gateway Cards: Services & Projects -->
+  <section id="explore-gateways" class="ag-gateways-wrap">
+    <div class="ag-gateways-grid">
+      <!-- Gateway 01: Services -->
+      <a
+        routerLink="/services"
+        class="ag-gateway-card"
+        (pointermove)="onCardPointerMove($event)"
+      >
+        <div class="ag-gateway-top">
+          <span class="ag-gateway-tag">
+            {{ language.text('01 · الخدمات', '01 · Services') }}
+          </span>
+          <span class="ag-gateway-corner" aria-hidden="true">
+            <i class="bi bi-layers"></i>
+          </span>
         </div>
-        <h3 class="service-title">{{ s.title }}</h3>
-        <p class="service-desc">{{ s.description }}</p>
 
-        <ul class="service-features-list">
-          @for (f of s.features; track f) {
-          <li><i class="bi bi-check2 text-success"></i> {{ f }}</li>
+        <h2 class="ag-gateway-title">
+          {{ language.text('بنية لكل نشاط', 'Built for Every Store') }}
+        </h2>
+        <p class="ag-gateway-desc">
+          {{ language.text('خوادم، نطاقات، واتساب، وتوصيل ذكي.', 'Cloud hosting, domains, WhatsApp, and delivery.') }}
+        </p>
+
+        <div class="ag-industry-icons" aria-hidden="true">
+          @for (ind of industries; track ind.id) {
+            <span class="ag-ind-chip" [title]="language.text(ind.labelAr, ind.labelEn)">
+              <i [class]="'bi ' + ind.icon"></i>
+            </span>
           }
-        </ul>
-
-        <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="service-order-link">
-          <span>طلب هذه الخدمة</span>
-          <i class="bi bi-arrow-left"></i>
-        </a>
-      </div>
-      }
-    </div>
-  </div>
-</section>
-
-<!-- Projects Section (مشاريعنا - أحدث 10 مشاريع حية تلقائياً) -->
-<section id="projects" class="projects-section">
-  <div class="section-container">
-    <div class="section-heading">
-      <span class="section-badge">مشاريع حية</span>
-      <h2 class="section-title">أحدث مشاريعنا</h2>
-      <p class="section-lead">نماذج لمواقع ومتاجر إلكترونية حقيقية تم استضافتها وإطلاقها عبر سحابة MeCart</p>
-    </div>
-
-    @if (isLoadingProjects()) {
-    <div class="loading-box">
-      <div class="spinner-border text-success" role="status"></div>
-      <p>جاري تحميل أحدث المشاريع من السيرفر...</p>
-    </div>
-    } @else {
-    <div class="projects-grid">
-      @for (p of latestProjects(); track p.id) {
-      <div class="project-card">
-        <a class="project-preview-link" [href]="p.url" target="_blank" rel="noopener" [attr.aria-label]="'فتح معاينة ' + p.name"><app-project-preview [slug]="p.subdomain" [name]="p.name" /></a>
-        <div class="project-card-header">
-          <div class="project-icon">
-            <i class="bi bi-shop"></i>
-          </div>
-          <div class="project-info">
-            <h3 class="project-title">{{ p.name }}</h3>
-            <span class="project-domain-tag">{{ p.domainLabel }}</span>
-          </div>
         </div>
 
-        <div class="project-meta-row">
-          <span class="meta-item"><i class="bi bi-box-seam"></i> {{ p.productsCount }}+ صنف</span>
-          <span class="meta-status"><i class="bi bi-patch-check-fill"></i> متاح لايف</span>
+        <div class="ag-gateway-link">
+          <span>{{ language.text('عرض الخدمات', 'Explore Services') }}</span>
+          <i
+            class="bi"
+            [class.bi-arrow-left]="language.isRtl()"
+            [class.bi-arrow-right]="!language.isRtl()"
+            aria-hidden="true"
+          ></i>
+        </div>
+      </a>
+
+      <!-- Gateway 02: Projects -->
+      <a
+        routerLink="/projects"
+        class="ag-gateway-card ag-gateway-projects"
+        (pointermove)="onCardPointerMove($event)"
+      >
+        <div class="ag-gateway-top">
+          <span class="ag-gateway-tag">
+            {{ language.text('02 · المشاريع', '02 · Projects') }}
+          </span>
+          <span class="ag-gateway-corner is-indigo" aria-hidden="true">
+            <i class="bi bi-grid-1x2"></i>
+          </span>
         </div>
 
-        <div class="project-actions">
-          <a [href]="p.url" target="_blank" rel="noopener" class="btn btn-preview">
-            <i class="bi bi-eye-fill"></i>
-            <span>معاينة لايف</span>
-          </a>
-          <a [href]="getProjectWhatsAppUrl(p)" target="_blank" rel="noopener" class="btn btn-order-similar">
-            <i class="bi bi-whatsapp"></i>
-            <span>طلب متجر مماثل</span>
-          </a>
-        </div>
-      </div>
-      }
-    </div>
+        <h2 class="ag-gateway-title">
+          {{ language.text('متاجر حية الآن', 'Live Storefronts') }}
+        </h2>
+        <p class="ag-gateway-desc">
+          {{ language.text('معاينة حية لمتاجر حقيقية على سحابتنا.', 'Real stores running live on our cloud.') }}
+        </p>
 
-    <!-- Link to all projects page -->
-    <div class="view-all-projects-box">
-      <a routerLink="/projects" class="btn btn-view-all">
-        <span>استعراض كافة المشاريع والصفحات</span>
-        <i class="bi bi-arrow-left"></i>
+        <div class="ag-live-pill">
+          <span class="ag-live-dot" aria-hidden="true"></span>
+          @if (liveProjectsCount()) {
+            <span>{{ language.text(liveProjectsCount() + '+ متجر نشط لايف', liveProjectsCount() + '+ Live Storefronts') }}</span>
+          } @else {
+            <span>{{ language.text('تعمل الآن على السحابة', 'Live on Cloud') }}</span>
+          }
+        </div>
+
+        <div class="ag-gateway-link">
+          <span>{{ language.text('تصفح المشاريع', 'Browse Projects') }}</span>
+          <i
+            class="bi"
+            [class.bi-arrow-left]="language.isRtl()"
+            [class.bi-arrow-right]="!language.isRtl()"
+            aria-hidden="true"
+          ></i>
+        </div>
       </a>
     </div>
-    }
-  </div>
-</section>
+  </section>
 
-<!-- About Cloud Hosting -->
-<section id="about-cloud" class="about-cloud-section">
-  <div class="section-container">
-    <div class="about-cloud-card">
-      <div class="about-texts">
-        <span class="about-badge">بنية استضافة RunX</span>
-        <h2>لماذا يعتمد أصحاب الأعمال على سحابة MeCart؟</h2>
-        <p>
-          نوفر بنية تحتية مدارة بالكامل ومصممة خصيصاً للتجارة الإلكترونية مع تفعيل فوري لشهادات الأمان، وتوزيع الأحمال، ونقل البيانات بضغطة زر دون الحاجة لتوظيف مهندسي سيرفرات.
-        </p>
-        <div class="about-points">
-          <div class="point-item"><i class="bi bi-shield-check text-success"></i> سيرفرات عالية الحماية والأمان</div>
-          <div class="point-item"><i class="bi bi-lightning-charge-fill text-warning"></i> سرعة تصفح فائقة لعملائك</div>
-          <div class="point-item"><i class="bi bi-headset text-primary"></i> دعم فني مباشر من مهندسي RunX Tech</div>
-        </div>
-      </div>
-      <div class="about-cta-box">
-        <a [href]="whatsappOrderUrl" target="_blank" rel="noopener" class="btn btn-about-whatsapp">
-          <i class="bi bi-whatsapp"></i>
-          <span>طلب استضافة متجر الآن</span>
+  <!-- Minimal Dark Obsidian CTA Finale -->
+  <section class="ag-finale-wrap">
+    <div class="ag-finale-card">
+      <div class="ag-finale-glow" aria-hidden="true"></div>
+      <div class="ag-finale-content">
+        <span class="ag-finale-eyebrow">{{ language.text('MeCart Cloud', 'MeCart Cloud') }}</span>
+        <h2 class="ag-finale-title">{{ language.text('جاهز للإطلاق؟', 'Ready for liftoff?') }}</h2>
+        <a [href]="whatsappUrl()" target="_blank" rel="noopener" class="ag-btn-white">
+          <i class="bi bi-whatsapp" aria-hidden="true"></i>
+          <span>{{ language.text('تواصل عبر واتساب', 'Start on WhatsApp') }}</span>
         </a>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Footer (Light, Crisp, High Trust) -->
-<footer class="mecart-footer">
-  <div class="footer-container">
-    <div class="footer-top-grid">
-      <!-- Brand Column -->
-      <div class="footer-brand-col">
-        <div class="mecart-brand-badge footer-badge">
-          <span class="brand-icon"><i class="bi bi-cart3"></i></span>
-          <div class="brand-names">
-            <span class="brand-main">MeCart<small>.app</small></span>
-            <span class="brand-desc">Cloud Hosting</span>
-          </div>
-        </div>
-        <p class="f-bio">
-          استضافة سحابية متطورة للمتاجر الإلكترونية المتخصصة بكافة الأنشطة التجارية.
-        </p>
-
-        <!-- Official RunX Tech Endorsement Card -->
-        <div class="runx-official-card">
-          <img [src]="runxLogo" alt="RunX Tech" class="runx-card-img" />
-          <div class="runx-card-texts">
-            <span class="runx-card-title">إحدى منصات <strong>RunX Tech</strong></span>
-            <span class="runx-card-desc">للحلول البرمجية الذكية والبنى التحتية السحابية</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Links Column 1 -->
-      <div class="footer-links-col">
-        <h4 class="col-title">أقسام الموقع</h4>
-        <ul>
-          <li><a href="#services">خدماتنا</a></li>
-          <li><a routerLink="/projects">مشاريعنا السحابية</a></li>
-          <li><a href="#about-cloud">عن الاستضافة السحابية</a></li>
-          <li><a [href]="whatsappOrderUrl" target="_blank" rel="noopener">طلب خدمة جديدة</a></li>
-        </ul>
-      </div>
-
-      <!-- Links Column 2 -->
-      <div class="footer-links-col">
-        <h4 class="col-title">التواصل والمبيعات</h4>
-        <ul>
-          <li><a href="https://runxtech.com" target="_blank" rel="noopener">موقع شركة RunX Tech</a></li>
-          <li><a [href]="whatsappOrderUrl" target="_blank" rel="noopener">واتساب: +201080225502</a></li>
-          <li><a href="mailto:support@runxtech.com">support&#64;runxtech.com</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="footer-bottom-row">
-      <div class="copyright-text">
-        &copy; 2026 <strong>MeCart.app</strong> &bull; جميع الحقوق محفوظة &bull; إحدى مشاريع <strong>RunX Tech</strong>
-      </div>
-      <div class="footer-links-mini">
-        <a routerLink="/">الرئيسية</a> &bull;
-        <a routerLink="/projects">مشاريعنا</a> &bull;
-        <a [href]="whatsappOrderUrl" target="_blank" rel="noopener">طلب خدمة</a>
-      </div>
-    </div>
-  </div>
-</footer>
+  <app-platform-footer />
+</div>

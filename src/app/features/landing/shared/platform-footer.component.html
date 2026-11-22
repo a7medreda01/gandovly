@@ -1,0 +1,29 @@
+<footer class="ag-footer">
+  <div class="ag-footer-inner">
+    <div class="ag-footer-top">
+      <div class="ag-footer-brand">
+        <a routerLink="/" class="ag-footer-logo">
+          <span class="ag-footer-mark" aria-hidden="true"><i class="bi bi-cart3"></i></span>
+          <span class="ag-footer-name">MeCart<span class="ag-footer-dot">.app</span></span>
+        </a>
+        <a href="https://runxtech.com" target="_blank" rel="noopener" class="ag-footer-runx">
+          <img [src]="runxLogo" alt="RunX Tech" />
+          <span>{{ language.text('إحدى مشاريع RunX Tech', 'By RunX Tech') }}</span>
+        </a>
+      </div>
+
+      <nav class="ag-footer-nav" [attr.aria-label]="language.text('روابط التذييل', 'Footer navigation')">
+        <a routerLink="/">{{ language.text('الرئيسية', 'Home') }}</a>
+        <a routerLink="/services">{{ language.text('الخدمات', 'Services') }}</a>
+        <a routerLink="/projects">{{ language.text('المشاريع', 'Projects') }}</a>
+        <a href="https://runxtech.com" target="_blank" rel="noopener">RunX Tech</a>
+        <a [href]="whatsappUrl()" target="_blank" rel="noopener">{{ language.text('واتساب', 'WhatsApp') }}</a>
+      </nav>
+    </div>
+
+    <div class="ag-footer-bottom">
+      <span>&copy; 2026 MeCart &middot; RunX Tech</span>
+      <a href="mailto:support@runxtech.com">support&#64;runxtech.com</a>
+    </div>
+  </div>
+</footer>
