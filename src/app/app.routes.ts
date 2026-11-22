@@ -19,7 +19,7 @@ export const routes: Routes = [
       },
       {
         path: 'menu',
-        loadComponent: () => import('./features/storefront/menu/menu.component').then(m => m.MenuComponent)
+        loadComponent: () => import('./features/storefront/catalog/catalog.component').then(m => m.CatalogComponent)
       },
       {
         path: 'checkout',

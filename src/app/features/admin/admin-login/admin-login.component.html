@@ -1,6 +1,6 @@
 <div class="admin-login-page flex-center" [class.platform-login]="platformLogin">
   <div class="login-card glass-panel text-center">
-    <div class="login-brand-mark">@if (platformLogin) { <span>M</span> } @else if (settingsService.settings().logoUrl) { <img [src]="settingsService.settings().logoUrl" [alt]="settingsService.settings().restaurantName" /> } @else { <i class="bi bi-shop"></i> }</div>
+    <div class="login-brand-mark">@if (platformLogin) { <img src="/assets/images/branding/mecart-logo.png" alt="MeCart" /> } @else if (settingsService.settings().logoUrl) { <img [src]="settingsService.settings().logoUrl" [alt]="settingsService.settings().restaurantName" /> } @else { <i class="bi bi-shop"></i> }</div>
     <h2>{{ platformLogin ? 'إدارة Mecart' : settingsService.settings().restaurantName }}</h2>
     <p>{{ platformLogin ? 'أهلاً بعودتك. سجل الدخول إلى مساحة إدارة متاجرك.' : 'سجل الدخول لإدارة طلبات متجرك ومنتجاته.' }}</p>
 

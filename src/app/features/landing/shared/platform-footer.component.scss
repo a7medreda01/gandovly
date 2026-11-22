@@ -43,16 +43,11 @@
   font-family: 'Inter', var(--font-family-base);
 }
 
-.ag-footer-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  background: #0b0f19;
-  color: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.92rem;
+.ag-footer-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .ag-footer-dot {

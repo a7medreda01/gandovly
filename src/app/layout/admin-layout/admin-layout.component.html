@@ -4,7 +4,7 @@
     <div class="sidebar-header">
       <div class="workspace-brand">
         <div class="workspace-mark" [class.platform-mark]="isPlatform()">
-          @if (isPlatform()) { <span>M</span> } @else if (storeLogo()) { <img [src]="storeLogo()" [alt]="storeName()" /> } @else { <i class="bi bi-shop"></i> }
+          @if (isPlatform()) { <img src="/assets/images/branding/mecart-logo.png" alt="MeCart" /> } @else if (storeLogo()) { <img [src]="storeLogo()" [alt]="storeName()" /> } @else { <i class="bi bi-shop"></i> }
         </div>
         <div class="workspace-identity"><strong>{{ isPlatform() ? 'Mecart' : storeName() }}</strong><span>{{ isPlatform() ? 'مساحة إدارة المنصة' : 'لوحة إدارة متجرك' }}</span></div>
         <button class="btn-sidebar-close" (click)="closeSidebar()" aria-label="إغلاق القائمة"><i class="bi bi-x-lg"></i></button>

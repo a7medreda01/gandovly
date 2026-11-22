@@ -65,17 +65,17 @@ export class App implements OnInit, OnDestroy {
 
   private initVisitTracking(): void {
     try {
-      let visitorToken = localStorage.getItem('gandofly_vid');
+      let visitorToken = localStorage.getItem('mecart_vid') || localStorage.getItem('gandofly_vid');
       if (!visitorToken) {
         visitorToken = 'v_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now().toString(36);
-        localStorage.setItem('gandofly_vid', visitorToken);
       }
+      localStorage.setItem('mecart_vid', visitorToken);
 
       let lastRecordedUrl = '';
       let lastRecordedTime = 0;
 
       const recordUrlVisit = (url: string) => {
-        if (new URLSearchParams(window.location.search).get('showcase') === '1' || !url || url.startsWith('/admin') || url.startsWith('/kitchen')) {
+        if (new URLSearchParams(window.location.search).get('showcase') === '1' || !url || url.startsWith('/admin')) {
           return;
         }
 
