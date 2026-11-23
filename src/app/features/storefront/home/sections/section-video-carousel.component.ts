@@ -9,6 +9,7 @@ import { StorefrontSettings } from '../../../../core/models/models';
 import { ScrollAnimateDirective } from '../../../../shared/directives/scroll-animate.directive';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * Modern High-Performance Video Carousel Section
@@ -494,7 +495,15 @@ export class SectionVideoCarouselComponent implements OnInit, AfterViewInit, OnD
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://') || cleanUrl.startsWith('data:') || cleanUrl.startsWith('blob:')) {
       return cleanUrl;
     }
-    return cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`;
+    const normalized = cleanUrl.startsWith('/') ? cleanUrl : `/${cleanUrl}`;
+    if (normalized.startsWith('/uploads/')) {
+      let apiHost = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+      if (!apiHost || apiHost.startsWith('/')) {
+        apiHost = '';
+      }
+      return `${apiHost}${normalized}`;
+    }
+    return normalized;
   }
 
   visibleCardsCount(): number {

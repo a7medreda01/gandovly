@@ -5,6 +5,8 @@ import { HomeSection } from '../../../../core/models/store-layout';
 import { StorefrontSettings } from '../../../../core/models/models';
 import { ScrollAnimateDirective } from '../../../../shared/directives/scroll-animate.directive';
 import { LanguageService } from '../../../../core/services/language.service';
+import { ImageUrlPipe } from '../../../../shared/pipes/image-url.pipe';
+import { environment } from '../../../../../environments/environment';
 
 /**
  * Video Section
@@ -14,7 +16,7 @@ import { LanguageService } from '../../../../core/services/language.service';
   selector: 'app-section-video',
   encapsulation: ViewEncapsulation.None,
   standalone: true,
-  imports: [CommonModule, ScrollAnimateDirective],
+  imports: [CommonModule, ScrollAnimateDirective, ImageUrlPipe],
   styles: [`
     .video-section {
       padding: 2.5rem 0;
@@ -63,8 +65,8 @@ import { LanguageService } from '../../../../core/services/language.service';
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen></iframe>
     } @else {
-      <video controls [poster]="s.imageUrl || ''">
-        <source [src]="s.videoUrl || s.link" type="video/mp4">
+      <video controls [poster]="s.imageUrl ? (s.imageUrl | imageUrl:'banner') : ''">
+        <source [src]="resolvedVideoSrc()" [type]="videoMimeType()">
         {{ lang.text('متصفحك لا يدعم تشغيل الفيديو', 'Your browser does not support HTML5 video') }}
       </video>
     }
@@ -80,6 +82,28 @@ export class SectionVideoComponent {
 
   title() { return this.lang.text(this.s.title || 'شاهد منتجاتنا قيد الاستخدام', this.s.titleEn || 'See Our Products In Action'); }
   subtitle() { return this.lang.text(this.s.subtitle, this.s.subtitleEn); }
+
+  resolvedVideoSrc = computed<string>(() => {
+    const raw = (this.s.videoUrl || this.s.link || '').trim();
+    if (!raw) return '';
+    if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('data:') || raw.startsWith('blob:')) {
+      return raw;
+    }
+    const normalized = raw.startsWith('/') ? raw : `/${raw}`;
+    if (normalized.startsWith('/uploads/')) {
+      let apiHost = environment.apiUrl.replace(/\/api\/v1\/?$/, '');
+      if (!apiHost || apiHost.startsWith('/')) {
+        apiHost = '';
+      }
+      return `${apiHost}${normalized}`;
+    }
+    return normalized;
+  });
+
+  videoMimeType = computed<string>(() => {
+    const src = this.resolvedVideoSrc().toLowerCase().split('?')[0];
+    return src.endsWith('.webm') ? 'video/webm' : 'video/mp4';
+  });
 
   safeEmbedUrl = computed<SafeResourceUrl | null>(() => {
     const raw = this.s.videoUrl || this.s.link || '';
