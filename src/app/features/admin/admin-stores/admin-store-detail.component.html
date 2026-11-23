@@ -343,9 +343,9 @@
                   </div>
                 </div>
 
-                <!-- CNAME Record -->
+                <!-- www A Record -->
                 <div class="dns-record-item">
-                  <span class="record-badge record-cname">CNAME</span>
+                  <span class="record-badge record-a">A Record</span>
                   <div class="record-col">
                     <span class="col-label">الاسم (Host)</span>
                     <div class="col-val-box">
@@ -358,8 +358,8 @@
                   <div class="record-col">
                     <span class="col-label">يشير إلى (Points to)</span>
                     <div class="col-val-box">
-                      <code class="text-cname">mecart.app</code>
-                      <button type="button" class="btn-copy-chip" (click)="copyText('mecart.app', 'قيمة سجل CNAME')" title="نسخ القيمة">
+                      <code class="text-ip">187.7.75.101</code>
+                      <button type="button" class="btn-copy-chip" (click)="copyText('187.7.75.101', 'قيمة سجل A لـ www (187.7.75.101)')" title="نسخ القيمة">
                         <i class="bi bi-copy me-1"></i>نسخ
                       </button>
                     </div>
@@ -370,9 +370,9 @@
                   </div>
                 </div>
               } @else {
-                <!-- Subdomain CNAME Record -->
+                <!-- Subdomain A Record -->
                 <div class="dns-record-item">
-                  <span class="record-badge record-cname">CNAME</span>
+                  <span class="record-badge record-a">A Record</span>
                   <div class="record-col">
                     <span class="col-label">الاسم (Host)</span>
                     <div class="col-val-box">
@@ -385,8 +385,8 @@
                   <div class="record-col">
                     <span class="col-label">يشير إلى (Points to)</span>
                     <div class="col-val-box">
-                      <code class="text-cname">cname.vercel-dns.com</code>
-                      <button type="button" class="btn-copy-chip" (click)="copyText('cname.vercel-dns.com', 'قيمة سجل CNAME')" title="نسخ القيمة">
+                      <code class="text-ip">187.7.75.101</code>
+                      <button type="button" class="btn-copy-chip" (click)="copyText('187.7.75.101', 'قيمة سجل A (187.7.75.101)')" title="نسخ القيمة">
                         <i class="bi bi-copy me-1"></i>نسخ
                       </button>
                     </div>
