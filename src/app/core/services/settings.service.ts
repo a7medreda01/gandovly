@@ -93,9 +93,9 @@ export class SettingsService {
         for (const key of ['logoUrl', 'heroBannerDesktopUrl', 'heroBannerMobileUrl', 'faviconUrl'] as const) {
           if (/mecart|mecard|runx/i.test(clean[key] || '')) clean[key] = '';
         }
-          for (const key of ['facebookUrl', 'instagramUrl'] as const) {
-            if (/^https?:\/\/(www\.)?facebook\.com\/runxtech\/?$/i.test(clean[key] || '')) clean[key] = '';
-          }
+        for (const key of ['facebookUrl', 'instagramUrl'] as const) {
+          if (/^https?:\/\/(www\.)?facebook\.com\/runxtech\/?$/i.test(clean[key] || '')) clean[key] = '';
+        }
         const colorKeys = [
           'primaryColor', 'secondaryColor', 'accentColor', 'surfaceColor',
           'navbarBgColor', 'navbarTextColor', 'footerBgColor', 'footerTextColor',
@@ -178,16 +178,16 @@ export class SettingsService {
 
     // Clear optional overrides before applying a complete identity, including live previews.
     // Empty settings must restore defaults rather than retain an earlier store or preset.
-    for (const key of ['--navbar-bg','--navbar-text','--footer-bg','--footer-text','--card-bg','--surface-white','--border-color','--line','--btn-primary-bg','--btn-primary-text','--btn-accent-bg','--btn-accent-text','--success-color','--error-color','--warning-color','--radius-card','--radius-box','--radius-modal','--radius-control','--font-size-base','--font-family-base']) root.style.removeProperty(key);
+    for (const key of ['--navbar-bg', '--navbar-text', '--footer-bg', '--footer-text', '--card-bg', '--surface-white', '--border-color', '--line', '--btn-primary-bg', '--btn-primary-text', '--btn-accent-bg', '--btn-accent-text', '--success-color', '--error-color', '--warning-color', '--radius-card', '--radius-box', '--radius-modal', '--radius-control', '--font-size-base', '--font-family-base']) root.style.removeProperty(key);
     document.body.style.removeProperty('font-family');
     root.style.removeProperty('font-size');
 
-    const layout=settings.storeLayout;
-    root.style.setProperty('--mobile-product-columns',String(layout?.mobileColumns||2));
-    root.style.setProperty('--product-image-fit',layout?.cardImageFit||'cover');
-    root.style.setProperty('--product-image-padding',String(layout?.cardImagePadding||0)+'px');
-    root.style.setProperty('--product-image-radius',(layout?.cardImageRadius??-1)<0?'var(--radius-product-card)':layout!.cardImageRadius+'px');
-    root.style.setProperty('--product-image-aspect',layout?.cardImageAspect==='portrait'?'3 / 4':layout?.cardImageAspect==='landscape'?'4 / 3':'1 / 1');
+    const layout = settings.storeLayout;
+    root.style.setProperty('--mobile-product-columns', String(layout?.mobileColumns || 2));
+    root.style.setProperty('--product-image-fit', layout?.cardImageFit || 'cover');
+    root.style.setProperty('--product-image-padding', String(layout?.cardImagePadding || 0) + 'px');
+    root.style.setProperty('--product-image-radius', (layout?.cardImageRadius ?? -1) < 0 ? 'var(--radius-product-card)' : layout!.cardImageRadius + 'px');
+    root.style.setProperty('--product-image-aspect', layout?.cardImageAspect === 'portrait' ? '3 / 4' : layout?.cardImageAspect === 'landscape' ? '4 / 3' : '1 / 1');
     root.style.setProperty('--product-card-style', layout?.productCardStyle || 'modern');
     root.style.setProperty('--header-position', layout?.stickyHeader === false ? 'relative' : 'sticky');
     if (layout?.navbarLogoWidth) root.style.setProperty('--navbar-logo-width', layout.navbarLogoWidth + 'px');
@@ -280,7 +280,7 @@ export class SettingsService {
       root.style.setProperty('--font-size-base', `${settings.fontSizeBase}px`);
       root.style.fontSize = `${settings.fontSizeBase}px`;
     }
-    const shadows: Record<string,string> = { none: 'none', soft: '0 4px 16px #142d450a', medium: '0 6px 22px #142d4517', strong: '0 10px 30px #142d4526' };
+    const shadows: Record<string, string> = { none: 'none', soft: '0 4px 16px #142d450a', medium: '0 6px 22px #142d4517', strong: '0 10px 30px #142d4526' };
     root.style.setProperty('--shadow-card', shadows[settings.cardShadowStyle || 'soft'] || shadows['soft']);
 
     if (settings.fontFamily) {

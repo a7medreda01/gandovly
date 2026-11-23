@@ -77,6 +77,13 @@
       </div>
     </div>
 
+    @if (settingsService.settings().storeLayout?.showFooterSeoDescription && (settingsService.settings().seoDescription || settingsService.settings().description)) {
+      <div class="footer-about-seo text-muted small mt-3 pt-3 border-top" style="opacity: 0.9; line-height: 1.6;">
+        <strong class="d-block mb-1 text-dark">{{ languageService.text('عن المتجر والخدمات', 'About Store & Services') }}:</strong>
+        <p class="mb-0">{{ settingsService.settings().seoDescription || settingsService.settings().description }}</p>
+      </div>
+    }
+
     <!-- Bottom Copyright & Developer Credit -->
     <div class="footer-bottom-row">
       <p class="copyright-text">© {{ currentYear }} {{ languageService.getStoreName() }}. {{ languageService.text('جميع الحقوق محفوظة.', 'All rights reserved.') }}</p>

@@ -147,6 +147,7 @@ export interface StoreLayout {
     requireWhatsAppOtp?: boolean;
     guestCheckout?: boolean;
     showFooterStoreName?: boolean;
+    showFooterSeoDescription?: boolean;
     navbarLogoWidth?: number;
     navbarLogoHeight?: number;
     footerLogoWidth?: number;
