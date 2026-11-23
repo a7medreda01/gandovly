@@ -296,17 +296,44 @@ export class SettingsService {
     if (typeof document === 'undefined') return;
     const platform = isPlatformContext();
     const name = platform ? 'Mecart' : (settings.restaurantName || 'المتجر');
-    const title = platform ? 'Mecart — إدارة المتاجر' : (window.location.pathname.startsWith('/admin') ? 'إدارة ' + name : name);
-    const description = platform ? 'إدارة المتاجر والعملاء والبيانات من مساحة عمل واحدة.' : (settings.description || 'تسوق منتجات ' + name);
+    const title = platform ? 'Mecart — إدارة المتاجر' : (window.location.pathname.startsWith('/admin') ? 'إدارة ' + name : (settings.seoTitle || name));
+    const description = platform ? 'إدارة المتاجر والعملاء والبيانات من مساحة عمل واحدة.' : (settings.seoDescription || settings.description || 'تسوق منتجات ' + name);
+    const keywords = settings.seoKeywords || name;
     document.title = title;
-    for (const [key, content] of Object.entries({ title, description, author: name, keywords: name, 'twitter:title': title, 'twitter:description': description })) {
+    for (const [key, content] of Object.entries({ title, description, author: name, keywords, 'twitter:title': title, 'twitter:description': description })) {
       document.querySelector('meta[name="' + key + '"]')?.setAttribute('content', content);
     }
     for (const [key, content] of Object.entries({ 'og:title': title, 'og:site_name': name, 'og:description': description })) {
       document.querySelector('meta[property="' + key + '"]')?.setAttribute('content', content);
     }
+    const iconUrl = platform ? '/favicon.png' : (settings.faviconUrl || settings.logoUrl || '/assets/images/branding/store-mark.svg');
     const icon = document.querySelector('link[rel="icon"]');
-    icon?.setAttribute('href', platform ? '/favicon.png' : (settings.faviconUrl || '/assets/images/branding/store-mark.svg'));
+    icon?.setAttribute('href', iconUrl);
     icon?.removeAttribute('type');
+    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+    appleIcon?.setAttribute('href', iconUrl);
+
+    if (settings.googleSiteVerification) {
+      let gsv = document.querySelector('meta[name="google-site-verification"]');
+      if (!gsv) {
+        gsv = document.createElement('meta');
+        gsv.setAttribute('name', 'google-site-verification');
+        document.head.appendChild(gsv);
+      }
+      gsv.setAttribute('content', settings.googleSiteVerification);
+    }
+
+    if (settings.googleAnalyticsId && !document.getElementById('ga-script')) {
+      const s = document.createElement('script');
+      s.id = 'ga-script';
+      s.async = true;
+      s.src = `https://www.googletagmanager.com/gtag/js?id=${settings.googleAnalyticsId}`;
+      document.head.appendChild(s);
+
+      const inline = document.createElement('script');
+      inline.id = 'ga-inline';
+      inline.innerHTML = `window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${settings.googleAnalyticsId}');`;
+      document.head.appendChild(inline);
+    }
   }
 }

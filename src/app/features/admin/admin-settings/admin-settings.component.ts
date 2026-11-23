@@ -375,7 +375,11 @@ export class AdminSettingsComponent implements OnInit {
     }
   }
 
-  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout' | 'menu' | 'cart' | 'checkout' | 'account' | 'integrations' | 'domain'>('info');
+  activeTab = signal<'discounts' | 'branding' | 'policies' | 'info' | 'packages' | 'performance' | 'layout' | 'menu' | 'cart' | 'checkout' | 'account' | 'integrations' | 'domain' | 'seo'>('info');
+
+  get currentStoreDomain(): string {
+    return this.customDomain() || (typeof window !== 'undefined' ? window.location.host : 'yourstore.com');
+  }
   settings = signal<StorefrontSettings | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
@@ -533,7 +537,7 @@ export class AdminSettingsComponent implements OnInit {
   private readonly route=inject(ActivatedRoute);
   ngOnInit() {
     this.commerce.presets.subscribe(rows=>{this.activityPresets=rows;this.commerceCdr.markForCheck();});
-    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(['performance','layout','menu','cart','checkout','account','info','branding','discounts','policies','packages','integrations','domain'].includes(requestedTab||''))this.activeTab.set(requestedTab as any);
+    const requestedTab=this.route.snapshot.queryParamMap.get('tab');if(['performance','layout','menu','cart','checkout','account','info','branding','discounts','policies','packages','integrations','domain','seo'].includes(requestedTab||''))this.activeTab.set(requestedTab as any);
     this.loadSettings();
     this.loadPackageStats();
     this.loadDomain();

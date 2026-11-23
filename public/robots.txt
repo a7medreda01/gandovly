@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /kitchen
-
-Sitemap: https://gandovly.runasp.net/sitemap.xml

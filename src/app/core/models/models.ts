@@ -49,6 +49,11 @@ export interface StorefrontSettings {
   heroBannerDesktopUrl: string;
   heroBannerMobileUrl: string;
   faviconUrl: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  googleSiteVerification?: string;
+  googleAnalyticsId?: string;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;

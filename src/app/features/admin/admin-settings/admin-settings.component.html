@@ -19,6 +19,7 @@
     <button type="button" class="tab-btn" [class.active]="activeTab()==='branding'" [attr.aria-current]="activeTab()==='branding' ? 'true' : null" (click)="activeTab.set('branding')"><i class="bi bi-palette"></i><span>الهوية والتصميم</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='info'" [attr.aria-current]="activeTab()==='info' ? 'true' : null" (click)="activeTab.set('info')"><i class="bi bi-shop"></i><span>بيانات المتجر</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='domain'" [attr.aria-current]="activeTab()==='domain' ? 'true' : null" (click)="activeTab.set('domain')"><i class="bi bi-globe2" aria-hidden="true"></i><span>الدومين</span></button>
+    <button type="button" class="tab-btn" [class.active]="activeTab()==='seo'" [attr.aria-current]="activeTab()==='seo' ? 'true' : null" (click)="activeTab.set('seo')"><i class="bi bi-search" aria-hidden="true"></i><span>السيو والأرشفة</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='discounts'" [attr.aria-current]="activeTab()==='discounts' ? 'true' : null" (click)="activeTab.set('discounts')"><i class="bi bi-tags"></i><span>العروض والتوصيل</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='integrations'" [attr.aria-current]="activeTab()==='integrations' ? 'true' : null" (click)="activeTab.set('integrations')"><i class="bi bi-graph-up"></i><span>التكاملات والقياس</span></button>
     <button type="button" class="tab-btn" [class.active]="activeTab()==='packages'" [attr.aria-current]="activeTab()==='packages' ? 'true' : null" (click)="activeTab.set('packages');loadPackageStats()"><i class="bi bi-box-seam"></i><span>النسخ والاستيراد</span></button>
@@ -1714,6 +1715,134 @@
             </div>
           </div>
         </details>
+      </div>
+    }
+
+    <!-- TAB: SEO & Search Engines -->
+    @if (activeTab() === 'seo') {
+      <div class="tab-content animate-fade-in">
+        <!-- 1. SEO Search Results Preview & Meta -->
+        <details class="settings-card settings-disclosure seo-settings" open>
+          <summary>
+            <i class="bi bi-search text-primary me-2"></i> 1. إعدادات السيو والظهور في بحث Google
+            <small>معاينة عنوان ووصف المتجر في محركات البحث</small>
+          </summary>
+
+          <div class="card-body">
+            <!-- Live Google Search Result Preview Card -->
+            <div class="google-preview-card p-3 mb-4 rounded border bg-light">
+              <span class="text-muted small fw-bold d-block mb-2"><i class="bi bi-google me-1"></i> معاينة شكل المتجر في نتائج بحث جوجل (Google Snippet):</span>
+              <div class="google-snippet-box bg-white p-3 rounded border">
+                <div class="snippet-header d-flex align-items-center gap-2 mb-1">
+                  <img [src]="settings()!.faviconUrl || settings()!.logoUrl || '/favicon.png'" class="snippet-favicon rounded-circle border" style="width: 22px; height: 22px; object-fit: cover;" alt="Favicon">
+                  <div class="snippet-url text-truncate small text-dark">
+                    <span>{{ currentStoreDomain || 'yourstore.com' }}</span>
+                  </div>
+                </div>
+                <h4 class="snippet-title text-primary text-truncate mb-1" style="font-size: 1.15rem; font-weight: 600;">
+                  {{ settings()!.seoTitle || settings()!.restaurantName || 'عنوان المتجر' }}
+                </h4>
+                <p class="snippet-desc text-muted mb-0 small" style="line-height: 1.45;">
+                  {{ settings()!.seoDescription || settings()!.description || 'وصف المتجر والخدمات والمنتجات المقدمة...' }}
+                </p>
+              </div>
+            </div>
+
+            <!-- SEO Title -->
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">
+                عنوان السيو في محركات البحث (SEO Title)
+                <span class="badge bg-light text-muted ms-2">{{ (settings()!.seoTitle || '').length }} / 60 حرف</span>
+              </label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.seoTitle" 
+                placeholder="مثال: أسماك جندوفلي | أشهى الأسماك والمأكولات البحرية الطازجة">
+              <div class="form-text text-muted small">
+                العنوان الرئيسي الذي يظهر باللون الأزرق في جوجل وتبويب المتصفح. إذا تركته فارغاً سيتم استخدام اسم المتجر تلقائياً.
+              </div>
+            </div>
+
+            <!-- SEO Description -->
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">
+                الوصف التعريفي لمحركات البحث والخدمات (SEO Meta Description)
+                <span class="badge bg-light text-muted ms-2">{{ (settings()!.seoDescription || '').length }} / 250 حرف</span>
+              </label>
+              <textarea class="form-control" rows="4" [(ngModel)]="settings()!.seoDescription" 
+                placeholder="اكتب نبذة غنية وموجزة عن نشاطك والخدمات والمنتجات ومناطق التوصيل لمساعدة محركات البحث في فهرستك..."></textarea>
+              <div class="form-text text-muted small">
+                هذا الوصف مخصص لمحركات البحث (جوجل وواتساب ومواقع التواصل) لمساعدتك في الأرشفة، <strong>ولا يظهر في تصميم واجهة المتجر</strong> للحفاظ على جمالية التصميم.
+              </div>
+            </div>
+
+            <!-- SEO Keywords -->
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">الكلمات المفتاحية الأساسية (SEO Keywords)</label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.seoKeywords" 
+                placeholder="مثال: أسماك طازجة, مطعم بحري, جمبري, سمك مشوي, دليفري أسماك">
+              <div class="form-text text-muted small">
+                أدخل الكلمات البحثية التي يبحث بها عملاؤك مفصولة بفاصلة (,).
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- 2. Webmaster & Analytics Integration -->
+        <details class="settings-card settings-disclosure seo-tools mt-3">
+          <summary>
+            <i class="bi bi-tools text-primary me-2"></i> 2. أدوات التحقق والقياس (Google Search Console & Analytics)
+            <small>إثبات ملكية المتجر في جوجل وتتبع الزوار</small>
+          </summary>
+
+          <div class="card-body">
+            <!-- Google Search Console -->
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">
+                <i class="bi bi-shield-check text-success me-1"></i> كود إثبات ملكية الموقع (Google Site Verification)
+              </label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.googleSiteVerification" 
+                placeholder="مثال: google-site-verification=abc123xyz456...">
+              <div class="form-text text-muted small">
+                احصل على هذا الكود من Google Search Console وألصقه هنا لإثبات ملكيتك للمتجر وأرشفته رسمياً في جوجل.
+              </div>
+            </div>
+
+            <!-- Google Analytics 4 -->
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">
+                <i class="bi bi-graph-up text-primary me-1"></i> معرف تتبع Google Analytics 4 (GA4 ID)
+              </label>
+              <input type="text" class="form-control" [(ngModel)]="settings()!.googleAnalyticsId" 
+                placeholder="مثال: G-XXXXXXXXXX">
+              <div class="form-text text-muted small">
+                معرف تتبع إحصائيات جوجل لمعرفة عدد الزيارات والصفحات الأكثر زيارة والمبيعات.
+              </div>
+            </div>
+
+            <!-- Live Links for Robots & Sitemap -->
+            <div class="seo-system-links p-3 bg-light rounded border mt-3">
+              <span class="fw-bold d-block mb-2 small"><i class="bi bi-diagram-3 me-1"></i> روابط الفهرسة التلقائية لمتجرك:</span>
+              <div class="d-flex flex-wrap gap-2">
+                <a [href]="'/sitemap.xml'" target="_blank" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-filetype-xml me-1"></i> عرض خريطة الموقع (sitemap.xml)
+                </a>
+                <a [href]="'/robots.txt'" target="_blank" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-file-earmark-text me-1"></i> عرض ملف التوجيه (robots.txt)
+                </a>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- Save Button Footer -->
+        <div class="tab-save-footer mt-4 flex-between">
+          <div class="save-hint text-muted small">
+            <i class="bi bi-info-circle me-1"></i> اضغط حفظ لتطبيق إعدادات السيو والتحقق فورياً في محركات البحث.
+          </div>
+          <button type="button" class="btn btn-primary px-4" [disabled]="isSaving()" (click)="saveSettings('seo')">
+            @if (isSaving()) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            <span>حفظ إعدادات السيو</span>
+          </button>
+        </div>
       </div>
     }
 
