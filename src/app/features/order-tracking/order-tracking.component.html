@@ -134,7 +134,12 @@
                     @if (line.modifiers && line.modifiers.length > 0) {
                       <div class="item-addons-tags">
                         @for (m of line.modifiers; track m.id) {
-                          <span class="addon-chip">+ {{ m.modifierOptionNameAr }}</span>
+                          <span class="addon-chip">
+                            + {{ m.modifierOptionNameAr }}
+                            @if ((m.quantity || 1) > 1) {
+                              <span>(×{{ m.quantity }}{{ m.unitLabelAr ? ' ' + m.unitLabelAr : '' }})</span>
+                            }
+                          </span>
                         }
                       </div>
                     }
@@ -185,7 +190,12 @@
               @if (line.modifiers && line.modifiers.length > 0) {
                 <div class="item-addons-tags mt-1">
                   @for (m of line.modifiers; track m.id) {
-                    <span class="addon-chip">+ {{ m.modifierOptionNameAr }}</span>
+                    <span class="addon-chip">
+                      + {{ m.modifierOptionNameAr }}
+                      @if ((m.quantity || 1) > 1) {
+                        <span>(×{{ m.quantity }}{{ m.unitLabelAr ? ' ' + m.unitLabelAr : '' }})</span>
+                      }
+                    </span>
                   }
                 </div>
               }

@@ -70,6 +70,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
   selectedPrepOption: PreparationOption | null = null;
   selectedModifiersByGroup: { [groupId: number]: ModifierOption | null } = {};
   multiSelectedModifiers: ModifierOption[] = [];
+  modifierQuantities: Record<number, number> = {};
   specialInstructions: string = '';
   collapsedGroups = signal<Record<string, boolean>>({});
 
@@ -225,13 +226,13 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
       const opt = this.selectedModifiersByGroup[Number(key)];
       if (opt && opt.price) {
-        total += opt.price * units;
+        total += (opt.price * this.getModifierQty(opt)) * units;
       }
     }
 
     for (const opt of this.multiSelectedModifiers) {
       if (opt.price) {
-        total += opt.price * units;
+        total += (opt.price * this.getModifierQty(opt)) * units;
       }
     }
 
@@ -389,6 +390,15 @@ export class ProductPageComponent implements OnInit, OnDestroy {
         this.selectedPrepOption = g.options[0];
       }
     }
+
+    this.modifierQuantities = {};
+    for (const grp of p.modifierGroups || []) {
+      for (const opt of grp.options || []) {
+        if (opt.allowQuantity) {
+          this.modifierQuantities[opt.id] = this.getModifierDefaultQty(opt);
+        }
+      }
+    }
   }
 
   private loadRelated(p: Product): void {
@@ -425,6 +435,9 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     if (this.selectedModifiersByGroup[groupId]?.id === opt.id) {
       this.selectedModifiersByGroup[groupId] = null;
     } else {
+      if (opt.allowQuantity && this.modifierQuantities[opt.id] === undefined) {
+        this.modifierQuantities[opt.id] = this.getModifierDefaultQty(opt);
+      }
       this.selectedModifiersByGroup[groupId] = opt;
     }
   }
@@ -437,7 +450,61 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     if(index>=0){this.multiSelectedModifiers.splice(index,1);return;}
     const count=this.multiSelectedModifiers.filter(m=>group.options.some(o=>o.id===m.id)).length;
     if(count>=group.maxSelection){this.toast.info('الحد الأقصى لهذه المجموعة '+group.maxSelection);return;}
+    if (opt.allowQuantity && this.modifierQuantities[opt.id] === undefined) {
+      this.modifierQuantities[opt.id] = this.getModifierDefaultQty(opt);
+    }
     this.multiSelectedModifiers.push(opt);
+  }
+
+  getModifierDefaultQty(opt: ModifierOption): number {
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    const def = Number(opt.defaultQuantity) || min;
+    return Math.min(max, Math.max(min, Math.round(def)));
+  }
+
+  getModifierQty(opt: ModifierOption): number {
+    if (!opt?.allowQuantity) return 1;
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    const current = this.modifierQuantities[opt.id] ?? this.getModifierDefaultQty(opt);
+    return Math.min(max, Math.max(min, Math.round(current)));
+  }
+
+  changeModifierQty(opt: ModifierOption, delta: number, event?: Event): void {
+    event?.stopPropagation();
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    const next = this.getModifierQty(opt) + delta;
+    this.modifierQuantities[opt.id] = Math.min(max, Math.max(min, next));
+  }
+
+  setModifierQty(opt: ModifierOption, qty: number, event?: Event): void {
+    event?.stopPropagation();
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    this.modifierQuantities[opt.id] = Math.min(max, Math.max(min, Math.round(Number(qty) || min)));
+  }
+
+  onModifierQtyInput(opt: ModifierOption, rawVal: any): void {
+    const parsed = parseInt(String(rawVal), 10);
+    if (!isNaN(parsed)) {
+      const min = Math.max(1, Number(opt.minQuantity) || 1);
+      const max = Math.max(min, Number(opt.maxQuantity) || 100);
+      this.modifierQuantities[opt.id] = Math.min(max, Math.max(min, parsed));
+    }
+  }
+
+  onModifierQtyBlur(opt: ModifierOption): void {
+    this.setModifierQty(opt, this.modifierQuantities[opt.id] ?? this.getModifierDefaultQty(opt));
+  }
+
+  getModifierUnitLabel(opt: ModifierOption): string {
+    return this.languageService.text(opt?.unitLabelAr || opt?.unitLabelEn || '', opt?.unitLabelEn || opt?.unitLabelAr || '');
+  }
+
+  getModifierTotalCost(opt: ModifierOption): number {
+    return Math.round(((Number(opt?.price) || 0) * this.getModifierQty(opt)) * 100) / 100;
   }
   isGroupExpanded(groupKey: string, defaultExpanded: boolean): boolean {
     const state = this.collapsedGroups();
@@ -533,11 +600,15 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     // Launch flying dot
     this.launchFlyingCartDot(event);
 
-    const mods: ModifierOption[] = [...this.multiSelectedModifiers];
+    const rawMods: ModifierOption[] = [...this.multiSelectedModifiers];
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
       const opt = this.selectedModifiersByGroup[Number(key)];
-      if (opt && !mods.some(m => m.id === opt.id)) mods.push(opt);
+      if (opt && !rawMods.some(m => m.id === opt.id)) rawMods.push(opt);
     }
+    const mods: ModifierOption[] = rawMods.map(opt => ({
+      ...opt,
+      selectedQuantity: this.getModifierQty(opt)
+    }));
 
     const qty = this.isWeighedProduct && this.orderMode === 'weight' ? Math.max(1, Math.round(this.customWeightGrams / (p.averageUnitWeightGrams || 500))) : this.piecesCount;
     const customGrams = this.isWeighedProduct ? this.calculatedEstimatedWeightGrams : undefined;

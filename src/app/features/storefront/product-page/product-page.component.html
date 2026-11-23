@@ -298,12 +298,12 @@
             >
               <div class="header-main-info">
                 <i class="bi bi-plus-circle-dotted text-primary header-icon"></i>
-                <span class="group-title">{{ group.nameAr }}</span>
-                <small class="group-subtitle">{{ group.isRequired ? 'مطلوب' : 'اختياري' }} · حتى {{ group.maxSelection }}</small>
+                <span class="group-title">{{ languageService.getLocalizedName(group) }}</span>
+                <small class="group-subtitle">{{ group.isRequired ? languageService.text('مطلوب', 'Required') : languageService.text('اختياري', 'Optional') }} · {{ languageService.text('حتى ' + group.maxSelection, 'Up to ' + group.maxSelection) }}</small>
               </div>
               <div class="header-end-info">
                 @if (getSelectedCountForGroup(group) > 0) {
-                  <span class="selected-pill">تم اختيار {{ getSelectedCountForGroup(group) }}</span>
+                  <span class="selected-pill">{{ languageService.text('تم اختيار ' + getSelectedCountForGroup(group), getSelectedCountForGroup(group) + ' selected') }}</span>
                 }
                 <i class="bi bi-chevron-down accordion-arrow" [class.rotated]="isModGroupExpanded(group.id, j)"></i>
               </div>
@@ -312,18 +312,103 @@
             @if (isModGroupExpanded(group.id, j)) {
               <div class="product-option-list mt-2">
                 @for (opt of group.options; track opt.id) {
-                  <button type="button"
-                    [class.selected]="modifierSelected(group, opt)"
-                    [disabled]="!opt.isAvailable"
-                    [attr.aria-pressed]="modifierSelected(group, opt)"
-                    (click)="toggleModifier(group, opt)"
-                  >
-                    <span>{{ opt.nameAr }}</span>
-                    @if (opt.price) {
-                      <bdi>+{{ opt.price | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                  <div class="product-option-item-wrap">
+                    <button type="button"
+                      [class.selected]="modifierSelected(group, opt)"
+                      [disabled]="!opt.isAvailable"
+                      [attr.aria-pressed]="modifierSelected(group, opt)"
+                      (click)="toggleModifier(group, opt)"
+                    >
+                      <span>{{ languageService.getLocalizedName(opt) }}</span>
+                      @if (opt.price) {
+                        <bdi>+{{ opt.price | number:'1.0-2' }} {{ currencySymbol }}{{ opt.allowQuantity && getModifierUnitLabel(opt) ? ' / ' + getModifierUnitLabel(opt) : '' }}</bdi>
+                      }
+                      <i class="bi" [class.bi-check-circle-fill]="modifierSelected(group, opt)" [class.bi-circle]="!modifierSelected(group, opt)" aria-hidden="true"></i>
+                    </button>
+
+                    @if (modifierSelected(group, opt) && opt.allowQuantity) {
+                      <div class="mod-qty-calc-panel">
+                        <div class="mod-qty-top-row">
+                          <div class="mod-qty-label-box">
+                            <span class="mod-qty-title">
+                              {{ languageService.text('حدد الكمية المطلوبة', 'Specify required quantity') }}
+                              @if (getModifierUnitLabel(opt)) {
+                                <span>({{ getModifierUnitLabel(opt) }})</span>
+                              }
+                            </span>
+                            @if ((opt.minQuantity || 1) > 1) {
+                              <span class="mod-min-notice">
+                                <i class="bi bi-info-circle-fill"></i>
+                                {{ languageService.text('الحد الأدنى للطلب هو ' + opt.minQuantity + ' ' + getModifierUnitLabel(opt), 'Minimum order quantity is ' + opt.minQuantity + ' ' + getModifierUnitLabel(opt)) }}
+                              </span>
+                            }
+                          </div>
+                          <div class="mod-qty-stepper">
+                            <button
+                              type="button"
+                              class="mod-step-btn"
+                              [disabled]="getModifierQty(opt) <= (opt.minQuantity || 1)"
+                              (click)="changeModifierQty(opt, -1, $event)"
+                              [attr.aria-label]="languageService.text('تقليل', 'Decrease')"
+                            >
+                              <i class="bi bi-dash-lg"></i>
+                            </button>
+                            <div class="mod-qty-input-wrap">
+                              <input
+                                type="number"
+                                class="mod-qty-input"
+                                [min]="opt.minQuantity || 1"
+                                [max]="opt.maxQuantity || 100"
+                                [ngModel]="getModifierQty(opt)"
+                                (ngModelChange)="onModifierQtyInput(opt, $event)"
+                                (blur)="onModifierQtyBlur(opt)"
+                              />
+                              @if (getModifierUnitLabel(opt)) {
+                                <span class="mod-qty-unit">{{ getModifierUnitLabel(opt) }}</span>
+                              }
+                            </div>
+                            <button
+                              type="button"
+                              class="mod-step-btn"
+                              [disabled]="getModifierQty(opt) >= (opt.maxQuantity || 100)"
+                              (click)="changeModifierQty(opt, 1, $event)"
+                              [attr.aria-label]="languageService.text('زيادة', 'Increase')"
+                            >
+                              <i class="bi bi-plus-lg"></i>
+                            </button>
+                          </div>
+                        </div>
+
+                        @if (opt.quickQuantities && opt.quickQuantities.length > 0) {
+                          <div class="mod-quick-chips">
+                            @for (q of opt.quickQuantities; track q) {
+                              <button
+                                type="button"
+                                class="mod-quick-chip"
+                                [class.active]="getModifierQty(opt) === q"
+                                (click)="setModifierQty(opt, q, $event)"
+                              >
+                                {{ q }} {{ getModifierUnitLabel(opt) }}
+                              </button>
+                            }
+                          </div>
+                        }
+
+                        @if (opt.price > 0) {
+                          <div class="mod-price-formula">
+                            <span class="formula-math">
+                              <bdi>{{ getModifierQty(opt) }} {{ getModifierUnitLabel(opt) }}</bdi>
+                              ×
+                              <bdi>{{ opt.price | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                            </span>
+                            <span class="formula-total">
+                              = <bdi>{{ getModifierTotalCost(opt) | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                            </span>
+                          </div>
+                        }
+                      </div>
                     }
-                    <i class="bi" [class.bi-check-circle-fill]="modifierSelected(group, opt)" [class.bi-circle]="!modifierSelected(group, opt)" aria-hidden="true"></i>
-                  </button>
+                  </div>
                 }
               </div>
             }

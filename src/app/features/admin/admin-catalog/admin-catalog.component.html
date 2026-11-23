@@ -504,10 +504,16 @@
                         <td>
                           <strong class="opt-name-ar">{{ opt.nameAr }}</strong>
                           @if (opt.nameEn) { <small class="text-muted d-block">{{ opt.nameEn }}</small> }
+                          @if (opt.allowQuantity) {
+                            <span class="badge bg-info-subtle text-primary border mt-1 d-inline-block">
+                              <i class="bi bi-sliders2 me-1"></i>
+                              كمية: {{ opt.minQuantity || 1 }}–{{ opt.maxQuantity || 100 }} {{ opt.unitLabelAr || opt.unitLabelEn || '' }}
+                            </span>
+                          }
                         </td>
                         <td>
                           <span class="cost-badge" [class.free]="opt.price === 0">
-                            {{ opt.price === 0 ? 'مشمول (0 ' + currencySymbol + ')' : '+' + opt.price + ' ' + currencySymbol }}
+                            {{ opt.price === 0 ? 'مشمول (0 ' + currencySymbol + ')' : '+' + opt.price + ' ' + currencySymbol + (opt.allowQuantity && opt.unitLabelAr ? ' / ' + opt.unitLabelAr : '') }}
                           </span>
                         </td>
                         <td style="text-align: center;">
@@ -1830,6 +1836,49 @@
               <span>متاح للاختيار حالياً (غير معطل)</span>
             </label>
           </div>
+
+          <div class="form-group mt-3 pt-3 border-top">
+            <label class="checkbox-label flex-center">
+              <input type="checkbox" [(ngModel)]="modifierOptionForm.allowQuantity" />
+              <span class="fw-bold text-primary">السماح للعميل بإدخال كمية لهذا الخيار (مثل: بالمتر، بالقطعة، بالوحدة)</span>
+            </label>
+          </div>
+
+          @if (modifierOptionForm.allowQuantity) {
+            <div class="p-3 rounded-3 border bg-light mt-2">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>الحد الأدنى للكمية (Min) *</label>
+                  <input type="number" min="1" class="form-control" [(ngModel)]="modifierOptionForm.minQuantity" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>الحد الأقصى للكمية (Max) *</label>
+                  <input type="number" min="1" class="form-control" [(ngModel)]="modifierOptionForm.maxQuantity" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>الكمية الافتراضية (Default) *</label>
+                  <input type="number" min="1" class="form-control" [(ngModel)]="modifierOptionForm.defaultQuantity" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label>وحدة القياس (عربي)</label>
+                  <input type="text" maxlength="30" class="form-control" placeholder="مثال: متر، قطعة، لتر..." [(ngModel)]="modifierOptionForm.unitLabelAr" />
+                </div>
+                <div class="form-group flex-1">
+                  <label>وحدة القياس (إنجليزي)</label>
+                  <input type="text" maxlength="30" class="form-control" placeholder="e.g. m, pcs, L..." [(ngModel)]="modifierOptionForm.unitLabelEn" />
+                </div>
+              </div>
+
+              <div class="form-group mb-0">
+                <label>أزرار الكميات السريعة (مفصولة بفاصلة - اختياري)</label>
+                <input type="text" class="form-control" placeholder="مثال: 20, 25, 30, 40, 50" [(ngModel)]="modifierOptionForm.quickQuantitiesText" />
+                <span class="hint-text">تظهر كأزرار اختيار سريع أسفل الخيار لتسهيل تحديد الكمية على العميل</span>
+              </div>
+            </div>
+          }
         </div>
 
         <div class="modal-footer flex-between">

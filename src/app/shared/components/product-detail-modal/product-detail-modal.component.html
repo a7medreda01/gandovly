@@ -329,7 +329,12 @@
               <!-- Single Choice / Required Dropdown Select -->
               <div class="config-card option-dropdown-card">
                 <label class="gas-dropdown-label" [for]="'mod-select-' + modGroup.id">
-                  {{ modGroup.nameAr }} <span class="required-star">*</span>
+                  {{ languageService.getLocalizedName(modGroup) }}
+                  @if (modGroup.isRequired) {
+                    <span class="required-star">*</span>
+                  } @else {
+                    <small class="text-muted fw-normal">({{ languageService.text('اختياري', 'Optional') }})</small>
+                  }
                 </label>
                 <div class="gas-select-wrapper">
                   <select
@@ -338,36 +343,210 @@
                     [ngModel]="selectedModifiersByGroup[modGroup.id]?.id ?? 'null'"
                     (ngModelChange)="onSingleModifierChange(modGroup, $event)"
                   >
-                    <option value="null" disabled>اختر</option>
+                    <option value="null" [disabled]="modGroup.isRequired">
+                      {{ modGroup.isRequired ? languageService.text('اختر', 'Select') : languageService.text('بدون / غير مطلوب', 'None') }}
+                    </option>
                     @for (mod of getFilteredGroupOptions(modGroup); track mod.id) {
-                      <option [value]="mod.id">
-                        {{ mod.nameAr }}{{ mod.price > 0 ? ' (+' + mod.price + ' ' + currencySymbol + ')' : '' }}
+                      <option [value]="mod.id" [disabled]="!mod.isAvailable">
+                        {{ languageService.getLocalizedName(mod) }}{{ mod.price > 0 ? ' (+' + mod.price + ' ' + currencySymbol + (mod.allowQuantity && getModifierUnitLabel(mod) ? ' / ' + getModifierUnitLabel(mod) : '') + ')' : '' }}
                       </option>
                     }
                   </select>
                   <i class="bi bi-chevron-down gas-select-chevron"></i>
                 </div>
+
+                @let selectedSingleMod = selectedModifiersByGroup[modGroup.id];
+                @if (selectedSingleMod && selectedSingleMod.allowQuantity) {
+                  <div class="mod-qty-calc-panel">
+                    <div class="mod-qty-top-row">
+                      <div class="mod-qty-label-box">
+                        <span class="mod-qty-title">
+                          {{ languageService.text('حدد الكمية المطلوبة', 'Specify required quantity') }}
+                          @if (getModifierUnitLabel(selectedSingleMod)) {
+                            <span>({{ getModifierUnitLabel(selectedSingleMod) }})</span>
+                          }
+                        </span>
+                        @if ((selectedSingleMod.minQuantity || 1) > 1) {
+                          <span class="mod-min-notice">
+                            <i class="bi bi-info-circle-fill"></i>
+                            {{ languageService.text('الحد الأدنى للطلب هو ' + selectedSingleMod.minQuantity + ' ' + getModifierUnitLabel(selectedSingleMod), 'Minimum order quantity is ' + selectedSingleMod.minQuantity + ' ' + getModifierUnitLabel(selectedSingleMod)) }}
+                          </span>
+                        }
+                      </div>
+                      <div class="mod-qty-stepper">
+                        <button
+                          type="button"
+                          class="mod-step-btn"
+                          [disabled]="getModifierQty(selectedSingleMod) <= (selectedSingleMod.minQuantity || 1)"
+                          (click)="changeModifierQty(selectedSingleMod, -1, $event)"
+                          [attr.aria-label]="languageService.text('تقليل', 'Decrease')"
+                        >
+                          <i class="bi bi-dash-lg"></i>
+                        </button>
+                        <div class="mod-qty-input-wrap">
+                          <input
+                            type="number"
+                            class="mod-qty-input"
+                            [min]="selectedSingleMod.minQuantity || 1"
+                            [max]="selectedSingleMod.maxQuantity || 100"
+                            [ngModel]="getModifierQty(selectedSingleMod)"
+                            (ngModelChange)="onModifierQtyInput(selectedSingleMod, $event)"
+                            (blur)="onModifierQtyBlur(selectedSingleMod)"
+                          />
+                          @if (getModifierUnitLabel(selectedSingleMod)) {
+                            <span class="mod-qty-unit">{{ getModifierUnitLabel(selectedSingleMod) }}</span>
+                          }
+                        </div>
+                        <button
+                          type="button"
+                          class="mod-step-btn"
+                          [disabled]="getModifierQty(selectedSingleMod) >= (selectedSingleMod.maxQuantity || 100)"
+                          (click)="changeModifierQty(selectedSingleMod, 1, $event)"
+                          [attr.aria-label]="languageService.text('زيادة', 'Increase')"
+                        >
+                          <i class="bi bi-plus-lg"></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    @if (selectedSingleMod.quickQuantities && selectedSingleMod.quickQuantities.length > 0) {
+                      <div class="mod-quick-chips">
+                        @for (q of selectedSingleMod.quickQuantities; track q) {
+                          <button
+                            type="button"
+                            class="mod-quick-chip"
+                            [class.active]="getModifierQty(selectedSingleMod) === q"
+                            (click)="setModifierQty(selectedSingleMod, q, $event)"
+                          >
+                            {{ q }} {{ getModifierUnitLabel(selectedSingleMod) }}
+                          </button>
+                        }
+                      </div>
+                    }
+
+                    @if (selectedSingleMod.price > 0) {
+                      <div class="mod-price-formula">
+                        <span class="formula-math">
+                          <bdi>{{ getModifierQty(selectedSingleMod) }} {{ getModifierUnitLabel(selectedSingleMod) }}</bdi>
+                          ×
+                          <bdi>{{ selectedSingleMod.price | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                        </span>
+                        <span class="formula-total">
+                          = <bdi>{{ getModifierTotalCost(selectedSingleMod) | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
               </div>
             } @else {
               <!-- Multiple Choice Accessories / Add-ons -->
               <div class="config-card">
                 <div class="config-card-header">
-                  <span class="card-title"><i class="bi bi-check2-square text-primary me-1"></i> {{ modGroup.nameAr }} (اختياري):</span>
+                  <span class="card-title"><i class="bi bi-check2-square text-primary me-1"></i> {{ languageService.getLocalizedName(modGroup) }} ({{ languageService.text('اختياري', 'Optional') }}):</span>
                 </div>
                 <div class="modifiers-vertical-list">
                   @for (mod of modGroup.options; track mod.id) {
-                    <label class="modifier-row" [class.is-checked]="isMultiModifierSelected(mod.id)">
-                      <div class="mod-right flex-center">
-                        <input
-                          type="checkbox"
-                          class="custom-check"
-                          [checked]="isMultiModifierSelected(mod.id)"
-                          (change)="toggleMultiModifier(mod)"
-                        />
-                        <span class="mod-title">{{ mod.nameAr }}</span>
-                      </div>
-                      <span class="mod-addon-price">{{ mod.price > 0 ? '+' + mod.price + ' ' + currencySymbol : 'بدون تكلفة' }}</span>
-                    </label>
+                    <div class="modifier-item-block">
+                      <label class="modifier-row" [class.is-checked]="isMultiModifierSelected(mod.id)">
+                        <div class="mod-right flex-center">
+                          <input
+                            type="checkbox"
+                            class="custom-check"
+                            [checked]="isMultiModifierSelected(mod.id)"
+                            [disabled]="!mod.isAvailable"
+                            (change)="toggleMultiModifier(mod)"
+                          />
+                          <span class="mod-title">{{ languageService.getLocalizedName(mod) }}</span>
+                        </div>
+                        <span class="mod-addon-price">
+                          {{ mod.price > 0 ? '+' + mod.price + ' ' + currencySymbol + (mod.allowQuantity && getModifierUnitLabel(mod) ? ' / ' + getModifierUnitLabel(mod) : '') : languageService.text('بدون تكلفة', 'Free') }}
+                        </span>
+                      </label>
+
+                      @if (isMultiModifierSelected(mod.id) && mod.allowQuantity) {
+                        <div class="mod-qty-calc-panel">
+                          <div class="mod-qty-top-row">
+                            <div class="mod-qty-label-box">
+                              <span class="mod-qty-title">
+                                {{ languageService.text('حدد الكمية المطلوبة', 'Specify required quantity') }}
+                                @if (getModifierUnitLabel(mod)) {
+                                  <span>({{ getModifierUnitLabel(mod) }})</span>
+                                }
+                              </span>
+                              @if ((mod.minQuantity || 1) > 1) {
+                                <span class="mod-min-notice">
+                                  <i class="bi bi-info-circle-fill"></i>
+                                  {{ languageService.text('الحد الأدنى للطلب هو ' + mod.minQuantity + ' ' + getModifierUnitLabel(mod), 'Minimum order quantity is ' + mod.minQuantity + ' ' + getModifierUnitLabel(mod)) }}
+                                </span>
+                              }
+                            </div>
+                            <div class="mod-qty-stepper">
+                              <button
+                                type="button"
+                                class="mod-step-btn"
+                                [disabled]="getModifierQty(mod) <= (mod.minQuantity || 1)"
+                                (click)="changeModifierQty(mod, -1, $event)"
+                                [attr.aria-label]="languageService.text('تقليل', 'Decrease')"
+                              >
+                                <i class="bi bi-dash-lg"></i>
+                              </button>
+                              <div class="mod-qty-input-wrap">
+                                <input
+                                  type="number"
+                                  class="mod-qty-input"
+                                  [min]="mod.minQuantity || 1"
+                                  [max]="mod.maxQuantity || 100"
+                                  [ngModel]="getModifierQty(mod)"
+                                  (ngModelChange)="onModifierQtyInput(mod, $event)"
+                                  (blur)="onModifierQtyBlur(mod)"
+                                />
+                                @if (getModifierUnitLabel(mod)) {
+                                  <span class="mod-qty-unit">{{ getModifierUnitLabel(mod) }}</span>
+                                }
+                              </div>
+                              <button
+                                type="button"
+                                class="mod-step-btn"
+                                [disabled]="getModifierQty(mod) >= (mod.maxQuantity || 100)"
+                                (click)="changeModifierQty(mod, 1, $event)"
+                                [attr.aria-label]="languageService.text('زيادة', 'Increase')"
+                              >
+                                <i class="bi bi-plus-lg"></i>
+                              </button>
+                            </div>
+                          </div>
+
+                          @if (mod.quickQuantities && mod.quickQuantities.length > 0) {
+                            <div class="mod-quick-chips">
+                              @for (q of mod.quickQuantities; track q) {
+                                <button
+                                  type="button"
+                                  class="mod-quick-chip"
+                                  [class.active]="getModifierQty(mod) === q"
+                                  (click)="setModifierQty(mod, q, $event)"
+                                >
+                                  {{ q }} {{ getModifierUnitLabel(mod) }}
+                                </button>
+                              }
+                            </div>
+                          }
+
+                          @if (mod.price > 0) {
+                            <div class="mod-price-formula">
+                              <span class="formula-math">
+                                <bdi>{{ getModifierQty(mod) }} {{ getModifierUnitLabel(mod) }}</bdi>
+                                ×
+                                <bdi>{{ mod.price | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                              </span>
+                              <span class="formula-total">
+                                = <bdi>{{ getModifierTotalCost(mod) | number:'1.0-2' }} {{ currencySymbol }}</bdi>
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
                   }
                 </div>
               </div>

@@ -60,6 +60,7 @@ export class ProductDetailModalComponent implements OnInit {
   selectedPrepOption: PreparationOption | null = null;
   selectedModifiersByGroup: { [groupId: number]: ModifierOption | null } = {};
   multiSelectedModifiers: ModifierOption[] = [];
+  modifierQuantities: Record<number, number> = {};
   specialInstructions: string = '';
   activeImageIndex: number = 0;
   showSpecsModal: boolean = false;
@@ -242,6 +243,11 @@ export class ProductDetailModalComponent implements OnInit {
         if (grp.maxSelection === 1 || grp.isRequired) {
           this.selectedModifiersByGroup[grp.id] = null;
         }
+        for (const opt of grp.options || []) {
+          if (opt.allowQuantity) {
+            this.modifierQuantities[opt.id] = this.getModifierDefaultQty(opt);
+          }
+        }
       }
     }
 
@@ -329,13 +335,18 @@ export class ProductDetailModalComponent implements OnInit {
   }
 
   get allSelectedModifiers(): ModifierOption[] {
-    const list: ModifierOption[] = [...this.multiSelectedModifiers];
+    const rawList: ModifierOption[] = [...this.multiSelectedModifiers];
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
       const opt = this.selectedModifiersByGroup[Number(key)];
-      if (opt && !list.some(m => m.id === opt.id)) {
-        list.push(opt);
+      if (opt && !rawList.some(m => m.id === opt.id)) {
+        rawList.push(opt);
       }
     }
+
+    const list: ModifierOption[] = rawList.map(opt => ({
+      ...opt,
+      selectedQuantity: this.getModifierQty(opt)
+    }));
 
     // Smart pipe extension modifier if selected
     if (this.selectedPipeType !== 'none') {
@@ -361,7 +372,8 @@ export class ProductDetailModalComponent implements OnInit {
         nameAr: `خدمة إضافية: ${typeLabel} (${this.pipeMeters} وحدة × ${rate} = ${this.pipeTotalCost})`,
         price: this.pipeTotalCost,
         isAvailable: true,
-        displayOrder: 99
+        displayOrder: 99,
+        selectedQuantity: 1
       };
 
       list.push(pipeMod);
@@ -390,7 +402,7 @@ export class ProductDetailModalComponent implements OnInit {
 
       const mods = this.allSelectedModifiers;
       if (mods.length > 0) {
-        const modSum = mods.reduce((acc, m) => acc + m.price, 0);
+        const modSum = mods.reduce((acc, m) => acc + (m.price * (m.selectedQuantity || 1)), 0);
         total += modSum * units;
       }
     } else {
@@ -406,7 +418,7 @@ export class ProductDetailModalComponent implements OnInit {
 
       const mods = this.allSelectedModifiers;
       if (mods.length > 0) {
-        const modSum = mods.reduce((acc, m) => acc + m.price, 0);
+        const modSum = mods.reduce((acc, m) => acc + (m.price * (m.selectedQuantity || 1)), 0);
         total += modSum * this.piecesCount;
       }
     }
@@ -508,13 +520,61 @@ export class ProductDetailModalComponent implements OnInit {
   }
 
   isGroupVisible(group: ModifierGroup): boolean {
-    if (this.isPipeGroup(group)) {
-      return false; // Handled by dedicated smart pipes component
-    }
     if (group.nameAr.includes('منظم أو بدون')) {
       return !!this.selectedActivityName;
     }
     return true;
+  }
+
+  getModifierDefaultQty(opt: ModifierOption): number {
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    const def = Number(opt.defaultQuantity) || min;
+    return Math.min(max, Math.max(min, Math.round(def)));
+  }
+
+  getModifierQty(opt: ModifierOption): number {
+    if (!opt?.allowQuantity) return 1;
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    const current = this.modifierQuantities[opt.id] ?? this.getModifierDefaultQty(opt);
+    return Math.min(max, Math.max(min, Math.round(current)));
+  }
+
+  changeModifierQty(opt: ModifierOption, delta: number, event?: Event): void {
+    event?.stopPropagation();
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    const next = this.getModifierQty(opt) + delta;
+    this.modifierQuantities[opt.id] = Math.min(max, Math.max(min, next));
+  }
+
+  setModifierQty(opt: ModifierOption, qty: number, event?: Event): void {
+    event?.stopPropagation();
+    const min = Math.max(1, Number(opt.minQuantity) || 1);
+    const max = Math.max(min, Number(opt.maxQuantity) || 100);
+    this.modifierQuantities[opt.id] = Math.min(max, Math.max(min, Math.round(Number(qty) || min)));
+  }
+
+  onModifierQtyInput(opt: ModifierOption, rawVal: any): void {
+    const parsed = parseInt(String(rawVal), 10);
+    if (!isNaN(parsed)) {
+      const min = Math.max(1, Number(opt.minQuantity) || 1);
+      const max = Math.max(min, Number(opt.maxQuantity) || 100);
+      this.modifierQuantities[opt.id] = Math.min(max, Math.max(min, parsed));
+    }
+  }
+
+  onModifierQtyBlur(opt: ModifierOption): void {
+    this.setModifierQty(opt, this.modifierQuantities[opt.id] ?? this.getModifierDefaultQty(opt));
+  }
+
+  getModifierUnitLabel(opt: ModifierOption): string {
+    return this.languageService.text(opt?.unitLabelAr || opt?.unitLabelEn || '', opt?.unitLabelEn || opt?.unitLabelAr || '');
+  }
+
+  getModifierTotalCost(opt: ModifierOption): number {
+    return Math.round(((Number(opt?.price) || 0) * this.getModifierQty(opt)) * 100) / 100;
   }
 
   getFilteredGroupOptions(group: ModifierGroup): ModifierOption[] {
@@ -541,6 +601,9 @@ export class ProductDetailModalComponent implements OnInit {
     const optionId = Number(optionIdVal);
     const found = group.options?.find(o => o.id === optionId) || null;
     this.selectedModifiersByGroup[group.id] = found;
+    if (found?.allowQuantity && this.modifierQuantities[found.id] === undefined) {
+      this.modifierQuantities[found.id] = this.getModifierDefaultQty(found);
+    }
 
     if (group.nameAr.includes('نوع النشاط')) {
       this.resetRegulatorSelection(true);
@@ -565,6 +628,9 @@ export class ProductDetailModalComponent implements OnInit {
     if (exists) {
       this.multiSelectedModifiers = this.multiSelectedModifiers.filter(m => m.id !== mod.id);
     } else {
+      if (mod.allowQuantity && this.modifierQuantities[mod.id] === undefined) {
+        this.modifierQuantities[mod.id] = this.getModifierDefaultQty(mod);
+      }
       this.multiSelectedModifiers = [...this.multiSelectedModifiers, mod];
     }
   }

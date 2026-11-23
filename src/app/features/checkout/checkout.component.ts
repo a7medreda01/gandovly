@@ -286,12 +286,17 @@ export class CheckoutComponent implements OnInit {
     this.isCalculatingQuote.set(true);
     const items = this.cartService.items().map(i => ({
       productId: i.product.id,
-        variantId: i.selectedVariant?.id,
-        bookingStartUtc:i.bookingStartUtc,bookingEndUtc:i.bookingEndUtc,
+      variantId: i.selectedVariant?.id,
+      bookingStartUtc: i.bookingStartUtc,
+      bookingEndUtc: i.bookingEndUtc,
       quantityUnits: i.quantityUnits,
       customWeightGrams: i.customWeightGrams,
       preparationOptionId: i.selectedPrepOption?.id,
       modifierOptionIds: i.selectedModifiers.map(m => m.id),
+      modifierSelections: i.selectedModifiers.map(m => ({
+        modifierOptionId: m.id,
+        quantity: this.cartService.getModifierQuantity(m)
+      })),
       pipeMeters: i.pipeMeters,
       specialInstructions: i.pipeMeters ? `${i.specialInstructions ? i.specialInstructions + ' | ' : ''}[خدمات إضافية: ${i.pipeMeters} وحدة]` : i.specialInstructions
     }));
@@ -389,7 +394,9 @@ export class CheckoutComponent implements OnInit {
 
   getModifiersSummary(item: any): string {
     if (!item?.selectedModifiers || item.selectedModifiers.length === 0) return '';
-    return item.selectedModifiers.map((m: any) => m.nameAr).join('، ');
+    return item.selectedModifiers
+      .map((m: any) => this.cartService.formatModifierLabel(m, this.languageService.currentLang(), this.currencySymbol))
+      .join('، ');
   }
 
   // Initiates checkout validations and triggers Auth or Confirmation Modal
@@ -744,6 +751,10 @@ export class CheckoutComponent implements OnInit {
         bookingEndUtc: i.bookingEndUtc,
         preparationOptionId: i.selectedPrepOption?.id,
         modifierOptionIds: i.selectedModifiers.map(m => m.id),
+        modifierSelections: i.selectedModifiers.map(m => ({
+          modifierOptionId: m.id,
+          quantity: this.cartService.getModifierQuantity(m)
+        })),
         pipeMeters: i.pipeMeters,
         specialInstructions: i.pipeMeters ? `${i.specialInstructions ? i.specialInstructions + ' | ' : ''}[خدمات إضافية: ${i.pipeMeters} وحدة]` : i.specialInstructions
       }))

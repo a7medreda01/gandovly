@@ -99,7 +99,10 @@ export class InvoiceService {
         ? `<div class="item-sub">الوزن الفعلي: ${line.actualWeightGrams} جم</div>`
         : (line.estimatedWeightGrams ? `<div class="item-sub">الوزن التقديري: ${line.estimatedWeightGrams} جم</div>` : '');
       const modifiers = line.modifiers && line.modifiers.length > 0
-        ? `<div class="item-sub">+ ${line.modifiers.map(m => m.modifierOptionNameAr).join(', ')}</div>`
+        ? `<div class="item-sub">+ ${line.modifiers.map(m => {
+            const qtyStr = (m.quantity && m.quantity > 1) ? ` (×${m.quantity}${m.unitLabelAr ? ' ' + m.unitLabelAr : ''})` : '';
+            return `${m.modifierOptionNameAr}${qtyStr}`;
+          }).join(', ')}</div>`
         : '';
 
       return `
@@ -693,7 +696,11 @@ export class InvoiceService {
       if (line.preparationOptionNameAr || (line.modifiers && line.modifiers.length)) {
         ctx.fillStyle = '#64748b';
         ctx.font = '11px "Cairo", "Segoe UI", Tahoma, sans-serif';
-        const prepStr = [line.preparationOptionNameAr, line.modifiers?.map(m => m.modifierOptionNameAr).join(', ')].filter(Boolean).join(' - ');
+        const modStr = line.modifiers?.map(m => {
+          const qtyStr = (m.quantity && m.quantity > 1) ? ` (×${m.quantity}${m.unitLabelAr ? ' ' + m.unitLabelAr : ''})` : '';
+          return `${m.modifierOptionNameAr}${qtyStr}`;
+        }).join(', ');
+        const prepStr = [line.preparationOptionNameAr, modStr].filter(Boolean).join(' - ');
         ctx.fillText(`   └ ${prepStr}`, width - 75, y + 24);
       }
 

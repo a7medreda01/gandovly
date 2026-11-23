@@ -364,7 +364,13 @@
                     <div class="line-modifiers-row mt-2 d-flex align-items-center gap-1 flex-wrap">
                       <span class="modifier-lbl text-muted small"><i class="bi bi-plus-circle me-1"></i> الإضافات:</span>
                       @for (mod of l.modifiers; track mod.id) {
-                        <span class="modifier-pill-tag">{{ mod.modifierOptionNameAr }} (+{{ mod.priceSnapshot }} {{ currencySymbol }})</span>
+                        <span class="modifier-pill-tag">
+                          {{ mod.modifierOptionNameAr }}
+                          @if ((mod.quantity || 1) > 1) {
+                            <span class="badge bg-light text-dark border ms-1 me-1">×{{ mod.quantity }}{{ mod.unitLabelAr ? ' ' + mod.unitLabelAr : '' }}</span>
+                          }
+                          (+{{ (mod.totalPrice != null ? mod.totalPrice : (mod.priceSnapshot * (mod.quantity || 1))) | number:'1.2-2' }} {{ currencySymbol }})
+                        </span>
                       }
                     </div>
                   }

@@ -586,9 +586,18 @@
             <div class="summary-item-row flex-between">
               <img class="summary-item-thumb" [src]="(item.selectedVariant?.images?.[0] || item.product.imageUrl) | imageUrl:'product'" alt="" width="44" height="44" loading="lazy">
               <div class="item-name-box">
-                <span class="name">{{ item.product.nameAr }} (×{{ item.quantityUnits }})</span>
+                <span class="name">{{ languageService.getLocalizedName(item.product) }} (×{{ item.quantityUnits }})</span>
                 @if (item.selectedPrepOption) {
-                  <small class="prep"><i class="bi bi-gear-fill me-1"></i> {{ item.selectedPrepOption.nameAr }}</small>
+                  <small class="prep"><i class="bi bi-gear-fill me-1"></i> {{ languageService.getLocalizedName(item.selectedPrepOption) }}</small>
+                }
+                @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
+                  <div class="summary-item-modifiers mt-1">
+                    @for (mod of item.selectedModifiers; track mod.id) {
+                      <small class="d-block text-muted">
+                        + {{ cartService.formatModifierLabel(mod, languageService.currentLang(), currencySymbol) }}
+                      </small>
+                    }
+                  </div>
                 }
               </div>
               <div class="item-meta-box">

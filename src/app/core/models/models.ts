@@ -252,6 +252,19 @@ export interface ModifierOption {
   price: number;
   isAvailable: boolean;
   displayOrder: number;
+  allowQuantity?: boolean;
+  minQuantity?: number;
+  maxQuantity?: number;
+  defaultQuantity?: number;
+  unitLabelAr?: string;
+  unitLabelEn?: string;
+  quickQuantities?: number[];
+  selectedQuantity?: number;
+}
+
+export interface ModifierSelectionRequest {
+  modifierOptionId: number;
+  quantity: number;
 }
 
 export interface ModifierGroup {
@@ -380,6 +393,7 @@ export interface CreateOrderLineRequest {
   customWeightGrams?: number;
   preparationOptionId?: number;
   modifierOptionIds: number[];
+  modifierSelections?: ModifierSelectionRequest[];
   pipeMeters?: number;
   specialInstructions?: string;
 }
@@ -431,6 +445,11 @@ export interface OrderLineModifier {
   id: number;
   modifierOptionNameAr: string;
   priceSnapshot: number;
+  quantity?: number;
+  unitPrice?: number;
+  totalPrice?: number;
+  unitLabelAr?: string;
+  unitLabelEn?: string;
 }
 
 export interface OrderLine {

@@ -88,7 +88,14 @@ export class AdminCatalogComponent implements OnInit {
     nameEn: '',
     price: 0,
     isAvailable: true,
-    displayOrder: 1
+    displayOrder: 1,
+    allowQuantity: false,
+    minQuantity: 1,
+    maxQuantity: 100,
+    defaultQuantity: 1,
+    unitLabelAr: '',
+    unitLabelEn: '',
+    quickQuantitiesText: ''
   };
 
   filteredProducts = computed(() => this.products());
@@ -1446,7 +1453,14 @@ export class AdminCatalogComponent implements OnInit {
       nameEn: '',
       price: 0,
       isAvailable: true,
-      displayOrder: (group.options?.length || 0) + 1
+      displayOrder: (group.options?.length || 0) + 1,
+      allowQuantity: false,
+      minQuantity: 1,
+      maxQuantity: 100,
+      defaultQuantity: 1,
+      unitLabelAr: '',
+      unitLabelEn: '',
+      quickQuantitiesText: ''
     };
     this.showModifierOptionModal.set(true);
   }
@@ -1461,9 +1475,28 @@ export class AdminCatalogComponent implements OnInit {
       nameEn: opt.nameEn || '',
       price: opt.price,
       isAvailable: opt.isAvailable,
-      displayOrder: opt.displayOrder
+      displayOrder: opt.displayOrder,
+      allowQuantity: !!opt.allowQuantity,
+      minQuantity: opt.minQuantity ?? 1,
+      maxQuantity: opt.maxQuantity ?? 100,
+      defaultQuantity: opt.defaultQuantity ?? (opt.minQuantity ?? 1),
+      unitLabelAr: opt.unitLabelAr || '',
+      unitLabelEn: opt.unitLabelEn || '',
+      quickQuantitiesText: Array.isArray(opt.quickQuantities) && opt.quickQuantities.length > 0
+        ? opt.quickQuantities.join(', ')
+        : ''
     };
     this.showModifierOptionModal.set(true);
+  }
+
+  private parseQuickQuantitiesText(text: string): number[] {
+    if (!text || !text.trim()) return [];
+    return Array.from(new Set(
+      text
+        .split(/[,،\s]+/)
+        .map(part => parseInt(part.trim(), 10))
+        .filter(n => !isNaN(n) && n > 0)
+    )).sort((a, b) => a - b);
   }
 
   saveModifierOption() {
@@ -1472,34 +1505,62 @@ export class AdminCatalogComponent implements OnInit {
       return;
     }
 
+    const allowQuantity = !!this.modifierOptionForm.allowQuantity;
+    const minQuantity = Math.max(1, Math.round(Number(this.modifierOptionForm.minQuantity) || 1));
+    const maxQuantity = Math.max(minQuantity, Math.round(Number(this.modifierOptionForm.maxQuantity) || 100));
+    const defaultQuantity = Math.min(
+      maxQuantity,
+      Math.max(minQuantity, Math.round(Number(this.modifierOptionForm.defaultQuantity) || minQuantity))
+    );
+
+    if (allowQuantity) {
+      if (minQuantity < 1) {
+        this.toast.error('الحد الأدنى للكمية يجب أن يكون 1 على الأقل.');
+        return;
+      }
+      if (maxQuantity < minQuantity) {
+        this.toast.error('الحد الأقصى للكمية يجب أن يكون أكبر من أو يساوي الحد الأدنى.');
+        return;
+      }
+    }
+
+    const quickQuantities = allowQuantity
+      ? this.parseQuickQuantitiesText(this.modifierOptionForm.quickQuantitiesText)
+          .filter(q => q >= minQuantity && q <= maxQuantity)
+      : [];
+
+    const payload = {
+      nameAr: this.modifierOptionForm.nameAr.trim(),
+      nameEn: this.modifierOptionForm.nameEn.trim(),
+      price: Number(this.modifierOptionForm.price) || 0,
+      isAvailable: this.modifierOptionForm.isAvailable,
+      displayOrder: this.modifierOptionForm.displayOrder,
+      allowQuantity,
+      minQuantity,
+      maxQuantity,
+      defaultQuantity,
+      unitLabelAr: this.modifierOptionForm.unitLabelAr?.trim() || null,
+      unitLabelEn: this.modifierOptionForm.unitLabelEn?.trim() || null,
+      quickQuantities
+    };
+
     if (this.isEditingModifierOption()) {
-      this.adminService.updateModifierOption(this.modifierOptionForm.id, {
-        nameAr: this.modifierOptionForm.nameAr.trim(),
-        nameEn: this.modifierOptionForm.nameEn.trim(),
-        price: Number(this.modifierOptionForm.price) || 0,
-        isAvailable: this.modifierOptionForm.isAvailable,
-        displayOrder: this.modifierOptionForm.displayOrder
-      }).subscribe({
+      this.adminService.updateModifierOption(this.modifierOptionForm.id, payload).subscribe({
         next: () => {
           this.toast.success('تم تعديل الخيار بنجاح!');
           this.showModifierOptionModal.set(false);
           this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
         },
-        error: () => this.toast.error('فشل في حفظ التعديلات.')
+        error: (err) => this.toast.error(err?.error?.message || 'فشل في حفظ التعديلات.')
       });
     } else {
-      this.adminService.createModifierOption(this.targetModifierGroupId(), {
-        nameAr: this.modifierOptionForm.nameAr.trim(),
-        nameEn: this.modifierOptionForm.nameEn.trim(),
-        price: Number(this.modifierOptionForm.price) || 0,
-        displayOrder: this.modifierOptionForm.displayOrder
-      }).subscribe({
+      this.adminService.createModifierOption(this.targetModifierGroupId(), payload).subscribe({
         next: () => {
           this.toast.success('تمت إضافة الخيار بنجاح!');
           this.showModifierOptionModal.set(false);
           this.adminService.getModifierGroups().subscribe(groups => this.modifierGroups.set(groups || []));
         },
-        error: () => this.toast.error('فشل في إضافة الخيار.')
+        error: (err) => this.toast.error(err?.error?.message || 'فشل في إضافة الخيار.')
       });
     }
   }

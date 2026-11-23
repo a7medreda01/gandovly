@@ -153,7 +153,14 @@
                       <div class="sub-meta text-muted">تجهيز: {{ line.preparationOptionNameAr }}</div>
                     }
                     @if (line.modifiers && line.modifiers.length > 0) {
-                      <div class="sub-meta text-primary">+ {{ line.modifiers[0].modifierOptionNameAr }}</div>
+                      @for (mod of line.modifiers; track mod.id) {
+                        <div class="sub-meta text-primary">
+                          + {{ mod.modifierOptionNameAr }}
+                          @if ((mod.quantity || 1) > 1) {
+                            <span> (×{{ mod.quantity }}{{ mod.unitLabelAr ? ' ' + mod.unitLabelAr : '' }})</span>
+                          }
+                        </div>
+                      }
                     }
                   </td>
                   <td class="text-center fw-bold">{{ line.quantityUnits }}</td>

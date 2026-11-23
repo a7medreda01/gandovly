@@ -842,3 +842,166 @@ body:has(.ui-modal-backdrop) {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* ============================================================ */
+/* 11. Modifier Option Quantity Calculator Panel (Bilingual)    */
+/* ============================================================ */
+.mod-qty-calc-panel {
+  margin-top: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary-color, #0d2b45) 4%, #f8fafc);
+  border: 1.5px solid color-mix(in srgb, var(--primary-color, #0d2b45) 22%, #cbd5e1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  animation: fadeIn 0.2s ease-out forwards;
+
+  .mod-qty-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+
+  .mod-qty-label-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+
+    .mod-qty-title {
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: var(--ink, #0f172a);
+    }
+
+    .mod-min-notice {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #d97706;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+  }
+
+  .mod-qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 0.2rem 0.3rem;
+
+    .mod-step-btn {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      border-radius: 8px;
+      background: #f1f5f9;
+      color: var(--primary-color, #0d2b45);
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+
+      &:hover:not(:disabled) {
+        background: var(--primary-color, #0d2b45);
+        color: #ffffff;
+      }
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+
+    .mod-qty-input-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding-inline: 0.35rem;
+
+      .mod-qty-input {
+        width: 56px;
+        height: 30px;
+        border: none;
+        background: transparent;
+        text-align: center;
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: #0f172a;
+        outline: none;
+        -moz-appearance: textfield;
+
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+      }
+
+      .mod-qty-unit {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .mod-quick-chips {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.38rem;
+
+    .mod-quick-chip {
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: #ffffff;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      transition: all 0.15s ease;
+
+      &:hover {
+        border-color: var(--primary-color, #0d2b45);
+        color: var(--primary-color, #0d2b45);
+      }
+
+      &.active {
+        background: var(--primary-color, #0d2b45);
+        color: #ffffff;
+        border-color: var(--primary-color, #0d2b45);
+      }
+    }
+  }
+
+  .mod-price-formula {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.45rem;
+    border-top: 1px dashed #cbd5e1;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+
+    .formula-math {
+      color: #475569;
+    }
+
+    .formula-total {
+      font-size: 0.88rem;
+      font-weight: 900;
+      color: var(--primary-color, #00875a);
+    }
+  }
+}

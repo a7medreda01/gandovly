@@ -115,7 +115,7 @@
                     @if (item.selectedModifiers && item.selectedModifiers.length > 0) {
                       <div class="item-modifiers">
                         @for (mod of item.selectedModifiers; track mod.id) {
-                          <span class="mod-pill">+ {{ mod.nameAr }}</span>
+                          <span class="mod-pill">+ {{ cartService.formatModifierLabel(mod, languageService.currentLang(), languageService.currencySymbol) }}</span>
                         }
                       </div>
                     }

@@ -175,8 +175,12 @@ export class CartService {
     }
 
     // Modifiers
-    if (modifiers && modifiers.length > 0) {
-      const modSum = modifiers.reduce((acc, m) => acc + m.price, 0);
+    const normalizedModifiers = (modifiers || []).map(m => ({
+      ...m,
+      selectedQuantity: this.getModifierQuantity(m)
+    }));
+    if (normalizedModifiers.length > 0) {
+      const modSum = normalizedModifiers.reduce((acc, m) => acc + this.getModifierTotal(m), 0);
       lineTotal += modSum * Math.max(1, quantityUnits);
     }
 
@@ -189,7 +193,7 @@ export class CartService {
       selectedPrepOption: prepOption,
       selectedVariant: variant,
       bookingStartUtc:booking?.start,bookingEndUtc:booking?.end,
-      selectedModifiers: modifiers,
+      selectedModifiers: normalizedModifiers,
       pipeMeters,
       specialInstructions,
       estimatedWeightGrams: estimatedWeight,
@@ -241,7 +245,7 @@ export class CartService {
         }
 
         if (item.selectedModifiers && item.selectedModifiers.length > 0) {
-          const modSum = item.selectedModifiers.reduce((acc, m) => acc + m.price, 0);
+          const modSum = item.selectedModifiers.reduce((acc, m) => acc + this.getModifierTotal(m), 0);
           lineTotal += modSum * newQty;
         }
 
@@ -286,7 +290,7 @@ export class CartService {
         }
 
         if (item.selectedModifiers && item.selectedModifiers.length > 0) {
-          const modSum = item.selectedModifiers.reduce((acc, m) => acc + m.price, 0);
+          const modSum = item.selectedModifiers.reduce((acc, m) => acc + this.getModifierTotal(m), 0);
           lineTotal += modSum * pieces;
         }
 
@@ -325,5 +329,39 @@ export class CartService {
 
   clearCart() {
     this.items.set([]);
+  }
+
+  getModifierQuantity(mod: ModifierOption): number {
+    if (!mod?.allowQuantity) {
+      return Number(mod?.selectedQuantity) > 1 ? Math.round(Number(mod.selectedQuantity)) : 1;
+    }
+    const min = Math.max(1, Number(mod.minQuantity) || 1);
+    const max = Math.max(min, Number(mod.maxQuantity) || 100);
+    const raw = Number(mod.selectedQuantity) || Number(mod.defaultQuantity) || min;
+    return Math.min(max, Math.max(min, Math.round(raw)));
+  }
+
+  getModifierTotal(mod: ModifierOption): number {
+    return Math.round(((Number(mod?.price) || 0) * this.getModifierQuantity(mod)) * 100) / 100;
+  }
+
+  formatModifierLabel(mod: ModifierOption, lang: 'ar' | 'en' = 'ar', currencySymbol = ''): string {
+    if (!mod) return '';
+    const name = (lang === 'en' && mod.nameEn?.trim()) ? mod.nameEn.trim() : mod.nameAr;
+    const qty = this.getModifierQuantity(mod);
+    const unit = lang === 'en'
+      ? (mod.unitLabelEn?.trim() || mod.unitLabelAr?.trim() || '')
+      : (mod.unitLabelAr?.trim() || mod.unitLabelEn?.trim() || '');
+    const total = this.getModifierTotal(mod);
+
+    if (mod.allowQuantity || qty > 1) {
+      const qtyPart = unit ? ` × ${qty} ${unit}` : ` × ${qty}`;
+      const pricePart = total > 0 && currencySymbol ? ` — ${total.toLocaleString()} ${currencySymbol}` : '';
+      return `${name}${qtyPart}${pricePart}`;
+    }
+
+    return total > 0 && currencySymbol
+      ? `${name} (+${total.toLocaleString()} ${currencySymbol})`
+      : name;
   }
 }
