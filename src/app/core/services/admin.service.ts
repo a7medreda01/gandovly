@@ -397,7 +397,10 @@ export class AdminService {
   importStorePackage(file: File, cleanFirst = false, tenantId?: string): Observable<any> {
     const formData = new FormData();
     formData.append('packageFile', file);
-    return this.http.post<any>(tenantId ? `${this.api.baseUrl}/admin/tenants/${tenantId}/import` : `${this.api.baseUrl}/admin/store-package/import?cleanFirst=${cleanFirst}`, formData);
+    const url = tenantId
+      ? `${this.api.baseUrl}/admin/tenants/${tenantId}/import?cleanFirst=${cleanFirst}`
+      : `${this.api.baseUrl}/admin/store-package/import?cleanFirst=${cleanFirst}`;
+    return this.http.post<any>(url, formData);
   }
 
   reseedSampleData(): Observable<boolean> {

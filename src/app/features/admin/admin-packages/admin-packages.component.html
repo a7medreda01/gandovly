@@ -22,7 +22,7 @@
         </div>
 
         <p class="text-muted small mb-4">
-          يقوم المحرك بقراءة إعدادات المتجر الحالية، الفروع، مناطق التوصيل، الأقسام، وكافة المنتجات وصورها، وتغليفها داخل ملف <code>.zip</code> منظم يحتوي على <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>. الإصدار 1.2.0 يشمل سكشنات الرئيسية وتصميم الكروت، بالإضافة إلى قوالب النشاط والموارد والتشغيلات والملفات الرقمية الخاصة؛ يدعم استيراد 1.0.0 و1.1.0 أيضًا.
+          يقوم المحرك بقراءة إعدادات المتجر الحالية، الفروع، مناطق التوصيل، الأقسام، وكافة المنتجات وصورها وفيديوهات <code>MP4/WebM</code>، وتغليفها داخل ملف <code>.zip</code> متوافق مع PostgreSQL يحتوي على <code>manifest.json</code> ودليل <code>SEED_GUIDE.md</code>. الإصدار <strong>1.3.0</strong> يشمل القوالب الـ 4، الـ 17 نوع سكشن (بما فيها <code>video_carousel</code>)، البانرات المستقلة، والموارد والتشغيلات والملفات الرقمية الخاصة؛ ويدعم استيراد 1.0.0 حتى 1.4.0.
         </p>
 
         <ul class="list-unstyled small text-muted mb-4">
@@ -65,8 +65,23 @@
           ارفع ملف حزمة المتجر بصيغة <code>.zip</code> لاستيراد المنتجات والأقسام والصور تلقائيًا إلى المتجر المحدد.
         </p>
 
-        <!-- Clean Checkbox -->
-        <p class="text-muted small">لن يتم حذف أو دمج بيانات متجر قائم. استخدم متجرًا فارغًا.</p>
+        <!-- Clean Replace vs Smart Merge Checkbox -->
+        <div class="form-check form-switch mb-3 p-3 rounded-3 bg-light border">
+          <input
+            class="form-check-input ms-0 me-2"
+            type="checkbox"
+            id="cleanBeforeImportToggle"
+            [ngModel]="cleanBeforeImport()"
+            (ngModelChange)="cleanBeforeImport.set($event)"
+            [disabled]="isImporting()"
+          />
+          <label class="form-check-label fw-bold text-dark small" for="cleanBeforeImportToggle">
+            استبدال الكتالوج بالكامل قبل الزرع (Clean Replace)
+          </label>
+          <div class="text-muted small mt-1">
+            عند التعطيل (الافتراضي): إذا كان المتجر فارغًا يتم الزرع الكامل، وإذا كان قائمًا يتم <strong>الدمج والتحديث الذكي</strong> بدون حذف الطلبات. عند التفعيل: يحذف الكتالوج السابق ويعيد البناء (للمتاجر بدون طلبات فقط).
+          </div>
+        </div>
 
         <!-- Upload File Button -->
         <div class="mt-auto">
@@ -127,7 +142,14 @@
           <li><strong>GeneralRetail:</strong> محلات ملابس وأزياء ومقاسات وألوان.</li>
         </ul>
 
-        <p>اختر activityPreset لتجهيز مواصفات النشاط. يدعم التشغيل المتخصص مراجعة الروشتات، معاينات وعروض السيارات، الحجوزات، الملفات والأكواد، الاشتراكات اليدوية وتشغيلات الصلاحية. الدليل القابل للتنزيل يحتوي أمثلة الحقول والعلاقات. لا تصدّر الروشتات والعملاء أو أسرار الأكواد؛ احتفظ بالحزمة في مكان خاص.</p><h5 class="fw-bold text-dark mt-4">3. التثبيت المستقل (Standalone Installation)</h5>
+        <p>
+          اختر <code>activityPreset</code> لتجهيز مواصفات النشاط. يدعم المحرك في الإصدار <strong>1.3.0</strong> الـ <strong>17 نوع سكشن</strong> (بما فيها معرض الفيديوهات <code>video_carousel</code> وملفات <code>.mp4 / .webm</code> حتى 30MB)، وضغط الصور المخصص، وإعادة ربط معرفات الأقسام والمنتجات والروابط تلقائياً.
+        </p>
+        <ul>
+          <li><strong>التوافق مع PostgreSQL:</strong> تأكد من كتابة جميع التواريخ في ملفات JSON (مثل <code>updatedAt</code>, <code>exportedAt</code>, <code>countdownTarget</code>) بصيغة التوقيت العالمي UTC المنتهية بـ <code>Z</code>.</li>
+          <li><strong>الوضع الذكي والوضع النظيف:</strong> الاستيراد العادي (<code>cleanFirst=false</code>) يزرع المتجر الفارغ بالكامل أو يدمج التحديثات مع المتجر القائم، بينما <code>cleanFirst=true</code> يستبدل الكتالوج إذا لم توجد طلبات.</li>
+        </ul>
+        <h5 class="fw-bold text-dark mt-4">3. التثبيت المستقل (Standalone Installation)</h5>
         <p class="text-muted">
           إذا رغبت في استخراج هذا القالب وتركيبه كـ <strong>موقع مستقل بالكامل لعميل خاص</strong> على سيرفره المنفصل، يتم تصدير الحزمة وضبط المتغير في <code>appsettings.json</code>:
           <code>"DeploymentMode": "StandaloneInstance"</code>.

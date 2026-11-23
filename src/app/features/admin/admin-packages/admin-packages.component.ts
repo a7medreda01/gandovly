@@ -58,10 +58,12 @@ export class AdminPackagesComponent implements OnInit {
     this.adminService.exportStorePackage(this.selectedTenantId).subscribe({
       next: (blob: Blob) => {
         this.isExporting.set(false);
+        const store = this.stores().find(s => String(s.id) === String(this.selectedTenantId));
+        const slug = store?.slug || this.selectedTenantId;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `mecart_full_package_${new Date().toISOString().slice(0, 10)}.zip`;
+        a.download = `mecart_${slug}_package.zip`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -88,8 +90,8 @@ export class AdminPackagesComponent implements OnInit {
 
     const clean = this.cleanBeforeImport();
     const confirmMsg = clean
-      ? 'تحذير: لقد اخترت استبدال البيانات بالكامل! سيتم حذف الأصناف والأقسام السابقة وتطبيق الحزمة الجديدة. هل تريد المتابعة؟'
-      : 'سيتم استيراد الحزمة إلى المتجر المحدد إذا كان فارغًا. هل تريد المتابعة؟';
+      ? 'تحذير: لقد اخترت الاستبدال الكامل (Clean Replace)! سيتم حذف الكتالوج والأقسام والفروع والمناطق السابقة وتطبيق الحزمة الجديدة (متاح فقط في حال عدم وجود طلبات). هل تريد المتابعة؟'
+      : 'سيتم استيراد الحزمة إلى المتجر المحدد: زرع كامل إذا كان فارغًا، أو دمج وتحديث ذكي إذا كان يحتوي على بيانات بدون حذف الطلبات. هل تريد المتابعة؟';
 
     if (!confirm(confirmMsg)) {
       input.value = '';
