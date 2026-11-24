@@ -22,24 +22,28 @@ export class AdminLoginComponent implements OnInit {
   private readonly router = inject(Router);
 
   ngOnInit() {
-    if (typeof window !== 'undefined' && window.location.hash.includes('session=')) {
-      try {
-        const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-        const rawSession = hashParams.get('session');
-        if (rawSession) {
-          const session = JSON.parse(decodeURIComponent(rawSession));
-          if (session && session.token) {
-            this.authService.setAdminSession(session);
-            const returnUrl = hashParams.get('returnUrl') || '/admin/orders';
-            const cleanHash = window.location.hash.replace(/[#&]?session=[^&]*/, '').replace(/^#/, '');
-            history.replaceState(null, '', window.location.pathname + window.location.search + (cleanHash ? '#' + cleanHash : ''));
-            this.toast.success(`مرحباً بك مجدداً ${session.fullName || session.usernameOrPhone || ''}`);
-            this.router.navigateByUrl(returnUrl);
-            return;
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const xdt = urlParams.get('xdt');
+      if (xdt) {
+        this.isLoading.set(true);
+        this.authService.exchangeCrossDomainTicket(xdt).subscribe({
+          next: res => {
+            this.isLoading.set(false);
+            if (res && res.token) {
+              this.authService.setAdminSession(res);
+              urlParams.delete('xdt');
+              const newSearch = urlParams.toString() ? '?' + urlParams.toString() : '';
+              history.replaceState(null, '', window.location.pathname + newSearch + window.location.hash);
+              this.toast.success(`مرحباً بك مجدداً ${res.fullName || res.usernameOrPhone || ''}`);
+              this.router.navigateByUrl('/admin/orders');
+            }
+          },
+          error: err => {
+            this.isLoading.set(false);
+            console.warn('Cross-domain ticket exchange failed', err);
           }
-        }
-      } catch (e) {
-        console.warn('Cross-domain hash login failed', e);
+        });
       }
     }
   }
@@ -119,8 +123,15 @@ export class AdminLoginComponent implements OnInit {
           const host = window.location.hostname.toLowerCase();
           const targetSlug = res.tenantSlug;
           if ((host === 'mecart.app' || host === 'www.mecart.app' || host.endsWith('.vercel.app')) && targetSlug) {
-            const sessionData = encodeURIComponent(JSON.stringify(res));
-            window.location.href = `https://${targetSlug}.mecart.app/admin/orders#session=${sessionData}`;
+            this.authService.createCrossDomainTicket(targetSlug).subscribe({
+              next: tRes => {
+                const ticket = (tRes as any)?.data?.ticket || (tRes as any)?.ticket;
+                window.location.href = `https://${targetSlug}.mecart.app/admin/orders?xdt=${ticket}`;
+              },
+              error: () => {
+                window.location.href = `https://${targetSlug}.mecart.app/admin/login`;
+              }
+            });
           } else if (targetSlug && !host.includes(targetSlug) && (host === 'localhost' || host === '127.0.0.1')) {
             this.router.navigate(['/admin/orders'], { queryParams: { tenant: targetSlug } });
           } else {

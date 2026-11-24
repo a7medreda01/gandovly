@@ -19,8 +19,15 @@ export const platformGuard: CanActivateFn = (route, state) => {
     if (admin?.tenantSlug) {
       const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
       if (host === 'mecart.app' || host === 'www.mecart.app' || host.endsWith('.vercel.app')) {
-        const sessionData = encodeURIComponent(JSON.stringify(admin));
-        window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/orders#session=${sessionData}`;
+        auth.createCrossDomainTicket(admin.tenantSlug).subscribe({
+          next: res => {
+            const ticket = (res as any)?.data?.ticket || (res as any)?.ticket;
+            window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/orders?xdt=${ticket}`;
+          },
+          error: () => {
+            window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/login`;
+          }
+        });
         return false;
       }
       return router.createUrlTree(['/admin/orders'], { queryParams: { tenant: admin.tenantSlug } });
@@ -43,8 +50,15 @@ export const storeGuard: CanActivateFn = () => {
     if (admin && !admin.isPlatformAdmin && admin.tenantSlug) {
       const host = typeof window !== 'undefined' ? window.location.hostname.toLowerCase() : '';
       if (host === 'mecart.app' || host === 'www.mecart.app' || host.endsWith('.vercel.app')) {
-        const sessionData = encodeURIComponent(JSON.stringify(admin));
-        window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/orders#session=${sessionData}`;
+        auth.createCrossDomainTicket(admin.tenantSlug).subscribe({
+          next: res => {
+            const ticket = (res as any)?.data?.ticket || (res as any)?.ticket;
+            window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/orders?xdt=${ticket}`;
+          },
+          error: () => {
+            window.location.href = `https://${admin.tenantSlug}.mecart.app/admin/login`;
+          }
+        });
         return false;
       }
       return router.createUrlTree(['/admin/orders'], { queryParams: { tenant: admin.tenantSlug } });

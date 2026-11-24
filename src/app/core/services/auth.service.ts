@@ -24,22 +24,23 @@ export class AuthService {
     if (typeof localStorage === 'undefined') return;
     
     try {
-      if (typeof window !== 'undefined' && window.location.hash.includes('session=')) {
-        try {
-          const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-          const rawSession = hashParams.get('session');
-          if (rawSession) {
-            const adminUser: AuthResponse = JSON.parse(decodeURIComponent(rawSession));
-            if (adminUser && adminUser.token) {
-              this.currentAdmin.set(adminUser);
-              this.isAdminLoggedIn.set(true);
-              localStorage.setItem(adminSessionKey(), JSON.stringify(adminUser));
-              const cleanHash = window.location.hash.replace(/[#&]?session=[^&]*/, '').replace(/^#/, '');
-              history.replaceState(null, '', window.location.pathname + window.location.search + (cleanHash ? '#' + cleanHash : ''));
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search);
+        const xdt = urlParams.get('xdt');
+        if (xdt) {
+          this.exchangeCrossDomainTicket(xdt).subscribe({
+            next: res => {
+              if (res && res.token) {
+                this.setAdminSession(res);
+                urlParams.delete('xdt');
+                const newSearch = urlParams.toString() ? '?' + urlParams.toString() : '';
+                history.replaceState(null, '', window.location.pathname + newSearch + window.location.hash);
+              }
+            },
+            error: err => {
+              console.warn('Cross-domain ticket exchange failed', err);
             }
-          }
-        } catch (e) {
-          console.warn('Cross-domain session restore failed', e);
+          });
         }
       }
 
@@ -132,6 +133,14 @@ export class AuthService {
         }
       })
     );
+  }
+
+  createCrossDomainTicket(targetSlug?: string) {
+    return this.api.post<{ ticket: string }>('auth/admin/cross-domain-ticket', { targetSlug });
+  }
+
+  exchangeCrossDomainTicket(code: string) {
+    return this.api.post<AuthResponse>('auth/admin/cross-domain-exchange', { code });
   }
 
   logoutCustomer() {

@@ -72,6 +72,16 @@ export class InvoiceService {
     return map[method] || 'الدفع عند الاستلام';
   }
 
+  private escHtml(s: string | number | null | undefined): string {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   /**
    * Generates a thermal receipt HTML and prints it via an isolated hidden iframe
    */
@@ -79,29 +89,33 @@ export class InvoiceService {
     if (typeof window === 'undefined') return;
 
     const store = this.settingsService.settings();
-    const storeName = this.storeName;
-    const storeTagline = this.storeTagline;
-    const storePhone = this.storePhone;
-    const storeAddress = this.storeAddress;
-    const currency = this.currencySymbol;
+    const storeName = this.escHtml(this.storeName);
+    const storeTagline = this.escHtml(this.storeTagline);
+    const storePhone = this.escHtml(this.storePhone);
+    const storeAddress = this.escHtml(this.storeAddress);
+    const currency = this.escHtml(this.currencySymbol);
     const orderTotal = this.getOrderTotal(order);
     const orderSubtotal = this.getOrderSubtotal(order);
-    const dateFormatted = formatEgyptDateTime(order.createdAt);
-    const orderType = this.getOrderTypeLabel(order.orderType);
-    const paymentMethod = this.getPaymentMethodLabel(order.paymentMethod);
-    const statusLabel = this.getStatusLabel(order.status);
-    const customerAddress = order.deliveryAddress || order.deliveryZoneName || (order.orderType === 'Pickup' ? 'استلام من الفرع' : '-');
+    const dateFormatted = this.escHtml(formatEgyptDateTime(order.createdAt));
+    const orderType = this.escHtml(this.getOrderTypeLabel(order.orderType));
+    const paymentMethod = this.escHtml(this.getPaymentMethodLabel(order.paymentMethod));
+    const statusLabel = this.escHtml(this.getStatusLabel(order.status));
+    const rawCustomerAddress = order.deliveryAddress || order.deliveryZoneName || (order.orderType === 'Pickup' ? 'استلام من الفرع' : '-');
+    const customerAddress = this.escHtml(rawCustomerAddress);
+    const customerName = this.escHtml(order.customerName || 'عميل');
+    const customerPhone = this.escHtml(order.customerPhone || '-');
+    const orderNumber = this.escHtml(order.orderNumber);
 
     const linesHtml = order.orderLines.map((line, index) => {
       const lineTotal = Number(line.finalLineTotal ?? line.estimatedLineTotal ?? (line.unitPriceSnapshot * line.quantityUnits));
-      const prep = line.preparationOptionNameAr ? `<div class="item-sub">طريقة التجهيز: ${line.preparationOptionNameAr}</div>` : '';
+      const prep = line.preparationOptionNameAr ? `<div class="item-sub">طريقة التجهيز: ${this.escHtml(line.preparationOptionNameAr)}</div>` : '';
       const weight = line.actualWeightGrams
-        ? `<div class="item-sub">الوزن الفعلي: ${line.actualWeightGrams} جم</div>`
-        : (line.estimatedWeightGrams ? `<div class="item-sub">الوزن التقديري: ${line.estimatedWeightGrams} جم</div>` : '');
+        ? `<div class="item-sub">الوزن الفعلي: ${this.escHtml(line.actualWeightGrams)} جم</div>`
+        : (line.estimatedWeightGrams ? `<div class="item-sub">الوزن التقديري: ${this.escHtml(line.estimatedWeightGrams)} جم</div>` : '');
       const modifiers = line.modifiers && line.modifiers.length > 0
         ? `<div class="item-sub">+ ${line.modifiers.map(m => {
-            const qtyStr = (m.quantity && m.quantity > 1) ? ` (×${m.quantity}${m.unitLabelAr ? ' ' + m.unitLabelAr : ''})` : '';
-            return `${m.modifierOptionNameAr}${qtyStr}`;
+            const qtyStr = (m.quantity && m.quantity > 1) ? ` (×${m.quantity}${m.unitLabelAr ? ' ' + this.escHtml(m.unitLabelAr) : ''})` : '';
+            return `${this.escHtml(m.modifierOptionNameAr)}${qtyStr}`;
           }).join(', ')}</div>`
         : '';
 
@@ -109,7 +123,7 @@ export class InvoiceService {
         <tr>
           <td class="col-num">${index + 1}</td>
           <td class="col-name">
-            <strong>${line.productNameAr}</strong>
+            <strong>${this.escHtml(line.productNameAr)}</strong>
             ${prep}
             ${weight}
             ${modifiers}
@@ -130,7 +144,7 @@ export class InvoiceService {
       : '';
 
     const notesRow = order.notes
-      ? `<div class="receipt-notes"><strong>ملاحظات العميل:</strong> ${order.notes}</div>`
+      ? `<div class="receipt-notes"><strong>ملاحظات العميل:</strong> ${this.escHtml(order.notes)}</div>`
       : '';
 
     const htmlContent = `
@@ -138,7 +152,7 @@ export class InvoiceService {
       <html dir="rtl" lang="ar">
       <head>
         <meta charset="utf-8">
-        <title>فاتورة طلب #${order.orderNumber} - ${storeName}</title>
+        <title>فاتورة طلب #${orderNumber} - ${storeName}</title>
         <style>
           @page {
             size: 80mm auto;
@@ -313,7 +327,7 @@ export class InvoiceService {
         </div>
 
         <div class="receipt-badge">
-          فاتورة طلب #${order.orderNumber}
+          فاتورة طلب #${orderNumber}
         </div>
 
         <div class="receipt-meta-grid">
@@ -324,8 +338,8 @@ export class InvoiceService {
         </div>
 
         <div class="customer-box">
-          <div class="customer-row"><span>العميل:</span><strong>${order.customerName || 'عميل'}</strong></div>
-          <div class="customer-row"><span>الهاتف:</span><strong dir="ltr">${order.customerPhone || '-'}</strong></div>
+          <div class="customer-row"><span>العميل:</span><strong>${customerName}</strong></div>
+          <div class="customer-row"><span>الهاتف:</span><strong dir="ltr">${customerPhone}</strong></div>
           <div class="customer-row"><span>العنوان:</span><strong>${customerAddress}</strong></div>
         </div>
 
@@ -361,7 +375,7 @@ export class InvoiceService {
         ${notesRow}
 
         <div class="receipt-footer">
-          <div class="barcode-mock">*MC-${order.orderNumber}*</div>
+          <div class="barcode-mock">*MC-${orderNumber}*</div>
           <div>شكراً لتعاملكم واختياركم لنا ❤️</div>
           <div style="font-size: 9px; color: #666; margin-top: 2px;">تم إصدار الفاتورة إلكترونياً عبر MeCart</div>
         </div>
