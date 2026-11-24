@@ -32,9 +32,6 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
   // Custom Domain Management
   customDomainInput = '';
   domainDirectBusy = false;
-  showDnsVerify = false;
-  domainBusy = false;
-  domainProof: any = null;
   dnsConfigured = signal<boolean | null>(null);
   dnsChecking = signal<boolean>(false);
 
@@ -244,47 +241,6 @@ export class AdminStoreDetailComponent extends AdminStoresComponent {
       error: (e) => {
         this.domainDirectBusy = false;
         this.notice.error(e.error?.message || 'تعذر إلغاء ربط الدومين.');
-      }
-    });
-  }
-
-  prepareDomain(): void {
-    const s = this.store();
-    if (!s || this.domainBusy) return;
-    const clean = (this.customDomainInput || '').trim();
-    if (!clean) {
-      this.notice.error('أدخل اسم الدومين أولاً.');
-      return;
-    }
-    this.domainBusy = true;
-    this.domainProof = null;
-    this.detailApi.post<any>('admin/tenants/' + s.id + '/custom-domain/challenge', { domain: clean }).subscribe({
-      next: r => {
-        this.domainBusy = false;
-        this.domainProof = r;
-        this.customDomainInput = r.domain;
-      },
-      error: e => {
-        this.domainBusy = false;
-        this.notice.error(e.error?.message || 'تعذر إنشاء سجلات التحقق.');
-      }
-    });
-  }
-
-  verifyDomain(): void {
-    const s = this.store();
-    if (!s || !this.domainProof || this.domainBusy) return;
-    this.domainBusy = true;
-    this.detailApi.post<any>('admin/tenants/' + s.id + '/custom-domain/verify', this.domainProof).subscribe({
-      next: () => {
-        this.domainBusy = false;
-        this.domainProof = null;
-        this.loadStores();
-        this.notice.success('تم التحقق من DNS وربط الدومين بنجاح.');
-      },
-      error: e => {
-        this.domainBusy = false;
-        this.notice.error(e.error?.message || 'تعذر التحقق من سجل TXT.');
       }
     });
   }

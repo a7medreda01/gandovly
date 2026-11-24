@@ -307,11 +307,16 @@ export class SettingsService {
       document.querySelector('meta[property="' + key + '"]')?.setAttribute('content', content);
     }
     const iconUrl = platform ? '/favicon.png' : (settings.faviconUrl || settings.logoUrl || '/assets/images/branding/store-mark.svg');
-    const icon = document.querySelector('link[rel="icon"]');
-    icon?.setAttribute('href', iconUrl);
-    icon?.removeAttribute('type');
-    const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
-    appleIcon?.setAttribute('href', iconUrl);
+    for (const rel of ['icon', 'shortcut icon', 'apple-touch-icon']) {
+      let link = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = rel;
+        document.head.appendChild(link);
+      }
+      link.href = iconUrl;
+      link.removeAttribute('type');
+    }
 
     if (settings.googleSiteVerification) {
       let gsv = document.querySelector('meta[name="google-site-verification"]');
