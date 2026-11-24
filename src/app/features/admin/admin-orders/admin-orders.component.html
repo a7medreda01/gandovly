@@ -8,6 +8,17 @@
     <div class="header-action-group">
       <button
         type="button"
+        class="btn-bell-toggle"
+        [class.is-granted]="alertService.permission() === 'granted'"
+        [class.is-denied]="alertService.permission() === 'denied'"
+        (click)="alertService.permission() === 'granted' ? alertService.testChime() : alertService.requestPermission()"
+        [title]="alertService.permission() === 'granted' ? 'إشعارات المتصفح مفعلة (اضغط لتجربة نغمة الرنين)' : 'اضغط لتفعيل إشعارات الطلبات الفورية على هذا الجهاز'"
+      >
+        <i class="bi" [class.bi-bell-fill]="alertService.permission() === 'granted'" [class.bi-bell]="alertService.permission() !== 'granted'"></i>
+        <span>{{ alertService.permission() === 'granted' ? 'الإشعارات مفعلة 🔔' : 'تفعيل الإشعارات 🔔' }}</span>
+      </button>
+      <button
+        type="button"
         class="btn-sound-toggle"
         [class.sound-muted]="!alertService.isSoundEnabled()"
         (click)="alertService.toggleSound()"

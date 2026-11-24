@@ -49,51 +49,114 @@
 
 .btn-order-alert-toggle {
   position: relative;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  background: #ffffff;
-  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px 0 12px;
+  border-radius: 20px;
+  border: 1.5px solid #fde68a;
+  background: #fefce8;
+  color: #b45309;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(245, 158, 11, 0.15);
 
   &:hover {
-    background: #f8fafc;
-    color: #1e293b;
-    border-color: #cbd5e1;
+    background: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+    transform: translateY(-1px);
   }
 
   &.active {
-    color: #147d72;
-    border-color: #147d7233;
-    background: #147d7210;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #065f46;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.15);
+
+    &:hover {
+      background: #d1fae5;
+      border-color: #34d399;
+      color: #047857;
+    }
+
+    .bell-icon-box i {
+      color: #059669;
+    }
+  }
+
+  .bell-icon-box {
+    position: relative;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    line-height: 1;
+
+    i {
+      font-size: 16px;
+      transition: transform 0.2s ease;
+    }
   }
 
   &.has-pending {
-    color: #e11d48;
-    animation: bell-bounce 2s infinite ease-in-out;
+    background: #fff1f2;
+    border-color: #fecdd3;
+    color: #be123c;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.2);
+
+    .bell-icon-box i {
+      color: #e11d48;
+      animation: bell-bounce 1.8s infinite ease-in-out;
+    }
   }
 
   .order-badge {
     position: absolute;
-    top: -4px;
-    left: -4px;
-    background: #e11d48;
+    top: -8px;
+    right: -10px;
+    background: #dc2626;
     color: white;
     font-size: 10px;
-    font-weight: 800;
+    font-weight: 900;
     min-width: 18px;
     height: 18px;
-    line-height: 18px;
-    border-radius: 10px;
+    line-height: 16px;
+    border-radius: 9px;
     padding: 0 4px;
     text-align: center;
     border: 2px solid white;
-    box-shadow: 0 2px 5px rgba(225, 29, 72, 0.4);
+    box-shadow: 0 2px 6px rgba(220, 38, 38, 0.45);
   }
+
+  .bell-btn-title {
+    white-space: nowrap;
+    letter-spacing: -0.2px;
+  }
+}
+
+.sidebar-pending-badge {
+  margin-inline-start: auto;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  min-width: 20px;
+  height: 20px;
+  line-height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+  animation: pulse-badge 2s infinite ease-in-out;
+}
+
+@keyframes pulse-badge {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 @keyframes bell-bounce {
@@ -281,5 +344,23 @@
   .new-order-floating-banner {
     top: 65px;
     margin: 10px 16px 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .btn-order-alert-toggle {
+    padding: 0 8px;
+    height: 34px;
+    font-size: 11px;
+    border-radius: 10px;
+
+    .bell-btn-title {
+      font-size: 11px;
+    }
+  }
+
+  .notification-dropdown {
+    width: 280px;
+    left: -10px;
   }
 }

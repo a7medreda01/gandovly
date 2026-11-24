@@ -24,7 +24,13 @@
       } @else {
         @for (link of storeLinks(); track link.path) {
           @if (link.path !== 'users' || canManageUsers()) {
-            <a [routerLink]="'/admin/' + link.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item"><i [class]="'bi bi-' + link.icon"></i><span>{{ link.label }}</span></a>
+            <a [routerLink]="'/admin/' + link.path" routerLinkActive="active" (click)="closeSidebar()" class="nav-item">
+              <i [class]="'bi bi-' + link.icon"></i>
+              <span>{{ link.label }}</span>
+              @if (link.path === 'orders' && orderAlert.pendingCount() > 0) {
+                <span class="sidebar-pending-badge">{{ orderAlert.pendingCount() > 99 ? '99+' : orderAlert.pendingCount() }}</span>
+              }
+            </a>
           }
         }
       }
@@ -48,12 +54,15 @@
             [class.has-pending]="orderAlert.pendingCount() > 0"
             (click)="toggleNotificationMenu()"
             aria-label="إشعارات الطلبات الجديدة"
-            title="إشعارات الطلبات والصوت"
+            title="إشعارات الطلبات والتنبيه الصوتي"
           >
-            <i class="bi" [class.bi-bell-fill]="orderAlert.permission() === 'granted'" [class.bi-bell]="orderAlert.permission() !== 'granted'"></i>
-            @if (orderAlert.pendingCount() > 0) {
-              <span class="order-badge">{{ orderAlert.pendingCount() > 99 ? '99+' : orderAlert.pendingCount() }}</span>
-            }
+            <span class="bell-icon-box">
+              <i class="bi" [class.bi-bell-fill]="orderAlert.permission() === 'granted'" [class.bi-bell]="orderAlert.permission() !== 'granted'"></i>
+              @if (orderAlert.pendingCount() > 0) {
+                <span class="order-badge">{{ orderAlert.pendingCount() > 99 ? '99+' : orderAlert.pendingCount() }}</span>
+              }
+            </span>
+            <span class="bell-btn-title">إشعارات الطلبات</span>
           </button>
 
           @if (isNotificationMenuOpen) {
