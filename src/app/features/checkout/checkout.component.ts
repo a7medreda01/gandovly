@@ -6,7 +6,7 @@ import { GuestOrdersService } from '../../core/services/guest-orders.service';
 import { Component, OnInit, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CartService } from '../../core/services/cart.service';
 import { OrderService } from '../../core/services/order.service';
 import { SettingsService } from '../../core/services/settings.service';
@@ -40,6 +40,34 @@ export class CheckoutComponent implements OnInit {
   readonly authService = inject(AuthService);
   private readonly toast = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  readonly isBuyNowMode = signal<boolean>(false);
+
+  get checkoutItems() {
+    if (this.isBuyNowMode()) {
+      const item = this.cartService.buyNowItem();
+      return item ? [item] : [];
+    }
+    return this.cartService.items();
+  }
+
+  get checkoutSubtotal(): number {
+    if (this.isBuyNowMode()) {
+      return this.cartService.buyNowItem()?.estimatedLineTotal || 0;
+    }
+    return this.cartService.estimatedSubtotal();
+  }
+
+  get checkoutTotalItemsCount(): number {
+    return this.checkoutItems.reduce((sum, item) => sum + item.quantityUnits, 0);
+  }
+
+  get checkoutHasWeightedItems(): boolean {
+    return this.checkoutItems.some(
+      item => item.product?.pricingType === 'ByWeight' || (item.estimatedWeightGrams != null && item.estimatedWeightGrams > 0)
+    );
+  }
 
   get currencySymbol(): string {
     return this.languageService.currencySymbol;
@@ -48,9 +76,9 @@ export class CheckoutComponent implements OnInit {
   // Form Fields
   private readonly commerceApi=inject(CommerceService);private readonly commerceCdr=inject(ChangeDetectorRef);
   prescriptionToken='';prescriptionBusy=false;
-  get requiresPrescription(){return this.cartService.items().some(i=>i.product.commerce?.prescriptionRequired);}
-  get requiresDelivery(){return this.cartService.items().some(i=>!['Booking','Digital','Subscription'].includes(i.product.commerce?.mode||'Physical'));}
-  get isDigitalOnly(){return this.cartService.items().length>0&&this.cartService.items().every(i=>['Digital','Subscription'].includes(i.product.commerce?.mode||''));}
+  get requiresPrescription(){return this.checkoutItems.some(i=>i.product.commerce?.prescriptionRequired);}
+  get requiresDelivery(){return this.checkoutItems.some(i=>!['Booking','Digital','Subscription'].includes(i.product.commerce?.mode||'Physical'));}
+  get isDigitalOnly(){return this.checkoutItems.length>0&&this.checkoutItems.every(i=>['Digital','Subscription'].includes(i.product.commerce?.mode||''));}
   uploadPrescription(event:Event){const file=(event.target as HTMLInputElement).files?.[0];if(!file)return;this.prescriptionToken="";this.prescriptionBusy=true;this.commerceApi.uploadPrescription(file).pipe(finalize(()=>this.commerceCdr.markForCheck())).subscribe({next:r=>{this.prescriptionBusy=false;this.prescriptionToken=r.token;this.toast.success('تم رفع الروشتة بشكل خاص');},error:e=>{this.prescriptionBusy=false;this.prescriptionToken='';this.toast.error(e.error?.message||'تعذر رفع الروشتة');}});}
   customerName: string = '';
   customerPhone: string = '';
@@ -141,8 +169,20 @@ export class CheckoutComponent implements OnInit {
 
   ngOnInit() {
     this.city = this.settingsService.settings().city || '';
+    const buyNowActive = this.route.snapshot.queryParamMap.get('mode') === 'buyNow' && !!this.cartService.buyNowItem();
+    this.isBuyNowMode.set(buyNowActive);
+
+    this.route.queryParamMap.subscribe(params => {
+      const nextBuyNow = params.get('mode') === 'buyNow' && !!this.cartService.buyNowItem();
+      if (nextBuyNow !== this.isBuyNowMode()) {
+        this.isBuyNowMode.set(nextBuyNow);
+        if (!this.requiresDelivery) this.orderType = 'Pickup';
+        if (this.checkoutItems.length > 0) this.fetchQuote();
+      }
+    });
+
     if(!this.requiresDelivery)this.orderType='Pickup';
-    if (this.cartService.items().length === 0) {
+    if (this.checkoutItems.length === 0) {
       return;
     }
 
@@ -281,10 +321,10 @@ export class CheckoutComponent implements OnInit {
   fetchQuote() {
     this.quoteRequest?.unsubscribe();
     this.serverQuote.set(null);
-    if (this.cartService.items().length === 0) return;
+    if (this.checkoutItems.length === 0) return;
 
     this.isCalculatingQuote.set(true);
-    const items = this.cartService.items().map(i => ({
+    const items = this.checkoutItems.map(i => ({
       productId: i.product.id,
       variantId: i.selectedVariant?.id,
       bookingStartUtc: i.bookingStartUtc,
@@ -337,7 +377,7 @@ export class CheckoutComponent implements OnInit {
 
   // Calculation of Longest Item Prep Time + Delivery Duration
   get longestItemPrepTime(): { minutes: number; productName: string } {
-    const items = this.cartService.items();
+    const items = this.checkoutItems;
     if (!items || items.length === 0) {
       return { minutes: 30, productName: 'منتجات المتجر' };
     }
@@ -444,7 +484,7 @@ export class CheckoutComponent implements OnInit {
       return;
     }
 
-    this.pixels.track('InitiateCheckout',{ids:this.cartService.items().map(i=>String(i.product.id)),value:this.cartService.estimatedSubtotal()});
+    this.pixels.track('InitiateCheckout',{ids:this.checkoutItems.map(i=>String(i.product.id)),value:this.checkoutSubtotal});
     if (!quote) {
       if (!this.isCalculatingQuote()) this.fetchQuote();
       this.toast.info('انتظر حساب الإجمالي قبل تأكيد الطلب.');
@@ -742,7 +782,7 @@ export class CheckoutComponent implements OnInit {
       deliveryAddress: this.orderType === 'Delivery' ? this.fullFormattedAddress : undefined,
       notes: finalNotes,
       scheduledFor: isSched ? this.scheduledForDate()! : undefined,
-      items: this.cartService.items().map(i => ({
+      items: this.checkoutItems.map(i => ({
         productId: i.product.id,
         variantId: i.selectedVariant?.id,
         quantityUnits: i.quantityUnits,
@@ -760,14 +800,22 @@ export class CheckoutComponent implements OnInit {
       }))
     };
 
+    const purchasedIds = this.checkoutItems.map(i => String(i.product.id));
+    const purchasedQty = this.checkoutTotalItemsCount;
+    const wasBuyNow = this.isBuyNowMode();
+
     this.orderService.createOrder(request).subscribe({
       next: (order: any) => {
         this.isSubmitting.set(false);
         this.showOrderReview.set(false);
 
         if (!this.authService.currentCustomer()) this.guestOrders.remember(order.publicTrackingToken);
-        if(order.paymentStatus!=='Pending')this.pixels.track('Purchase',{orderId:String(order.id),ids:this.cartService.items().map(i=>String(i.product.id)),value:order.estimatedTotal,quantity:this.cartService.totalItemsCount()});
-        this.cartService.clearCart();
+        if(order.paymentStatus!=='Pending')this.pixels.track('Purchase',{orderId:String(order.id),ids:purchasedIds,value:order.estimatedTotal,quantity:purchasedQty});
+        if (wasBuyNow) {
+          this.cartService.clearBuyNowItem();
+        } else {
+          this.cartService.clearCart();
+        }
         this.toast.success('تم استلام طلبك بنجاح. احتفظ برابط متابعة الطلب.');
 
         // Auto-save new address to profile automatically as 'موقع المشروع / المقر'

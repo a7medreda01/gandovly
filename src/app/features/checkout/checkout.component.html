@@ -1,6 +1,6 @@
 @if (settingsService.settings().storeLayout?.onlineOrdering === false) {
   <section class="checkout-empty container"><h1>الطلب أونلاين متوقف حاليًا</h1><a routerLink="/menu">تصفح المنتجات</a></section>
-} @else if (cartService.items().length === 0) {
+} @else if (checkoutItems.length === 0) {
   <section class="checkout-empty container">
     <i class="bi bi-bag" aria-hidden="true"></i>
     <h1>سلتك فارغة</h1><p>أضف المنتجات التي تحتاجها، ثم أكمل بيانات طلبك هنا.</p>
@@ -9,8 +9,14 @@
 } @else {
 <div class="checkout-page container">
   <div class="checkout-header">
-    <h1 class="page-title">{{ settingsService.settings().checkoutPageTitle || 'إتمام الطلب' }}</h1>
-    <p class="page-subtitle">{{ settingsService.settings().checkoutPageSubtitle || 'أدخل بيانات التوصيل لتأكيد الطلب' }}</p>
+    <h1 class="page-title">{{ isBuyNowMode() ? 'شراء فوري' : (settingsService.settings().checkoutPageTitle || 'إتمام الطلب') }}</h1>
+    <p class="page-subtitle">
+      @if (isBuyNowMode()) {
+        شراء مباشر لهذا المنتج فقط — لن تتأثر المنتجات الموجودة في سلتك
+      } @else {
+        {{ settingsService.settings().checkoutPageSubtitle || 'أدخل بيانات التوصيل لتأكيد الطلب' }}
+      }
+    </p>
   </div>
 
   <div class="checkout-grid">
@@ -265,7 +271,7 @@
               @if (settingsService.settings().onlinePaymentInstructions?.trim()) {
                 <span class="transfer-instructions">{{ settingsService.settings().onlinePaymentInstructions }}</span>
               } @else {
-              <span>يرجى تحويل <strong>({{ serverQuote()?.estimatedTotal || cartService.estimatedSubtotal() }} {{ currencySymbol }})</strong> وكتابة رقم المحفظة أو اسم المحول في الملاحظات أدناه.</span>
+              <span>يرجى تحويل <strong>({{ serverQuote()?.estimatedTotal || checkoutSubtotal }} {{ currencySymbol }})</strong> وكتابة رقم المحفظة أو اسم المحول في الملاحظات أدناه.</span>
               }
             </div>
 
@@ -388,7 +394,7 @@
         }
 
         <!-- Disclaimer -->
-        @if (cartService.hasWeightedItems()) {
+        @if (checkoutHasWeightedItems) {
           <div class="disclaimer-note">
             <small><i class="bi bi-info-circle-fill text-warning me-1"></i> {{ settingsService.settings().estimatedWeightDisclaimer }}</small>
           </div>
@@ -582,7 +588,7 @@
 <ng-template #orderItems>
         <!-- Items Mini List -->
         <div class="summary-items-list">
-          @for (item of cartService.items(); track item.id) {
+          @for (item of checkoutItems; track item.id) {
             <div class="summary-item-row flex-between">
               <img class="summary-item-thumb" [src]="(item.selectedVariant?.images?.[0] || item.product.imageUrl) | imageUrl:'product'" alt="" width="44" height="44" loading="lazy">
               <div class="item-name-box">

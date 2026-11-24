@@ -680,7 +680,7 @@ export class ProductDetailModalComponent implements OnInit {
     this.isAdding = true;
     let added: boolean;
     try {
-      added = await this.cartService.addItem(
+      const args = [
         this.product,
         qty,
         this.selectedPrepOption ?? undefined,
@@ -690,7 +690,11 @@ export class ProductDetailModalComponent implements OnInit {
         this.orderMode,
         this.selectedPipeType !== 'none' ? this.pipeMeters : undefined,
         this.selectedVariant ?? undefined, this.booking ?? undefined
-      );
+      ] as const;
+
+      added = buyNow
+        ? await this.cartService.setBuyNowItem(...args)
+        : await this.cartService.addItem(...args);
 
     } catch {
       this.toast.error('تعذر إضافة المنتج. حاول مرة أخرى.');
@@ -702,12 +706,12 @@ export class ProductDetailModalComponent implements OnInit {
       return;
     }
 
-    this.isSuccess = true;
     if (buyNow) {
       this.closeModal.emit();
-      await this.router.navigate(['/checkout'], { queryParamsHandling: 'preserve' });
+      await this.router.navigate(['/checkout'], { queryParams: { mode: 'buyNow' }, queryParamsHandling: 'merge' });
       return;
     }
+    this.isSuccess = true;
     this.toast.success(
       'تمت الإضافة إلى السلة بنجاح',
       'عرض السلة',

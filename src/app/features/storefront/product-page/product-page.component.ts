@@ -597,8 +597,10 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     for(const group of p.modifierGroups||[]){const count=group.options.filter(o=>this.modifierSelected(group,o)).length;if(count<(group.isRequired?Math.max(1,group.minSelection):group.minSelection)||count>group.maxSelection){this.toast.error('راجع اختيارات '+group.nameAr);return;}}
     if(p.preparationGroups?.some(g=>g.isRequired&&!g.options.some(o=>o.id===this.selectedPrepOption?.id))){this.toast.error('اختر طريقة التجهيز المطلوبة');return;}
 
-    // Launch flying dot
-    this.launchFlyingCartDot(event);
+    // Launch flying dot only when adding to cart
+    if (!buyNow) {
+      this.launchFlyingCartDot(event);
+    }
 
     const rawMods: ModifierOption[] = [...this.multiSelectedModifiers];
     for (const key of Object.keys(this.selectedModifiersByGroup)) {
@@ -616,7 +618,7 @@ export class ProductPageComponent implements OnInit, OnDestroy {
     this.isAdding = true;
     let added: boolean;
     try {
-      added = await this.cartService.addItem(
+      const args = [
         p,
         qty,
         this.selectedPrepOption ?? undefined,
@@ -625,7 +627,11 @@ export class ProductPageComponent implements OnInit, OnDestroy {
         this.specialInstructions,
         this.isWeighedProduct ? this.orderMode : 'pieces',
         undefined, this.selectedVariant ?? undefined, this.booking ?? undefined
-      );
+      ] as const;
+
+      added = buyNow
+        ? await this.cartService.setBuyNowItem(...args)
+        : await this.cartService.addItem(...args);
 
     } catch {
       this.toast.error('تعذر إضافة المنتج. حاول مرة أخرى.');
@@ -637,11 +643,11 @@ export class ProductPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isSuccess.set(true);
     if (buyNow) {
-      await this.router.navigate(['/checkout'], { queryParamsHandling: 'preserve' });
+      await this.router.navigate(['/checkout'], { queryParams: { mode: 'buyNow' }, queryParamsHandling: 'merge' });
       return;
     }
+    this.isSuccess.set(true);
     this.toast.success(`تمت إضافة "${p.nameAr}" إلى السلة 🛒`);
 
     setTimeout(() => {

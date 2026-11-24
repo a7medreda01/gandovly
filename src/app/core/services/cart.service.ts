@@ -15,6 +15,7 @@ export class CartService {
   private readonly api = inject(ApiService);
   private readonly pendingStock = new Set<number>();
   items = signal<CartItem[]>([]);
+  buyNowItem = signal<CartItem | null>(null);
   isDrawerOpen = signal<boolean>(false);
   cartBumped = signal<boolean>(false);
   private bumpTimeout: any;
@@ -22,20 +23,37 @@ export class CartService {
   constructor() {
     if (typeof window === 'undefined') return;
     const key = customerSessionKey('store_cart_v1');
+    const buyNowKey = customerSessionKey('store_buy_now_v1');
+    const isValidCartItem = (item: CartItem): boolean =>
+      typeof item?.id === 'string' && Number.isInteger(item.product?.id) && typeof item.product?.nameAr === 'string' &&
+      Number.isInteger(item.quantityUnits) && item.quantityUnits >= 1 && item.quantityUnits <= 100 &&
+      Number.isFinite(item.estimatedLineTotal) && item.estimatedLineTotal >= 0 && Number.isFinite(item.estimatedUnitPrice) &&
+      Array.isArray(item.selectedModifiers);
+
     try {
       const saved = JSON.parse(localStorage.getItem(key) || 'null');
       if (saved?.version === 1 && Date.now() - saved.savedAt < 7 * 86400000 && Array.isArray(saved.items)) {
-        this.items.set(saved.items.slice(0, 100).filter((item: CartItem) =>
-          typeof item?.id === 'string' && Number.isInteger(item.product?.id) && typeof item.product?.nameAr === 'string' &&
-          Number.isInteger(item.quantityUnits) && item.quantityUnits >= 1 && item.quantityUnits <= 100 &&
-          Number.isFinite(item.estimatedLineTotal) && item.estimatedLineTotal >= 0 && Number.isFinite(item.estimatedUnitPrice) &&
-          Array.isArray(item.selectedModifiers)));
+        this.items.set(saved.items.slice(0, 100).filter(isValidCartItem));
       }
     } catch { /* Unavailable or corrupt storage must not prevent shopping. */ }
+
+    try {
+      const savedBuyNow = JSON.parse(sessionStorage.getItem(buyNowKey) || 'null');
+      if (savedBuyNow?.version === 1 && Date.now() - savedBuyNow.savedAt < 86400000 && isValidCartItem(savedBuyNow.item)) {
+        this.buyNowItem.set(savedBuyNow.item);
+      }
+    } catch { /* Unavailable or corrupt storage must not prevent shopping. */ }
+
     effect(() => {
       const items = this.items();
       try { if (items.length) localStorage.setItem(key, JSON.stringify({ version: 1, savedAt: Date.now(), items })); else localStorage.removeItem(key); }
       catch { /* Private browsing and storage limits keep the cart in memory. */ }
+    });
+
+    effect(() => {
+      const item = this.buyNowItem();
+      try { if (item) sessionStorage.setItem(buyNowKey, JSON.stringify({ version: 1, savedAt: Date.now(), item })); else sessionStorage.removeItem(buyNowKey); }
+      catch { /* Private browsing and storage limits keep buyNow in memory. */ }
     });
   }
 
@@ -80,13 +98,15 @@ export class CartService {
     this.isDrawerOpen.update(v => !v);
   }
 
-  private async hasStock(product: Product, quantity: number, variant?: ProductVariant, excludedItemId?: string): Promise<boolean> {
+  private async hasStock(product: Product, quantity: number, variant?: ProductVariant, excludedItemId?: string, ignoreExistingCart = false): Promise<boolean> {
     if (this.pendingStock.has(product.id)) return false;
     this.pendingStock.add(product.id);
     try {
-      const alreadyInCart = this.items()
-        .filter(item => item.id !== excludedItemId && item.product.id === product.id && item.selectedVariant?.id === variant?.id)
-        .reduce((total, item) => total + item.quantityUnits, 0);
+      const alreadyInCart = ignoreExistingCart
+        ? 0
+        : this.items()
+          .filter(item => item.id !== excludedItemId && item.product.id === product.id && item.selectedVariant?.id === variant?.id)
+          .reduce((total, item) => total + item.quantityUnits, 0);
       await firstValueFrom(this.api.get<number | null>(`storefront/products/${product.id}/stock`, {
         quantity: alreadyInCart + quantity,
         variantId: variant?.id
@@ -118,7 +138,7 @@ export class CartService {
     }
   }
 
-  async addItem(
+  private async buildCartItem(
     product: Product,
     quantityUnits: number,
     prepOption?: PreparationOption,
@@ -128,13 +148,14 @@ export class CartService {
     orderMode?: 'pieces' | 'weight',
     pipeMeters?: number,
     variant?: ProductVariant,
-    booking?: {start:string;end:string;blocks:number}
-  ) {
+    booking?: {start:string;end:string;blocks:number},
+    ignoreExistingCart = false
+  ): Promise<CartItem | null> {
     if(product.variants?.length&&!variant){
       const hasSizes = product.variants.some(v => !!v.size?.trim());
       throw new Error(hasSizes ? 'اختر اللون والمقاس.' : 'اختر اللون.');
     }
-    if (!await this.hasStock(product, Math.max(1, quantityUnits), variant)) return false;
+    if (!await this.hasStock(product, Math.max(1, quantityUnits), variant, undefined, ignoreExistingCart)) return null;
     if(variant){
       const variantDesc = variant.size?.trim() ? `${variant.color} / ${variant.size}` : variant.color;
       product={...product,variants:[variant],pricePerUnit:variant.price??product.pricePerUnit,nameAr:product.nameAr + (variantDesc ? ' — ' + variantDesc : ''),imageUrl:variant.images?.[0]||product.imageUrl};
@@ -184,7 +205,7 @@ export class CartService {
       lineTotal += modSum * Math.max(1, quantityUnits);
     }
 
-    const newItem: CartItem = {
+    return {
       id: 'item_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
       product,
       quantityUnits: Math.max(1, quantityUnits),
@@ -200,11 +221,57 @@ export class CartService {
       estimatedUnitPrice,
       estimatedLineTotal: Math.round(lineTotal * 100) / 100
     };
+  }
+
+  async addItem(
+    product: Product,
+    quantityUnits: number,
+    prepOption?: PreparationOption,
+    modifiers: ModifierOption[] = [],
+    customWeightGrams?: number,
+    specialInstructions?: string,
+    orderMode?: 'pieces' | 'weight',
+    pipeMeters?: number,
+    variant?: ProductVariant,
+    booking?: {start:string;end:string;blocks:number}
+  ) {
+    const newItem = await this.buildCartItem(
+      product, quantityUnits, prepOption, modifiers, customWeightGrams,
+      specialInstructions, orderMode, pipeMeters, variant, booking, false
+    );
+    if (!newItem) return false;
 
     this.items.update(list => [...list, newItem]);
     this.pixels.track('AddToCart',{ids:[String(product.id)],value:newItem.estimatedLineTotal,quantity:quantityUnits});
     this.triggerCartBump();
     return true;
+  }
+
+  /** Sets a standalone item for immediate "Buy Now" checkout without touching the shopping cart. */
+  async setBuyNowItem(
+    product: Product,
+    quantityUnits: number,
+    prepOption?: PreparationOption,
+    modifiers: ModifierOption[] = [],
+    customWeightGrams?: number,
+    specialInstructions?: string,
+    orderMode?: 'pieces' | 'weight',
+    pipeMeters?: number,
+    variant?: ProductVariant,
+    booking?: {start:string;end:string;blocks:number}
+  ): Promise<boolean> {
+    const newItem = await this.buildCartItem(
+      product, quantityUnits, prepOption, modifiers, customWeightGrams,
+      specialInstructions, orderMode, pipeMeters, variant, booking, true
+    );
+    if (!newItem) return false;
+
+    this.buyNowItem.set(newItem);
+    return true;
+  }
+
+  clearBuyNowItem() {
+    this.buyNowItem.set(null);
   }
 
   async updateQuantity(itemId: string, newQty: number) {
