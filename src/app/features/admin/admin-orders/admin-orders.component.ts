@@ -1,10 +1,13 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { SettingsService } from '../../../core/services/settings.service';
 import { InvoiceService } from '../../../core/services/invoice.service';
+import { AdminOrderAlertService } from '../../../core/services/admin-order-alert.service';
 import { Order, OrderLine, OrderStatus } from '../../../core/models/models';
 import { LoadingStateComponent } from '../../../shared/components/loading-state/loading-state.component';
 import { InvoiceModalComponent } from '../../../shared/components/invoice-modal/invoice-modal.component';
@@ -20,8 +23,13 @@ import { parseUtcDate, formatEgyptTime, formatEgyptDateTime, formatElapsedTime }
 export class AdminOrdersComponent implements OnInit, OnDestroy {
   private readonly adminService = inject(AdminService);
   private readonly toast = inject(NotificationService);
+  private readonly route = inject(ActivatedRoute);
   readonly settingsService = inject(SettingsService);
   readonly invoiceService = inject(InvoiceService);
+  readonly alertService = inject(AdminOrderAlertService);
+
+  private newOrderSub?: Subscription;
+  private queryParamSub?: Subscription;
 
   get currencySymbol(): string {
     return this.settingsService.settings().currencySymbol || 'ج.م';
@@ -74,6 +82,25 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     this.timerInterval = setInterval(() => {
       this.currentTime.set(new Date());
     }, 1000);
+
+    // Auto-refresh orders list on live new order notification
+    this.newOrderSub = this.alertService.newOrder$.subscribe(() => {
+      this.loadOrders();
+    });
+
+    // Handle direct navigation from notification click (?orderId=123)
+    this.queryParamSub = this.route.queryParams.subscribe(params => {
+      if (params['orderId']) {
+        const id = Number(params['orderId']);
+        if (id > 0) {
+          this.adminService.getOrderById(id).subscribe({
+            next: (order) => {
+              if (order) this.viewOrder(order);
+            }
+          });
+        }
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -82,6 +109,12 @@ export class AdminOrdersComponent implements OnInit, OnDestroy {
     }
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
+    }
+    if (this.newOrderSub) {
+      this.newOrderSub.unsubscribe();
+    }
+    if (this.queryParamSub) {
+      this.queryParamSub.unsubscribe();
     }
   }
 

@@ -38,8 +38,102 @@
   <main class="admin-main">
     <header class="admin-topbar">
       <div class="topbar-context"><button class="btn-mobile-nav-toggle" (click)="toggleSidebar()" aria-label="فتح القائمة"><i class="bi bi-list"></i></button><span class="breadcrumb-root">{{ isPlatform() ? 'Mecart' : storeName() }}</span><i class="bi bi-chevron-left breadcrumb-separator"></i><span class="breadcrumb-current">{{ pageTitle }}</span></div>
-      <div class="topbar-user"><span class="topbar-date">{{ todayDate | date:'d MMMM yyyy' }}</span><a routerLink="/" class="btn-store-link" [attr.aria-label]="isPlatform() ? 'عرض الموقع الرئيسي' : 'عرض المتجر'"><i class="bi bi-box-arrow-up-right"></i></a><div class="user-pill"><div class="admin-avatar-circle" [class.staff]="authService.currentAdmin()?.role === 'Staff'"><i class="bi" [class.bi-person-badge-fill]="authService.currentAdmin()?.role !== 'Staff'" [class.bi-person]="authService.currentAdmin()?.role === 'Staff'"></i></div><div class="user-caption"><strong>{{ authService.currentAdmin()?.isSupportSession ? 'فريق الدعم' : (authService.currentAdmin()?.fullName || 'المدير') }}</strong><small class="role-pill-text" [class.role-staff]="authService.currentAdmin()?.role === 'Staff'">{{ authService.currentAdmin()?.roleName || (authService.currentAdmin()?.role === 'Staff' ? 'موظف' : 'المدير') }}</small></div></div></div>
+      <div class="topbar-user">
+        <!-- Order Notifications & Sound Bell -->
+        <div class="notification-pill-wrapper">
+          <button
+            type="button"
+            class="btn-order-alert-toggle"
+            [class.active]="orderAlert.permission() === 'granted'"
+            [class.has-pending]="orderAlert.pendingCount() > 0"
+            (click)="toggleNotificationMenu()"
+            aria-label="إشعارات الطلبات الجديدة"
+            title="إشعارات الطلبات والصوت"
+          >
+            <i class="bi" [class.bi-bell-fill]="orderAlert.permission() === 'granted'" [class.bi-bell]="orderAlert.permission() !== 'granted'"></i>
+            @if (orderAlert.pendingCount() > 0) {
+              <span class="order-badge">{{ orderAlert.pendingCount() > 99 ? '99+' : orderAlert.pendingCount() }}</span>
+            }
+          </button>
+
+          @if (isNotificationMenuOpen) {
+            <div class="notification-dropdown-backdrop" (click)="isNotificationMenuOpen = false"></div>
+            <div class="notification-dropdown shadow-lg">
+              <div class="dropdown-head">
+                <strong><i class="bi bi-bell-fill text-warning me-1"></i> إشعارات الطلبات</strong>
+                <span class="badge bg-light text-dark border">{{ orderAlert.pendingCount() }} قيد الانتظار</span>
+              </div>
+
+              <!-- Browser Push Notification Status -->
+              <div class="dropdown-item-row">
+                <div class="item-info">
+                  <span class="item-title">إشعارات المتصفح والموبايل</span>
+                  <small class="item-sub">
+                    @if (orderAlert.permission() === 'granted') { <span class="text-success"><i class="bi bi-check-circle-fill"></i> مفعلة على هذا الجهاز</span> }
+                    @else if (orderAlert.permission() === 'denied') { <span class="text-danger"><i class="bi bi-slash-circle"></i> تم رفض الإذن من المتصفح</span> }
+                    @else { <span class="text-muted"><i class="bi bi-exclamation-circle"></i> غير مفعلة بعد</span> }
+                  </small>
+                </div>
+                @if (orderAlert.permission() !== 'granted') {
+                  <button type="button" class="btn btn-sm btn-primary" (click)="orderAlert.requestPermission()">
+                    تفعيل 🔔
+                  </button>
+                }
+              </div>
+
+              <!-- Sound Toggle Row -->
+              <div class="dropdown-item-row">
+                <div class="item-info">
+                  <span class="item-title">نغمة التنبيه الصوتية</span>
+                  <small class="item-sub">{{ orderAlert.isSoundEnabled() ? 'صوت التنبيه يعمل' : 'صوت التنبيه مكتوم' }}</small>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  [class.btn-outline-success]="orderAlert.isSoundEnabled()"
+                  [class.btn-outline-secondary]="!orderAlert.isSoundEnabled()"
+                  (click)="orderAlert.toggleSound()"
+                >
+                  <i class="bi" [class.bi-volume-up-fill]="orderAlert.isSoundEnabled()" [class.bi-volume-mute-fill]="!orderAlert.isSoundEnabled()"></i>
+                  {{ orderAlert.isSoundEnabled() ? 'مفعل' : 'مكتوم' }}
+                </button>
+              </div>
+
+              <!-- Test Sound Button -->
+              <div class="dropdown-footer">
+                <button type="button" class="btn-test-sound" (click)="orderAlert.testChime()">
+                  <i class="bi bi-play-circle-fill text-primary"></i> تجربة نغمة الرنين
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <span class="topbar-date">{{ todayDate | date:'d MMMM yyyy' }}</span>
+        <a routerLink="/" class="btn-store-link" [attr.aria-label]="isPlatform() ? 'عرض الموقع الرئيسي' : 'عرض المتجر'"><i class="bi bi-box-arrow-up-right"></i></a>
+        <div class="user-pill"><div class="admin-avatar-circle" [class.staff]="authService.currentAdmin()?.role === 'Staff'"><i class="bi" [class.bi-person-badge-fill]="authService.currentAdmin()?.role !== 'Staff'" [class.bi-person]="authService.currentAdmin()?.role === 'Staff'"></i></div><div class="user-caption"><strong>{{ authService.currentAdmin()?.isSupportSession ? 'فريق الدعم' : (authService.currentAdmin()?.fullName || 'المدير') }}</strong><small class="role-pill-text" [class.role-staff]="authService.currentAdmin()?.role === 'Staff'">{{ authService.currentAdmin()?.roleName || (authService.currentAdmin()?.role === 'Staff' ? 'موظف' : 'المدير') }}</small></div></div>
+      </div>
     </header>
+
+    @if (orderAlert.latestNewOrder(); as alert) {
+      <div class="new-order-floating-banner shadow" role="alert">
+        <div class="banner-content">
+          <span class="pulse-icon"><i class="bi bi-bell-fill"></i></span>
+          <div class="banner-text">
+            <strong>طلب جديد رقم #{{ alert.orderNumber || alert.latestOrderId }}!</strong>
+            <span>العميل: {{ alert.customerName || 'عميل جديد' }} — الإجمالي: {{ alert.totalAmount }} {{ settingsService.settings().currencySymbol || 'ج.م' }}</span>
+          </div>
+        </div>
+        <div class="banner-actions">
+          <button type="button" class="btn-banner-view" (click)="orderAlert.viewLatestOrder()">
+            <i class="bi bi-eye-fill"></i> عرض الطلب
+          </button>
+          <button type="button" class="btn-banner-close" (click)="orderAlert.dismissLatestAlert()" aria-label="إغلاق">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+    }
     @if (authService.currentAdmin()?.isSupportSession) { <div class="support-session-banner" role="status"><i class="bi bi-headset"></i> جلسة دعم مؤقتة — تنتهي {{ formatSupportSessionExpiry(authService.currentAdmin()?.expiresAt) }}</div> }
     <div class="admin-content"><router-outlet></router-outlet></div>
   </main>

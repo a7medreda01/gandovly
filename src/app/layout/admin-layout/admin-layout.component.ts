@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { SettingsService } from '../../core/services/settings.service';
+import { AdminOrderAlertService } from '../../core/services/admin-order-alert.service';
 import { isPlatformContext } from '../../core/services/store-context';
 
 @Component({
@@ -15,7 +16,14 @@ import { isPlatformContext } from '../../core/services/store-context';
 export class AdminLayoutComponent {
   readonly authService = inject(AuthService);
   readonly settingsService = inject(SettingsService);
+  readonly orderAlert = inject(AdminOrderAlertService);
   private readonly router = inject(Router);
+
+  isNotificationMenuOpen = false;
+
+  toggleNotificationMenu(): void {
+    this.isNotificationMenuOpen = !this.isNotificationMenuOpen;
+  }
   readonly isPlatform = computed(() => isPlatformContext() && this.authService.currentAdmin()?.isPlatformAdmin === true);
   readonly canManageUsers = computed(() => {
     const admin = this.authService.currentAdmin();

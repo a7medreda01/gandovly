@@ -5,11 +5,39 @@
       <h1 class="page-heading"><i class="bi bi-receipt-cutoff text-primary me-2"></i> إدارة ومتابعة جميع الطلبات</h1>
       <p class="page-sub">البحث برقم الطلب، الفلترة حسب الحالة، استعراض تفاصيل الأصناف والأوزان، وتحديث المراحل</p>
     </div>
-    <button class="btn-primary" (click)="loadOrders()" [disabled]="isLoading()">
-      <i class="bi bi-arrow-clockwise me-1" [class.spin]="isLoading()"></i>
-      <span>تحديث الطلبات</span>
-    </button>
+    <div class="header-action-group">
+      <button
+        type="button"
+        class="btn-sound-toggle"
+        [class.sound-muted]="!alertService.isSoundEnabled()"
+        (click)="alertService.toggleSound()"
+        [title]="alertService.isSoundEnabled() ? 'صوت التنبيه مفعل (اضغط للكتم)' : 'صوت التنبيه مكتوم (اضغط للتفعيل)'"
+      >
+        <i class="bi" [class.bi-volume-up-fill]="alertService.isSoundEnabled()" [class.bi-volume-mute-fill]="!alertService.isSoundEnabled()"></i>
+        <span>{{ alertService.isSoundEnabled() ? 'الصوت مفعل' : 'مكتوم' }}</span>
+      </button>
+      <button class="btn-primary" (click)="loadOrders()" [disabled]="isLoading()">
+        <i class="bi bi-arrow-clockwise me-1" [class.spin]="isLoading()"></i>
+        <span>تحديث الطلبات</span>
+      </button>
+    </div>
   </div>
+
+  <!-- Notification Activation Notice (Only shown if permission is not yet granted) -->
+  @if (alertService.isSupported && alertService.permission() !== 'granted') {
+    <div class="order-notif-callout shadow-sm">
+      <div class="callout-lead">
+        <div class="callout-icon-pulse"><i class="bi bi-bell-fill"></i></div>
+        <div class="callout-text">
+          <strong>تفعيل إشعارات الطلبات الفورية على الموبايل والكمبيوتر</strong>
+          <p>فعّل إشعارات المتصفح لتستقبل تنبيهاً فورياً وصوتياً مع كل طلب جديد لمتجرك حتى لو كانت الشاشة مقفلة أو التطبيق في الخلفية.</p>
+        </div>
+      </div>
+      <button type="button" class="btn-enable-notif" (click)="alertService.requestPermission()">
+        <i class="bi bi-bell-fill me-1"></i> تفعيل الإشعارات الآن
+      </button>
+    </div>
+  }
 
   <!-- Filters Bar -->
   <div class="filter-bar glass-panel">
