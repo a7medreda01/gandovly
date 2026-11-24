@@ -8,9 +8,14 @@ export interface CompressionOptions {
 }
 
 const DEFAULT_MAX_BYTES = 150 * 1024;
-const QUALITY_STEPS = [0.9, 0.84, 0.78, 0.72, 0.66, 0.6, 0.54, 0.48, 0.42, 0.36, 0.3];
+const HIGH_QUALITY_STEPS = [0.92, 0.88, 0.84, 0.8, 0.76];
+const FALLBACK_QUALITY_STEPS = [0.7, 0.64, 0.58];
+const WEB_SAFE_TYPES = new Set(['image/webp', 'image/jpeg', 'image/png', 'image/avif', 'image/gif']);
 
-/** Downscales and encodes an upload until it fits the storage ceiling. */
+/**
+ * Compresses and converts an image only if it exceeds `maxBytes`,
+ * preserving visual quality by prioritizing resolution balance over aggressive quality loss.
+ */
 export async function compressImage(file: File, options: CompressionOptions = {}): Promise<File> {
   const {
     maxWidth = 1400,
@@ -29,6 +34,11 @@ export async function compressImage(file: File, options: CompressionOptions = {}
     throw new Error('يرجى اختيار صورة نقطية PNG أو JPEG أو WebP.');
   }
 
+  // Skip compression completely when the original web-safe image is already within the allowed limit.
+  if (file.size <= maxBytes && WEB_SAFE_TYPES.has(file.type.toLowerCase())) {
+    return file;
+  }
+
   const objectUrl = URL.createObjectURL(file);
   try {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -45,6 +55,9 @@ export async function compressImage(file: File, options: CompressionOptions = {}
     width = Math.max(1, Math.round(width * initialScale));
     height = Math.max(1, Math.round(height * initialScale));
 
+    const startQuality = Math.min(0.96, Math.max(0.76, quality));
+    const highQualities = [...new Set([startQuality, ...HIGH_QUALITY_STEPS.filter(q => q <= startQuality)])];
+
     while (Math.max(width, height) >= 32) {
       const canvas = document.createElement('canvas');
       canvas.width = width;
@@ -55,9 +68,11 @@ export async function compressImage(file: File, options: CompressionOptions = {}
       context.imageSmoothingQuality = 'high';
       context.drawImage(image, 0, 0, width, height);
 
-      const startQuality = Math.min(0.98, Math.max(0.3, quality));
-      const qualities = [...new Set(QUALITY_STEPS.map(step => Math.max(0.24, startQuality - (0.9 - step))))];
-      for (const candidateQuality of qualities) {
+      const candidateQualities = Math.max(width, height) <= 600
+        ? [...highQualities, ...FALLBACK_QUALITY_STEPS]
+        : highQualities;
+
+      for (const candidateQuality of candidateQualities) {
         const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, mimeType, candidateQuality));
         if (!blob) continue;
         if (blob.size <= maxBytes) {
@@ -67,8 +82,9 @@ export async function compressImage(file: File, options: CompressionOptions = {}
         }
       }
 
-      width = Math.max(1, Math.floor(width * 0.82));
-      height = Math.max(1, Math.floor(height * 0.82));
+      // Gently downscale dimensions while keeping high visual quality
+      width = Math.max(1, Math.floor(width * 0.85));
+      height = Math.max(1, Math.floor(height * 0.85));
     }
 
     throw new Error(`تعذر ضغط الصورة إلى ${Math.round(maxBytes / 1024)} كيلوبايت. جرّب صورة أبسط.`);
