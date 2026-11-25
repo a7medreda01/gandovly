@@ -868,7 +868,15 @@ export class ProductDetailModalComponent implements OnInit {
     }
   }
 
+  private isInteractiveGalleryTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    return !!target.closest(
+      'button, a, .top-bar-actions, .hero-top-bar, .gallery-nav-btn, .gallery-pagination, .dot-indicator, .gallery-thumbs-strip, .thumb-item'
+    );
+  }
+
   onTouchStart(event: TouchEvent) {
+    if (this.isInteractiveGalleryTarget(event.target)) return;
     if (event.touches.length === 1) {
       this.touchStartX = event.touches[0].clientX;
       this.touchCurrentX = this.touchStartX;
@@ -939,6 +947,7 @@ export class ProductDetailModalComponent implements OnInit {
   onPointerDown(event: PointerEvent) {
     if (event.pointerType === 'touch') return;
     if (event.button !== 0) return;
+    if (this.isInteractiveGalleryTarget(event.target)) return;
     this.touchStartX = event.clientX;
     this.touchCurrentX = this.touchStartX;
     this.touchStartY = event.clientY;

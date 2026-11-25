@@ -90,6 +90,17 @@
                 }
               </div>
 
+              @if (orderAlert.needsIosInstallHint()) {
+                <div class="dropdown-item-row" style="background:#fffbeb; border-bottom:1px solid #fde68a;">
+                  <div class="item-info">
+                    <span class="item-title" style="color:#92400e;"><i class="bi bi-phone me-1"></i> تنبيه لمستخدمي آيفون</span>
+                    <small class="item-sub" style="color:#b45309; white-space:normal; line-height:1.4;">
+                      لتعمل إشعارات الموبايل على آيفون، اضغط مشاركة (Share) في Safari ثم «إضافة إلى الشاشة الرئيسية» وافتح التطبيق منها.
+                    </small>
+                  </div>
+                </div>
+              }
+
               <!-- Sound Toggle Row -->
               <div class="dropdown-item-row">
                 <div class="item-info">

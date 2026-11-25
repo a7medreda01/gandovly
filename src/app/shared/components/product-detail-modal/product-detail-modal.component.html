@@ -41,7 +41,7 @@
         <div class="hero-overlay"></div>
 
         <!-- Top Actions Bar -->
-        <div class="hero-top-bar">
+        <div class="hero-top-bar" (touchstart)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()">
           @if (product.brand) {
             <span class="brand-badge-overlay">
               <i class="bi bi-tag me-1"></i>
@@ -94,15 +94,15 @@
 
         <!-- Gallery Arrows (if multiple images) -->
         @if (galleryImages.length > 1) {
-          <button type="button" class="gallery-nav-btn prev-btn" (click)="prevImage($event)" title="الصورة السابقة">
+          <button type="button" class="gallery-nav-btn prev-btn" (touchstart)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()" (click)="prevImage($event)" title="الصورة السابقة">
             <i class="bi bi-chevron-right"></i>
           </button>
-          <button type="button" class="gallery-nav-btn next-btn" (click)="nextImage($event)" title="الصورة التالية">
+          <button type="button" class="gallery-nav-btn next-btn" (touchstart)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()" (click)="nextImage($event)" title="الصورة التالية">
             <i class="bi bi-chevron-left"></i>
           </button>
 
           <!-- Dots / Counter Indicator -->
-          <div class="gallery-pagination">
+          <div class="gallery-pagination" (touchstart)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()">
             @for (img of galleryImages; track $index) {
               <span
                 class="dot-indicator"
@@ -116,7 +116,7 @@
 
       <!-- Thumbnails Switcher Row -->
       @if (galleryImages.length > 1) {
-        <div class="gallery-thumbs-strip">
+        <div class="gallery-thumbs-strip" (touchstart)="$event.stopPropagation()" (pointerdown)="$event.stopPropagation()">
           @for (img of galleryImages; track $index) {
             <button
               type="button"

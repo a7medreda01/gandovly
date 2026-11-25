@@ -100,6 +100,8 @@
 /* Product Photo Showcase / Hero Gallery */
 .product-gallery-hero {
   position: relative;
+  flex-shrink: 0;
+  z-index: 15;
   background: #0d2b45;
   touch-action: none;
   user-select: none;
@@ -139,7 +141,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    z-index: 10;
+    z-index: 25;
+    pointer-events: none;
+
+    .brand-badge-overlay,
+    .top-bar-actions,
+    .btn-top-action {
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
 
     .brand-badge-overlay {
       background: rgba(15, 23, 42, 0.85);

@@ -814,7 +814,8 @@ export class AdminSettingsComponent implements OnInit {
 
     this.isUploading.set(true);
     try {
-      const compressed = await compressImage(file, { maxWidth: 1920, quality: 0.85, ...this.compressionOptions });
+      const desktopMaxBytes = Math.max(this.compressionOptions.maxBytes, 600 * 1024);
+      const compressed = await compressImage(file, { ...this.compressionOptions, maxWidth: 1920, quality: 0.92, maxBytes: desktopMaxBytes });
       this.adminService.uploadImage(compressed, 'banners').subscribe({
         next: url => {
           this.isUploading.set(false);
@@ -846,7 +847,8 @@ export class AdminSettingsComponent implements OnInit {
 
     this.isUploading.set(true);
     try {
-      const compressed = await compressImage(file, { maxWidth: 1080, quality: 0.85, ...this.compressionOptions });
+      const mobileMaxBytes = Math.max(this.compressionOptions.maxBytes, 350 * 1024);
+      const compressed = await compressImage(file, { ...this.compressionOptions, maxWidth: 1080, quality: 0.92, maxBytes: mobileMaxBytes });
       this.adminService.uploadImage(compressed, 'banners').subscribe({
         next: url => {
           this.isUploading.set(false);

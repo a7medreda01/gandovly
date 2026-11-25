@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Subject, Subscription, timer } from 'rxjs';
+import { merge, Subject, Subscription, timer } from 'rxjs';
 import { switchMap, filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
@@ -28,11 +28,23 @@ export class AdminOrderAlertService implements OnDestroy {
 
   private readonly apiUrl = environment.apiUrl;
   private pollSub?: Subscription;
+  private readonly manualCheck$ = new Subject<void>();
   private lastKnownOrderId: number | null = null;
   private audioCtx: AudioContext | null = null;
+  private swRegistration: ServiceWorkerRegistration | null = null;
+  private readonly visibilityHandler = () => {
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      this.checkNow();
+    }
+  };
 
   // Signals for state
   readonly isSupported = typeof window !== 'undefined' && 'Notification' in window;
+  readonly isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
+  readonly isStandalone = typeof window !== 'undefined' && (
+    window.matchMedia?.('(display-mode: standalone)').matches || (window.navigator as any).standalone === true
+  );
+  readonly needsIosInstallHint = computed(() => this.isIos && !this.isStandalone);
   readonly permission = signal<NotificationPermission>(
     this.isSupported ? Notification.permission : 'denied'
   );
@@ -49,12 +61,29 @@ export class AdminOrderAlertService implements OnDestroy {
     if (this.isSupported) {
       this.permission.set(Notification.permission);
     }
+    this.registerServiceWorker();
     this.initPolling();
   }
 
   ngOnDestroy(): void {
     this.stopPolling();
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', this.visibilityHandler);
+    }
     this.audioCtx?.close().catch(() => {});
+  }
+
+  private registerServiceWorker(): void {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('/sw-notifications.js', { scope: '/' })
+      .then(reg => {
+        this.swRegistration = reg;
+      })
+      .catch(() => {});
+  }
+
+  checkNow(): void {
+    this.manualCheck$.next();
   }
 
   // --- Notification Permission & Sound Toggles ---
@@ -189,12 +218,13 @@ export class AdminOrderAlertService implements OnDestroy {
       data: { orderId: order.latestOrderId }
     };
 
-    // If Service Worker is active on mobile, use registration.showNotification for best mobile background integration
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.ready.then(reg => {
-        reg.showNotification(title, options).catch(() => {
-          this.fallbackNotification(title, options, order.latestOrderId);
-        });
+    // Use Service Worker registration.showNotification for mobile (Android Chrome & iOS PWA)
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      const regPromise = this.swRegistration
+        ? Promise.resolve(this.swRegistration)
+        : navigator.serviceWorker.ready;
+      regPromise.then(reg => {
+        return reg.showNotification(title, options);
       }).catch(() => {
         this.fallbackNotification(title, options, order.latestOrderId);
       });
@@ -219,8 +249,12 @@ export class AdminOrderAlertService implements OnDestroy {
   initPolling(): void {
     if (this.pollSub) return;
 
-    // Check every 15 seconds when authenticated as admin
-    this.pollSub = timer(1000, 15000).pipe(
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', this.visibilityHandler);
+    }
+
+    // Check every 15 seconds + immediately when tab/app becomes visible again
+    this.pollSub = merge(timer(1000, 15000), this.manualCheck$).pipe(
       filter(() => this.auth.currentAdmin() !== null),
       switchMap(() => this.http.get<{ success: boolean; data?: LatestOrderAlert }>(`${this.apiUrl}/admin/orders/latest-alert`))
     ).subscribe({
