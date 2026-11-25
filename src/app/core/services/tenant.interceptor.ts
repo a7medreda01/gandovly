@@ -24,6 +24,7 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
     if (session?.token) headers['Authorization'] = `Bearer ${session.token}`;
   } catch { /* Invalid stored session is handled by the login flow. */ }
   const customHost = !['localhost','127.0.0.1','mecart.app','www.mecart.app','supermarket1.runasp.net'].includes(host) && !host.endsWith('.mecart.app') && !host.endsWith('.vercel.app') && !host.includes('vercel.app');
+  if (customHost) headers['X-Store-Host'] = host;
 
   const handleResponse = (req: typeof request) => next(req).pipe(
     catchError((err: unknown) => {
@@ -43,7 +44,11 @@ export const tenantInterceptor: HttpInterceptorFn = (request, next) => {
 
   if (!environment.standalone && !slug && customHost) {
     return inject(StoreDomainResolver).slug.pipe(
-      switchMap(resolved => handleResponse(request.clone({ setHeaders: { ...headers, 'X-Tenant-Slug': resolved } })))
+      switchMap(resolved => {
+        const nextHeaders = resolved ? { ...headers, 'X-Tenant-Slug': resolved } : headers;
+        return handleResponse(request.clone({ setHeaders: nextHeaders }));
+      }),
+      catchError(() => handleResponse(request.clone({ setHeaders: headers })))
     );
   }
   return handleResponse(request.clone({ setHeaders: headers }));
