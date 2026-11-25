@@ -92,12 +92,36 @@ export class CatalogComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
-    // 1. Load Categories from backend
-    this.catalogService.loadCategories().subscribe();
+    // 1. Load Categories from backend and validate any category query param
+    this.catalogService.loadCategories().subscribe(cats => {
+      const catId = this.selectedCatId();
+      if (catId !== null && Array.isArray(cats) && cats.length > 0 && !cats.some(c => c.id === catId)) {
+        this.selectedCatId.set(null);
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { category: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        });
+        this.fetchProducts(true);
+      }
+    });
 
     // 2. Read query params independently
     this.routeSubscription = this.route.queryParams.subscribe(params => {
-      this.selectedCatId.set(params['category'] ? +params['category'] : null);
+      const rawCat = params['category'] ? +params['category'] : null;
+      const loadedCats = this.catalogService.categories();
+      if (rawCat !== null && loadedCats.length > 0 && !loadedCats.some(c => c.id === rawCat)) {
+        this.selectedCatId.set(null);
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { category: null },
+          queryParamsHandling: 'merge',
+          replaceUrl: true
+        });
+      } else {
+        this.selectedCatId.set(rawCat);
+      }
       if (params['page']) {
         this.pageIndex.set(+params['page'] || 1);
       }
