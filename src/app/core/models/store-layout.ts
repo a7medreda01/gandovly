@@ -155,6 +155,7 @@ export interface StoreLayout {
     modalImageHeight?: number;
     enableProductPageAnimations?: boolean;
     enableProductCardAnimations?: boolean;
+    enableDiscountPriceAnimation?: boolean;
     enableHomeSectionAnimations?: boolean;
     enableImageCompression?: boolean;
     maxImageCompressionKb?: number;
@@ -163,7 +164,7 @@ export interface StoreLayout {
     useCustomHome: boolean;
     sections: HomeSection[];
 }
-export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, showHomeSearch: true, showMobileBottomNav: true, showOrdersPage: true, requireWhatsAppOtp: false, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
+export const defaultStoreLayout = (): StoreLayout => ({ homeTheme: 'classic', mobileColumns: 2, cardImageFit: 'cover', cardImagePadding: 0, cardImageRadius: -1, cardImageAspect: 'square', detailImageFit: 'contain', detailImageAspect: 'square', enableProductPageAnimations: true, enableProductCardAnimations: true, enableDiscountPriceAnimation: true, enableHomeSectionAnimations: true, enableImageCompression: true, maxImageCompressionKb: 150, showCustomerServicePhone: false, showHomeSearch: true, showMobileBottomNav: true, showOrdersPage: true, requireWhatsAppOtp: false, productCardStyle: 'modern', discountBadgeMode: 'percent', stickyHeader: true, promoBannerLink: '/menu', useCustomHome: false, sections: [] });
 export function newHomeSection(kind: HomeSection['kind']): HomeSection {
     const titles: Record<HomeSection['kind'], string> = {
         hero: 'اكتشف مجموعتنا',
